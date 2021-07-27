@@ -1,0 +1,31 @@
+<div>
+    <h2 *ngIf="data.modalTitle" mat-dialog-title>
+        {{ modalTitle | translate }}
+        <div (click)="onNoClick()" class="icon-right">x</div>
+    </h2>
+</div>
+<mat-dialog-content *ngIf="data.commonText" class="content-color">{{
+    commonText | translate
+    }}</mat-dialog-content>
+<mat-dialog-actions>
+    <button
+            (click)="onNoClick()"
+            *ngIf="data.cancelButton"
+            class="btn danger-color"
+            mat-button
+            mat-dialog-close
+    >
+        {{ cancelButton | translate }}
+    </button>
+    <!--
+        <! — The mat-dialog-close directive optionally accepts a value as a result for the dialog.
+    -->
+    <button
+            *ngIf="data.confirmButton"
+            [mat-dialog-close]="true"
+            class="btn success-color"
+            mat-button
+    >
+        {{ confirmButton | translate }}
+    </button>
+</mat-dialog-actions>

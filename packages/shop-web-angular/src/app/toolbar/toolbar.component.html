@@ -1,0 +1,64 @@
+<mat-toolbar class="toolbar" color="primary">
+    <div [routerLink]="['/']" class="logo" mat-button>
+        <img src="assets/img/ever-logo.svg"/>
+    </div>
+
+    <div class="menu-brand-separator"></div>
+
+    <span class="nav">
+		<button
+                [routerLinkActive]="'active-option'"
+                [routerLink]="['/products']"
+                class="nav-option"
+                mat-button
+        >
+			<ever-icon class="nav-icon" type="basket"></ever-icon>
+            {{ 'Products' | translate }}
+		</button>
+		<button
+                [routerLinkActive]="'active-option'"
+                [routerLink]="['/orders']"
+                class="nav-option"
+                mat-button
+        >
+			<ever-icon class="nav-icon" type="history"></ever-icon>
+            {{ 'Orders' | translate }}
+		</button>
+	</span>
+
+    <section class="right-elements">
+		<span class="toggle-order-type">
+			<small
+                    (click)="toggleGetProductsType()"
+                    [ngClass]="{ 'no-select': isDeliveryRequired }"
+                    class="ml-3"
+            >{{ 'TAKEAWAY' | translate }}</small
+            >
+			<mat-slide-toggle
+                    (change)="toggleGetProductsType()"
+                    [checked]="isDeliveryRequired"
+                    class="example-margin mr-2 ml-2"
+            >
+			</mat-slide-toggle>
+			<small
+                    (click)="toggleGetProductsType()"
+                    [ngClass]="{ 'no-select': !isDeliveryRequired }"
+                    class="mr-3"
+            >{{ 'DELIVERY' | translate }}</small
+            >
+		</span>
+        <mat-search
+            #matSearch
+            (detectLocation)="loadAddress(true)"
+            (searchLocation)="tryFindNewAddress($event)"
+            [color]="styleVariables.brandLighted"
+            focusedColor="#f1f1f1"
+        ></mat-search>
+    </section>
+
+    <div class="nav">
+        <button [routerLink]="['/settings']" class="nav-option" mat-button>
+            <ever-icon class="nav-icon" type="settings"></ever-icon>
+        </button>
+    </div>
+</mat-toolbar>

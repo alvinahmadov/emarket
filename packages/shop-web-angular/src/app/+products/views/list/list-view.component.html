@@ -1,0 +1,29 @@
+<mat-card-content class="list-view">
+    <div
+            (scrolled)="loadProducts.emit(productsCount)"
+            (window:resize)="onResize($event)"
+            *ngIf="products.length"
+            [infiniteScrollDisabled]="productsLoading"
+            [infiniteScrollDistance]="2"
+            [infiniteScrollThrottle]="50"
+            [ngClass]="{ container: !isWideView }"
+            class="products-content"
+            infiniteScroll
+    >
+        <div class="view-type-container">
+            <view-type class="view-type"></view-type>
+        </div>
+        <masonry
+                (layoutComplete)="onLayoutComplete($event)"
+                [options]="{ resize: true, fitWidth: true }"
+        >
+            <masonry-brick *ngFor="let product of products" class="brick">
+                <product
+                        (load)="masonry.layout()"
+                        [info]="product"
+                        [layoutComplete]="layoutComplete"
+                ></product>
+            </masonry-brick>
+        </masonry>
+    </div>
+</mat-card-content>

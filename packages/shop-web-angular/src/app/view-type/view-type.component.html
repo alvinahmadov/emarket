@@ -1,0 +1,94 @@
+<span class="view-settings">
+	<span *ngIf="showTuneButton" class="tune-settings">
+		<mat-button-toggle-group>
+			<mat-button-toggle
+                    (click)="showTuneButton = !showTuneButton"
+                    [matTooltipPosition]="'above'"
+                    matTooltip="Tune buttons"
+                    value="list"
+            >
+				<i class="material-icons">
+					tune
+				</i>
+			</mat-button-toggle>
+		</mat-button-toggle-group>
+	</span>
+
+	<span *ngIf="!showTuneButton" class="settings-buttons">
+		<mat-button-toggle-group
+                (change)="viewTypeChange()"
+                [(ngModel)]="viewType"
+                class="mr-1"
+        >
+			<mat-button-toggle
+                    [matTooltipPosition]="'above'"
+                    matTooltip="List View"
+                    value="list"
+            >
+				<i class="material-icons">
+					view_comfy
+				</i>
+			</mat-button-toggle>
+
+            <!-- Enabled when the "Carousel" View is ready. -->
+			<mat-button-toggle
+                    [disabled]="false"
+                    [matTooltipPosition]="'above'"
+                    matTooltip="Carousel View"
+                    value="carousel"
+            >
+				<i class="material-icons">
+					view_carousel
+				</i>
+			</mat-button-toggle>
+		</mat-button-toggle-group>
+
+		<mat-button-toggle-group
+                (change)="listViewTypeChange()"
+                [(ngModel)]="listViewType"
+                class="mr-1"
+        >
+			<mat-button-toggle
+                    [disabled]="!isListView"
+                    [matTooltipPosition]="'above'"
+                    class="masonry-button"
+                    matTooltip="Masonry View"
+                    value="masonry"
+            >
+				<img alt="" src="../../assets/img/masonry.png"/>
+			</mat-button-toggle>
+
+			<mat-button-toggle
+                    [disabled]="!isListView"
+                    [matTooltipPosition]="'above'"
+                    matTooltip="Grid View"
+                    value="grid"
+            >
+				<fa-icon [icon]="['fas', 'th-large']"></fa-icon>
+			</mat-button-toggle>
+		</mat-button-toggle-group>
+
+		<mat-button-toggle-group
+                (change)="listViewSpaceChange()"
+                [(ngModel)]="listViewSpace"
+        >
+			<mat-button-toggle
+                    [disabled]="!isListView"
+                    [matTooltipPosition]="'above'"
+                    matTooltip="Normal View"
+                    value="normal"
+            >
+				<fa-icon [icon]="['fas', 'compress']"></fa-icon>
+			</mat-button-toggle>
+
+			<mat-button-toggle
+                    [disabled]="!isListView"
+                    [matTooltipPosition]="'above'"
+                    matTooltip="Wide View"
+                    value="wide"
+            >
+				<fa-icon [icon]="['fas', 'expand']"></fa-icon>
+			</mat-button-toggle>
+		</mat-button-toggle-group>
+	</span>
+</span>
