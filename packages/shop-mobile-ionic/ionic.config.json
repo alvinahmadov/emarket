@@ -1,0 +1,8 @@
+{
+  "name": "shop-mobile",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular",
+  "id": "897e13e3"
+}
