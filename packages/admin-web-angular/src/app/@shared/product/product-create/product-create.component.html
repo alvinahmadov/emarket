@@ -1,0 +1,28 @@
+<div class="modal-header">
+    <span class="modal-title">{{ 'PRODUCT_TYPE_VIEW.TITLE' | translate }}</span>
+    <button (click)="_cancelModal()" aria-label="Close" class="close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div>
+    <form-wizard
+        #formWizard
+        [buttonDone]="buttonDone"
+        [buttonNext]="buttonNext"
+        [buttonPrevious]="buttonPrevious"
+        [formGroup]="form"
+        [nbSpinner]="loading"
+        class="form-horizontal"
+    >
+        <wizard-step
+                (onComplete)="createProduct()"
+                [isValid]="basicInfo.valid"
+                [title]="''"
+        >
+            <ea-product-basic-info-form
+                #basicInfoForm
+                [form]="basicInfo"
+            ></ea-product-basic-info-form>
+        </wizard-step>
+    </form-wizard>
+</div>

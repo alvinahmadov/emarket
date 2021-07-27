@@ -1,0 +1,8 @@
+<nb-layout>
+    <nb-layout-column
+            *ngIf="message"
+            [innerHTML]="message | safe: 'html'"
+            class="maintenance-message-container"
+    >
+    </nb-layout-column>
+</nb-layout>

@@ -1,0 +1,81 @@
+<nb-card>
+    <nb-card-body>
+        <div class="pull-left"></div>
+        {{ 'CARRIERS_VIEW.CARRIER_PAGE.AVAIBLE_ORDER_TO_PICK_UP' | translate }}
+    </nb-card-body>
+
+    <nb-card-footer>
+        <div
+                *ngIf="
+				canControl && selectedCarrier?.status === carrierOnlineStatus
+			"
+                class="padding-bottom pull-right"
+        >
+            <div *ngIf="isCarrierPickupOrder" class="row carrier-buttons">
+                <a
+                        (click)="
+						updateOrderCarrierStatus(
+							enumOrderCarrierStatus.CarrierArrivedToCustomer
+						)
+					"
+                        class="btn btn-sm btn-outline-success col margin d-inline-block"
+                >
+                    <i
+                            aria-hidden="true"
+                            class="ion-md-log-in"
+                            name="thumbs-up"
+                    ></i
+                    >{{
+                    'CARRIERS_VIEW.CARRIER_PAGE.ARRIVED_TO_CUSTOMER'
+                        | translate
+                    }}
+                </a>
+                <a
+                        (click)="
+						updateOrderCarrierStatus(
+							enumOrderCarrierStatus.IssuesDuringDelivery
+						)
+					"
+                        class="btn btn-sm btn-outline-danger col margin d-inline-block"
+                >
+                    <i aria-hidden="true" class="ion-md-alert"></i>
+                    {{ 'CARRIERS_VIEW.CARRIER_PAGE.FAILED' | translate }}
+                </a>
+            </div>
+
+            <div *ngIf="isCarrierArrivedToCustomer" class="row carrier-buttons">
+                <a
+                        (click)="
+						updateOrderCarrierStatus(
+							enumOrderCarrierStatus.DeliveryCompleted
+						)
+					"
+                        class="btn btn-sm btn-outline-success col margin d-inline-block"
+                >
+                    <i aria-hidden="true" class="ion-md-log-in"></i
+                    >{{ 'CARRIERS_VIEW.CARRIER_PAGE.DELIVERED' | translate }}
+                </a>
+                <a
+                        (click)="
+						updateOrderCarrierStatus(
+							enumOrderCarrierStatus.ClientRefuseTakingOrder
+						)
+					"
+                        class="btn btn-sm btn-outline-danger col margin d-inline-block"
+                >
+                    <i aria-hidden="true" class="ion-md-alert"></i>
+                    {{
+                    'CARRIERS_VIEW.CARRIER_PAGE.CLIENT_REFUSE_ORDER'
+                        | translate
+                    }}
+                </a>
+            </div>
+        </div>
+
+        <ng2-smart-table
+                (userRowSelect)="selectOrder($event)"
+                [settings]="settingsSmartTable"
+                [source]="sourceSmartTable"
+        ></ng2-smart-table>
+    </nb-card-footer>
+</nb-card>

@@ -1,0 +1,27 @@
+<nb-card class="setup-merchant-location">
+    <nb-card-header>
+        {{ 'FAKE_DATA.SETUP_MERCHANTS.LOCATION.LOCATION' | translate }}
+    </nb-card-header>
+    <nb-card-body>
+        <ea-location-form
+            #locationForm
+            (mapCoordinatesEmitter)="mapCoordEmitter.emit($event)"
+            (mapGeometryEmitter)="mapGeometryEmitter.emit($event)"
+            [form]="location"
+            [showAutocompleteSearch]="true"
+        >
+        </ea-location-form>
+        <google-map
+                [mapCoordEvent]="mapCoordEmitter"
+                [mapGeometryEvent]="mapGeometryEmitter"
+        >
+        </google-map>
+    </nb-card-body>
+</nb-card>
+
+<button (click)="previousStep.emit()" nbButton>
+    {{ 'FAKE_DATA.SETUP_MERCHANTS.PREV' | translate }}
+</button>
+<button (click)="nextStep.emit()" [disabled]="location.invalid" nbButton>
+    {{ 'FAKE_DATA.SETUP_MERCHANTS.NEXT' | translate }}
+</button>

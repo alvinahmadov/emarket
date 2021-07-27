@@ -1,0 +1,11 @@
+<div class="modal-header">
+    <h3>{{ 'CUSTOMERS_VIEW.CANCEL_ORDER' | translate }}</h3>
+    <button (click)="cancel()" aria-label="Close" class="close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+	<span (click)="cancelOrder()" class="cancelBtn">{{
+        'CUSTOMERS_VIEW.CANCEL_ORDER' | translate
+        }}</span>
+</div>

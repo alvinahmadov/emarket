@@ -1,0 +1,18 @@
+<label [class.vertical]="vertical" class="switch-label">
+	<span [class.active]="vertical || isFirstValue()" class="first">
+		{{ vertical ? currentValueLabel() : firstValueLabel }}
+	</span>
+
+    <div class="switch">
+        <input
+                (change)="changeValue()"
+                [checked]="isSecondValue()"
+                type="checkbox"
+        />
+        <span class="slider"></span>
+    </div>
+
+    <span *ngIf="!vertical" [class.active]="isSecondValue()" class="second">
+		{{ secondValueLabel }}
+	</span>
+</label>

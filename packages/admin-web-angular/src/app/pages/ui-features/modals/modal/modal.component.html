@@ -1,0 +1,12 @@
+<div class="modal-header">
+    <span>{{ modalHeader }}</span>
+    <button (click)="closeModal()" aria-label="Close" class="close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">{{ modalContent }}</div>
+<div class="modal-footer">
+    <button (click)="closeModal()" class="btn btn-md btn-primary">
+        Save changes
+    </button>
+</div>

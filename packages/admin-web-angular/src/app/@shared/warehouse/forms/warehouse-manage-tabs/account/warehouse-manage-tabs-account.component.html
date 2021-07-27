@@ -1,0 +1,100 @@
+<div *ngIf="form" [formGroup]="form" class="col-sm-12">
+    <fieldset>
+        <div class="form-group row">
+            <label class="col-sm-2 control-label"
+            >* {{ 'WAREHOUSE_VIEW.MUTATION.USERNAME' | translate }}</label
+            >
+
+            <div class="col-sm-9">
+                <input
+                        class="form-control"
+                        formControlName="username"
+                        placeholder="{{
+						'WAREHOUSE_VIEW.MUTATION.USERNAME' | translate
+					}}"
+                        type="text"
+                />
+
+                <div
+                        *ngIf="
+						username.errors && (username.dirty || username.touched)
+					"
+                        class="alert alert-danger"
+                >
+                    <div [hidden]="!username.hasError('required')">
+                        {{
+                        'WAREHOUSE_VIEW.MUTATION.ERRORS.USERNAME_IS_REQUIRED'
+                            | translate
+                        }}!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div [formGroup]="password" class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'WAREHOUSE_VIEW.MUTATION.OLD_PASSWORD' | translate
+                }}</label>
+
+            <div class="col-sm-9">
+                <input
+                        class="form-control"
+                        formControlName="current"
+                        placeholder="{{
+						'WAREHOUSE_VIEW.MUTATION.OLD_PASSWORD' | translate
+					}}"
+                        type="password"
+                />
+            </div>
+        </div>
+
+        <div [formGroup]="password" class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'WAREHOUSE_VIEW.MUTATION.NEW_PASSWORD' | translate
+                }}</label>
+
+            <div class="col-sm-9">
+                <input
+                        class="form-control"
+                        formControlName="new"
+                        placeholder="{{
+						'WAREHOUSE_VIEW.MUTATION.NEW_PASSWORD' | translate
+					}}"
+                        type="password"
+                />
+            </div>
+        </div>
+
+        <div [formGroup]="password" class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'WAREHOUSE_VIEW.MUTATION.CONFIRM_PASSWORD' | translate
+                }}</label>
+
+            <div class="col-sm-9">
+                <input
+                        class="form-control"
+                        formControlName="confirm"
+                        placeholder="{{
+						'WAREHOUSE_VIEW.MUTATION.CONFIRM_PASSWORD' | translate
+					}}"
+                        type="password"
+                />
+
+                <div
+                        *ngIf="
+						passwordConfirm.errors &&
+						(passwordConfirm.dirty || passwordConfirm.touched)
+					"
+                        class="alert alert-danger"
+                >
+                    <div [hidden]="!passwordConfirm.hasError('notMatch')">
+                        {{
+                        'WAREHOUSE_VIEW.MUTATION.PASSWORDS_DO_NOT_MATCH'
+                            | translate
+                        }}!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>

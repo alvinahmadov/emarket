@@ -1,0 +1,7 @@
+<ea-product-basic-info-form
+    #basicInfoForm
+    *ngIf="areCategoriesLoaded"
+    [currentProduct]="product"
+    [form]="basicInfo"
+    [productCategories]="productsCategories"
+></ea-product-basic-info-form>

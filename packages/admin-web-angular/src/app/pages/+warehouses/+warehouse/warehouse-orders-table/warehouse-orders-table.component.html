@@ -1,0 +1,100 @@
+<div>Orders table view</div>
+
+<nb-card>
+    <nb-card-header class="header-color">
+        <div class="row">
+            <div class="col-md-12">
+                <button
+                        (click)="openWarehouseOrderCreateModal()"
+                        nbButton
+                        status="success"
+                >
+                    <i class="ion-md-add button-icon mr-1"></i>
+                    {{ 'WAREHOUSE_VIEW.CREATE_ORDER' | translate }}
+                </button>
+            </div>
+        </div>
+    </nb-card-header>
+
+    <nb-card-body style="overflow: hidden;">
+        <div class="row">
+            <div class="col-md-4">
+                <div
+                        class="btn-group btn-group-toggle btn-outline-toggle-group btn-group-full-width btn-toggle-radio-group"
+                        ngbRadioGroup
+                >
+                    <label
+                            class="btn btn-outline-secondary btn-tn"
+                            ngbButtonLabel
+                    >
+                        <input
+                                (click)="filterOrders('ready')"
+                                ngbButton
+                                type="radio"
+                                value="ready"
+                        />
+                        {{ 'Confirmed' | translate }}
+                    </label>
+
+                    <label
+                            class="btn btn-outline-secondary btn-tn"
+                            ngbButtonLabel
+                    >
+                        <input
+                                (click)="filterOrders('in_delivery')"
+                                ngbButton
+                                type="radio"
+                                value="in_delivery"
+                        />
+                        {{ 'In Delivery' | translate }}
+                    </label>
+
+                    <label
+                            class="btn btn-outline-secondary btn-tn"
+                            ngbButtonLabel
+                    >
+                        <input
+                                (click)="filterOrders('not_confirmed')"
+                                ngbButton
+                                type="radio"
+                                value="not_confirmed"
+                        />
+                        {{ 'Not Confirmed' | translate }}
+                    </label>
+
+                    <label
+                            class="btn btn-outline-secondary btn-tn"
+                            ngbButtonLabel
+                    >
+                        <input
+                                (click)="filterOrders('cancelled')"
+                                ngbButton
+                                type="radio"
+                                value="cancelled"
+                        />
+                        {{ 'Cancelled' | translate }}
+                    </label>
+
+                    <label class="btn-outline-secondary btn-tn" ngbButtonLabel>
+                        <input
+                                (click)="filterOrders('all')"
+                                ngbButton
+                                type="radio"
+                                value="all"
+                        />
+                        {{ 'All' | translate }}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+
+    <nb-card-footer>
+        <ng2-smart-table
+                (userRowSelect)="selectOrder($event)"
+                [settings]="settingsSmartTable"
+                [source]="sourceSmartTable"
+        >
+        </ng2-smart-table>
+    </nb-card-footer>
+</nb-card>

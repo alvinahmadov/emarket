@@ -1,0 +1,338 @@
+<nb-card>
+    <nb-card-header>Button Groups</nb-card-header>
+    <nb-card-body>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="example-container toggle-types">
+                    <div class="container-title">Toggle Types</div>
+                    <div
+                            [(ngModel)]="radioModel"
+                            class="btn-group btn-group-toggle btn-outline-toggle-group btn-group-full-width btn-toggle-radio-group"
+                            ngbRadioGroup
+                    >
+                        <label class="btn btn-outline-primary" ngbButtonLabel>
+                            <input ngbButton type="radio" value="left"/> Left
+                        </label>
+                        <label class="btn btn-outline-primary" ngbButtonLabel>
+                            <input ngbButton type="radio" value="middle"/>
+                            Middle
+                        </label>
+                        <label class="btn btn-outline-primary" ngbButtonLabel>
+                            <input ngbButton type="radio" value="right"/> Right
+                        </label>
+                    </div>
+                    <div
+                            class="btn-group btn-group-toggle btn-group-full-width"
+                            data-toggle="buttons"
+                    >
+                        <label
+                                [class.active]="checkboxModel.left"
+                                class="btn btn-primary"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="checkboxModel.left"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            Left
+                        </label>
+                        <label
+                                [class.active]="checkboxModel.middle"
+                                class="btn btn-primary"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="checkboxModel.middle"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            Middle
+                        </label>
+                        <label
+                                [class.active]="checkboxModel.right"
+                                class="btn btn-primary"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="checkboxModel.right"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            Right
+                        </label>
+                    </div>
+                </div>
+                <div class="example-container toolbars-container">
+                    <div class="pagination-container">
+                        <div class="container-title">Pagination</div>
+                        <div
+                                [(ngModel)]="paginationModel"
+                                class="btn-group btn-group-toggle btn-outline-toggle-group"
+                                data-toggle="buttons"
+                                ngbRadioGroup
+                        >
+                            <label
+                                    class="btn btn-outline-success"
+                                    ngbButtonLabel
+                            >
+                                <input [value]="1" ngbButton type="radio"/> 1
+                            </label>
+                            <label
+                                    class="btn btn-outline-success"
+                                    ngbButtonLabel
+                            >
+                                <input [value]="2" ngbButton type="radio"/> 2
+                            </label>
+                            <label
+                                    class="btn btn-outline-success"
+                                    ngbButtonLabel
+                            >
+                                <input [value]="3" ngbButton type="radio"/> 3
+                            </label>
+                            <label
+                                    class="btn btn-outline-success"
+                                    ngbButtonLabel
+                            >
+                                <input [value]="4" ngbButton type="radio"/> 4
+                            </label>
+                            <label
+                                    class="btn btn-outline-success"
+                                    ngbButtonLabel
+                            >
+                                <input [value]="5" ngbButton type="radio"/> 5
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="icon-toolbar-container">
+                        <div class="container-title">Icon Toolbar</div>
+                        <div
+                                class="btn-group btn-group-toggle"
+                                data-toggle="buttons"
+                        >
+                            <label
+                                    [class.active]="iconToolbarModel.one"
+                                    class="btn btn-success"
+                                    ngbButtonLabel
+                            >
+                                <input
+                                        [(ngModel)]="iconToolbarModel.one"
+                                        ngbButton
+                                        type="checkbox"
+                                />
+                                1
+                            </label>
+                            <label
+                                    [class.active]="iconToolbarModel.two"
+                                    class="btn btn-success"
+                                    ngbButtonLabel
+                            >
+                                <input
+                                        [(ngModel)]="iconToolbarModel.two"
+                                        ngbButton
+                                        type="checkbox"
+                                />
+                                2
+                            </label>
+                            <label
+                                    [class.active]="iconToolbarModel.three"
+                                    class="btn btn-success"
+                                    ngbButtonLabel
+                            >
+                                <input
+                                        [(ngModel)]="iconToolbarModel.three"
+                                        ngbButton
+                                        type="checkbox"
+                                />
+                                3
+                            </label>
+                            <label
+                                    [class.active]="iconToolbarModel.four"
+                                    class="btn btn-success"
+                                    ngbButtonLabel
+                            >
+                                <input
+                                        [(ngModel)]="iconToolbarModel.four"
+                                        ngbButton
+                                        type="checkbox"
+                                />
+                                4
+                            </label>
+                            <label
+                                    [class.active]="iconToolbarModel.five"
+                                    class="btn btn-success"
+                                    ngbButtonLabel
+                            >
+                                <input
+                                        [(ngModel)]="iconToolbarModel.five"
+                                        ngbButton
+                                        type="checkbox"
+                                />
+                                5
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="example-container">
+                    <div class="container-title divided-button-group">
+                        Divided Button Group
+                    </div>
+                    <div
+                            class="btn-group btn-group-toggle btn-divided-group btn-outline-divided-group btn-group-full-width btn-divided-checkbox-group"
+                            data-toggle="buttons"
+                    >
+                        <label
+                                [class.active]="dividedCheckboxModel.monday"
+                                class="btn btn-outline-success btn-icon"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedCheckboxModel.monday"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            <i class="nb-arrow-thin-down"></i>
+                        </label>
+                        <label
+                                [class.active]="dividedCheckboxModel.tuesday"
+                                class="btn btn-outline-success btn-icon"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedCheckboxModel.tuesday"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            <i class="nb-arrow-thin-up"></i>
+                        </label>
+                        <label
+                                [class.active]="dividedCheckboxModel.wednesday"
+                                class="btn btn-outline-success btn-icon"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedCheckboxModel.wednesday"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            <i class="nb-arrow-thin-left"></i>
+                        </label>
+                        <label
+                                [class.active]="dividedCheckboxModel.thursday"
+                                class="btn btn-outline-success btn-icon"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedCheckboxModel.thursday"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            <i class="nb-arrow-thin-right"></i>
+                        </label>
+                        <label
+                                [class.active]="dividedCheckboxModel.friday"
+                                class="btn btn-outline-success btn-icon"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedCheckboxModel.friday"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            <i class="nb-arrow-left"></i>
+                        </label>
+                        <label
+                                [class.active]="dividedCheckboxModel.saturday"
+                                class="btn btn-outline-success btn-icon"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedCheckboxModel.saturday"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            <i class="nb-arrow-right"></i>
+                        </label>
+                    </div>
+                </div>
+                <div class="example-container">
+                    <div class="container-title">Divided Button Group</div>
+                    <div class="row">
+                        <div
+                                [(ngModel)]="dividedButtonGroupOne"
+                                class="btn-group btn-group-toggle btn-divided-group btn-outline-divided-group btn-group-full-width col-md-12"
+                                ngbRadioGroup
+                        >
+                            <label
+                                    class="btn btn-outline-primary"
+                                    ngbButtonLabel
+                            >
+                                <input ngbButton type="radio" value="left"/>
+                                Left
+                            </label>
+                            <label
+                                    class="btn btn-outline-primary"
+                                    ngbButtonLabel
+                            >
+                                <input ngbButton type="radio" value="middle"/>
+                                Middle
+                            </label>
+                            <label
+                                    class="btn btn-outline-primary"
+                                    ngbButtonLabel
+                            >
+                                <input ngbButton type="radio" value="right"/>
+                                Right
+                            </label>
+                        </div>
+                    </div>
+                    <div
+                            class="btn-group btn-group-toggle btn-divided-group btn-group-full-width"
+                            data-toggle="buttons"
+                    >
+                        <label
+                                [class.active]="dividedButtonGroupTwo.left"
+                                [class.focus]="dividedButtonGroupTwo.left"
+                                class="btn btn-primary"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedButtonGroupTwo.left"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            Left
+                        </label>
+                        <label
+                                [class.active]="dividedButtonGroupTwo.middle"
+                                [class.focus]="dividedButtonGroupTwo.middle"
+                                class="btn btn-primary"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedButtonGroupTwo.middle"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            Middle
+                        </label>
+                        <label
+                                [class.active]="dividedButtonGroupTwo.right"
+                                [class.focus]="dividedButtonGroupTwo.right"
+                                class="btn btn-primary"
+                                ngbButtonLabel
+                        >
+                            <input
+                                    [(ngModel)]="dividedButtonGroupTwo.right"
+                                    ngbButton
+                                    type="checkbox"
+                            />
+                            Right
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>

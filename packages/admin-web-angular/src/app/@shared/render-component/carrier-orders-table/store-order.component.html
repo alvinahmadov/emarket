@@ -1,0 +1,16 @@
+<div (click)="redirect()" *ngIf="rowData?.warehouse" class="redirectBtn">
+    <strong class="d-block">
+        <img
+                alt=""
+                class="warehouse-image"
+                src="{{ rowData?.warehouse?.logo }}"
+        />
+        <i>{{ rowData?.warehouse?.name }}</i>
+    </strong>
+    <span>
+		{{ rowData?.warehouse?.geoLocation?.city }},
+        {{ rowData?.warehouse?.geoLocation?.house }},
+        {{ rowData?.warehouse?.geoLocation?.postcode }},
+        {{ rowData?.warehouse?.geoLocation?.countryName }}
+	</span>
+</div>

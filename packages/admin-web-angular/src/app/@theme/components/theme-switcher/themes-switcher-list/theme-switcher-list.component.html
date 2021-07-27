@@ -1,0 +1,10 @@
+<ul class="themes-switcher-list">
+    <li
+            (click)="onToggleTheme(theme.key)"
+            *ngFor="let theme of themes"
+            class="themes-switcher-item"
+    >
+        <i [ngClass]="'drop-icon-' + theme.key" class="nb-drop"></i>
+        <span>{{ theme.title }}</span>
+    </li>
+</ul>

@@ -1,0 +1,89 @@
+<nb-card
+        *ngIf="topWarehouseProducts && topWarehouseProducts.length"
+        class="panel"
+>
+    <nb-card-header class="panel-heading">
+        <span>{{ 'WAREHOUSE_VIEW.TOP_PRODUCTS' | translate }}</span>
+    </nb-card-header>
+    <nb-card-body>
+        <ul class="products">
+            <li
+                    *ngFor="let warehouseProduct of topWarehouseProducts"
+                    class="product-card-container"
+                    type="card"
+            >
+                <div class="card product-card">
+                    <div class="product-actions-info-bar">
+						<span class="info">
+							<span
+                            ><i class="fa fa-shopping-cart"></i>
+                                {{ warehouseProduct.soldCount }}
+							</span>
+							<span
+                            ><i
+                                    [hidden]="
+										!warehouseProduct?.isManufacturing
+									"
+                                    class="fa fa-industry"
+                            ></i
+                            ></span>
+							<span
+                            ><i
+                                    [hidden]="
+										!warehouseProduct?.isCarrierRequired
+									"
+                                    class="fa fa-motorcycle"
+                            ></i
+                            ></span>
+						</span>
+                        <span class="actions">
+							<a
+                                    (click)="removeProduct(warehouseProduct)"
+                                    class="edit-button button"
+                            >
+								<i class="ion-md-trash"></i>
+							</a>
+							<a
+                                    (click)="editProduct(warehouseProduct)"
+                                    class="edit-button button"
+                            >
+								<i class="fa fa-cog"></i>
+							</a>
+						</span>
+                    </div>
+                    <div class="product-image-container">
+                        <img
+                                (click)="addProduct(warehouseProduct)"
+                                class="product-image"
+                                src="{{
+								localeTranslate(
+									warehouseProduct?.product?.images
+								)
+							}}"
+                        />
+                    </div>
+
+                    <div class="product-mini-bar">
+                        <div class="name">
+                            {{
+                            localeTranslate(
+                                warehouseProduct?.product?.title
+                            )
+                            }}
+                        </div>
+                        <span
+                                [ngClass]="{
+								'progress-bar-danger':
+									warehouseProduct.count == 0,
+								'progress-bar-warning':
+									warehouseProduct.count == 1
+							}"
+                                class="count"
+                        >{{ warehouseProduct?.count }}</span
+                        >
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </nb-card-body>
+</nb-card>

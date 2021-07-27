@@ -1,0 +1,44 @@
+<div
+        [class.left]="position === 'normal'"
+        [class.right]="position === 'inverse'"
+        class="header-container"
+>
+    <div class="logo-container">
+        <a (click)="toggleSidebar()" class="navigation" href="#">
+            <nb-icon icon="menu-2-outline"></nb-icon>
+        </a>
+
+        <div (click)="navigateHome()" class="logo">
+			<span> {{ 'HEADER_VIEW.EVER' | translate }}</span
+            ><span class="ever-simbol">®</span>
+            <span>{{ 'HEADER_VIEW.ADMIN' | translate }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="header-container">
+    <nb-actions
+            [class.left]="position === 'inverse'"
+            [class.right]="position === 'normal'"
+            size="small"
+    >
+        <nb-action
+                (click)="toggleSettings()"
+                class="toggle-layout"
+                icon="settings-2-outline"
+        ></nb-action>
+        <nb-action *ngIf="admin$ | async; let admin" class="admin-menu">
+            <nb-user
+                    [name]="admin?.name"
+                    [nbContextMenu]="adminMenu"
+                    [picture]="admin?.pictureUrl"
+            ></nb-user>
+        </nb-action>
+        <!--
+        <nb-action class="control-item" icon="bell-outline"></nb-action>
+    <nb-action class="control-item" icon="email-outline"></nb-action>
+        <nb-action class="control-item">
+         <nb-search type="rotate-layout"></nb-search>
+        </nb-action>-->
+    </nb-actions>
+</div>

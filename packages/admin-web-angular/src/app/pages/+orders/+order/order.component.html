@@ -1,0 +1,99 @@
+<div *ngIf="order$ | async as order" class="row order-page">
+    <toaster-container></toaster-container>
+
+    <div class="col-md-9">
+        <nb-card>
+            <nb-card-header>
+                <h1 class="d-inline-vlock">
+                    {{ 'ORDER_VIEW.ORDER_HEADER_INFO.ORDER' | translate }}
+                    {{ getOrderName(order) }}
+                    <span class="pull-right">{{
+                        order.createdAt | date: 'MM-dd-yy'
+                        }}</span>
+                </h1>
+            </nb-card-header>
+
+            <nb-card-body>
+                <h4 class="d-inline-block">
+                    {{
+                    'ORDER_VIEW.ORDER_HEADER_INFO.MANAGE_ORDER' | translate
+                    }}
+                </h4>
+                <h4 class="d-inline-block pull-right">
+                    {{ 'ORDER_VIEW.ORDER_HEADER_INFO.TOTAL' | translate }} ${{
+                    getTotalPrice(order)
+                    }}
+                </h4>
+            </nb-card-body>
+        </nb-card>
+
+        <ea-warehouse-order-view
+                [hideHeader]="true"
+                [selectedOrder]="order"
+        ></ea-warehouse-order-view>
+
+        <ea-order-products [order]="order"></ea-order-products>
+    </div>
+    <div class="col-md-3 order-sidebar-info">
+        <nb-card class="p-3">
+            <ea-order-sidebar-info-box
+                    *ngIf="order?.warehouse"
+                    [contactDetails]="getWarehouseContactDetails(order?.warehouse)"
+                    [imageUrl]="order?.warehouse?.logo"
+                    [redirectUrl]="'stores/' + order.warehouse.id"
+                    [title]="titleWarehouse"
+                    class="mb-3"
+            ></ea-order-sidebar-info-box>
+
+            <ea-order-sidebar-info-box
+                    *ngIf="order?.user"
+                    [contactDetails]="getCustomerContactDetails(order?.user)"
+                    [imageUrl]="order?.user?.image"
+                    [redirectUrl]="'customers/list/' + order.user.id"
+                    [title]="titleCustomer"
+            ></ea-order-sidebar-info-box>
+
+            <ea-order-sidebar-info-box
+                    *ngIf="order?.carrier"
+                    [contactDetails]="getCarrierContactDetails(order?.carrier)"
+                    [imageUrl]="order?.carrier?.logo"
+                    [redirectUrl]="'carriers/' + order.carrier.id"
+                    [title]="titleCarrier"
+                    class="mt-3"
+            ></ea-order-sidebar-info-box>
+
+            <nb-card class="m-0 mt-3">
+                <nb-card-header>
+                    <h4>{{ 'ORDER_VIEW.LOCATION_INFO.MAP' | translate }}</h4>
+                </nb-card-header>
+
+                <nb-card-body class="order-map p-0">
+                    <div class="sub-title content-center">
+                        <h6>
+                            {{
+                            'ORDER_VIEW.LOCATION_INFO.DELIVERY_DISTANCE'
+                                | translate
+                            }}
+                            {{
+                            getDistance(
+                                order?.user?.geoLocation,
+                                order?.warehouse?.geoLocation
+                            )
+                            }}
+                        </h6>
+                    </div>
+                    <div class="map">
+                        <ea-carrier-location
+                                *ngIf="isCarrierCurrent(order)"
+                                [order]="order"
+                        ></ea-carrier-location>
+                        <ea-user-warehouse-location
+                                *ngIf="!isCarrierCurrent(order)"
+                                [order]="order"
+                        ></ea-user-warehouse-location>
+                    </div>
+                </nb-card-body>
+            </nb-card>
+        </nb-card>
+    </div>
+</div>

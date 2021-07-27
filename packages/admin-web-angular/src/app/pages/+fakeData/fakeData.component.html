@@ -1,0 +1,569 @@
+<toaster-container></toaster-container>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">
+        <h1>{{ 'FAKE_DATA.FAKE_DATA_GENERATOR' | translate }}</h1>
+    </nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData col">
+                <div class="container-btn d-flex align-items-center">
+                    <button
+                            (click)="callAll()"
+                            [disabled]="isBtnDisabled.all"
+                            [nbSpinner]="loading.all"
+                            nbButton
+                            status="primary"
+                    >
+                        {{ 'FAKE_DATA.GENERATE_ALL' | translate }}!
+                    </button>
+
+                    <label
+                            class="d-flex align-items-center ml-3 mt-2"
+                            style="cursor: pointer;"
+                    >
+                        <input
+                                [(ngModel)]="includeHardcodedData"
+                                type="checkbox"
+                        />
+                        <span class="ml-1">{{
+                            'FAKE_DATA.INCLUDED_HARDCODED_DATA' | translate
+                            }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="fakeData my-auto col">
+                <div class="container-btn float-right">
+                    <button
+                            (click)="clearAll()"
+                            [disabled]="isBtnDisabled.clearAll"
+                            [nbSpinner]="loading.clearAll"
+                            nbButton
+                            status="danger"
+                    >
+                        {{ 'FAKE_DATA.CLEAR_ALL' | translate }}!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">{{
+        'FAKE_DATA.HARDCODED_DATA' | translate
+        }}</nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="generateHardcoded()"
+                            [disabled]="isBtnDisabled.hardcoded"
+                            [nbSpinner]="loading.hardcoded"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.GENERATE_HARDCODED_ONLY' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">{{
+        'FAKE_DATA.CREATE_INVITE' | translate
+        }}</nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createInvite1()"
+                            [disabled]="isBtnDisabled.invite1"
+                            [nbSpinner]="loading.invite1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_1st_INVITE' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createInvite2()"
+                            [disabled]="isBtnDisabled.invite2"
+                            [nbSpinner]="loading.invite2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_2st_INVITE' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createInvite3()"
+                            [disabled]="isBtnDisabled.invite3"
+                            [nbSpinner]="loading.invite3"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_3st_INVITE' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createInvite4()"
+                            [disabled]="isBtnDisabled.invite4"
+                            [nbSpinner]="loading.invite4"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_4st_INVITE' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">
+        {{ 'FAKE_DATA.CREATE_USER' | translate }}</nb-card-header
+    >
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createUser()"
+                            [disabled]="isBtnDisabled.user"
+                            [nbSpinner]="loading.user"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_1st_USER' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="generate100Customers()"
+                            [disabled]="isBtnDisabled.users100"
+                            [nbSpinner]="loading.users100"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_100_USERS' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">
+        {{ 'FAKE_DATA.CREATE_CARRIER' | translate }}</nb-card-header
+    >
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createCarrier1()"
+                            [disabled]="isBtnDisabled.carrier1"
+                            [nbSpinner]="loading.carrier1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_1st_CARRIER' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createCarrier2()"
+                            [disabled]="isBtnDisabled.carrier2"
+                            [nbSpinner]="loading.carrier2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_2nd_CARRIER' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createCarrier3()"
+                            [disabled]="isBtnDisabled.carrier3"
+                            [nbSpinner]="loading.carrier3"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_3rd_CARRIER' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="generate100Carriers()"
+                            [disabled]="isBtnDisabled.carriers100"
+                            [nbSpinner]="loading.carriers100"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_100_CARRIERS' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">{{
+        'FAKE_DATA.CREATE_PRODUCT' | translate
+        }}</nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createPeperoniAndMushroomPizzaProduct()"
+                            [disabled]="isBtnDisabled.product1"
+                            [nbSpinner]="loading.product1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_PEPERONI&MUSHROOM_PIZZA_PRODUCT'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createSushiAndCaviarMixProduct()"
+                            [disabled]="isBtnDisabled.product2"
+                            [nbSpinner]="loading.product2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_SUSHI&CAVIAR_PRODUCT' | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createSushiMixProduct()"
+                            [disabled]="isBtnDisabled.product3"
+                            [nbSpinner]="loading.product3"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_SUSHI_MIX_PRODUCT' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createPastaProduct()"
+                            [disabled]="isBtnDisabled.product4"
+                            [nbSpinner]="loading.product4"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_PASTA_PRODUCT' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createSushiBoxProduct()"
+                            [disabled]="isBtnDisabled.product5"
+                            [nbSpinner]="loading.product5"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_SUSHI_BOX_PRODUCT' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createPeperoniAndTomatoPizzaProduct()"
+                            [disabled]="isBtnDisabled.product6"
+                            [nbSpinner]="loading.product6"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_PEPERONI&TOMATO_PIZZA_PRODUCT'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">
+        {{ 'FAKE_DATA.CREATE_WAREHOUSE' | translate }}
+    </nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createWarehouse1()"
+                            [disabled]="isBtnDisabled.warehouse1"
+                            [nbSpinner]="loading.warehouse1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_1st_WAREHOUSE' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createWarehouse2()"
+                            [disabled]="isBtnDisabled.warehouse2"
+                            [nbSpinner]="loading.warehouse2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_2nd_WAREHOUSE' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createWarehouse3()"
+                            [disabled]="isBtnDisabled.warehouse3"
+                            [nbSpinner]="loading.warehouse3"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_3rd_WAREHOUSE' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="generate100Warehouses()"
+                            [disabled]="isBtnDisabled.warehouses100"
+                            [nbSpinner]="loading.warehouses100"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CREATE_100_WAREHOUSES' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55=""
+    >{{ 'FAKE_DATA.CREATE_WAREHOUSE_PRODUCT' | translate }}
+    </nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createWarehouse1Products()"
+                            [disabled]="isBtnDisabled.warehouseProduct1"
+                            [nbSpinner]="loading.warehouseProduct1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_1st_WAREHOUSE_PRODUCTS(using_product_number_1_2_3_4_5_and_6)'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createWarehouse2Products()"
+                            [disabled]="isBtnDisabled.warehouseProduct2"
+                            [nbSpinner]="loading.warehouseProduct2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_2nd_WAREHOUSE_PRODUCTS(using_product_number_1_2_and_3'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createWarehouse3Products()"
+                            [disabled]="isBtnDisabled.warehouseProduct3"
+                            [nbSpinner]="loading.warehouseProduct3"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_3rd_WAREHOUSE_PRODUCTS(using_1st_product)'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55=""
+    >{{ 'FAKE_DATA.UPDATE_WAREHOUSE_GEO_LOCATION' | translate }}
+    </nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="updateWarehouse1GeoLocation()"
+                            [disabled]="isBtnDisabled.warehouseGeoLocation"
+                            [nbSpinner]="loading.warehouseGeoLocation"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.UPDATE_1ST_WAREHOUSE_GEO_LOCATION'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55=""
+    >{{ 'FAKE_DATA.CREATE_ORDER' | translate }}
+    </nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createOrder1()"
+                            [disabled]="isBtnDisabled.createOrder1"
+                            [nbSpinner]="loading.createOrder1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_1RD_ORDER(using_1st_warehouse_1st_user_and_1st_product)'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="createOrder2()"
+                            [disabled]="isBtnDisabled.createOrder2"
+                            [nbSpinner]="loading.createOrder2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{
+                        'FAKE_DATA.CREATE_2ND_ORDER(using_1st_warehouse_1st_user_and_2nd_product)'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="generateRandomOrdersPerStore()"
+                            [disabled]="isBtnDisabled.create1000Orders"
+                            [nbSpinner]="loading.create1000Orders"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        <!-- TODO TRANSLATION -->
+                        CREATE 1000 ORDERS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<nb-card _ngcontent-c55="" _nghost-c13="">
+    <nb-card-header _ngcontent-c55="">
+        {{ 'FAKE_DATA.CONFIRM_ORDER' | translate }}
+    </nb-card-header>
+
+    <nb-card-body _ngcontent-c55="">
+        <div class="row">
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="confirmOrder1()"
+                            [disabled]="isBtnDisabled.confirmOrder1"
+                            [nbSpinner]="loading.confirmOrder1"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CONFIMR_1st_ORDER' | translate }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fakeData">
+                <div class="container-btn">
+                    <button
+                            (click)="confirmOrder2()"
+                            [disabled]="isBtnDisabled.confirmOrder2"
+                            [nbSpinner]="loading.confirmOrder2"
+                            class="btn btn-startProcessing btn-sm"
+                    >
+                        {{ 'FAKE_DATA.CONFIMR_2nd_ORDER' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>

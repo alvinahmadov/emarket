@@ -1,0 +1,47 @@
+<nb-card class="setup-merchant-payments">
+    <nb-card-header>
+        {{ 'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYMENTS' | translate }}
+    </nb-card-header>
+    <nb-card-body>
+        <div class="row m-0">
+            <div class="form-group offset-md-2 col-md-4">
+                <nb-checkbox
+                        (checkedChange)="isOnlinePaymentAllowed($event)"
+                        [checked]="false"
+                >
+                    {{
+                    'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.ALLOW_ONLINE_PAYMENT'
+                        | translate
+                    }}
+                </nb-checkbox>
+            </div>
+            <div class="form-group offset-md-2 col-md-4">
+                <nb-checkbox
+                        (checkedChange)="isCashAllowed($event)"
+                        [checked]="true"
+                >
+                    {{
+                    'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.ALLOW_CASH_PAYMENT'
+                        | translate
+                    }}
+                </nb-checkbox>
+            </div>
+        </div>
+        <div [hidden]="!isPaymentEnabled" class="row m-0">
+            <div class="form-group offset-md-2 col-md-8">
+                <ea-payment-gateways
+                    #paymentGateways
+                    [warehouseCountry]="locationForm.countryId.value"
+                    [warehouseLogo]="warehouseLogo"
+                ></ea-payment-gateways>
+            </div>
+        </div>
+    </nb-card-body>
+</nb-card>
+
+<button (click)="previousStep.emit()" nbButton>
+    {{ 'FAKE_DATA.SETUP_MERCHANTS.PREV' | translate }}
+</button>
+<button (click)="nextStep.emit()" [disabled]="!isPaymentValid" nbButton>
+    {{ 'FAKE_DATA.SETUP_MERCHANTS.NEXT' | translate }}
+</button>

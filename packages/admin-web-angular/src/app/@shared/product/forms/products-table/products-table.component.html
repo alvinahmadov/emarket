@@ -1,0 +1,14 @@
+<nb-card
+        [nbSpinner]="loading"
+        [ngClass]="boxShadow === 'none' ? 'no-box-shadow' : ''"
+>
+    <ng2-smart-table
+            (delete)="deleteProduct($event)"
+            (edit)="edit($event)"
+            (userRowSelect)="selectProductTmp($event)"
+            [settings]="settingsSmartTable"
+            [source]="sourceSmartTable"
+            class="products-table"
+    >
+    </ng2-smart-table>
+</nb-card>

@@ -1,0 +1,40 @@
+<nb-card>
+    <toaster-container></toaster-container>
+
+    <nb-card-header>
+        <button
+                (click)="openWizardNewCarrier()"
+                class="mr-2 d-inline-block"
+                nbButton
+                status="success"
+        >
+            <i class="ion-md-add button-icon mr-1"></i>
+            {{ 'CARRIERS_VIEW.CREATE_BUTTON' | translate }}
+        </button>
+        <button
+                (click)="deleteSelectedCarriers()"
+                [disabled]="!carriersTable.hasSelectedCarriers"
+                class="mr-2 d-inline-block"
+                nbButton
+                status="danger"
+        >
+            <i class="ion-md-trash button-icon mr-1"></i>
+            {{ 'CARRIERS_VIEW.DELETE' | translate }}
+        </button>
+        <button
+                class="mr-2 d-inline-block"
+                nbButton
+                routerLink="track"
+                status="primary"
+        >
+            <i class="ion-md-map button-icon mr-1"></i>
+            {{ 'CARRIERS_VIEW.TRACK' | translate }}
+        </button>
+    </nb-card-header>
+    <nb-card-body [nbSpinner]="loading">
+        <ea-carriers-smart-table
+            #carriersTable
+            [perPage]="perPage"
+        ></ea-carriers-smart-table>
+    </nb-card-body>
+</nb-card>

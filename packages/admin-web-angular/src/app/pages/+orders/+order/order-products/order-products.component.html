@@ -1,0 +1,106 @@
+<div class="order-product">
+    <toaster-container></toaster-container>
+    <nb-card class="m-0">
+        <nb-card-header>
+            <div class="row m-0">
+                <h4>
+                    {{
+                    'ORDER_VIEW.ORDER_PRODUCT_INFO.ORDER_PRODUCTS'
+                        | translate
+                    }}
+                </h4>
+            </div>
+            <div class="row break-line"></div>
+            <div
+                    [hidden]="
+					order?.isCancelled ||
+					order?.carrierStatus === deliveryCompleted ||
+					order?.warehouseStatus === givenToCarrier
+				"
+                    class="row m-0"
+            >
+                <div class="col-8 p-0 btn-group">
+                    <button
+                            (click)="addProducts()"
+                            class="d-inline-block"
+                            nbButton
+                            status="success"
+                    >
+                        <i class="ion-md-add button-icon mr-1"></i
+                        >{{
+                        'ORDER_VIEW.ORDER_PRODUCT_INFO.ADD_PRODUCTS'
+                            | translate
+                        }}
+                    </button>
+                    <button
+                            (click)="removeSelectedProducts()"
+                            [disabled]="!selectedProducts.length"
+                            [nbSpinner]="loading"
+                            class="mr-2 d-inline-block"
+                            nbButton
+                            status="warning"
+                    >
+                        <i class="ion-md-trash button-icon mr-1"></i>
+                        {{
+                        'ORDER_VIEW.ORDER_PRODUCT_INFO.REMOVE_PRODUCTS'
+                            | translate
+                        }}
+                    </button>
+                </div>
+                <div class="col-4 pull-right p-0">
+                    <button
+                            (click)="cancelOrder()"
+                            [nbSpinner]="loading"
+                            class="mr-2 d-inline-block float-right"
+                            nbButton
+                            status="danger"
+                    >
+                        <i class="ion-md-close button-icon mr-1"></i>
+                        {{
+                        'ORDER_VIEW.ORDER_PRODUCT_INFO.CANCEL_ORDER'
+                            | translate
+                        }}
+                    </button>
+                </div>
+            </div>
+
+            <h4 *ngIf="order?.isCancelled" class="text-danger">
+                {{
+                'ORDER_VIEW.ORDER_PRODUCT_INFO.THE_ORDER_IS_CANCELED'
+                    | translate
+                }}
+            </h4>
+            <h4
+                    *ngIf="
+					order?.warehouseStatus === givenToCarrier &&
+					order?.carrierStatus !== deliveryCompleted
+				"
+                    class="text-info"
+            >
+                {{
+                'ORDER_VIEW.ORDER_PRODUCT_INFO.THE_ORDER_IS_GIVEN_TO_CARRIER'
+                    | translate
+                }}
+            </h4>
+            <h4
+                    *ngIf="order?.carrierStatus === deliveryCompleted"
+                    class="text-success"
+            >
+                {{
+                'ORDER_VIEW.ORDER_PRODUCT_INFO.THE_ORDER_IS_DELIVERED'
+                    | translate
+                }}
+            </h4>
+        </nb-card-header>
+
+        <nb-card-body>
+            <ng2-smart-table
+                    (userRowSelect)="selectProductTmp($event)"
+                    [settings]="settingsSmartTable"
+                    [source]="sourceSmartTable"
+                    id="smartTableCustomer"
+            >
+            </ng2-smart-table>
+        </nb-card-body>
+    </nb-card>
+</div>

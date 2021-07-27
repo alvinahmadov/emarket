@@ -1,0 +1,52 @@
+<nb-card>
+    <nb-card-header>Button Dropdowns</nb-card-header>
+    <nb-card-body>
+        <div class="dropdown btn-group" ngbDropdown>
+            <button class="btn btn-primary" type="button">Dropdown</button>
+            <button
+                    class="btn btn-primary"
+                    ngbDropdownToggle
+                    type="button"
+            ></button>
+            <ul class="dropdown-menu" ngbDropdownMenu>
+                <li class="dropdown-item">Icon Button</li>
+                <li class="dropdown-item">Hero Button</li>
+                <li class="dropdown-item">Default</li>
+            </ul>
+        </div>
+        <div class="dropdown" ngbDropdown>
+            <button class="btn btn-primary" ngbDropdownToggle type="button">
+                Dropdown
+            </button>
+            <ul class="dropdown-menu" ngbDropdownMenu>
+                <li class="dropdown-item">Icon Button</li>
+                <li class="dropdown-item">Hero Button</li>
+                <li class="dropdown-item">Default</li>
+            </ul>
+        </div>
+        <div class="dropdown" ngbDropdown placement="top">
+            <button
+                    class="btn btn-outline-primary"
+                    ngbDropdownToggle
+                    type="button"
+            >
+                Dropup
+            </button>
+            <ul class="dropdown-menu" ngbDropdownMenu>
+                <li class="dropdown-item">Icon Button</li>
+                <li class="dropdown-item">Hero Button</li>
+                <li class="dropdown-item">Default</li>
+            </ul>
+        </div>
+        <div class="dropdown ghost-dropdown" ngbDropdown>
+            <button class="btn btn-primary" ngbDropdownToggle type="button">
+                Dropdown
+            </button>
+            <ul class="dropdown-menu" ngbDropdownMenu>
+                <li class="dropdown-item">Icon Button</li>
+                <li class="dropdown-item">Hero Button</li>
+                <li class="dropdown-item">Default</li>
+            </ul>
+        </div>
+    </nb-card-body>
+</nb-card>

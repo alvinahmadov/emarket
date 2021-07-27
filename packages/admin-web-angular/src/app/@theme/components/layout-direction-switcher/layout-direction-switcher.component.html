@@ -1,0 +1,16 @@
+<fieldset>
+    <p>Directions:</p>
+
+    <nb-radio-group
+            (valueChange)="toggleDirection($event)"
+            [(value)]="currentDirection"
+            name="size"
+    >
+        <nb-radio [value]="directions.LTR" name="size"
+        ><small>LTR </small></nb-radio
+        >
+        <nb-radio [value]="directions.RTL" name="size">
+            <small>RTL</small>
+        </nb-radio>
+    </nb-radio-group>
+</fieldset>

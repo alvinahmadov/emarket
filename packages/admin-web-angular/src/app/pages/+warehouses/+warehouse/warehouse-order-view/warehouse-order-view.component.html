@@ -1,0 +1,189 @@
+<nb-card *ngIf="selectedOrder">
+    <nb-card-header [hidden]="hideHeader" class="header-color">
+        <ea-order-header-info
+                [selectedOrder]="selectedOrder"
+        ></ea-order-header-info>
+    </nb-card-header>
+
+    <nb-card-body class="order-view">
+        <div
+                *ngIf="selectedOrder?.products.length"
+                [hidden]="
+				selectedOrder.warehouseStatus >= 7 || selectedOrder.isCancelled
+			"
+                aria-label="Order Actions"
+                class="btn-group btn-group-lg actions"
+        >
+            <div [hidden]="selectedOrder.warehouseStatus != 0" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(1)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-secondary order-btn-margin-bottom"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span class="ion-md-skip-forward"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.CONFIRM' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 1" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(2)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-startProcessing"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span class="ion-md-log-in"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.START_PROCESSING' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 2" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(3)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-info btn-rectangle order-btn-margin-bottom"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-list"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.START_ALLOCATION' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 3" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(4)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-success btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-clipboard"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.ALLOCATED' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 3" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(200)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-danger btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-alert"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.ALLOCATION_FAILS' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 4" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(5)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-primary btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-filing"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.START_PACKAGING' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 5" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(6)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-success btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="fa fa fa-archive"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.PACKAGED' | translate }}
+                </button>
+            </div>
+
+            <div [hidden]="selectedOrder.warehouseStatus != 5" class="btnOrder">
+                <button
+                        (click)="updateOrderWarehouseStatus(201)"
+                        [disabled]="!isSelectedOrderActionsAvailable"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-danger btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-alert"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.PACKAGING_FAILS' | translate }}
+                </button>
+            </div>
+
+            <div
+                    *ngIf="
+					selectedOrder.warehouseStatus === 6 &&
+					selectedOrder.orderType === orderTypeDelivery
+				"
+                    class="btnOrder"
+            >
+                <button
+                        (click)="updateOrderWarehouseStatus(7)"
+                        [disabled]="
+						!isSelectedOrderActionsAvailable ||
+						selectedOrder.carrierStatus < 2
+					"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-primary btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        ng-disabled="selectedOrder.carrier == null || selectedOrder.carrierStatus < 2"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-airplane"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.GIVEN_TO_CARRIER' | translate }}
+                </button>
+            </div>
+            <div
+                    *ngIf="
+					selectedOrder.warehouseStatus === 6 &&
+					selectedOrder.orderType === orderTypeTakeaway
+				"
+                    class="btnOrder"
+            >
+                <button
+                        (click)="updateOrderWarehouseStatus(8)"
+                        [nbSpinner]="loading"
+                        class="btn btn-outline-primary btn-sm btn-rectangle"
+                        nbSpinnerStatus="success"
+                        type="button"
+                >
+                    <span aria-hidden="true" class="ion-md-happy"></span>
+                    {{ 'WAREHOUSE_VIEW.ORDER.GIVEN_TO_CUSTOMER' | translate }}
+                </button>
+            </div>
+        </div>
+
+        <h4
+                *ngIf="!selectedOrder?.products.length"
+                class="text-danger pb-2 pl-3"
+        >
+            {{
+            'WAREHOUSE_VIEW.ORDER.CANT_PROCESSING_WITHOUT_PRODUCTS'
+                | translate
+            }}
+        </h4>
+
+        <div
+                *ngIf="selectedOrder.products.length"
+                class="col-12 no-padding slider"
+        >
+            <image-slider [slideImages]="slideImages"></image-slider>
+        </div>
+    </nb-card-body>
+</nb-card>

@@ -1,0 +1,158 @@
+<nb-card>
+    <nb-card-header>
+        Toaster configuration
+    </nb-card-header>
+    <nb-card-body>
+        <toaster-container [toasterconfig]="config"></toaster-container>
+
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label class="form-control-label"
+                    >Place to show toast:</label
+                    >
+                    <div class="dropdown" ngbDropdown>
+                        <button
+                                class="btn btn-primary"
+                                ngbDropdownToggle
+                                type="button"
+                        >
+                            {{ position }}
+                        </button>
+                        <ul class="dropdown-menu" ngbDropdownMenu>
+                            <li
+                                    (click)="position = p"
+                                    *ngFor="let p of positions"
+                                    class="dropdown-item"
+                            >
+                                {{ p }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">Animation type:</label>
+                    <div class="dropdown" ngbDropdown>
+                        <button
+                                class="btn btn-primary"
+                                ngbDropdownToggle
+                                type="button"
+                        >
+                            {{ animationType }}
+                        </button>
+                        <ul class="dropdown-menu" ngbDropdownMenu>
+                            <li
+                                    (click)="animationType = at"
+                                    *ngFor="let at of animations"
+                                    class="dropdown-item"
+                            >
+                                {{ at }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">Title:</label>
+                    <input
+                            [(ngModel)]="title"
+                            class="form-control"
+                            name="title"
+                    />
+                </div>
+                <form>
+                    <div class="form-group">
+                        <label class="form-control-label">Content:</label>
+                        <input
+                                [(ngModel)]="content"
+                                class="form-control"
+                                name="content"
+                        />
+                    </div>
+                </form>
+                <div class="form-group">
+                    <label class="form-control-label"
+                    >Time to hide toast, ms. 0 to persistent toast:</label
+                    >
+                    <input
+                            [(ngModel)]="timeout"
+                            class="form-control"
+                            name="timeout"
+                            type="number"
+                    />
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label class="form-control-label"
+                    >Limit number of toasts:</label
+                    >
+                    <input
+                            [(ngModel)]="toastsLimit"
+                            class="form-control"
+                            name="limit"
+                            type="number"
+                    />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">Toast type:</label>
+                    <div class="dropdown" ngbDropdown>
+                        <button
+                                class="btn btn-primary"
+                                ngbDropdownToggle
+                                type="button"
+                        >
+                            {{ type }}
+                        </button>
+                        <ul class="dropdown-menu" ngbDropdownMenu>
+                            <li
+                                    (click)="type = t"
+                                    *ngFor="let t of types"
+                                    class="dropdown-item"
+                            >
+                                {{ t }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <nb-checkbox [(ngModel)]="isNewestOnTop"
+                    >Newest on top
+                    </nb-checkbox
+                    >
+                </div>
+                <div>
+                    <nb-checkbox [(ngModel)]="isHideOnClick"
+                    >Hide on click
+                    </nb-checkbox
+                    >
+                </div>
+                <div>
+                    <nb-checkbox [(ngModel)]="isDuplicatesPrevented"
+                    >Prevent arising of duplicate toast
+                    </nb-checkbox
+                    >
+                </div>
+                <div>
+                    <nb-checkbox [(ngModel)]="isCloseButton"
+                    >Close button
+                    </nb-checkbox
+                    >
+                </div>
+            </div>
+        </div>
+    </nb-card-body>
+
+    <nb-card-footer>
+        <button (click)="makeToast()" class="btn btn-primary">
+            Show toast
+        </button>
+        <button (click)="openRandomToast()" class="btn btn-success">
+            Random toast
+        </button>
+        <button (click)="clearToasts()" class="btn btn-danger">
+            Clear all toasts
+        </button>
+    </nb-card-footer>
+</nb-card>

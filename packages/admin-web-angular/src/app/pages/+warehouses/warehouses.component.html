@@ -1,0 +1,49 @@
+<nb-card [nbSpinner]="loading">
+    <toaster-container></toaster-container>
+
+    <nb-card-header>
+        <button
+                (click)="createWarehouseModel()"
+                class="mr-2 d-inline-block"
+                nbButton
+                status="success"
+        >
+            <i class="ion-md-add button-icon mr-1"></i>
+            <small _ngcontent-c55="">{{
+                'WAREHOUSES_VIEW.CREATE' | translate
+                }}</small>
+        </button>
+        <button
+                (click)="deleteSelectedRows()"
+                [disabled]="!hasSelectedWarehouses"
+                class="mr-2 d-inline-block"
+                nbButton
+                status="danger"
+        >
+            <i class="ion-md-trash button-icon mr-1"></i>
+            <small _ngcontent-c55="">{{
+                'WAREHOUSES_VIEW.DELETE' | translate
+                }}</small>
+        </button>
+        <button
+                class="mr-2 d-inline-block"
+                nbButton
+                routerLink="track"
+                status="primary"
+        >
+            <i class="ion-md-map button-icon mr-1"></i>
+            <small _ngcontent-c55="">{{
+                'WAREHOUSES_VIEW.SHOW_ON_MAP' | translate
+                }}</small>
+        </button>
+    </nb-card-header>
+
+    <nb-card-body>
+        <ng2-smart-table
+                (userRowSelect)="selectWarehouseTmp($event)"
+                [settings]="settingsSmartTable"
+                [source]="sourceSmartTable"
+        >
+        </ng2-smart-table>
+    </nb-card-body>
+</nb-card>

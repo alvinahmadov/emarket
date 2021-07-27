@@ -1,0 +1,179 @@
+<div class="row">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-8">
+                <nb-card>
+                    <nb-card-header>
+                        {{
+                        'CARRIERS_VIEW.TRACK_PAGE.TRACK_ALL_WORKING_CARRIERS'
+                            | translate
+                        }}
+                    </nb-card-header>
+                    <nb-card-body>
+                        <div #gmap class="googleMap"></div>
+                    </nb-card-body>
+                </nb-card>
+            </div>
+
+            <div class="col-4">
+                <nb-card>
+                    <nb-card-header>
+                        {{
+                        'CARRIERS_VIEW.TRACK_PAGE.FILTER_CARRIERS'
+                            | translate
+                        }}
+                    </nb-card-header>
+                    <nb-card-body style="overflow: inherit;">
+                        <div>
+                            <ng-select
+                                    (change)="storeListener($event)"
+                                    [(ngModel)]="selectedStore"
+                                    [clearable]="false"
+                                    [items]="stores"
+                                    bindLabel="id"
+                                    placeholder="{{
+									'DASHBOARD_VIEW.SELECT_COMPONENT.SELECT_STORE'
+										| translate
+								}}"
+                                    style="width: 100%; margin-bottom: 30px;"
+                            >
+                                <ng-template let-item="item" ng-label-tmp>
+                                    <img
+                                            *ngIf="item.logo"
+                                            [src]="item.logo"
+                                            class="mr-2"
+                                            height="15"
+                                            width="15"
+                                    />
+                                    <b>{{ item.name }}</b>
+                                </ng-template>
+                                <ng-template
+                                    let-index="index"
+                                    let-item="item"
+                                    ng-option-tmp
+                                >
+                                    <p class="card-title">
+                                        <img
+                                                *ngIf="item.logo"
+                                                [src]="item.logo"
+                                                class="mr-1"
+                                                height="40"
+                                                width="40"
+                                        />
+                                        {{ item.name }}
+                                    </p>
+                                </ng-template>
+                            </ng-select>
+                            <ng-select
+                                    (change)="carrierListener($event)"
+                                    [(ngModel)]="selectedCarrier"
+                                    [clearable]="false"
+                                    [items]="filteredCarriersList"
+                                    bindLabel="fullName"
+                                    placeholder="{{
+									'CARRIERS_VIEW.CARRIER_PAGE.SELECT_CARRIER'
+										| translate
+								}}"
+                                    style="width: 100%; margin-bottom: 30px;"
+                            >
+                                <ng-template let-item="item" ng-label-tmp>
+                                    <img
+                                            *ngIf="item.logo"
+                                            [src]="item.logo"
+                                            class="mr-2"
+                                            height="15"
+                                            width="15"
+                                    />
+                                    {{ item.fullName }}
+                                </ng-template>
+                                <ng-template
+                                    let-index="index"
+                                    let-item="item"
+                                    ng-option-tmp
+                                >
+                                    <p class="card-title">
+                                        <img
+                                                *ngIf="item.logo"
+                                                [src]="item.logo"
+                                                class="mr-1"
+                                                height="40"
+                                                width="40"
+                                        />
+                                        {{ item.fullName }}
+                                    </p>
+                                </ng-template>
+                            </ng-select>
+                        </div>
+                        <nb-card-footer>
+                            <div class="details">
+                                <div *ngIf="selectedStore" class="warehouse">
+                                    <h6>
+                                        <b>{{ selectedStore.name }}</b>
+                                    </h6>
+                                    <ul>
+                                        <li>
+                                            {{
+                                            'CARRIERS_VIEW.TRACK_PAGE.PHONE'
+                                                | translate
+                                            }}:
+                                            {{ selectedStore.contactPhone }}
+                                        </li>
+                                        <li>
+                                            {{
+                                            'CARRIERS_VIEW.TRACK_PAGE.EMAIL'
+                                                | translate
+                                            }}:
+                                            {{ selectedStore.contactEmail }}
+                                        </li>
+                                        <li>
+                                            {{
+                                            'CARRIERS_VIEW.TRACK_PAGE.ADDRESS'
+                                                | translate
+                                            }}:
+                                            {{
+                                            selectedStore.geoLocation
+                                                .streetAddress
+                                            }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div *ngIf="selectedCarrier" class="carrier">
+                                    <h6>
+                                        <b>{{ selectedCarrier.fullName }}</b>
+                                    </h6>
+                                    <ul>
+                                        <li>
+                                            {{
+                                            'CARRIERS_VIEW.TRACK_PAGE.DELIVERY_COUNT'
+                                                | translate
+                                            }}:
+                                            {{
+                                            selectedCarrier.numberOfDeliveries
+                                            }}
+                                        </li>
+                                        <li>
+                                            {{
+                                            'CARRIERS_VIEW.TRACK_PAGE.PHONE'
+                                                | translate
+                                            }}: {{ selectedCarrier.phone }}
+                                        </li>
+                                        <li>
+                                            {{
+                                            'CARRIERS_VIEW.TRACK_PAGE.ADDRESS'
+                                                | translate
+                                            }}:
+                                            {{
+                                            selectedCarrier.geoLocation
+                                                .streetAddress
+                                            }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </nb-card-footer>
+                    </nb-card-body>
+                </nb-card>
+            </div>
+        </div>
+    </div>
+</div>

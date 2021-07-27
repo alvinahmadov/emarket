@@ -1,0 +1,60 @@
+<toaster-container></toaster-container>
+
+<nb-card size="large">
+    <nb-tabset #ordersProfitTab (changeTab)="changeTab($event)" fullWidth>
+        <nb-tab tabTitle="{{ 'DASHBOARD_VIEW.CHARTS.ORDERS' | translate }}">
+            <div class="chart-container">
+                <ea-chart-panel-summary
+                        [isLoading]="loading.chartPanelSummary"
+                        [summary]="chartPanelSummary"
+                ></ea-chart-panel-summary>
+
+                <ea-chart-panel-header
+                        (clearSelectedRange)="clearRange()"
+                        (customRangeDaysDiff)="selectDateRangeOrderCharts($event)"
+                        (periodChange)="setPeriodAndGetChartData($event)"
+                        [clearRangeFromParent]="clearRange$"
+                        [preservedRangeEvent]="preservedRanges$"
+                        [type]="period"
+                >
+                </ea-chart-panel-header>
+
+                <ea-orders-chart
+                    #ordersChart
+                    [nbSpinner]="loading.chart"
+                    [ordersChartData]="ordersChartData"
+                    nbSpinnerSize="xxlarge"
+                ></ea-orders-chart>
+            </div>
+        </nb-tab>
+
+        <nb-tab
+                [lazyLoad]="true"
+                tabTitle="{{ 'DASHBOARD_VIEW.CHARTS.PROFIT' | translate }}"
+        >
+            <div class="chart-container">
+                <ea-chart-panel-summary
+                        [isLoading]="loading.chartPanelSummary"
+                        [summary]="chartPanelSummary"
+                ></ea-chart-panel-summary>
+
+                <ea-chart-panel-header
+                        (clearSelectedRange)="clearRange()"
+                        (customRangeDaysDiff)="selectDateRangeOrderCharts($event)"
+                        (periodChange)="setPeriodAndGetChartData($event)"
+                        [clearRangeFromParent]="clearRange$"
+                        [preservedRangeEvent]="preservedRanges$"
+                        [type]="period"
+                >
+                </ea-chart-panel-header>
+
+                <ea-profit-chart
+                    #profitChart
+                    [nbSpinner]="loading.chart"
+                    [profitChartData]="profitChartData"
+                    nbSpinnerSize="xxlarge"
+                ></ea-profit-chart>
+            </div>
+        </nb-tab>
+    </nb-tabset>
+</nb-card>

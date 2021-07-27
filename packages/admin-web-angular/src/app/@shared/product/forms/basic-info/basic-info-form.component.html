@@ -1,0 +1,194 @@
+<div
+        *ngIf="form"
+        [formGroup]="form"
+        class="col-md-12 col-lg-12 col-sm-12 product-basic-info"
+>
+    <fieldset>
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'Title' | translate
+                }}</label>
+            <div class="col-sm-9">
+                <input
+                        class="form-control"
+                        formControlName="title"
+                        placeholder="{{
+						'WAREHOUSE_VIEW.PLACEHOLDER.EXAMPLE' | translate
+					}}"
+                        type="text"
+                />
+
+                <span
+                        *ngIf="title?.invalid && (title.dirty || title.touched)"
+                        class="alert alert-danger"
+                >
+					<span *ngIf="title.errors.required">
+						{{
+                        'PRODUCT_TYPE_VIEW.WIZARD_FORM.VALIDATION_MESSAGES.TITLE'
+                            | translate
+                        }}!
+					</span>
+
+					<span *ngIf="title.errors.maxlength">
+						{{
+                        'PRODUCT_TYPE_VIEW.WIZARD_FORM.VALIDATION_MESSAGES.THE_LENGHT_OF_THE_TITLE'
+                            | translate
+                        }}
+					</span>
+				</span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'Picture Url' | translate
+                }}</label>
+            <div class="col-sm-9">
+                <e-cu-file-uploader
+                        (uploadedImgObj)="addImageObj($event)"
+                        [fileUrl]="imagesUrls"
+                        [locale]="locale.value"
+                        [placeholder]="uploaderPlaceholder"
+                ></e-cu-file-uploader>
+
+                <span
+                        *ngIf="(imagesArr || uploaderChanged) && image.invalid"
+                        class="alert alert-danger"
+                >
+					{{
+                    'PRODUCT_TYPE_VIEW.WIZARD_FORM.VALIDATION_MESSAGES.IMAGE'
+                        | translate
+                    }}!
+				</span>
+            </div>
+        </div>
+
+        <div
+                *ngIf="imagesArr && imagesArr.length > 0"
+                class="form-group row images-container mt-0"
+        >
+            <label class="col-sm-2 control-label"></label>
+            <div
+                    *ngFor="let image of imagesArr"
+                    class="mt-0 images-content mt-2"
+            >
+                <div class="row preview-img">
+                    <div>
+                        <img
+                            #productImagePreview
+                            (error)="imgOnError()"
+                            (load)="imgOnLoad()"
+                            alt="Invalid image"
+                            class="img-rounded"
+                            src="{{ image }}"
+                        />
+                    </div>
+
+                    <div
+                            (click)="deleteImg(image)"
+                            class="removeIcon pl-2 pr-2"
+                    >
+                        <div
+                                class="ion-md-remove-circle"
+                                placeholder="Remove image"
+                                title="remove"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'Description' | translate
+                }}</label>
+            <div class="col-sm-9">
+                <div class="input-group">
+					<textarea
+                            class="form-control"
+                            formControlName="description"
+                            placeholder="{{
+							'WAREHOUSE_VIEW.PLACEHOLDER.HERE_GOES_A_SHORT_DESCRIPTION'
+								| translate
+						}}"
+                            rows="5"
+                    ></textarea>
+                </div>
+
+                <span
+                        *ngIf="
+						description?.invalid &&
+						(description.dirty || description.touched)
+					"
+                        class="alert alert-danger"
+                >
+					<span *ngIf="description.errors.required">
+						{{
+                        'PRODUCT_TYPE_VIEW.WIZARD_FORM.VALIDATION_MESSAGES.DESCRIPTION'
+                            | translate
+                        }}!
+					</span>
+
+					<span *ngIf="description.errors.maxlength">
+						{{
+                        'PRODUCT_TYPE_VIEW.WIZARD_FORM.VALIDATION_MESSAGES.THE_LENGHT_OF_THE_DESCRIPTION'
+                            | translate
+                        }}
+					</span>
+				</span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'Details' | translate
+                }}</label>
+            <div class="col-sm-9">
+                <input
+                        class="form-control"
+                        formControlName="details"
+                        placeholder="{{
+						'WAREHOUSE_VIEW.PLACEHOLDER.HERE_GOES_A_DETAILS_ABOUT_PRODUCT_(OPTION)'
+							| translate
+					}}"
+                        type="text"
+                />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'CATEGORY' | translate
+                }}</label>
+            <div class="col-sm-9">
+                <ss-multiselect-dropdown
+                        [options]="categoryOptions"
+                        [settings]="{ displayAllSelectedText: true }"
+                        [texts]="{
+						defaultTitle: 'SELECT' | translate,
+						searchEmptyResult:
+							'WAREHOUSE_VIEW.NEW_PRODUCT.NOTHING_FOUND'
+							| translate
+					}"
+                        class="categoryOptions-dropdown"
+                        formControlName="selectedProductCategories"
+                >
+                </ss-multiselect-dropdown>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-2 control-label">{{
+                'LANGUAGE' | translate
+                }}</label>
+            <div class="col-sm-9">
+                <select class="form-control" formControlName="locale">
+                    <option
+                            *ngFor="let lang of languages"
+                            [value]="getLanguageCode(lang)"
+                    >{{ lang | translate }}</option
+                    >
+                </select>
+            </div>
+        </div>
+    </fieldset>
+</div>

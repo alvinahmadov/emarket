@@ -1,0 +1,172 @@
+<div class="row">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-8">
+                <nb-card>
+                    <nb-card-header>
+                        <div class="go-back">
+                            <nb-icon
+                                    (click)="goBack()"
+                                    icon="arrow-back-outline"
+                            >
+                            </nb-icon>
+                        </div>
+
+                        {{
+                        'WAREHOUSES_VIEW.MERCHANTS.TRACK_ALL_MERCHANTS'
+                            | translate
+                        }}
+                    </nb-card-header>
+                    <nb-card-body>
+                        <div #gmap class="googleMap"></div>
+                    </nb-card-body>
+                </nb-card>
+            </div>
+
+            <div class="col-4">
+                <nb-card>
+                    <nb-card-header>
+                        {{
+                        'WAREHOUSES_VIEW.MERCHANTS.FILTER_MERCHANTS'
+                            | translate
+                        }}
+                    </nb-card-header>
+                    <nb-card-body style="overflow: inherit;">
+                        <div>
+                            <ng-select
+                                    (change)="filterByName($event)"
+                                    [(ngModel)]="merchantName"
+                                    [clearable]="true"
+                                    [items]="listOfMerchants"
+                                    [placeholder]="
+									'WAREHOUSES_VIEW.MERCHANTS.FILTER_BY_NAME'
+										| translate
+								"
+                                    bindLabel="name"
+                                    style="width: 100%; margin-bottom: 30px;"
+                            >
+                                <ng-template let-item="item" ng-label-tmp>
+                                    <img
+                                            *ngIf="item.logo"
+                                            [src]="item.logo"
+                                            class="mr-2"
+                                            height="15"
+                                            width="15"
+                                    />
+                                    <b>{{ item }}</b>
+                                </ng-template>
+                            </ng-select>
+                            <ng-select
+                                    (change)="filterByCity($event)"
+                                    [(ngModel)]="merchantCity"
+                                    [clearable]="true"
+                                    [items]="listOfCities"
+                                    [placeholder]="
+									'WAREHOUSES_VIEW.MERCHANTS.FILTER_BY_CITY'
+										| translate
+								"
+                                    bindLabel="city"
+                                    style="width: 100%; margin-bottom: 30px;"
+                            >
+                                <ng-template
+                                    let-index="index"
+                                    let-item="item"
+                                    ng-option-tmp
+                                >
+                                    <p class="card-title">
+                                        <img
+                                                *ngIf="item.logo"
+                                                [src]="item.logo"
+                                                class="mr-1"
+                                                height="40"
+                                                width="40"
+                                        />
+                                        {{ item }}
+                                    </p>
+                                </ng-template>
+                            </ng-select>
+                            <ng-select
+                                    (change)="filterByCountry($event)"
+                                    [(ngModel)]="merchantCountry"
+                                    [clearable]="true"
+                                    [items]="listOfCountries"
+                                    [placeholder]="
+									'WAREHOUSES_VIEW.MERCHANTS.FILTER_BY_COUNTRY'
+										| translate
+								"
+                                    bindLabel="city"
+                                    style="width: 100%; margin-bottom: 30px;"
+                            >
+                                <ng-template
+                                    let-index="index"
+                                    let-item="item"
+                                    ng-option-tmp
+                                >
+                                    <p class="card-title">
+                                        <img
+                                                *ngIf="item.logo"
+                                                [src]="item.logo"
+                                                class="mr-1"
+                                                height="40"
+                                                width="40"
+                                        />
+                                        {{ item }}
+                                    </p>
+                                </ng-template>
+                            </ng-select>
+                        </div>
+                        <nb-card-footer>
+                            <div class="details">
+                                <div *ngIf="selectedStore" class="warehouse">
+                                    <h6>
+                                        <b>{{ selectedStore.name }}</b>
+                                    </h6>
+                                    <ul>
+                                        <li>
+                                            Phone:
+                                            {{ selectedStore.contactPhone }}
+                                        </li>
+                                        <li>
+                                            Email:
+                                            {{ selectedStore.contactEmail }}
+                                        </li>
+                                        <li>
+                                            Address:
+                                            {{
+                                            selectedStore.geoLocation
+                                                .streetAddress
+                                            }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div *ngIf="selectedCarrier" class="carrier">
+                                    <h6>
+                                        <b>{{ selectedCarrier.fullName }}</b>
+                                    </h6>
+                                    <ul>
+                                        <li>
+                                            Delivery Count:
+                                            {{
+                                            selectedCarrier.numberOfDeliveries
+                                            }}
+                                        </li>
+                                        <li>
+                                            Phone: {{ selectedCarrier.phone }}
+                                        </li>
+                                        <li>
+                                            Address:
+                                            {{
+                                            selectedCarrier.geoLocation
+                                                .streetAddress
+                                            }}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </nb-card-footer>
+                    </nb-card-body>
+                </nb-card>
+            </div>
+        </div>
+    </div>
+</div>

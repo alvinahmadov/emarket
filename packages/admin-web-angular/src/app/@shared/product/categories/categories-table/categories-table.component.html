@@ -1,0 +1,10 @@
+<ng2-smart-table
+        (delete)="deleteCategory($event)"
+        (edit)="edit($event)"
+        (userRowSelect)="selectCategoryTmp($event)"
+        [nbSpinner]="loading"
+        [settings]="settingsSmartTable"
+        [source]="sourceSmartTable"
+        class="category-table"
+>
+</ng2-smart-table>

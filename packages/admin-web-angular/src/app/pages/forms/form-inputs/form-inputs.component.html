@@ -1,0 +1,400 @@
+<div class="row">
+    <div class="col-lg-6">
+        <nb-card>
+            <nb-card-header>Default Inputs</nb-card-header>
+            <nb-card-body>
+                <div class="input-group">
+                    <input
+                            class="form-control"
+                            placeholder="Project"
+                            type="text"
+                    />
+                </div>
+                <div class="row full-name-inputs">
+                    <div class="col-sm-6 input-group">
+                        <input
+                                class="form-control"
+                                placeholder="Nick"
+                                type="text"
+                        />
+                    </div>
+                    <div class="col-sm-6 input-group">
+                        <input
+                                class="form-control"
+                                placeholder="Last Name"
+                                type="text"
+                        />
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input
+                            class="form-control"
+                            placeholder="Password"
+                            type="password"
+                    />
+                </div>
+                <div class="input-group has-person-icon">
+                    <input
+                            class="form-control"
+                            placeholder="With Icon"
+                            type="text"
+                    />
+                </div>
+                <div class="input-group input-group-rounded">
+                    <input
+                            class="form-control"
+                            placeholder="Rounded border"
+                            type="text"
+                    />
+                </div>
+                <div class="form-group">
+                    <input
+                            class="form-control"
+                            placeholder="Project"
+                            type="text"
+                    />
+                    <small class="form-text"
+                    >A block of help text that breaks into a new line and
+                        may extend beyond one line.
+                    </small>
+                </div>
+                <div class="input-group">
+                    <input
+                            class="form-control"
+                            disabled
+                            placeholder="Disabled input"
+                            type="text"
+                    />
+                </div>
+                <div class="input-group">
+					<textarea
+                            class="form-control"
+                            placeholder="Text Area"
+                            rows="5"
+                    ></textarea>
+                </div>
+                <div class="input-group input-group-sm">
+                    <input
+                            class="form-control"
+                            placeholder="Small Input"
+                            type="text"
+                    />
+                </div>
+                <div class="input-group input-group-lg">
+                    <input
+                            class="form-control"
+                            placeholder="Large Input"
+                            type="text"
+                    />
+                </div>
+            </nb-card-body>
+        </nb-card>
+
+        <nb-card>
+            <nb-card-header>Input Groups</nb-card-header>
+            <nb-card-body>
+                <div class="input-group">
+                    <span class="input-group-addon success">@</span>
+                    <input
+                            class="form-control"
+                            placeholder="Username"
+                            type="text"
+                    />
+                </div>
+
+                <div class="input-group mail-btn-group">
+					<span class="input-group-prepend">
+						<button
+                                class="btn btn-primary btn-icon input-group-text"
+                        >
+							<i class="ion-ios-email-outline"></i>
+						</button>
+					</span>
+                    <input
+                            class="form-control"
+                            placeholder="Recipient's username"
+                            type="text"
+                    />
+                    <span class="input-group-append">
+						<button class="btn btn-primary input-group-text">
+							@example.com
+						</button>
+					</span>
+                </div>
+                <div class="input-group">
+                    <input
+                            class="form-control"
+                            placeholder="Search for..."
+                            type="text"
+                    />
+                    <span class="input-group-append">
+						<button class="btn btn-danger input-group-text">
+							Search
+						</button>
+					</span>
+                </div>
+                <div class="input-group">
+                    <div
+                            class="dropdown input-group-prepend input-group-btn"
+                            ngbDropdown
+                    >
+                        <button
+                                class="btn btn-success dropdown-toggle"
+                                ngbDropdownToggle
+                                type="button"
+                        >
+                            Action
+                        </button>
+                        <ul class="dropdown-menu" ngbDropdownMenu>
+                            <li class="dropdown-item">Action</li>
+                            <li class="dropdown-item">Another action</li>
+                            <li class="dropdown-item">Something else here</li>
+                            <div
+                                    class="dropdown-divider"
+                                    role="separator"
+                            ></div>
+                            <li class="dropdown-item">Separated link</li>
+                        </ul>
+                    </div>
+                    <input class="form-control" type="text"/>
+                </div>
+            </nb-card-body>
+        </nb-card>
+
+        <nb-card>
+            <nb-card-header>Selects</nb-card-header>
+            <nb-card-body>
+                <div class="form-group">
+                    <label>Simple Select</label>
+                    <select class="form-control">
+                        <option>Minsk</option>
+                        <option>Gomel</option>
+                        <option>Brest</option>
+                        <option>Grodno</option>
+                        <option>Mogilev</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Multiple Select</label>
+                    <select class="form-control" multiple>
+                        <option>Item 1</option>
+                        <option>Item 2</option>
+                        <option>Item 3</option>
+                        <option>Item 4</option>
+                        <option>Item 5</option>
+                    </select>
+                </div>
+            </nb-card-body>
+        </nb-card>
+    </div>
+
+    <div class="col-lg-6">
+        <nb-card>
+            <nb-card-header>Input Styles</nb-card-header>
+            <nb-card-body>
+                <div class="input-group input-group-border-only">
+                    <input
+                            class="form-control"
+                            placeholder="Border Only"
+                            type="text"
+                    />
+                </div>
+                <div class="input-group">
+                    <input
+                            class="form-control"
+                            placeholder="Default Input"
+                            type="text"
+                    />
+                </div>
+                <div class="input-group input-group-fill-only">
+                    <input
+                            class="form-control"
+                            placeholder="Fill Only"
+                            type="text"
+                    />
+                </div>
+            </nb-card-body>
+        </nb-card>
+
+        <nb-card>
+            <nb-card-header>Validation States</nb-card-header>
+            <nb-card-body>
+                <div class="form-group">
+                    <input
+                            class="form-control form-control-success"
+                            placeholder="Input with Success"
+                            type="text"
+                    />
+                </div>
+                <div class="form-group">
+                    <input
+                            class="form-control form-control-warning"
+                            placeholder="Input with Warning"
+                            type="text"
+                    />
+                </div>
+                <div class="form-group">
+                    <input
+                            class="form-control form-control-danger"
+                            placeholder="Input with Danger"
+                            type="text"
+                    />
+                </div>
+                <div class="form-group validation-checkboxes row">
+                    <nb-checkbox class="col-sm-4" status="success"
+                    >Checkbox with Success
+                    </nb-checkbox
+                    >
+                    <nb-checkbox class="col-sm-4" status="warning"
+                    >Checkbox with Warning
+                    </nb-checkbox
+                    >
+                    <nb-checkbox class="col-sm-4" status="danger"
+                    >Checkbox with Danger
+                    </nb-checkbox
+                    >
+                </div>
+                <div class="form-group has-success">
+                    <input
+                            class="form-control form-control-success"
+                            placeholder="Input with Success Icon"
+                            type="text"
+                    />
+                </div>
+                <div class="form-group has-warning">
+                    <input
+                            class="form-control form-control-warning"
+                            placeholder="Input with Warning Icon"
+                            type="text"
+                    />
+                </div>
+                <div class="form-group has-danger">
+                    <input
+                            class="form-control form-control-danger"
+                            placeholder="Input with Danger Icon"
+                            type="text"
+                    />
+                </div>
+            </nb-card-body>
+        </nb-card>
+
+        <nb-card>
+            <nb-card-header>Checkboxes & Radios</nb-card-header>
+            <nb-card-body>
+                <div class="row demo-checkboxes-radio">
+                    <div class="demo-checkboxes col-sm-4">
+                        <nb-checkbox>Checkbox 1</nb-checkbox>
+                        <nb-checkbox [value]="true">Checkbox 2</nb-checkbox>
+
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                    class="custom-control-input"
+                                    id="b-checkbox"
+                                    type="checkbox"
+                            />
+                            <label class="custom-control-label" for="b-checkbox"
+                            >Bootstrap Checkbox</label
+                            >
+                        </div>
+                    </div>
+                    <div class="demo-radio col-sm-4">
+                        <label class="custom-control custom-radio">
+                            <input
+                                    class="custom-control-input"
+                                    name="customRadio"
+                                    type="radio"
+                            />
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description"
+                            >Radio 1</span
+                            >
+                        </label>
+                        <label class="custom-control custom-radio">
+                            <input
+                                    checked
+                                    class="custom-control-input"
+                                    name="customRadio"
+                                    type="radio"
+                            />
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description"
+                            >Radio 2</span
+                            >
+                        </label>
+                        <label class="custom-control custom-radio">
+                            <input
+                                    class="custom-control-input"
+                                    name="customRadio"
+                                    type="radio"
+                            />
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description"
+                            >Radio 3</span
+                            >
+                        </label>
+                    </div>
+                    <div class="demo-disabled-checkbox-radio col-sm-4">
+                        <nb-checkbox disabled>Disabled Checkbox</nb-checkbox>
+                        <label class="custom-control custom-radio">
+                            <input
+                                    class="custom-control-input"
+                                    disabled
+                                    type="radio"
+                            />
+                            <span class="custom-control-indicator"></span>
+                            <span class="custom-control-description"
+                            >Disabled Radio</span
+                            >
+                        </label>
+                    </div>
+                </div>
+            </nb-card-body>
+        </nb-card>
+
+        <nb-card>
+            <nb-card-body class="demo-rating">
+                <span class="rating-header">Rating</span>
+                <div>
+                    <ngb-rating [(rate)]="starRate" max="5">
+                        <ng-template let-fill="fill">
+							<span
+                                    [class.filled]="fill === 100"
+                                    class="star fill"
+                            >
+								<i
+                                        *ngIf="fill === 100"
+                                        class="ion-android-star"
+                                ></i>
+								<i
+                                        *ngIf="fill !== 100"
+                                        class="ion-android-star-outline"
+                                ></i>
+							</span>
+                        </ng-template>
+                    </ngb-rating>
+                    <span class="current-rate">{{ starRate }}</span>
+                </div>
+                <div>
+                    <ngb-rating [(rate)]="heartRate" max="5">
+                        <ng-template let-fill="fill">
+							<span
+                                    [class.filled]="fill === 100"
+                                    class="star fill"
+                            >
+								<i
+                                        *ngIf="fill === 100"
+                                        class="ion-ios-heart"
+                                ></i>
+								<i
+                                        *ngIf="fill !== 100"
+                                        class="ion-ios-heart-outline"
+                                ></i>
+							</span>
+                        </ng-template>
+                    </ngb-rating>
+                    <span class="current-rate">{{ heartRate }}</span>
+                </div>
+            </nb-card-body>
+        </nb-card>
+    </div>
+</div>

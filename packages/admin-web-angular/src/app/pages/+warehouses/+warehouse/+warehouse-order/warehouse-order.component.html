@@ -1,0 +1,83 @@
+<div class="modal-header">
+	<span>{{
+        'WAREHOUSE_VIEW.CREATE_ORDER_MODAL.TITLE.CREATE_ORDER' | translate
+        }}</span>
+    <button (click)="cancel()" aria-label="Close" class="close">
+        <span aria-hidden=" true ">&times;</span>
+    </button>
+</div>
+
+<form-wizard
+    #wizardForm
+    [buttonDone]="buttonDone"
+    [buttonNext]="buttonNext"
+    [buttonPrevious]="buttonPrevious"
+    [nbSpinner]="loading"
+>
+    <wizard-step
+            [isValid]="false"
+            [showNext]="false"
+            [title]="TRANSLATE_PREFIXES.STEP1.TITLE | translate"
+            class="step-1"
+    >
+        <nb-card>
+            <div class="pt-2">
+                <button
+                        (click)="selectExistingCustomer()"
+                        class="btn btn-outline-secondary p-5"
+                >
+                    {{
+                    TRANSLATE_PREFIXES.STEP1.SELECT_FROM_EXISTING
+                        | translate
+                    }}
+                </button>
+
+                <button
+                        (click)="addNewCustomer()"
+                        class="btn btn-outline-secondary p-5"
+                >
+                    {{ TRANSLATE_PREFIXES.STEP1.ADD_NEW_CUSTOMER | translate }}
+                </button>
+            </div>
+        </nb-card>
+    </wizard-step>
+
+    <wizard-step
+            [isValid]="isCreateOrderWizardAllowed"
+            [showNext]="showNextButton"
+            [title]="titleSelectAdd"
+    >
+        <nb-card>
+            <div *ngIf="isSelectedFromExisting">
+                <ng2-smart-table
+                        (userRowSelect)="selectFromExisting($event)"
+                        [settings]="settingsSmartTable"
+                        [source]="sourceSmartTable"
+                ></ng2-smart-table>
+            </div>
+        </nb-card>
+        <div *ngIf="!isSelectedFromExisting" class="pt-3">
+            <ea-warehouse-order-create-user
+                #warehouseOrderCreateUser
+                (newUserEmitter)="onNewUser($event)"
+                [createUserEvent]="createUserEmitter"
+            ></ea-warehouse-order-create-user>
+        </div>
+    </wizard-step>
+
+    <wizard-step
+            (onComplete)="completeOrder()"
+            [isValid]="isOrderAllowed"
+            [title]="TRANSLATE_PREFIXES.STEP3.TITLE | translate"
+    >
+        <ea-warehouse-order-modal
+            #warehouseOrderModal
+            (isOrderAllowedEmitter)="onIsOrderAllowed($event)"
+            (makeOrderEmitter)="onMakeOrder($event)"
+            [loading]="loading"
+            [showOrderAction]="false"
+            [warehouseId]="warehouseId"
+        >
+        </ea-warehouse-order-modal>
+    </wizard-step>
+</form-wizard>

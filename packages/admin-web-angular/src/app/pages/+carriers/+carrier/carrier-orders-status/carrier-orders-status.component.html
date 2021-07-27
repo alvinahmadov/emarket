@@ -1,0 +1,78 @@
+<nb-card>
+    <nb-card-header>
+        {{ 'CARRIERS_VIEW.CARRIER_PAGE.CARRIER_ORDERS_STATUS' | translate }}
+        <div class="mt-3 panel panel-default">
+            <div class="panel-body">
+                <div
+                        *ngIf="
+						ordersCarrierStatus === enumOrderCarrierStatus.NoCarrier
+					"
+                        class="btn-group btn-group-lg"
+                        role="group"
+                >
+                    <button
+                            (click)="selectOrdersForDelivery()"
+                            [disabled]="
+							!pageBtnStates.isSelectOrdersForDeliveryAvailable
+						"
+                            [nbSpinner]="loading"
+                            class="btn btn-startProcessing"
+                            type="button"
+                    >
+                        <span class="ion-md-log-in"></span>
+                        {{ 'CARRIERS_VIEW.CARRIER_PAGE.Start' | translate }}
+                    </button>
+                </div>
+
+                <div
+                        *ngIf="
+						ordersCarrierStatus ===
+						enumOrderCarrierStatus.CarrierSelectedOrder
+					"
+                        aria-label="Order Actions"
+                        class="btn-group btn-group-lg"
+                        role="group"
+                >
+                    <button
+                            (click)="
+							updateCarrierOrdersStatus(
+								enumOrderCarrierStatus.CarrierPickedUpOrder
+							)
+						"
+                            [disabled]="!pageBtnStates.isCarrierPickupOrder"
+                            [nbSpinner]="loading"
+                            nbButton
+                            outline
+                            status="primary"
+                            type="button"
+                    >
+						<span
+                                aria-hidden="true"
+                                class="ion-md-filing mr-1"
+                        ></span>
+                        {{
+                        'CARRIERS_VIEW.CARRIER_PAGE.PICKED_UP_ORDER'
+                            | translate
+                        }}
+                    </button>
+
+                    <button
+                            (click)="cancelDelivery()"
+                            [disabled]="!pageBtnStates.isCarrierPickupOrder"
+                            [nbSpinner]="loading"
+                            nbButton
+                            outline
+                            status="danger"
+                            type="button"
+                    >
+						<span
+                                aria-hidden="true"
+                                class="ion-md-alert mr-1"
+                        ></span>
+                        {{ 'CARRIERS_VIEW.CARRIER_PAGE.CANCEL' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nb-card-header>
+</nb-card>

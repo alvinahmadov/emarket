@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <span>Invite code</span>
+    <button (click)="closeModal()" aria-label="Close" class="close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="col-12 input-group">
+        <input
+                [(ngModel)]="code"
+                class="form-control"
+                placeholder="Code"
+                type="number"
+        />
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="row" style="width: 90%; margin: auto;">
+        <button
+                (click)="login()"
+                [disabled]="!code || code < 1000 || code > 9999"
+                class="col-12"
+                nbButton
+                status="primary"
+        >
+            Get inside
+        </button>
+    </div>
+</div>

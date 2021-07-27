@@ -1,0 +1,76 @@
+<div class="chart-header">
+    <ea-legend-chart [legendItems]="chartLegend"></ea-legend-chart>
+
+    <ng-template #popContent>
+        <div class="p-1">
+            <div class="form-group">
+                {{ 'DASHBOARD_VIEW.CHARTS.FROM' | translate }}:
+                <input
+                        [(ngModel)]="fromDate"
+                        class="form-control"
+                        type="date"
+                />
+            </div>
+            <div class="form-group">
+                {{ 'DASHBOARD_VIEW.CHARTS.TO' | translate }}:
+                <input [(ngModel)]="toDate" class="form-control" type="date"/>
+            </div>
+            <button
+                    (click)="selectDateRange()"
+                    class="btn btn-sm btn-hero-primary w-100"
+                    nbButton
+                    outline
+            >
+                {{ 'DASHBOARD_VIEW.CHARTS.SELECT' | translate }}
+            </button>
+        </div>
+    </ng-template>
+
+    <div class="range-period-container">
+        <button
+            #customDateRangeButton
+            *ngIf="!isDateRangeSelected"
+            [autoClose]="false"
+            [ngbPopover]="popContent"
+            class="btn btn-outline-secondary"
+            placement="bottom"
+        >
+            {{ 'DASHBOARD_VIEW.CHARTS.CUSTOM_PERIOD' | translate }}
+        </button>
+        <small *ngIf="isDateRangeSelected" class="w-auto">
+            <a (click)="clearRangeAndSendEvent()" class="close">x</a>
+            <strong>{{ 'DASHBOARD_VIEW.CHARTS.FROM' | translate }}: </strong
+            >{{ fromDate | myReplacePipe: '-':'.' }}<br/>
+            <strong>{{ 'DASHBOARD_VIEW.CHARTS.TO' | translate }}: </strong
+            >{{ toDate | myReplacePipe: '-':'.' }}
+        </small>
+    </div>
+
+    <div
+            [ngClass]="{ 'ghost-dropdown': currentTheme === 'corporate' }"
+            class="dropdown w-auto"
+            ngbDropdown
+    >
+        <button
+                [ngClass]="{
+				'btn-outline-success': currentTheme === 'default',
+				'btn-outline-primary': currentTheme !== 'default',
+				'btn-sm': breakpoint.width <= breakpoints.is
+			}"
+                class="btn w-auto"
+                ngbDropdownToggle
+                type="button"
+        >
+            {{ periodText }} &nbsp;
+        </button>
+        <ul class="dropdown-menu w-auto" ngbDropdownMenu>
+            <li
+                    (click)="changePeriod(period.key)"
+                    *ngFor="let period of types"
+                    class="dropdown-item"
+            >
+                {{ period.value }}
+            </li>
+        </ul>
+    </div>
+</div>

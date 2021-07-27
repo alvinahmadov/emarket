@@ -1,0 +1,51 @@
+<div class="summary-container">
+    <div *ngFor="let item of summary" class="summary">
+        <div class="value">
+			<span [ngClass]="isLoading ? 'waiting' : ''">
+				<div *ngIf="item.isPrice && !isLoading" class="row">
+					<h2 class="col-4">
+						<small>{{ item.values.completed.title }}</small> ${{
+                        item.values.completed.value | myNumberWithCommas
+                        }}
+					</h2>
+
+					<h2 class="col-4">
+						<small>{{ item.values.total.title }}</small> ${{
+                        item.values.total.value | myNumberWithCommas
+                        }}
+					</h2>
+
+					<h2 class="col-4">
+						<small>{{ item.values.cancelled.title }}</small> ${{
+                        item.values.cancelled.value | myNumberWithCommas
+                        }}
+					</h2>
+				</div>
+
+				<div *ngIf="!item.isPrice && !isLoading" class="row">
+					<h2 class="col-4">
+						<small>{{ item.values.completed.title }}</small>
+                        {{ item.values.completed.value }}
+					</h2>
+
+					<h2 class="col-4">
+						<small>{{ item.values.total.title }}</small>
+                        {{ item.values.total.value }}
+					</h2>
+
+					<h2 class="col-4">
+						<small>{{ item.values.cancelled.title }}</small>
+                        {{ item.values.cancelled.value }}
+					</h2>
+				</div>
+			</span>
+
+            <span
+                    *ngIf="isLoading"
+                    [nbSpinner]="isLoading"
+                    class="loading-placeholder"
+            >
+			</span>
+        </div>
+    </div>
+</div>

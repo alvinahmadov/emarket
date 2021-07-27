@@ -1,0 +1,9 @@
+<div class="text-center">
+    <img
+            (click)="addProduct()"
+            *ngIf="value"
+            [ngClass]="{ clickable: !rowData.disableImg }"
+            src="{{ value }}"
+            width="60"
+    />
+</div>
