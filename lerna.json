@@ -1,0 +1,30 @@
+{
+  "lerna": "3.11.1",
+  "concurrency": 8,
+  "version": "independent",
+  "changelog": {
+    "repo": "ever-co/ever",
+    "cacheDir": ".changelog",
+    "labels": {}
+  },
+  "stream": true,
+  "command": {
+    "bootstrap": {},
+    "publish": {
+      "conventionalCommits": true,
+      "ignoreChanges": [
+        "*.md",
+        "test/**"
+      ],
+      "message": "chore(release): %s"
+    },
+    "version": {
+      "push": false
+    }
+  },
+  "packages": [
+    "packages/*"
+  ],
+  "npmClient": "yarn",
+  "useWorkspaces": true
+}
