@@ -21,7 +21,7 @@ COPY --chown=node:node .snyk ./.snyk
 COPY --chown=node:node packages/common ./packages/common
 COPY --chown=node:node packages/common-angular ./packages/common-angular
 
-RUN yarn install
+RUN yarn install && yarn cache clean
 
 FROM node:lts-alpine3.14 AS production
 

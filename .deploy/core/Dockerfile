@@ -21,7 +21,7 @@ COPY --chown=node:node .snyk ./.snyk
 COPY --chown=node:node packages/core/.snyk ./packages/core/.snyk
 COPY --chown=node:node packages/common ./packages/common
 
-RUN yarn install
+RUN yarn install && yarn cache clean
 
 FROM node:lts-alpine3.14 AS production
 
