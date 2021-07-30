@@ -25,9 +25,9 @@ RUN yarn install && yarn cache clean
 
 FROM node:lts-alpine3.14 AS production
 
-ENV APP=/home/emarket
-
 RUN npm install cross-env -g
+
+ENV APP=/home/emarket
 
 RUN mkdir $APP_HOME
 RUN mkdir -p $APP_HOME/packages/shop-web-angular

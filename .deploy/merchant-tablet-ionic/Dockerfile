@@ -25,6 +25,8 @@ RUN yarn install && yarn cache clean
 
 FROM node:lts-alpine3.14 AS production
 
+ENV APP_HOME=/home/emarket
+
 RUN npm install cross-env -g
 
 RUN mkdir $APP_HOME

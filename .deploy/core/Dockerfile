@@ -29,6 +29,8 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.6.0/wait
 
 RUN npm install cross-env -g && npm install pm2 -g --unsafe-perm && chmod +x /wait
 
+ENV APP_HOME=/home/emarket
+
 RUN mkdir $APP_HOME
 RUN mkdir -p $APP_HOME/packages/core
 RUN mkdir -p $APP_HOME/packages/common

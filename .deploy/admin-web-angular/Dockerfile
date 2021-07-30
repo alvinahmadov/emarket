@@ -27,6 +27,8 @@ FROM node:lts-alpine3.14 AS production
 
 RUN npm install cross-env -g
 
+ENV APP_HOME=/home/emarket
+
 RUN mkdir $APP_HOME
 RUN mkdir -p $APP_HOME/packages/admin-web-angular
 RUN mkdir -p $APP_HOME/packages/common
