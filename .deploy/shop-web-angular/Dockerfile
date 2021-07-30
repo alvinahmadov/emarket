@@ -9,42 +9,42 @@ RUN apk update \
 	&& npm config set python /usr/bin/python \
 	&& npm install yarn -g --force
 
-RUN mkdir /srv/ever && chown node:node /srv/ever
+ENV APP_HOME=/home/emarket
 
-USER node
+RUN mkdir $APP_HOME
 
-WORKDIR /srv/ever
+WORKDIR $APP_HOME
 
-COPY --chown=node:node package.json yarn.lock lerna.json package.workspaces.json ./
-COPY --chown=node:node packages/shop-web-angular/package.json ./packages/shop-web-angular/package.json
-COPY --chown=node:node .snyk ./.snyk
-COPY --chown=node:node packages/common ./packages/common
-COPY --chown=node:node packages/common-angular ./packages/common-angular
+COPY package.json yarn.lock lerna.json package.workspaces.json ./
+COPY packages/shop-web-angular/package.json ./packages/shop-web-angular/package.json
+COPY .snyk ./.snyk
+COPY packages/common ./packages/common
+COPY packages/common-angular ./packages/common-angular
 
 RUN yarn install && yarn cache clean
 
 FROM node:lts-alpine3.14 AS production
 
+ENV APP=/home/emarket
+
 RUN npm install cross-env -g
 
-RUN mkdir /srv/ever && chown node:node /srv/ever
-RUN mkdir -p /srv/ever/packages/shop-web-angular && chown node:node /srv/ever/packages/shop-web-angular
-RUN mkdir -p /srv/ever/packages/common && chown node:node /srv/ever/packages/common
-RUN mkdir -p /srv/ever/packages/common-angular && chown node:node /srv/ever/packages/common-angular
+RUN mkdir $APP_HOME
+RUN mkdir -p $APP_HOME/packages/shop-web-angular
+RUN mkdir -p $APP_HOME/packages/common
+RUN mkdir -p $APP_HOME/packages/common-angular
 
-USER node
-
-WORKDIR /srv/ever
+WORKDIR $APP_HOME
 
 ARG NODE_OPTIONS="--max-old-space-size=2048"
 ENV NODE_OPTIONS $NODE_OPTIONS
 ENV NODE_ENV production
 
-COPY --from=development --chown=node:node /srv/ever/node_modules ./node_modules
-COPY --from=development --chown=node:node /srv/ever/packages/common/node_modules ./packages/common/node_modules
-COPY --from=development --chown=node:node /srv/ever/packages/common-angular/node_modules ./packages/common-angular/node_modules
-COPY --from=development --chown=node:node /srv/ever/packages/shop-web-angular/node_modules ./packages/shop-web-angular/node_modules
-COPY --chown=node:node package.json yarn.lock lerna.json package.workspaces.json tsconfig.base.json ./
-COPY --chown=node:node packages/common ./packages/common
-COPY --chown=node:node packages/common-angular ./packages/common-angular
-COPY --chown=node:node packages/shop-web-angular ./packages/shop-web-angular
+COPY --from=development $APP_HOME/node_modules ./node_modules
+COPY --from=development $APP_HOME/packages/common/node_modules ./packages/common/node_modules
+COPY --from=development $APP_HOME/packages/common-angular/node_modules ./packages/common-angular/node_modules
+COPY --from=development $APP_HOME/packages/shop-web-angular/node_modules ./packages/shop-web-angular/node_modules
+COPY package.json yarn.lock lerna.json package.workspaces.json tsconfig.base.json ./
+COPY packages/common ./packages/common
+COPY packages/common-angular ./packages/common-angular
+COPY packages/shop-web-angular ./packages/shop-web-angular
