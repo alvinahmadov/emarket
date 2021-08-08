@@ -5,9 +5,9 @@ import { first }      from 'rxjs/operators';
 @Injectable()
 export class ServerConnectionService
 {
-	constructor(private readonly httpClient: HttpClient) {}
+	public constructor(private readonly httpClient: HttpClient) {}
 	
-	load(endPoint: string, store: { serverConnection: string })
+	public load(endPoint: string, store: { serverConnection: string })
 	{
 		return new Promise(async(resolve, reject) =>
 		                   {
@@ -17,17 +17,21 @@ export class ServerConnectionService
 		                   });
 	}
 	
-	async checkServerConnection(
+	public async checkServerConnection(
 			endPoint: string,
 			store: { serverConnection: string }
 	)
 	{
 		try
 		{
-			await this.httpClient.get(endPoint).pipe(first()).toPromise();
+			await this.httpClient
+			          .get(endPoint)
+			          .pipe(first())
+			          .toPromise();
 		} catch(error)
 		{
 			store.serverConnection = error.status;
+			console.error(error.message);
 		}
 	}
 }

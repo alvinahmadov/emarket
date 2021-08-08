@@ -28,7 +28,7 @@ export class MaintenanceService
 	
 	constructor(private http: HttpClient) {}
 	
-	async getMaintenanceInfo(
+	public async getMaintenanceInfo(
 			maintenanceApiUrl: string
 	): Promise<IMaintenanceInfo[]>
 	{
@@ -41,7 +41,7 @@ export class MaintenanceService
 		return maintenanceInfo['maintenance'];
 	}
 	
-	load(appTyle: string, maintenanceApiUrl: string)
+	public load(appType: string, maintenanceApiUrl: string): Promise<boolean>
 	{
 		return new Promise(async(resolve, reject) =>
 		                   {
@@ -55,15 +55,12 @@ export class MaintenanceService
 								                   m.type === MaintenanceTypes.Api && m.status
 				                   );
 				                   const appInfo = maintenanceInfo.find(
-						                   (m: IMaintenanceInfo) => m.type === appTyle && m.status
+						                   (m: IMaintenanceInfo) => m.type === appType && m.status
 				                   );
 				                   const maintenanceMode: IMaintenanceInfo = apiInfo || appInfo;
 				                   if(maintenanceMode)
 				                   {
-					                   localStorage.setItem(
-							                   'maintenanceMode',
-							                   maintenanceMode.type
-					                   );
+					                   localStorage.setItem('maintenanceMode', maintenanceMode.type);
 				                   }
 				                   else
 				                   {
@@ -78,21 +75,19 @@ export class MaintenanceService
 		                   });
 	}
 	
-	async getMessage(type: string, maintenanceApiUrl: string)
+	public async getMessage(type: string, maintenanceApiUrl: string)
 	{
 		try
 		{
-			const maintenanceInfo = await this.getMaintenanceInfo(
-					maintenanceApiUrl
-			);
-			return maintenanceInfo.find(
-					(m: IMaintenanceInfo) => m.type === type
-			).message;
+			const maintenanceInfo = await this.getMaintenanceInfo(maintenanceApiUrl);
+			return maintenanceInfo.find((m: IMaintenanceInfo) => m.type === type).message;
 		} catch(error)
-		{}
+		{
+			console.error(error.message);
+		}
 	}
 	
-	async getStatus(type: string, maintenanceApiUrl: string): Promise<boolean>
+	public async getStatus(type: string, maintenanceApiUrl: string): Promise<boolean>
 	{
 		try
 		{
@@ -107,6 +102,8 @@ export class MaintenanceService
 			).status;
 			return apiStatus && appStatus;
 		} catch(error)
-		{}
+		{
+			console.error(error.message);
+		}
 	}
 }
