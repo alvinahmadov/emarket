@@ -1,0 +1,84 @@
+<ion-content>
+	<div class="auth-view">
+		<div class="auth-view-content">
+			<div class="logo">
+				<img src="{{ loginLogo }}" />
+			</div>
+			<tabs>
+				<!-- Login -->
+				<tab title="{{ 'LOGIN_VIEW.AUTHORIZE' | translate }}">
+					<div class="auth-form">
+						<div>
+							<input
+								class="auth-input"
+								placeholder="{{ 'LOGIN_VIEW.USER_NAME' | translate }}"
+								[(ngModel)]="username"
+							/>
+						</div>
+						<div>
+							<input
+								class="auth-input"
+								type="password"
+								placeholder="{{ 'LOGIN_VIEW.USER_PASSWORD' | translate }}"
+								[(ngModel)]="password"
+							/>
+						</div>
+						<div>
+							<button class="auth-button" (click)="login()">
+								{{ 'LOGIN_VIEW.LOGIN' | translate }}
+							</button>
+						</div>
+					</div>
+				</tab>
+				<!-- Register -->
+				<tab title="{{ 'REGISTER_VIEW.REGISTER' | translate }}">
+					<div class="auth-form">
+						<div>
+							<input
+								class="auth-input"
+								placeholder="{{ 'REGISTER_VIEW.WAREHOUSE_NAME' | translate }}"
+								[(ngModel)]="warehouseName"
+							/>
+						</div>
+						<div>
+							<input
+								class="auth-input"
+								placeholder="{{ 'REGISTER_VIEW.USER_NAME' | translate }}"
+								[(ngModel)]="username"
+							/>
+						</div>
+						<div>
+							<input
+								class="auth-input"
+								type="password"
+								placeholder="{{ 'REGISTER_VIEW.USER_PASSWORD' | translate }}"
+								[(ngModel)]="password"
+							/>
+						</div>
+						<div class="auth-terms">
+							<input
+								id="terms"
+								type="checkbox"
+								[(ngModel)]="acceptTerms"
+							/>
+							<label for="terms">
+								<a href="#">
+									{{ 'REGISTER_VIEW.TERMS' | translate }}
+								</a>
+							</label>
+						</div>
+						<div>
+							<button
+								class="auth-button"
+								(click)="register()"
+								[disabled]="!acceptTerms"
+							>
+								{{ 'REGISTER_VIEW.REGISTER' | translate }}
+							</button>
+						</div>
+					</div>
+				</tab>
+			</tabs>
+		</div>
+	</div>
+</ion-content>
