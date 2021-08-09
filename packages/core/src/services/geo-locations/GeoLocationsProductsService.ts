@@ -17,8 +17,7 @@ import {
 }                                         from '@pyro/io';
 import IGeoLocationProductsRouter         from '@modules/server.common/routers/IGeoLocationProductsRouter';
 import IService                           from '../IService';
-import { map, first }                     from 'rxjs/operators';
-import IWarehouseProduct                  from '@modules/server.common/interfaces/IWarehouseProduct';
+import { map }                            from 'rxjs/operators';
 import {
 	IProductTitle,
 	IProductDescription,
@@ -26,6 +25,7 @@ import {
 }                                         from '@modules/server.common/interfaces/IProduct';
 import WarehouseProduct                   from '@modules/server.common/entities/WarehouseProduct';
 import { IGetGeoLocationProductsOptions } from 'graphql/geo-locations/geo-location.resolver';
+import IWarehouseProduct                  from "@modules/server.common/interfaces/IWarehouseProduct";
 
 @injectable()
 @routerName('geo-location-products')
@@ -73,37 +73,44 @@ export class GeoLocationsProductsService
 	{
 		try
 		{
-			const merchants = await this.geoLocationsWarehousesService.getMerchants(
-					geoLocation,
-					GeoLocationsWarehousesService.TrackingDistance,
+			const merchants = await this.geoLocationsWarehousesService
+			                            .getMerchants(
+					                            geoLocation,
+					                            GeoLocationsWarehousesService.TrackingDistance,
+					                            {
+						                            fullProducts: true,
+						                            activeOnly: true,
+						                            merchantsIds: options ? options.merchantIds : null
+					                            }
+			                            );
+			const productsIds: Array<string[]> = merchants.map(
+					(m) =>
 					{
-						fullProducts: true,
-						activeOnly: true,
-						merchantsIds: options ? options.merchantIds : null
-					}
-			);
-			const productsIds = merchants.map((m) =>
-			                                  {
-				                                  let products = m.products
-				                                                  .filter((wProduct) =>
-						                                                          this.productsFilter(wProduct, options)
-				                                                  )
-				                                                  .filter((wProduct) =>
-						                                                          this.filterBySearchText(wProduct, searchText)
-				                                                  );
-				
-				                                  if(!options || !options.withoutCount)
-				                                  {
-					                                  products = products.filter(
-							                                  (wProduct) => wProduct.count > 0
-					                                  );
-				                                  }
-				
-				                                  return products.map((p) => new WarehouseProduct(p).productId);
-			                                  });
+						let products = m.products
+						                .filter((wProduct: IWarehouseProduct) =>
+								                        this.productsFilter(wProduct, options)
+						                )
+						                .filter((wProduct: IWarehouseProduct) =>
+								                        GeoLocationsProductsService
+										                        .filterBySearchText(wProduct, searchText)
+						                );
+						
+						if(!options || !options.withoutCount)
+						{
+							products = products.filter(
+									(wProduct) => wProduct.count > 0
+							);
+						}
+						
+						return products.map(
+								(p) => new WarehouseProduct(p).productId
+						);
+					});
 			
+			// TODO: Test if everything is OK after changes (removed productsIds.flat())
 			return (
-					productsIds.flat().filter((x, i, a) => a.indexOf(x) == i)
+					productsIds
+							.filter((x, i, a) => a.indexOf(x) == i)
 							.length || 0
 			);
 		} catch(error)
@@ -149,6 +156,7 @@ export class GeoLocationsProductsService
 	): ProductInfo[]
 	{
 		const underscore_: any = _; // TODO: remove sh..t
+		// noinspection JSUnusedLocalSymbols
 		return underscore_(warehouses)
 				.map((_warehouse) =>
 				     {
@@ -169,7 +177,7 @@ export class GeoLocationsProductsService
 					     }
 					
 					     warehouse.products = warehouse.products.filter((wProduct) =>
-							                                                    this.filterBySearchText(wProduct, searchText)
+							                                                    GeoLocationsProductsService.filterBySearchText(wProduct, searchText)
 					     );
 					
 					     return warehouse;
@@ -231,12 +239,12 @@ export class GeoLocationsProductsService
 		
 		return options.isDeliveryRequired
 		       ? wProduct.isDeliveryRequired === options.isDeliveryRequired
-		       : true && options.isTakeaway
+		       : options.isTakeaway
 		         ? wProduct.isTakeaway === options.isTakeaway
 		         : true;
 	}
 	
-	private filterBySearchText(wProduct, searchText)
+	private static filterBySearchText(wProduct, searchText)
 	{
 		if(!searchText)
 		{
