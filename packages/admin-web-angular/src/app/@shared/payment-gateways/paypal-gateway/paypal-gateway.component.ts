@@ -9,7 +9,7 @@ import IPaymentGatewayCreateObject     from '@modules/server.common/interfaces/I
 
 @Component({
 	           selector: 'ea-payPal-gateway',
-	           templateUrl: './payPal-gateway.component.html',
+	           templateUrl: './paypal-gateway.component.html',
            })
 export class PayPalGatewayComponent
 {
