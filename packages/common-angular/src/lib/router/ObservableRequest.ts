@@ -19,23 +19,25 @@ export class ObservableRequest<T>
 	
 	run(): Observable<T>
 	{
-		return this.socket.connection.pipe(
-				first(),
-				switchMap(() =>
-				          {
-					          this.socket.emit(this.event, ...this.args, this.callId);
+		return this.socket
+		           .connection
+		           .pipe(
+				           first(),
+				           switchMap(() =>
+				                     {
+					                     this.socket.emit(this.event, ...this.args, this.callId);
 					
-					          return this.socket.connection.pipe(
-							          exhaustMap(() =>
-							                     {
-								                     const subscriber = new ObservableResponseSubscriber<T>(
-										                     this.socket,
-										                     this.callId
-								                     );
-								                     return subscriber.getResponse();
-							                     })
-					          );
-				          })
-		);
+					                     return this.socket.connection.pipe(
+							                     exhaustMap(() =>
+							                                {
+								                                const subscriber = new ObservableResponseSubscriber<T>(
+										                                this.socket,
+										                                this.callId
+								                                );
+								                                return subscriber.getResponse();
+							                                })
+					                     );
+				                     })
+		           );
 	}
 }
