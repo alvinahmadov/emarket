@@ -3,43 +3,45 @@ import https                               from 'https';
 import http                                from 'http';
 import path                                from 'path';
 import pem                                 from 'pem';
-import fs                                  from 'fs';
-import bodyParser                          from 'body-parser';
-import cors                                from 'cors';
-import passport                            from 'passport';
-import methodOverride                      from 'method-override';
-import errorhandler                        from 'errorhandler';
-import socketIO                            from 'socket.io';
-import express                             from 'express';
-import mongoose                            from 'mongoose';
-import morgan                              from 'morgan';
-import exphbs                              from 'express-handlebars';
-import { createLogger }                    from '../helpers/Log';
-import IService, { ServiceSymbol }         from './IService';
-import { IRoutersManager }                 from '@pyro/io';
-import { WarehousesService }               from './warehouses';
-import { SocialStrategiesService }         from './users';
-import { env }                             from '../env';
-import { getModel }                        from '@pyro/db-server';
-import Bluebird                            from 'bluebird';
-import { AdminsService }                   from './admins';
-import ipstack = require('ipstack');
-import requestIp = require('request-ip');
-import { createConnection }                from 'typeorm';
-import { IWarehouseCreateObject }          from '@modules/server.common/interfaces/IWarehouse';
-import { getDummyImage }                   from '@modules/server.common/utils';
-import Admin                               from '@modules/server.common/entities/Admin';
-import Device                              from '@modules/server.common/entities/Device';
-import Carrier                             from '@modules/server.common/entities/Carrier';
-import Invite                              from '@modules/server.common/entities/Invite';
-import InviteRequest                       from '@modules/server.common/entities/InviteRequest';
-import Order                               from '@modules/server.common/entities/Order';
-import Product                             from '@modules/server.common/entities/Product';
-import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
-import User                                from '@modules/server.common/entities/User';
-import Warehouse                           from '@modules/server.common/entities/Warehouse';
-import Promotion                           from '@modules/server.common/entities/Promotion';
-import { ConfigService }                   from '../config/config.service';
+import fs                                 from 'fs';
+import bodyParser                         from 'body-parser';
+import cors                               from 'cors';
+import passport                           from 'passport';
+import methodOverride                     from 'method-override';
+import errorhandler                       from 'errorhandler';
+import socketIO                           from 'socket.io';
+import express                            from 'express';
+import mongoose                           from 'mongoose';
+import morgan                             from 'morgan';
+import exphbs                             from 'express-handlebars';
+import { createLogger }                   from '../helpers/Log';
+import IService, { ServiceSymbol }        from './IService';
+import { IRoutersManager }                from '@pyro/io';
+import { WarehousesService }              from './warehouses';
+import { SocialStrategiesService }        from './users';
+import { env }                            from '../env';
+import { getModel }                       from '@pyro/db-server';
+import Bluebird                           from 'bluebird';
+import { AdminsService }                  from './admins';
+import { UsersAuthService, UsersService } from './users';
+import { FakeRegisterService }            from './fake-data';
+import ipstack                            from 'ipstack';
+import requestIp                          from 'request-ip';
+import { createConnection }               from 'typeorm';
+import { IWarehouseCreateObject }         from '@modules/server.common/interfaces/IWarehouse';
+import { getDummyImage }                  from '@modules/server.common/utils';
+import Admin                              from '@modules/server.common/entities/Admin';
+import Device                             from '@modules/server.common/entities/Device';
+import Carrier                            from '@modules/server.common/entities/Carrier';
+import Invite                             from '@modules/server.common/entities/Invite';
+import InviteRequest                      from '@modules/server.common/entities/InviteRequest';
+import Order                              from '@modules/server.common/entities/Order';
+import Product                            from '@modules/server.common/entities/Product';
+import ProductsCategory                   from '@modules/server.common/entities/ProductsCategory';
+import User                               from '@modules/server.common/entities/User';
+import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import Promotion                          from '@modules/server.common/entities/Promotion';
+import { ConfigService }                  from '../config/config.service';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -47,10 +49,8 @@ const INTERNAL_IPS = ['127.0.0.1', '::1'];
 @injectable()
 export class ServicesApp
 {
-	// TODO: put to config (we also may want to increase it)
-	private static _poolSize: number = 50;
-	// TODO: put to config
-	private static _connectTimeoutMS: number = 40000;
+	protected static _poolSize: number;
+	protected static _connectTimeoutMS: number;
 	protected db_server = process.env.DB_ENV || 'primary';
 	protected db: mongoose.Connection;
 	protected expressApp: express.Express;
@@ -70,10 +70,16 @@ export class ServicesApp
 			protected socialStrategiesService: SocialStrategiesService,
 			@inject(AdminsService)
 			private readonly _adminsService: AdminsService,
+			@inject(UsersService)
+			private readonly _usersService: UsersService,
+			@inject(UsersAuthService)
+			private readonly _usersAuthService: UsersAuthService,
 			@inject(ConfigService)
 					_configService: ConfigService
 	)
 	{
+		ServicesApp._poolSize = _configService.Env.POOL_SIZE;
+		ServicesApp._connectTimeoutMS = _configService.Env.CONNECT_TIMEOUT_MS;
 		const maxSockets = _configService.Env.MAX_SOCKETS;
 		
 		// see https://webapplog.com/seven-things-you-should-stop-doing-with-node-js
@@ -86,9 +92,9 @@ export class ServicesApp
 				.on('SIGTERM', this._gracefulExit);
 	}
 	
-	static getEntities()
+	static getEntities(): any[]
 	{
-		const entities = [
+		return [
 			Admin,
 			Carrier,
 			Device,
@@ -101,7 +107,6 @@ export class ServicesApp
 			Warehouse,
 			Promotion
 		];
-		return entities;
 	}
 	
 	static async CreateTypeORMConnection()
@@ -113,8 +118,6 @@ export class ServicesApp
 		
 		const conn = await createConnection({
 			                                    name: 'typeorm',
-			                                    // TODO: put this into settings (it's mongo only during testing of
-			                                    // TypeORM integration!)
 			                                    type: 'mongodb',
 			                                    url: env.DB_URI,
 			                                    entities,
@@ -139,7 +142,7 @@ export class ServicesApp
 		return conn;
 	}
 	
-	async start(callback: () => void)
+	public async start(callback: () => void): Promise<void>
 	{
 		this.callback = callback;
 		await this._connectDB();
@@ -151,13 +154,20 @@ export class ServicesApp
 		{
 			if(this.db != null)
 			{
-				this.db.close(() =>
+				this.db.close((err) =>
 				              {
-					              this.log.info(
-							              'Mongoose default connection with DB :' +
-							              this.db_server +
-							              ' is disconnected through app termination'
-					              );
+					              if(!err)
+					              {
+						              this.log.info(
+								              'Mongoose default connection with DB :' +
+								              this.db_server +
+								              ' is disconnected through app termination'
+						              );
+					              }
+					              else
+					              {
+						              this.log.error(err);
+					              }
 					              process.exit(0);
 				              });
 			}
@@ -177,8 +187,8 @@ export class ServicesApp
 				autoReconnect: true,
 				useFindAndModify: false,
 				reconnectTries: Number.MAX_VALUE,
-				poolSize: ServicesApp._poolSize,
-				connectTimeoutMS: ServicesApp._connectTimeoutMS,
+				poolSize: env.POOL_SIZE,
+				connectTimeoutMS: env.CONNECT_TIMEOUT_MS,
 				useUnifiedTopology: true
 			};
 			
@@ -191,7 +201,7 @@ export class ServicesApp
 			
 			this._configDBEvents();
 			
-			this._onDBConnect();
+			await this._onDBConnect();
 		} catch(err)
 		{
 			this.log.error(
@@ -226,13 +236,20 @@ export class ServicesApp
 	
 	private async _onDBConnect()
 	{
-		// that's important to see even if logs disabled, do not remove!
-		console.log('Connected to DB');
+		if(env.isDev || env.isTest)
+		{
+			console.log('Connected to DB');
+		}
 		
 		this.log.info({ db: this.db_server }, 'Connected to DB');
 		
 		await this._registerModels();
 		await this._registerEntityAdministrator();
+		if(env.isDev)
+		{
+			await this._registerPredefinedUser();
+			await this._registerTestWarehouse();
+		}
 		this._passportSetup();
 		await this._startExpress();
 		await this._startSocketIO();
@@ -241,10 +258,13 @@ export class ServicesApp
 		await this.callback();
 		
 		// let's report RAM usage after all is bootstrapped
-		await this.reportMemoryUsage();
+		if(env.isDev)
+		{
+			await ServicesApp.reportMemoryUsage();
+		}
 	}
 	
-	private async reportMemoryUsage()
+	private static async reportMemoryUsage()
 	{
 		console.log('Memory usage: ');
 		console.log(process.memoryUsage());
@@ -252,36 +272,82 @@ export class ServicesApp
 	
 	/**
 	 * Create initial (default) Admin user with default credentials:
-	 * Email: admin@mail.co
-	 * Password: admin
 	 *
 	 * @private
 	 * @memberof ServicesApp
 	 */
 	private async _registerEntityAdministrator()
 	{
-		const adminEmail = 'admin@mail.com'; // TODO: put to config
-		const adminPassword = 'admin'; // TODO: put to config
+		const adminName = "Admin";
+		const adminEmail = env.DEFAULT_ADMIN_MAIL;
+		const adminPassword = env.DEFAULT_ADMIN_PASSWORD;
 		
 		const adminCollectionCount = await this._adminsService.count({
 			                                                             email: adminEmail
 		                                                             });
-		
+		adminName.slice(0, 2);
 		if(adminCollectionCount === 0)
 		{
-			this._adminsService.register({
-				                             admin: {
-					                             email: adminEmail,
-					                             name: 'Admin',
-					                             hash: null,
-					                             pictureUrl: getDummyImage(300, 300, 'A')
-				                             },
-				                             password: adminPassword
-			                             });
+			await this._adminsService.register({
+				                                   admin: {
+					                                   email: adminEmail,
+					                                   name: adminName,
+					                                   hash: null,
+					                                   pictureUrl: getDummyImage(300, 300, adminName.slice(0, 2))
+				                                   },
+				                                   password: adminPassword
+			                                   });
 		}
 	}
 	
-	private _getBaseUrl(url: string)
+	private async _registerPredefinedUser()
+	{
+		try
+		{
+			const predefinedUser = await FakeRegisterService.getPredefinedUser(
+					this._usersService,
+					this._usersAuthService
+			);
+			
+			if(!predefinedUser)
+			{
+				console.warn("Test user cannot be created");
+			}
+			else
+			{
+				console.warn(`User created: ${predefinedUser}`);
+			}
+		} catch(e)
+		{
+			this.log.debug(e);
+		}
+		
+	}
+	
+	private async _registerTestWarehouse()
+	{
+		try
+		{
+			const warehouse = await FakeRegisterService.getWarehouse(
+					this._usersService,
+					this.warehousesService
+			);
+			
+			if(!warehouse)
+			{
+				alert("Test warehouse cannot be created");
+			}
+			else
+			{
+				console.log(`Warehouse created: ${warehouse}`);
+			}
+		} catch(e)
+		{
+			this.log.debug(e)
+		}
+	}
+	
+	private static _getBaseUrl(url: string)
 	{
 		if(url)
 		{
@@ -307,12 +373,40 @@ export class ServicesApp
 		{
 			passport.use(googleStrategy);
 		}
+		else
+		{
+			if(env.isDev || env.isTest)
+			{
+				console.warn("GoogleStrategy is not enabled");
+			}
+		}
+		
+		// Yandex Strategy
+		const yandexStrategy = this.socialStrategiesService.getYandexStrategy();
+		if(yandexStrategy != null)
+		{
+			passport.use(yandexStrategy);
+		}
+		else
+		{
+			if(env.isDev || env.isTest)
+			{
+				console.warn("YandexStrategy is not enabled");
+			}
+		}
 		
 		// Facebook Strategy
 		const facebookStrategy = this.socialStrategiesService.getFacebookStrategy();
 		if(facebookStrategy != null)
 		{
 			passport.use(facebookStrategy);
+		}
+		else
+		{
+			if(env.isDev || env.isTest)
+			{
+				console.warn("FacebookStrategy is not enabled");
+			}
 		}
 	}
 	
@@ -424,57 +518,69 @@ export class ServicesApp
 			this.expressApp.use(eh());
 		}
 		
-		this.expressApp.get('/', function(req, res)
-		{
-			res.render('index');
-		});
+		this.expressApp.get('/',
+		                    (
+				                    req,
+				                    res
+		                    ) =>
+		                    {
+			                    res.render('index');
+		                    });
 		
 		// Get location (lat, long) by IP address
 		// TODO: put into separate service
-		this.expressApp.get('/getLocationByIP', (req, res) =>
-		{
-			const ipStackKey = env.IP_STACK_API_KEY;
-			if(ipStackKey)
-			{
-				const clientIp = req['clientIp'];
+		this.expressApp.get('/getLocationByIP',
+		                    (
+				                    req,
+				                    res
+		                    ) =>
+		                    {
+			                    const ipStackKey = env.IP_STACK_API_KEY;
+			                    if(ipStackKey)
+			                    {
+				                    const clientIp = req['clientIp'];
 				
-				if(!INTERNAL_IPS.includes(clientIp))
-				{
-					ipstack(clientIp, ipStackKey, (err, response) =>
-					{
-						res.json({
-							         latitude: response.latitude,
-							         longitude: response.longitude
-						         });
-					});
-				}
-				else
-				{
-					this.log.info(
-							`Can't use ipstack with internal ip address ${clientIp}`
-					);
-					res.status(204).end();
-				}
-			}
-			else
-			{
-				this.log.error('Not provided Key for IpStack');
-				res.status(500).end();
-			}
-		});
+				                    if(!INTERNAL_IPS.includes(clientIp))
+				                    {
+					                    ipstack(clientIp, ipStackKey, (err, response) =>
+					                    {
+						                    res.json({
+							                             latitude: response.latitude,
+							                             longitude: response.longitude
+						                             });
+					                    });
+				                    }
+				                    else
+				                    {
+					                    this.log.info(
+							                    `Can't use ipstack with internal ip address ${clientIp}`
+					                    );
+					                    res.status(204).end();
+				                    }
+			                    }
+			                    else
+			                    {
+				                    this.log.error('Not provided Key for IpStack');
+				                    res.status(500).end();
+			                    }
+		                    });
 		
 		// TODO: why is this here? It should be in some Nest Controller
-		this.expressApp.post('/warehouse/create', async(req, res) =>
-		{
-			const warehouseCreateObject: IWarehouseCreateObject = JSON.parse(
-					req.body.warehouse
-			);
+		this.expressApp.post('/warehouse/create',
+		                     async(
+				                     req,
+				                     res
+		                     ) =>
+		                     {
+			                     const warehouseCreateObject: IWarehouseCreateObject = JSON.parse(
+					                     req.body.warehouse
+			                     );
 			
-			const warehouse = await this.warehousesService.create(
-					warehouseCreateObject
-			);
-			res.json(warehouse);
-		});
+			                     const warehouse = await this.warehousesService.create(
+					                     warehouseCreateObject
+			                     );
+			                     res.json(warehouse);
+		                     });
 		
 		this._setupAuthRoutes();
 		this._setupStaticRoutes();
@@ -491,7 +597,6 @@ export class ServicesApp
 					httpsPort,
 					httpPort,
 					environment,
-					'process.env': process.env,
 					dotenv: conf
 				},
 				'Express server prepare to listen'
@@ -630,11 +735,6 @@ export class ServicesApp
 			res.render('about_us_en');
 		});
 		
-		this.expressApp.get('/he/about', function(req, res)
-		{
-			res.render('about_us_he');
-		});
-		
 		this.expressApp.get('/ru/about', function(req, res)
 		{
 			res.render('about_us_ru');
@@ -643,11 +743,6 @@ export class ServicesApp
 		this.expressApp.get('/en/privacy', function(req, res)
 		{
 			res.render('privacy_en');
-		});
-		
-		this.expressApp.get('/he/privacy', function(req, res)
-		{
-			res.render('privacy_he');
 		});
 		
 		this.expressApp.get('/ru/privacy', function(req, res)
@@ -660,78 +755,68 @@ export class ServicesApp
 			res.render('terms_of_use_en');
 		});
 		
-		this.expressApp.get('/he/terms', function(req, res)
-		{
-			res.render('terms_of_use_he');
-		});
-		
 		this.expressApp.get('/ru/terms', function(req, res)
 		{
 			res.render('terms_of_use_ru');
-		});
-		
-		this.expressApp.get('/bg/terms', function(req, res)
-		{
-			res.render('terms_of_use_bg');
 		});
 	}
 	
 	private _setupAuthRoutes()
 	{
 		// Facebook route auth
-		this.expressApp.get(
-				'/auth/facebook',
-				(req, res, next) =>
-				{
-					passport[
-							'_strategies'
-							].session.base_redirect_url = this._getBaseUrl(
-							req.headers.referer
-					);
-					next();
-				},
-				passport.authenticate('facebook', {
-					scope: ['email', 'public_profile']
-				})
-		);
+		this._authRoutesHelper({
+			                       name: 'facebook',
+			                       auth_url: '/auth/facebook',
+			                       callback_url: '/auth/facebook',
+			                       failure_redirect: '/login',
+			                       scope: ['email', 'public_profile']
+		                       })
 		
-		this.expressApp.get(
-				'/auth/facebook/callback',
-				passport.authenticate('facebook', { failureRedirect: '/login' }),
-				async(req, res) =>
-				{
-					const baseRedirectUr =
-							passport['_strategies'].session.base_redirect_url;
-					if(req.user)
-					{
-						res.redirect(baseRedirectUr + (<any>req.user).redirectUrl);
-					}
-					else
-					{
-						res.redirect(baseRedirectUr || '');
-					}
-					passport['_strategies'].session.base_redirect_url = '';
-				}
-		);
+		// Yandex route auth
+		this._authRoutesHelper({
+			                       name: 'yandex',
+			                       auth_url: '/auth/yandex',
+			                       callback_url: '/auth/yandex/callback',
+			                       failure_redirect: '/login',
+			                       scope: ['profile', 'email']
+		                       })
 		
 		// Google route auth
+		this._authRoutesHelper({
+			                       name: 'google',
+			                       auth_url: '/auth/google',
+			                       callback_url: '/auth/google/callback',
+			                       failure_redirect: '/login',
+			                       scope: ['profile', 'email']
+		                       })
+	}
+	
+	private _authRoutesHelper(strategy: {
+		name: string;
+		auth_url: string;
+		callback_url: string;
+		failure_redirect?: string;
+		scope?: string[];
+	})
+	{
 		this.expressApp.get(
-				'/auth/google',
+				strategy.auth_url,
 				(req, res, next) =>
 				{
 					passport[
 							'_strategies'
-							].session.base_redirect_url = this._getBaseUrl(
+							].session.base_redirect_url = ServicesApp._getBaseUrl(
 							req.headers.referer
 					);
 					next();
 				},
-				passport.authenticate('google', { scope: ['profile', 'email'] })
+				passport.authenticate(strategy.name, { scope: strategy.scope })
 		);
 		
 		this.expressApp.get(
-				'/auth/google/callback',
-				passport.authenticate('google', { failureRedirect: '/login' }),
+				strategy.callback_url,
+				passport.authenticate(strategy.name,
+				                      { failureRedirect: strategy.failure_redirect ?? '/login' }),
 				async(req, res) =>
 				{
 					const baseRedirectUr =
