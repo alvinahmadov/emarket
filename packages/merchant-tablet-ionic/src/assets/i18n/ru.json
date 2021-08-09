@@ -1,4 +1,5 @@
 {
+  "TITLE": "Приложение Торговца",
   "LANGUAGE": {
     "ID": "ru-RU",
     "NAME": "Русский"
@@ -248,7 +249,17 @@
     }
   },
   "LOGIN_VIEW": {
-    "LOGIN": "Авторизоваться"
+    "LOGIN": "Войти",
+    "AUTHORIZE": "Авторизация",
+    "USER_NAME": "Имя пользователя",
+    "USER_PASSWORD": "Пароль"
+  },
+  "REGISTER_VIEW": {
+    "REGISTER": "Регистрация",
+    "WAREHOUSE_NAME": "Название магазина",
+    "USER_NAME": "Имя пользователя",
+    "USER_PASSWORD": "Пароль",
+    "TERMS": "Соглашаетесь с правилами"
   },
   "LANGUAGE_VIEW": {
     "TITLE": "Выбор языка",

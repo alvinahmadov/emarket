@@ -125,8 +125,8 @@
     "LOCATION": "Место нахождения"
   },
   "SETTINGS_VIEW": {
-    "SETTINGS": "настройки",
-    "LANGUAGE": "язык"
+    "SETTINGS": "Настройки",
+    "LANGUAGE": "Язык"
   },
   "NO_SERVER_VIEW": {
     "NO_SERVER": "Сервер упал"

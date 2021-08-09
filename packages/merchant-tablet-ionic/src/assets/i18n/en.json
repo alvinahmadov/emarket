@@ -1,4 +1,5 @@
 {
+  "TITLE": "Merchant App",
   "LANGUAGE": {
     "ID": "en-US",
     "NAME": "English"
@@ -250,7 +251,16 @@
     }
   },
   "LOGIN_VIEW": {
-    "LOGIN": "Login"
+    "LOGIN": "Sign In",
+    "AUTHORIZE": "Authorization",
+    "USER_NAME": "Username",
+    "USER_PASSWORD": "Password"
+  },
+  "REGISTER_VIEW": {
+    "REGISTER": "Sign Up",
+    "USER_NAME": "Username",
+    "USER_PASSWORD": "Password",
+    "TERMS": "Accept usage terms"
   },
   "LANGUAGE_VIEW": {
     "TITLE": "Select Language",
