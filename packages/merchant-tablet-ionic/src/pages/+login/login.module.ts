@@ -7,6 +7,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { CommonModule }         from '@angular/common';
 import { FormsModule }          from '@angular/forms';
 import { IonicModule }          from '@ionic/angular';
+import { TabModule }            from "@modules/client.common.angular2/components/tabs/tab.module";
 
 const routes: Routes = [
 	{
@@ -24,6 +25,7 @@ const routes: Routes = [
 		          CommonModule,
 		          FormsModule,
 		          TranslateModule.forChild(),
+		          TabModule,
 	          ],
           })
 export class LoginPageModule {}
