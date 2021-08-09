@@ -1,16 +1,16 @@
 import { NgModule }             from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginModuleGuard }     from './+login/login.module.guard';
+import { AuthModuleGuard }      from './+auth/auth.module.guard';
 import { WarehouseModuleGuard } from './+warehouse/warehouse.module.guard';
 import { InfoModuleGuard }      from './+info/info.module.guard';
 
 // TODO: add all routes!
 const routes: Routes = [
 	{
-		path: 'login',
+		path: 'auth',
 		loadChildren: () =>
-				import('./+login/login.module').then((m) => m.LoginPageModule),
-		canLoad: [LoginModuleGuard],
+				import('./+auth/auth.module').then((m) => m.AuthPageModule),
+		canLoad: [AuthModuleGuard],
 	},
 	{
 		path: 'warehouse',
@@ -79,13 +79,17 @@ const routes: Routes = [
 	{
 		path: '',
 		pathMatch: 'full',
-		redirectTo: 'login',
+		redirectTo: 'auth',
 	},
 ];
 
 @NgModule({
 	          imports: [RouterModule.forChild(routes)],
-	          providers: [LoginModuleGuard, WarehouseModuleGuard, InfoModuleGuard],
+	          providers: [
+		          AuthModuleGuard,
+		          WarehouseModuleGuard,
+		          InfoModuleGuard
+	          ],
 	          exports: [RouterModule],
           })
 export class PagesModule {}
