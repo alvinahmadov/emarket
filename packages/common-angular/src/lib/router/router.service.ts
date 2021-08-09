@@ -21,8 +21,6 @@ export class Router
 	{
 		this.socket = socketFactory.build(`${apiUrl}/${name}`);
 		this.routersService.sockets.next(this.socket);
-		
-		console.log(`Router named ${name} created!`);
 	}
 	
 	runAndObserve<T>(methodName: string, ...args: any[]): Observable<T>
