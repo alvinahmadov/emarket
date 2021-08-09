@@ -13,21 +13,22 @@ export class Request<T>
 	{
 		return new Promise<T>((resolve, reject) =>
 		                      {
-			                      this.socket.emit(this.event, ...this.args, (err, res) =>
-			                      {
-				                      if(err != null)
-				                      {
-					                      reject(this.deserializeError(err));
-				                      }
-				                      else
-				                      {
-					                      resolve(res);
-				                      }
-			                      });
+			                      this.socket.emit(this.event, ...this.args,
+			                                       (err: any, res: T | PromiseLike<T>) =>
+			                                       {
+				                                       if(err != null)
+				                                       {
+					                                       reject(Request.deserializeError(err));
+				                                       }
+				                                       else
+				                                       {
+					                                       resolve(res);
+				                                       }
+			                                       });
 		                      });
 	}
 	
-	private deserializeError(error)
+	private static deserializeError(error)
 	{
 		if(error.__isError__)
 		{
