@@ -11,6 +11,7 @@ export interface IUserInitializeObject extends DBCreateObject
 	socialIds?: string[];
 	isRegistrationCompleted?: boolean;
 	hash?: string;
+	role?: string;
 	isBanned?: boolean;
 }
 
@@ -22,7 +23,7 @@ export interface IUserCreateObject extends IUserInitializeObject
 	stripeCustomerId?: string;
 }
 
-export interface IResponseGenerate1000Customers
+export interface IResponseGenerateCustomers
 {
 	success: boolean;
 	message: string;
