@@ -7,11 +7,11 @@ enum PaymentGateways
 {
 	Stripe,
 	PayPal,
+	YooMoney,
+	Bitpay
 }
 
-export function paymentGatewaysToString(
-		paymentGateway: PaymentGateways
-): string
+export function paymentGatewaysToString(paymentGateway: PaymentGateways): string
 {
 	switch(paymentGateway)
 	{
@@ -19,6 +19,10 @@ export function paymentGatewaysToString(
 			return 'Stripe';
 		case PaymentGateways.PayPal:
 			return 'PayPal';
+		case PaymentGateways.YooMoney:
+			return 'YooMoney';
+		case PaymentGateways.Bitpay:
+			return 'Bitpay';
 		default:
 			return 'BAD_PAYMENT_GATEWAY';
 	}
@@ -29,9 +33,13 @@ export function paymentGatewaysLogo(paymentGateway: PaymentGateways): string
 	switch(paymentGateway)
 	{
 		case PaymentGateways.Stripe:
-			return 'https://stripe.com/img/v3/home/twitter.png';
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956521/emarket/payment/stripe-logo_qbvwio.png';
 		case PaymentGateways.PayPal:
-			return 'https://avatars1.githubusercontent.com/u/476675?s=200&v=4';
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956520/emarket/payment/paypal-logo_klfdzh.png';
+		case PaymentGateways.YooMoney:
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956521/emarket/payment/ukassa-logo_qnai6d.jpg';
+		case PaymentGateways.Bitpay:
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956521/emarket/payment/bitpay-logo_n7sew5.png';
 		default:
 			return 'BAD_PAYMENT_GATEWAY';
 	}

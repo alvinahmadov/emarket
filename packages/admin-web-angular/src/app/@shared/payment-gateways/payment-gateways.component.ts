@@ -1,13 +1,15 @@
 import { Component, Input, ViewChild, OnChanges } from '@angular/core';
-import { Country }                                from '@modules/server.common/entities';
-import { StripeGatewayComponent }                 from './stripe-gateway/stripe-gateway.component';
-import { PayPalGatewayComponent }                 from './payPal-gateway/payPal-gateway.component';
-import IPaymentGatewayCreateObject                from '@modules/server.common/interfaces/IPaymentGateway';
-import { CurrenciesService }                      from '@app/@core/data/currencies.service';
 import { first }                                  from 'rxjs/operators';
-import Warehouse                                  from '@modules/server.common/entities/Warehouse';
+import { CurrenciesService }                      from '@app/@core/data/currencies.service';
+import IPaymentGatewayCreateObject                from '@modules/server.common/interfaces/IPaymentGateway';
 import PaymentGateways                            from '@modules/server.common/enums/PaymentGateways';
+import { Country }                                from '@modules/server.common/entities';
+import Warehouse                                  from '@modules/server.common/entities/Warehouse';
 import { countriesDefaultCurrencies }             from '@modules/server.common/entities/Currency';
+import { StripeGatewayComponent }                 from './stripe-gateway/stripe-gateway.component';
+import { PayPalGatewayComponent }                 from './paypal-gateway/paypal-gateway.component';
+import { YooMoneyGatewayComponent }               from './yoomoney-gateway/yoomoney-gateway.component';
+import { BitpayGatewayComponent }                 from './bitpay-gateway/bitpay-gateway.component';
 
 @Component({
 	           selector: 'ea-payment-gateways',
@@ -21,6 +23,12 @@ export class PaymentGatewaysComponent implements OnChanges
 	@ViewChild('payPalGateway')
 	payPalGateway: PayPalGatewayComponent;
 	
+	@ViewChild('yooMoneyGateway')
+	yooMoneyGateway: YooMoneyGatewayComponent;
+	
+	@ViewChild('bitpayGateway')
+	bitpayGateway: BitpayGatewayComponent;
+	
 	@Input()
 	warehouseLogo: string;
 	@Input()
@@ -30,17 +38,19 @@ export class PaymentGatewaysComponent implements OnChanges
 	
 	currenciesCodes: string[] = [];
 	
-	constructor(private currenciesService: CurrenciesService)
+	public constructor(private currenciesService: CurrenciesService)
 	{
-		this.loadCurrenciesCodes();
+		this.loadCurrenciesCodes().then().catch(e => console.log(e));
 	}
 	
-	get isValid(): boolean
+	public get isValid(): boolean
 	{
 		let valid = false;
 		if(
 				this.stripeGateway.isStripeEnabled ||
-				this.payPalGateway.isPayPalEnabled
+				this.payPalGateway.isPayPalEnabled ||
+				this.yooMoneyGateway.isYooEnabled ||
+				this.bitpayGateway.isBitpayEnabled
 		)
 		{
 			if(this.stripeGateway.isStripeEnabled)
@@ -62,17 +72,39 @@ export class PaymentGatewaysComponent implements OnChanges
 					return;
 				}
 			}
+			
+			if(this.yooMoneyGateway.isYooEnabled)
+			{
+				valid = this.yooMoneyGateway.isFormValid;
+				
+				if(!valid)
+				{
+					return;
+				}
+			}
+			
+			if(this.bitpayGateway.isBitpayEnabled)
+			{
+				valid = this.bitpayGateway.isFormValid;
+				
+				if(!valid)
+				{
+					return;
+				}
+			}
 		}
 		
 		return valid;
 	}
 	
-	get paymentsGateways(): IPaymentGatewayCreateObject[]
+	public get paymentsGateways(): IPaymentGatewayCreateObject[]
 	{
 		const paymentsGateways = [];
 		
 		const stripeGatewayCreateObject = this.stripeGateway.createObject;
 		const payPalGatewayCreateObject = this.payPalGateway.createObject;
+		const yooMoneyGatewayCreateObject = this.yooMoneyGateway.createObject;
+		const bitpayGatewayCreateObject = this.bitpayGateway.createObject;
 		
 		if(stripeGatewayCreateObject)
 		{
@@ -84,10 +116,20 @@ export class PaymentGatewaysComponent implements OnChanges
 			paymentsGateways.push(payPalGatewayCreateObject);
 		}
 		
+		if(yooMoneyGatewayCreateObject)
+		{
+			paymentsGateways.push(yooMoneyGatewayCreateObject);
+		}
+		
+		if(bitpayGatewayCreateObject)
+		{
+			paymentsGateways.push(bitpayGatewayCreateObject);
+		}
+		
 		return paymentsGateways;
 	}
 	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		const merchantCountry = Country[this.warehouseCountry];
 		
@@ -111,10 +153,26 @@ export class PaymentGatewaysComponent implements OnChanges
 			{
 				this.payPalGateway.configModel.currency = defaultCurrency;
 			}
+			
+			if(
+					this.yooMoneyGateway &&
+					(!this.isEdit || !this.yooMoneyGateway.configModel.currency)
+			)
+			{
+				this.yooMoneyGateway.configModel.currency = defaultCurrency;
+			}
+			
+			if(
+					this.bitpayGateway &&
+					(!this.isEdit || !this.bitpayGateway.configModel.currency)
+			)
+			{
+				this.bitpayGateway.configModel.currency = defaultCurrency;
+			}
 		}
 	}
 	
-	setValue(merchant: Warehouse)
+	public setValue(merchant: Warehouse)
 	{
 		if(merchant.paymentGateways)
 		{
@@ -135,19 +193,37 @@ export class PaymentGatewaysComponent implements OnChanges
 			{
 				this.payPalGateway.setValue(payPalConfigObj.configureObject);
 			}
+			
+			const yooConfigObj = merchant.paymentGateways.find(
+					(g) => g.paymentGateway === PaymentGateways.YooMoney
+			);
+			
+			if(yooConfigObj)
+			{
+				this.yooMoneyGateway.setValue(yooConfigObj.configureObject);
+			}
+			
+			const bitpayConfigObj = merchant.paymentGateways.find(
+					(g) => g.paymentGateway === PaymentGateways.Bitpay
+			);
+			
+			if(bitpayConfigObj)
+			{
+				this.bitpayGateway.setValue(bitpayConfigObj.configureObject);
+			}
 		}
 	}
 	
 	private async loadCurrenciesCodes()
 	{
-		const res = await this.currenciesService
-		                      .getCurrencies()
-		                      .pipe(first())
-		                      .toPromise();
+		const res: any = await this.currenciesService
+		                           .getCurrencies()
+		                           .pipe(first())
+		                           .toPromise();
 		
 		if(res)
 		{
-			this.currenciesCodes = res.map((r) => r.currencyCode);
+			this.currenciesCodes = res.map(r => r.currencyCode);
 		}
 	}
 }
