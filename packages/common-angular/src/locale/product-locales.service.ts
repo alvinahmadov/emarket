@@ -17,15 +17,16 @@ class ProductTransientViewModel
 @Injectable()
 export class ProductLocalesService
 {
-	private readonly _defaultLang: string = 'en-US';
-	private readonly _defaultLocale: string = 'en-US';
+	// TODO: Set default lang and locale from config
+	private readonly _defaultLang: string = 'ru-RU';
+	private readonly _defaultLocale: string = 'ru-RU';
 	private _productTransientProperties = new ProductTransientViewModel();
 	
 	public currentLocale: string;
 	
 	constructor(private readonly _translateService: TranslateService) {}
 	
-	public get isServiceStateValid()
+	public get isServiceStateValid(): boolean
 	{
 		return (
 				this._productTransientProperties.title !== '' &&
@@ -58,12 +59,10 @@ export class ProductLocalesService
 				// Or first
 				member[0];
 		// this is for pictures, they support url instead of value
-		const value: string = productMember.value || productMember['url'];
-		
-		return value;
+		return productMember.value || productMember['url'];
 	}
 	
-	getMemberValue(productMember: ILocaleMember[])
+	getMemberValue(productMember: ILocaleMember[]): string
 	{
 		let valueMember = this._getProductLocaleMember(productMember);
 		
@@ -111,7 +110,7 @@ export class ProductLocalesService
 		}
 	}
 	
-	takeSelectedLang(lang: string)
+	takeSelectedLang(lang: string): string
 	{
 		let translateLang = this._defaultLocale;
 		switch(lang)
@@ -119,16 +118,8 @@ export class ProductLocalesService
 			case 'en-US':
 				translateLang = 'en-US';
 				break;
-			case 'he-IL':
-				translateLang = 'he-IL';
-				break;
 			case 'ru-RU':
 				translateLang = 'ru-RU';
-				break;
-			case 'bg-BG':
-				translateLang = 'bg-BG';
-			case 'es-ES':
-				translateLang = 'es-ES';
 				break;
 		}
 		return translateLang;
@@ -137,7 +128,7 @@ export class ProductLocalesService
 	private _getProductLocaleMember(
 			productMember: ILocaleMember[],
 			defaultLocale?: boolean
-	)
+	): ILocaleMember
 	{
 		if(productMember)
 		{
