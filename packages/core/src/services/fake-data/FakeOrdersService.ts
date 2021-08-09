@@ -2,7 +2,6 @@ import { injectable } from 'inversify';
 import _              from 'lodash';
 import Product        from '@modules/server.common/entities/Product';
 import User           from '@modules/server.common/entities/User';
-import Warehouse      from '@modules/server.common/entities/Warehouse';
 
 @injectable()
 export class FakeOrdersService
