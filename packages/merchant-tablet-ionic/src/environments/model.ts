@@ -26,6 +26,8 @@ export interface Environment
 	FAKE_UUID: string;
 	MIXPANEL_API_KEY: string;
 	
+	WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS: number;
+	
 	MAP_MERCHANT_ICON_LINK: string;
 	
 	MAP_USER_ICON_LINK: string;
