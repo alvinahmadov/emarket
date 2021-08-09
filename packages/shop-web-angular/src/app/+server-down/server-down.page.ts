@@ -24,15 +24,17 @@ export class ServerDownPage implements OnDestroy
 	)
 	{
 		const browserLang = translate.getBrowserLang();
+		const defaultLanguage = environment.DEFAULT_LANGUAGE;
+		let availableLocales = environment.AVAILABLE_LOCALES;
 		
 		translate.use(
-				browserLang.match(/en-US|bg-BG|he-IL|ru-RU|es-ES/)
+				browserLang.match(availableLocales)
 				? browserLang
-				: 'en-US'
+				: defaultLanguage
 		);
 		
 		this.noInternetLogo = environment['NO_INTERNET_LOGO'];
-		this.testConnection();
+		this.testConnection().then().catch();
 	}
 	
 	ngOnDestroy(): void
