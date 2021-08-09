@@ -1,0 +1,32 @@
+@import "../common-angular/src/scss/everbie.common";
+
+$tab-border-color: #898989;
+$tab-border: 1px solid $tab-border-color;
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+:host {
+  display: flex;
+  height: 100%;
+}
+
+:host(.hidden) {
+  display: none;
+}
+
+.tabs__panel {
+  background-color: transparent;
+  color: white;
+  width: 100%;
+  border-top: 0;
+  border-top-color: transparent;
+  border-bottom: $tab-border;
+  border-right: $tab-border;
+  border-left: $tab-border;
+  border-radius: 0 0 6px 6px;
+  padding: 20px 10px;
+  margin: 0;
+}
