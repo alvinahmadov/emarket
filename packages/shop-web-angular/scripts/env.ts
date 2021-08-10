@@ -7,22 +7,24 @@ import { cleanEnv, num, str, bool } from 'envalid';
 export type Env = Readonly<{
 	production: boolean;
 	
-	DEFAULT_LATITUDE: number;
-	DEFAULT_LONGITUDE: number;
-	
-	DEFAULT_LANGUAGE: string;
-	
 	SERVICES_ENDPOINT: string;
 	HTTPS_SERVICES_ENDPOINT: string;
 	GQL_ENDPOINT: string;
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
+	DEFAULT_LATITUDE: number;
+	DEFAULT_LONGITUDE: number;
+	
+	DEFAULT_LANGUAGE: string;
+	AVAILABLE_LOCALES: string;
+	
 	AUTH_LOGO: string;
 	NO_INTERNET_LOGO: string;
-	GOOGLE_MAPS_API_KEY: string;
 	
 	DELIVERY_TIME_MIN: number;
 	DELIVERY_TIME_MAX: number;
+	
+	GOOGLE_MAPS_API_KEY: string;
 	
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
@@ -37,11 +39,6 @@ export const env: Env = cleanEnv(
 		{
 			production: bool({ default: false }),
 			
-			DEFAULT_LATITUDE: num({ default: 42.6459136 }),
-			DEFAULT_LONGITUDE: num({ default: 23.3332736 }),
-			
-			DEFAULT_LANGUAGE: str({ default: 'en-US' }),
-			
 			SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
 			HTTPS_SERVICES_ENDPOINT: str({ default: 'https://localhost:5501' }),
 			GQL_ENDPOINT: str({ default: 'http://localhost:5555/graphql' }),
@@ -49,13 +46,19 @@ export const env: Env = cleanEnv(
 				                                default: 'ws://localhost:5050/subscriptions',
 			                                }),
 			
+			DEFAULT_LATITUDE: num({ default: 42.6459136 }),
+			DEFAULT_LONGITUDE: num({ default: 23.3332736 }),
+			
+			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
+			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
+			
 			AUTH_LOGO: str({ default: 'assets/img/ever-logo.svg' }),
 			NO_INTERNET_LOGO: str({ default: 'assets/img/ever-logo.svg' }),
 			
-			GOOGLE_MAPS_API_KEY: str({ default: '' }),
-			
 			DELIVERY_TIME_MIN: num({ default: 30 }),
 			DELIVERY_TIME_MAX: num({ default: 60 }),
+			
+			GOOGLE_MAPS_API_KEY: str({ default: '' }),
 			
 			// For maintenance micro service.
 			SETTINGS_APP_TYPE: str({ default: 'shop-web' }),
@@ -69,3 +72,7 @@ export const env: Env = cleanEnv(
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );
+
+console.log("Shopweb environment details");
+console.log(env)
+console.warn("Remove upper log in production from scripts/env.ts")
