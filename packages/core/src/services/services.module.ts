@@ -4,13 +4,15 @@ import { servicesContainer } from './inversify.config';
 
 function getServices()
 {
-	return servicesContainer.getAll(ServiceSymbol).map((service) =>
-	                                                   {
-		                                                   return {
-			                                                   provide: service.constructor,
-			                                                   useValue: service
-		                                                   };
-	                                                   });
+	return servicesContainer
+			.getAll(ServiceSymbol)
+			.map((service) =>
+			     {
+				     return {
+					     provide: service.constructor,
+					     useValue: service
+				     };
+			     });
 }
 
 const services = getServices();
