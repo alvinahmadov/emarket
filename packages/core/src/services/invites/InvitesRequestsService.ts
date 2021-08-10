@@ -1,28 +1,28 @@
 import Logger                                            from 'bunyan';
-import { inject, injectable }                            from 'inversify';
-import { createLogger }                                  from '../../helpers/Log';
-import { IInviteRequestCreateObject }                    from '@modules/server.common/interfaces/IInviteRequest';
-import InviteRequest                                     from '@modules/server.common/entities/InviteRequest';
-import { DBService, ExistenceEventType }                 from '@pyro/db-server';
-import { InvitesService }                                from './InvitesService';
-import { Subscription }                                  from 'rxjs/Subscription';
-import _                                                 from 'lodash';
-import Invite                                            from '@modules/server.common/entities/Invite';
-import ILanguage                                         from '@modules/server.common/interfaces/ILanguage';
-import requestPromise                                    from 'request-promise';
 import Bluebird                                          from 'bluebird';
-import { DevicesService }                                from '../devices';
-import Device                                            from '@modules/server.common/entities/Device';
-import { launched }                                      from '@modules/server.common/notifications';
-import IInviteRequestRouter                              from '@modules/server.common/routers/IInviteRequestRouter';
-import { asyncListener, observableListener, routerName } from '@pyro/io';
-import IService                                          from '../IService';
-import { env }                                           from '../../env';
-import { filter, first, map, switchMap }                 from 'rxjs/operators';
-import { IGeoLocationCreateObject }                      from '@modules/server.common/interfaces/IGeoLocation';
-import { Country }                                       from '@modules/server.common/entities/GeoLocation';
-import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
 import faker                                             from 'faker';
+import _                                                 from 'lodash';
+import { inject, injectable }                            from 'inversify';
+import { filter, first, map, switchMap }                 from 'rxjs/operators';
+import { Subscription }                                  from 'rxjs/Subscription';
+import requestPromise                                    from 'request-promise';
+import { asyncListener, observableListener, routerName } from '@pyro/io';
+import { DBService, ExistenceEventType }                 from '@pyro/db-server';
+import { IInviteRequestCreateObject }                    from '@modules/server.common/interfaces/IInviteRequest';
+import ILanguage                                         from '@modules/server.common/interfaces/ILanguage';
+import Device                                            from '@modules/server.common/entities/Device';
+import { Country }                                       from '@modules/server.common/entities/GeoLocation';
+import InviteRequest                                     from '@modules/server.common/entities/InviteRequest';
+import Invite                                            from '@modules/server.common/entities/Invite';
+import { IGeoLocationCreateObject }                      from '@modules/server.common/interfaces/IGeoLocation';
+import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
+import IInviteRequestRouter                              from '@modules/server.common/routers/IInviteRequestRouter';
+import { launched }                                      from '@modules/server.common/notifications';
+import { InvitesService }                                from './InvitesService';
+import IService                                          from '../IService';
+import { DevicesService }                                from '../devices';
+import { createLogger }                                  from '../../helpers/Log';
+import { env }                                           from '../../env';
 
 @injectable()
 @routerName('invite-request')
@@ -43,55 +43,61 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 	{
 		super();
 		
-		this.pushSendingInvitesSubscription = this.invitesService.existence
-		                                          .pipe(
-				                                          filter(
-						                                          (existenceEvent) =>
-								                                          existenceEvent.type
-								                                          === ExistenceEventType.Created
-				                                          ),
-				                                          map((existenceEvent) => existenceEvent.value as Invite)
-		                                          )
-		                                          .subscribe(async(invite) =>
-		                                                     {
-			                                                     interface AggregateResult
-			                                                     {
-				                                                     _id: string; // deviceId
-				                                                     createdAt: string;
-			                                                     }
-			
-			                                                     const results: AggregateResult[] = await this.Model.aggregate()
-			                                                                                                  .sort({
-				                                                                                                        channelId: 1,
-				                                                                                                        _createdAt: 1
-			                                                                                                        })
-			                                                                                                  .group({
-				                                                                                                         _id: '$deviceId',
-				                                                                                                         createdAt: { $last: '$_createdAt' }
-			                                                                                                         })
-			                                                                                                  .exec();
-			
-			                                                     if(results.length > 0)
-			                                                     {
-				                                                     await this.notifyAboutLaunch(
-						                                                     invite,
-						                                                     _.map(results, (result) => result._id)
-				                                                     );
-			                                                     }
-		                                                     });
+		this.pushSendingInvitesSubscription =
+				this.invitesService
+				    .existence
+				    .pipe(
+						    filter(
+								    (existenceEvent) =>
+										    existenceEvent.type === ExistenceEventType.Created
+						    ),
+						    map((existenceEvent) => existenceEvent.value as Invite)
+				    )
+				    .subscribe(
+						    async(invite) =>
+						    {
+							    interface AggregateResult
+							    {
+								    _id: string; // deviceId
+								    createdAt: string;
+							    }
+							
+							    const results: AggregateResult[] =
+									    await this.Model
+									              .aggregate()
+									              .sort({
+										                    channelId: 1,
+										                    _createdAt: 1
+									                    })
+									              .group({
+										                     _id: '$deviceId',
+										                     createdAt: { $last: '$_createdAt' }
+									                     })
+									              .exec();
+							
+							    if(results.length > 0)
+							    {
+								    await this.notifyAboutLaunch(
+										    invite,
+										    _.map(results, (result) => result._id)
+								    );
+							    }
+						    }
+				    );
 	}
 	
 	@observableListener()
 	get(id: string)
 	{
-		return super.get(id).pipe(
-				map(async(inviteReq) =>
-				    {
-					    await this.throwIfNotExists(id);
-					    return inviteReq;
-				    }),
-				switchMap((inviteReq) => inviteReq)
-		);
+		return super.get(id)
+		            .pipe(
+				            map(async(inviteReq) =>
+				                {
+					                await this.throwIfNotExists(id);
+					                return inviteReq;
+				                }),
+				            switchMap((inviteReq) => inviteReq)
+		            );
 	}
 	
 	@asyncListener()
@@ -109,10 +115,10 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 	): Promise<void>
 	{
 		const devices = await (
-				await this.devicesService.getMultipleDevices(devicesIds)
-		)
-				.pipe(first())
-				.toPromise();
+				await this.devicesService
+				          .getMultipleDevices(devicesIds)
+		).pipe(first())
+		 .toPromise();
 		
 		const devicesByLanguages = _.groupBy(
 				devices,
@@ -127,7 +133,7 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 			const request = {
 				audience: this._getLaunchAudience(devicesByLanguage),
 				device_types: 'all',
-				notification: this._getLaunchNotification(language, invite)
+				notification: InvitesRequestsService._getLaunchNotification(language, invite)
 			};
 			
 			try
@@ -191,11 +197,12 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 		
 		if(invited && skipInvited >= 0)
 		{
-			const invitedFromDB = await this.Model.find({
-				                                            ...findInput,
-				                                            isDeleted: { $eq: false },
-				                                            isInvited: { $eq: true }
-			                                            })
+			const invitedFromDB = await this.Model
+			                                .find({
+				                                      ...findInput,
+				                                      isDeleted: { $eq: false },
+				                                      isInvited: { $eq: true }
+			                                      })
 			                                .sort({ invitedDate: 'desc' })
 			                                .skip(skipInvited)
 			                                .limit(pagingOptions.limit - inviteRequests.length)
@@ -210,10 +217,9 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 	
 	async throwIfNotExists(inviteRequestId: string)
 	{
-		const inviteRequest = await super
-				.get(inviteRequestId)
-				.pipe(first())
-				.toPromise();
+		const inviteRequest = await super.get(inviteRequestId)
+		                                 .pipe(first())
+		                                 .toPromise();
 		
 		if(!inviteRequest || inviteRequest.isDeleted)
 		{
@@ -233,7 +239,7 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 		{
 			const houseNumber = `${inviteRequestsCount}`;
 			
-			const requestLocation = this._getInviteRequestGeoLocationCreateObj(
+			const requestLocation = InvitesRequestsService._getInviteRequestGeoLocationCreateObj(
 					houseNumber,
 					defaultLng,
 					defaultLat
@@ -261,8 +267,7 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 		};
 		
 		const ios_devices = _.filter(
-				devices,
-				(device) => device.type === 'ios'
+				devices, device => device.type === 'ios'
 		);
 		
 		if(ios_devices.length > 0)
@@ -293,14 +298,14 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 		return audience;
 	}
 	
-	private _getLaunchNotification(language: ILanguage, invite: Invite): any
+	private static _getLaunchNotification(language: ILanguage, invite: Invite): any
 	{
 		switch(language)
 		{
 			case 'en-US':
 				return {
 					android: {
-						title: 'Ever just launched!',
+						title: 'Market just launched!',
 						alert: 'Click to see some available products.',
 						extra: {
 							event: launched,
@@ -316,6 +321,7 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 					}
 				};
 			case 'ru-RU':
+			default:
 				return {
 					android: {
 						title: 'Market только что запустился!',
@@ -334,53 +340,16 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 						}
 					}
 				};
-			case 'bg-BG':
-				return {
-					android: {
-						title: 'Market стартира!',
-						alert: 'Кликнете, за да видите някои налични продукти.',
-						extra: {
-							event: launched,
-							invite: JSON.stringify(invite)
-						}
-					},
-					ios: {
-						alert: 'Market стартира на вашия адрес. Забавлявай се!',
-						extra: {
-							event: launched,
-							invite: JSON.stringify(invite)
-						}
-					}
-				};
-			case 'he-IL':
-			default:
-				return {
-					android: {
-						title: 'הושקנו בכתובת שלך!',
-						alert: 'תלחץ כדי לצפות במוצרים!',
-						extra: {
-							event: launched,
-							invite: JSON.stringify(invite)
-						}
-					},
-					ios: {
-						alert: 'Ever הושק בכתובת שלך! תלחץ כדי לצפות במוצרים!',
-						extra: {
-							event: launched,
-							invite: JSON.stringify(invite)
-						}
-					}
-				};
 		}
 	}
 	
-	private _getInviteRequestGeoLocationCreateObj(
+	private static _getInviteRequestGeoLocationCreateObj(
 			houseNumber: string,
 			defaultLng: number,
 			defaultLat: number
 	): IGeoLocationCreateObject
 	{
-		const GeoLocation: IGeoLocationCreateObject = {
+		return {
 			countryId: faker.random.number(Country.ZW) as Country,
 			city: faker.address.city(),
 			house: houseNumber,
@@ -390,6 +359,5 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 			},
 			streetAddress: faker.address.streetAddress()
 		};
-		return GeoLocation;
 	}
 }
