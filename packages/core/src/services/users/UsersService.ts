@@ -1,32 +1,7 @@
 import Logger                                       from 'bunyan';
+import _                                            from 'lodash';
 import { inject, injectable, LazyServiceIdentifer } from 'inversify';
-import { env }                                      from '../../env';
-import User                                         from '@modules/server.common/entities/User';
-import { createLogger }                             from '../../helpers/Log';
-import { InvitesService }                           from '../invites';
-import { DBService }                                from '@pyro/db-server';
-import {
-	IUserCreateObject,
-	IUserInitializeObject
-}                                                   from '@modules/server.common/interfaces/IUser';
-import IUserRouter                                  from '@modules/server.common/routers/IUserRouter';
-import {
-	asyncListener,
-	observableListener,
-	routerName,
-	serialization
-}                                                   from '@pyro/io';
 import { Observable }                               from 'rxjs';
-import { observeFile }                              from '../../utils';
-import GeoLocation, {
-	Country
-}                                                   from '@modules/server.common/entities/GeoLocation';
-import IGeoLocation, {
-	IGeoLocationCreateObject
-}                                                   from '@modules/server.common/interfaces/IGeoLocation';
-import { DevicesService }                           from '../devices';
-import IService                                     from '../IService';
-import { v1 as uuid }                               from 'uuid';
 import {
 	distinctUntilChanged,
 	exhaustMap,
@@ -39,12 +14,32 @@ import {
 }                                                   from 'rxjs/operators';
 import { of }                                       from 'rxjs/observable/of';
 import { _throw }                                   from 'rxjs/observable/throw';
+import Stripe                                       from 'stripe';
+import { v1 as uuid }                               from 'uuid';
+import {
+	asyncListener,
+	observableListener,
+	routerName,
+	serialization
+}                                                   from '@pyro/io';
+import { DBService }                                from '@pyro/db-server';
 import ILanguage                                    from '@modules/server.common/interfaces/ILanguage';
-import _ = require('lodash');
-import faker                                        from 'faker';
-import { WarehousesService }                        from '../../services/warehouses';
+import {
+	IUserCreateObject,
+	IUserInitializeObject
+}                                                   from '@modules/server.common/interfaces/IUser';
 import IPagingOptions                               from '@modules/server.common/interfaces/IPagingOptions';
-import Stripe = require('stripe');
+import IGeoLocation                                 from '@modules/server.common/interfaces/IGeoLocation';
+import User                                         from '@modules/server.common/entities/User';
+import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
+import IUserRouter                                  from '@modules/server.common/routers/IUserRouter';
+import { InvitesService }                           from '../invites';
+import { DevicesService }                           from '../devices';
+import IService                                     from '../IService';
+import { WarehousesService }                        from '../../services/warehouses';
+import { createLogger }                             from '../../helpers/Log';
+import { observeFile }                              from '../../utils';
+import { env }                                      from '../../env';
 
 interface IWatchedFiles
 {
@@ -87,22 +82,26 @@ export class UsersService extends DBService<User>
 	)
 	{
 		super();
-		// TODO: too many hardcoded constants used below. Refactor!
+		const availableLocales: string[] = env.AVAILABLE_LOCALES.split('|')
 		this.watchedFiles = _.zipObject(
 				['aboutUs', 'privacy', 'termsOfUse', 'help'],
-				_.map(['about_us', 'privacy', 'terms_of_use', 'help'], (folder) =>
-						_.zipObject(
-								['en-US', 'he-IL', 'ru-RU', 'bg-BG'],
-								_.map(['en-US', 'he-IL', 'ru-RU', 'bg-BG'], (language) =>
-										observeFile(
-												`${__dirname}/../../../../res/templates/${folder}/${language}.hbs`
-										).pipe(
-												tap({ error: (err) => this.log.error(err) }),
-												publishReplay(1),
-												refCount<string>()
-										)
-								)
-						)
+				_.map(['about_us', 'privacy', 'terms_of_use', 'help'], folder =>
+				      {
+					      _.zipObject(
+							      availableLocales,
+							      _.map(availableLocales, language =>
+							            {
+								            observeFile(
+										            `${__dirname}/../../../../res/templates/${folder}/${language}.hbs`
+								            ).pipe(
+										            tap({ error: (err) => this.log.error(err) }),
+										            publishReplay(1),
+										            refCount<string>()
+								            )
+							            }
+							      )
+					      )
+				      }
 				)
 		) as any;
 	}
@@ -202,14 +201,15 @@ export class UsersService extends DBService<User>
 	@observableListener()
 	get(customerId: string): Observable<User>
 	{
-		return super.get(customerId).pipe(
-				map(async(user) =>
-				    {
-					    await this.throwIfNotExists(customerId);
-					    return user;
-				    }),
-				switchMap((user) => user)
-		);
+		return super.get(customerId)
+		            .pipe(
+				            map(async(user) =>
+				                {
+					                await this.throwIfNotExists(customerId);
+					                return user;
+				                }),
+				            switchMap((user) => user)
+		            );
 	}
 	
 	/**
@@ -225,7 +225,9 @@ export class UsersService extends DBService<User>
 	{
 		await this.throwIfNotExists(userId);
 		
-		const user = await this.get(userId).pipe(first()).toPromise();
+		const user = await this.get(userId)
+		                       .pipe(first())
+		                       .toPromise();
 		
 		if(user != null)
 		{
@@ -279,7 +281,9 @@ export class UsersService extends DBService<User>
 		
 		try
 		{
-			let user = await this.get(userId).pipe(first()).toPromise();
+			let user = await this.get(userId)
+			                     .pipe(first())
+			                     .toPromise();
 			
 			if(user != null)
 			{
@@ -376,27 +380,28 @@ export class UsersService extends DBService<User>
 			selectedLanguage: string
 	): Observable<string> /*returns html*/
 	{
-		const language = selectedLanguage as ILanguage;
-		return this.devicesService.get(deviceId).pipe(
-				exhaustMap((device) =>
-				           {
-					           if(device === null)
-					           {
-						           return _throw(
-								           new Error(`User with the id ${userId} doesn't exist`)
-						           );
-					           }
-					           else
-					           {
-						           return of(device);
-					           }
-				           }),
-				distinctUntilChanged(
-						(oldDevice, newDevice) =>
-								oldDevice.language !== newDevice.language
-				),
-				switchMap((device) => this.watchedFiles.aboutUs[language])
-		);
+		return this.devicesService
+		           .get(deviceId)
+		           .pipe(
+				           exhaustMap((device) =>
+				                      {
+					                      if(device === null)
+					                      {
+						                      return _throw(
+								                      new Error(`User with the id ${userId} doesn't exist`)
+						                      );
+					                      }
+					                      else
+					                      {
+						                      return of(device);
+					                      }
+				                      }),
+				           distinctUntilChanged(
+						           (oldDevice, newDevice) =>
+								           oldDevice.language !== newDevice.language
+				           ),
+				           switchMap((device) => this.watchedFiles.aboutUs[selectedLanguage as ILanguage])
+		           );
 	}
 	
 	/**
@@ -414,29 +419,30 @@ export class UsersService extends DBService<User>
 			selectedLanguage: string
 	): Observable<string>
 	{
-		const language = selectedLanguage as ILanguage;
-		return this.devicesService.get(deviceId).pipe(
-				exhaustMap((device) =>
-				           {
-					           if(device === null)
-					           {
-						           return _throw(
-								           new Error(
-										           `Device with the id ${deviceId} doesn't exist`
-								           )
-						           );
-					           }
-					           else
-					           {
-						           return of(device);
-					           }
-				           }),
-				distinctUntilChanged(
-						(oldDevice, newDevice) =>
-								oldDevice.language !== newDevice.language
-				),
-				switchMap((device) => this.watchedFiles.termsOfUse[language])
-		);
+		return this.devicesService
+		           .get(deviceId)
+		           .pipe(
+				           exhaustMap((device) =>
+				                      {
+					                      if(device === null)
+					                      {
+						                      return _throw(
+								                      new Error(
+										                      `Device with the id ${deviceId} doesn't exist`
+								                      )
+						                      );
+					                      }
+					                      else
+					                      {
+						                      return of(device);
+					                      }
+				                      }),
+				           distinctUntilChanged(
+						           (oldDevice, newDevice) =>
+								           oldDevice.language !== newDevice.language
+				           ),
+				           switchMap((device) => this.watchedFiles.termsOfUse[selectedLanguage as ILanguage])
+		           );
 	}
 	
 	/**
@@ -454,27 +460,28 @@ export class UsersService extends DBService<User>
 			selectedLanguage: string
 	): Observable<string>
 	{
-		const language = selectedLanguage as ILanguage;
-		return this.devicesService.get(deviceId).pipe(
-				exhaustMap((device) =>
-				           {
-					           if(device === null)
-					           {
-						           return _throw(
-								           new Error(`User with the id ${userId} doesn't exist`)
-						           );
-					           }
-					           else
-					           {
-						           return of(device);
-					           }
-				           }),
-				distinctUntilChanged(
-						(oldDevice, newDevice) =>
-								oldDevice.language !== newDevice.language
-				),
-				switchMap((device) => this.watchedFiles.privacy[language])
-		);
+		return this.devicesService
+		           .get(deviceId)
+		           .pipe(
+				           exhaustMap((device) =>
+				                      {
+					                      if(device === null)
+					                      {
+						                      return _throw(
+								                      new Error(`User with the id ${userId} doesn't exist`)
+						                      );
+					                      }
+					                      else
+					                      {
+						                      return of(device);
+					                      }
+				                      }),
+				           distinctUntilChanged(
+						           (oldDevice, newDevice) =>
+								           oldDevice.language !== newDevice.language
+				           ),
+				           switchMap((device) => this.watchedFiles.privacy[selectedLanguage as ILanguage])
+		           );
 	}
 	
 	/**
@@ -492,98 +499,28 @@ export class UsersService extends DBService<User>
 			selectedLanguage: string
 	): Observable<string>
 	{
-		const language = selectedLanguage as ILanguage;
-		return this.devicesService.get(deviceId).pipe(
-				exhaustMap((device) =>
-				           {
-					           if(device === null)
-					           {
-						           return _throw(
-								           new Error(`User with the id ${userId} doesn't exist`)
-						           );
-					           }
-					           else
-					           {
-						           return of(device);
-					           }
-				           }),
-				distinctUntilChanged(
-						(oldDevice, newDevice) =>
-								oldDevice.language !== newDevice.language
-				),
-				switchMap((device) => this.watchedFiles.help[language])
-		);
-	}
-	
-	/**
-	 * Generates Fake Customer records
-	 * TODO: move to separate FakeUsersService (put into 'fake-data' folder)
-	 * TODO: rename method to "generateCustomers"
-	 *
-	 * @param {number} defaultLng
-	 * @param {number} defaultLat
-	 * @returns {Promise<IUserCreateObject[]>}
-	 * @memberof UsersService
-	 */
-	async generate1000Customers(
-			defaultLng: number,
-			defaultLat: number
-	): Promise<IUserCreateObject[]>
-	{
-		const existingEmails = _.map(
-				await this.Model.find({}).select({ email: 1 }).lean().exec(),
-				(u) => u.email
-		);
-		
-		const customersToCreate: IUserCreateObject[] = [];
-		
-		const customerCreatedFrom = new Date(2015, 1);
-		const customerCreatedTo = new Date();
-		
-		let customerCount = 1;
-		
-		while(customerCount <= 1000)
-		{
-			const firstName = faker.name.firstName();
-			const lastName = faker.name.lastName();
-			const email = faker.internet.email(firstName, lastName);
-			const isBanned = Math.random() < 0.02;
-			
-			const geoLocation: IGeoLocationCreateObject = {
-				countryId: faker.random.number(Country.ZW) as Country,
-				city: faker.address.city(),
-				house: `${customerCount}`,
-				loc: {
-					type: 'Point',
-					coordinates: [defaultLng, defaultLat]
-				},
-				streetAddress: faker.address.streetAddress()
-			};
-			
-			if(!existingEmails.includes(email))
-			{
-				existingEmails.push(email);
-				
-				customersToCreate.push({
-					                       firstName: faker.name.firstName(),
-					                       lastName: faker.name.lastName(),
-					                       geoLocation,
-					                       apartment: `${customerCount}`,
-					                       email,
-					                       isBanned,
-					                       image: faker.image.avatar(),
-					                       phone: faker.phone.phoneNumber(),
-					                       _createdAt: faker.date.between(
-							                       customerCreatedFrom,
-							                       customerCreatedTo
-					                       )
-				                       } as any);
-				
-				customerCount += 1;
-			}
-		}
-		
-		return this.Model.insertMany(customersToCreate);
+		return this.devicesService
+		           .get(deviceId)
+		           .pipe(
+				           exhaustMap((device) =>
+				                      {
+					                      if(device === null)
+					                      {
+						                      return _throw(
+								                      new Error(`User with the id ${userId} doesn't exist`)
+						                      );
+					                      }
+					                      else
+					                      {
+						                      return of(device);
+					                      }
+				                      }),
+				           distinctUntilChanged(
+						           (oldDevice, newDevice) =>
+								           oldDevice.language !== newDevice.language
+				           ),
+				           switchMap((device) => this.watchedFiles.help[selectedLanguage as ILanguage])
+		           );
 	}
 	
 	async banUser(id: string): Promise<User>
@@ -606,7 +543,9 @@ export class UsersService extends DBService<User>
 	 */
 	async throwIfNotExists(userId: string)
 	{
-		const user = await super.get(userId).pipe(first()).toPromise();
+		const user = await super.get(userId)
+		                        .pipe(first())
+		                        .toPromise();
 		
 		if(!user || user.isDeleted)
 		{
