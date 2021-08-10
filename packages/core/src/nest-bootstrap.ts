@@ -1,11 +1,11 @@
-import { NestFactory }                    from '@nestjs/core';
-import { ApplicationModule }              from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { env }                            from './env';
 import Logger                             from 'bunyan';
+import { NestFactory }                    from '@nestjs/core';
+import { INestApplication }               from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ApplicationModule }              from './app.module';
+import { env }                            from './env';
 import { createLogger }                   from './helpers/Log';
 import { NestJSLogger }                   from './helpers/NestJSLogger';
-import { INestApplication }               from '@nestjs/common';
 
 const log: Logger = createLogger({ name: 'bootstrapNest' });
 
@@ -39,5 +39,6 @@ export async function bootstrapNest(): Promise<void>
 	}
 	
 	log.info(`Swagger UI available at http://localhost:${port}/api`);
-	console.log(`Swagger UI available at http://localhost:${port}/api`);
+	log.info(`GraphQL Playground available at http://localhost:${port}/graphql`);
+	log.info(`GraphQL Subscriptions available at ws://localhost:${port}/subscriptions`);
 }
