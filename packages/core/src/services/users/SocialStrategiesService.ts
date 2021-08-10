@@ -1,5 +1,6 @@
 import GoogleStrategy            from 'passport-google-oauth20';
 import FacebookStrategy          from 'passport-facebook';
+import YandexStrategy            from 'passport-yandex-token';
 import { inject, injectable }    from 'inversify';
 import { SocialRegisterService } from './SocialRegisterService';
 import { routerName }            from '@pyro/io';
@@ -16,7 +17,7 @@ export class SocialStrategiesService implements IService
 	)
 	{}
 	
-	getGoogleStrategy(): GoogleStrategy | null
+	public getGoogleStrategy(): GoogleStrategy | null
 	{
 		if(env.GOOGLE_APP_ID !== '' && env.GOOGLE_APP_SECRET !== '')
 		{
@@ -36,15 +37,49 @@ export class SocialStrategiesService implements IService
 					}
 			);
 		}
-		
-		console.log(
-				`Warning: Google OAuth disabled because no details provided in the settings/environment`
-		);
+		else
+		{
+			console.warn(`Google app_id: ${env.GOOGLE_APP_ID}, secret: ${env.GOOGLE_APP_SECRET}`);
+			console.warn(
+					`Warning: Google OAuth disabled because no details provided in the settings/environment`
+			);
+			
+		}
 		
 		return null;
 	}
 	
-	getFacebookStrategy(): FacebookStrategy | null
+	public getYandexStrategy(): YandexStrategy | null
+	{
+		if(env.YANDEX_APP_ID !== '' && env.YANDEX_APP_SECRET !== '')
+		{
+			return new YandexStrategy(
+					{
+						clientID: env.YANDEX_APP_ID,
+						clientSecret: env.YANDEX_APP_SECRET,
+						callbackURL: '/auth/yandex/callback'
+					},
+					async(accessToken, refreshToken, profile, done) =>
+					{
+						const { redirectUrl } = await this.socialRegister.register(
+								profile
+						);
+						
+						return done(null, { redirectUrl });
+					}
+			);
+		}
+		else
+		{
+			console.warn(
+					`Warning: Yandex OAuth disabled because no details provided in the settings/environment`
+			);
+		}
+		
+		return null;
+	}
+	
+	public getFacebookStrategy(): FacebookStrategy | null
 	{
 		if(env.FACEBOOK_APP_ID !== '' && env.FACEBOOK_APP_SECRET !== '')
 		{
