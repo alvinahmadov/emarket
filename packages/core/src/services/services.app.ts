@@ -3,45 +3,47 @@ import https                               from 'https';
 import http                                from 'http';
 import path                                from 'path';
 import pem                                 from 'pem';
-import fs                                 from 'fs';
-import bodyParser                         from 'body-parser';
-import cors                               from 'cors';
-import passport                           from 'passport';
-import methodOverride                     from 'method-override';
-import errorhandler                       from 'errorhandler';
-import socketIO                           from 'socket.io';
-import express                            from 'express';
-import mongoose                           from 'mongoose';
-import morgan                             from 'morgan';
-import exphbs                             from 'express-handlebars';
-import { createLogger }                   from '../helpers/Log';
-import IService, { ServiceSymbol }        from './IService';
-import { IRoutersManager }                from '@pyro/io';
-import { WarehousesService }              from './warehouses';
-import { SocialStrategiesService }        from './users';
-import { env }                            from '../env';
-import { getModel }                       from '@pyro/db-server';
-import Bluebird                           from 'bluebird';
-import { AdminsService }                  from './admins';
-import { UsersAuthService, UsersService } from './users';
-import { FakeRegisterService }            from './fake-data';
-import ipstack                            from 'ipstack';
-import requestIp                          from 'request-ip';
-import { createConnection }               from 'typeorm';
-import { IWarehouseCreateObject }         from '@modules/server.common/interfaces/IWarehouse';
-import { getDummyImage }                  from '@modules/server.common/utils';
-import Admin                              from '@modules/server.common/entities/Admin';
-import Device                             from '@modules/server.common/entities/Device';
-import Carrier                            from '@modules/server.common/entities/Carrier';
-import Invite                             from '@modules/server.common/entities/Invite';
-import InviteRequest                      from '@modules/server.common/entities/InviteRequest';
-import Order                              from '@modules/server.common/entities/Order';
-import Product                            from '@modules/server.common/entities/Product';
-import ProductsCategory                   from '@modules/server.common/entities/ProductsCategory';
-import User                               from '@modules/server.common/entities/User';
-import Warehouse                          from '@modules/server.common/entities/Warehouse';
-import Promotion                          from '@modules/server.common/entities/Promotion';
-import { ConfigService }                  from '../config/config.service';
+import fs                                  from 'fs';
+import bodyParser                          from 'body-parser';
+import cors                                from 'cors';
+import passport                            from 'passport';
+import methodOverride                      from 'method-override';
+import errorhandler                        from 'errorhandler';
+import socketIO                            from 'socket.io';
+import express                             from 'express';
+import mongoose                            from 'mongoose';
+import morgan                              from 'morgan';
+import Bluebird                            from 'bluebird';
+import exphbs                              from 'express-handlebars';
+import ipstack                             from 'ipstack';
+import requestIp                           from 'request-ip';
+import { createConnection }                from 'typeorm';
+import { IRoutersManager }                 from '@pyro/io';
+import { getModel }                        from '@pyro/db-server';
+import Admin                               from '@modules/server.common/entities/Admin';
+import Device                              from '@modules/server.common/entities/Device';
+import Carrier                             from '@modules/server.common/entities/Carrier';
+import Invite                              from '@modules/server.common/entities/Invite';
+import InviteRequest                       from '@modules/server.common/entities/InviteRequest';
+import Order                               from '@modules/server.common/entities/Order';
+import Product                             from '@modules/server.common/entities/Product';
+import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
+import User                                from '@modules/server.common/entities/User';
+import Warehouse                           from '@modules/server.common/entities/Warehouse';
+import Promotion                           from '@modules/server.common/entities/Promotion';
+import { getDummyImage }                   from '@modules/server.common/utils';
+import {
+	FakeUsersService,
+	FakeWarehousesService
+}                                          from './fake-data';
+import IService, { ServiceSymbol }         from './IService';
+import { AdminsService }                   from './admins';
+import { UsersAuthService, UsersService }  from './users';
+import { WarehousesService }               from './warehouses';
+import { SocialStrategiesService }         from './users';
+import { createLogger }                    from '../helpers/Log';
+import { ConfigService }                   from '../config/config.service';
+import { env }                             from '../env';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -78,8 +80,8 @@ export class ServicesApp
 					_configService: ConfigService
 	)
 	{
-		ServicesApp._poolSize = _configService.Env.POOL_SIZE;
-		ServicesApp._connectTimeoutMS = _configService.Env.CONNECT_TIMEOUT_MS;
+		ServicesApp._poolSize = _configService.Env.DB_POOL_SIZE;
+		ServicesApp._connectTimeoutMS = _configService.Env.DB_CONNECT_TIMEOUT;
 		const maxSockets = _configService.Env.MAX_SOCKETS;
 		
 		// see https://webapplog.com/seven-things-you-should-stop-doing-with-node-js
@@ -187,8 +189,8 @@ export class ServicesApp
 				autoReconnect: true,
 				useFindAndModify: false,
 				reconnectTries: Number.MAX_VALUE,
-				poolSize: env.POOL_SIZE,
-				connectTimeoutMS: env.CONNECT_TIMEOUT_MS,
+				poolSize: env.DB_POOL_SIZE,
+				connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
 				useUnifiedTopology: true
 			};
 			
@@ -304,46 +306,54 @@ export class ServicesApp
 	{
 		try
 		{
-			const predefinedUser = await FakeRegisterService.getPredefinedUser(
-					this._usersService,
-					this._usersAuthService
-			);
+			const fakeUsersService =
+					new FakeUsersService(
+							this._usersService,
+							this._usersAuthService
+					);
+			
+			const predefinedUser =
+					await fakeUsersService.generatePredefinedUser();
 			
 			if(!predefinedUser)
 			{
-				console.warn("Test user cannot be created");
+				this.log.warn("Test user wasn't created");
 			}
 			else
 			{
-				console.warn(`User created: ${predefinedUser}`);
+				this.log.warn(`Test user created: ${predefinedUser}`);
 			}
 		} catch(e)
 		{
 			this.log.debug(e);
 		}
-		
 	}
 	
 	private async _registerTestWarehouse()
 	{
 		try
 		{
-			const warehouse = await FakeRegisterService.getWarehouse(
-					this._usersService,
-					this.warehousesService
+			const fakeWarehousesService = new FakeWarehousesService(this.warehousesService);
+			
+			const warehouse = await fakeWarehousesService.generateWarehouse(
+					{
+						username: env.FAKE_USERNAME,
+						password: env.FAKE_PASSWORD,
+						email: env.FAKE_EMAIL
+					}
 			);
 			
 			if(!warehouse)
 			{
-				alert("Test warehouse cannot be created");
+				this.log.warn("Test warehouse wasn't created")
 			}
 			else
 			{
-				console.log(`Warehouse created: ${warehouse}`);
+				this.log.warn(`Test warehouse created: ${warehouse}`);
 			}
 		} catch(e)
 		{
-			this.log.debug(e)
+			this.log.warn(e)
 		}
 	}
 	
@@ -362,7 +372,7 @@ export class ServicesApp
 			                       done(null, user);
 		                       });
 		
-		passport.deserializeUser((id, done) =>
+		passport.deserializeUser(() =>
 		                         {
 			                         // TODO ?
 		                         });
@@ -472,9 +482,7 @@ export class ServicesApp
 		
 		this.httpServer = http.createServer(this.expressApp);
 		
-		// TODO: add to settings file
-		// set connections timeouts to 30 minutes (for long running requests)
-		const timeout = 30 * 60 * 1000;
+		const timeout = env.CONNECTION_TIMEOUT * 60 * 1000;
 		
 		if(this.httpsServer)
 		{
@@ -564,24 +572,6 @@ export class ServicesApp
 				                    res.status(500).end();
 			                    }
 		                    });
-		
-		// TODO: why is this here? It should be in some Nest Controller
-		this.expressApp.post('/warehouse/create',
-		                     async(
-				                     req,
-				                     res
-		                     ) =>
-		                     {
-			                     const warehouseCreateObject: IWarehouseCreateObject = JSON.parse(
-					                     req.body.warehouse
-			                     );
-			
-			                     const warehouse = await this.warehousesService.create(
-					                     warehouseCreateObject
-			                     );
-			                     res.json(warehouse);
-		                     });
-		
 		this._setupAuthRoutes();
 		this._setupStaticRoutes();
 		
