@@ -1,14 +1,16 @@
+// noinspection GraphQLUnresolvedReference
+
 import { Injectable }             from '@angular/core';
 import { Apollo }                 from 'apollo-angular';
-import User                       from '@modules/server.common/entities/User';
-import { map, share }             from 'rxjs/operators';
-import { Observable }             from 'rxjs';
 import gql                        from 'graphql-tag';
+import { Observable }             from 'rxjs';
+import { map, share }             from 'rxjs/operators';
 import IUser, {
-	IResponseGenerate1000Customers,
+	IResponseGenerateCustomers,
 }                                 from '@modules/server.common/interfaces/IUser';
-import { IUserRegistrationInput } from '@modules/server.common/routers/IUserAuthRouter';
 import IPagingOptions             from '@modules/server.common/interfaces/IPagingOptions';
+import User                       from '@modules/server.common/entities/User';
+import { IUserRegistrationInput } from '@modules/server.common/routers/IUserAuthRouter';
 
 @Injectable()
 export class UsersService
@@ -18,14 +20,15 @@ export class UsersService
     isUserEmailExists(email: string): Promise<boolean>
     {
         return this._apollo
-		.query<{ isUserEmailExists: boolean }>({
-                                                   query: gql`
-                                                       query IsUserEmailExists($email: String!) {
-                                                           isUserEmailExists(email: $email)
-                                                       }
-			                                       `,
-			                                       variables: { email },
-                                               })
+		.query<{ isUserEmailExists: boolean }>(
+            {
+                query: gql`
+					query IsUserEmailExists($email: String!) {
+						isUserEmailExists(email: $email)
+					}
+				`,
+				variables: { email },
+            })
 		.pipe(map((res) => res.data.isUserEmailExists))
 		.toPromise();
     }
@@ -39,9 +42,9 @@ export class UsersService
         return this._apollo
 		.query({
                    query: gql`
-                       query IsUserExists($conditions: UserMemberInput!) {
-                           isUserExists(conditions: $conditions)
-                       }
+					   query IsUserExists($conditions: UserMemberInput!) {
+						   isUserExists(conditions: $conditions)
+					   }
 			       `,
 			       variables: { conditions },
                })
@@ -51,34 +54,36 @@ export class UsersService
     getUsers(pagingOptions?: IPagingOptions): Observable<User[]>
     {
         return this._apollo
-		.watchQuery<{ users: IUser[] }>({
-                                            query: gql`
-                                                query AllUsers($pagingOptions: PagingOptionsInput) {
-                                                    users(pagingOptions: $pagingOptions) {
-                                                        _id
-                                                        firstName
-                                                        lastName
-                                                        image
-                                                        email
-                                                        apartment
-                                                        phone
-                                                        isBanned
-                                                        geoLocation {
-                                                            countryId
-                                                            city
-                                                            house
-                                                            streetAddress
-                                                            loc {
-                                                                type
-                                                                coordinates
-                                                            }
-                                                        }
-                                                    }
-                                                }
-			                                `,
-			                                variables: { pagingOptions },
-			                                pollInterval: 5000,
-                                        })
+		.watchQuery<{ users: IUser[] }>(
+            {
+                query: gql`
+					query AllUsers($pagingOptions: PagingOptionsInput) {
+						users(pagingOptions: $pagingOptions) {
+							_id
+							firstName
+							lastName
+							image
+							email
+							apartment
+							phone
+							isBanned
+							geoLocation {
+								countryId
+								city
+								house
+								streetAddress
+								loc {
+									type
+									coordinates
+								}
+							}
+						}
+					}
+				`,
+				variables: { pagingOptions },
+				pollInterval: 5000,
+            }
+        )
 		.valueChanges.pipe(
 				map((res) => res.data.users),
 				map((users) => users.map((user) => this._userFactory(user))),
@@ -91,28 +96,28 @@ export class UsersService
         return this._apollo
 		.query({
                    query: gql`
-                       query GetUserById($id: String!) {
-                           user(id: $id) {
-                               _id
-                               firstName
-                               lastName
-                               image
-                               email
-                               apartment
-                               phone
-                               isBanned
-                               geoLocation {
-                                   streetAddress
-                                   city
-                                   house
-                                   notes
-                                   loc {
-                                       type
-                                       coordinates
-                                   }
-                               }
-                           }
-                       }
+					   query GetUserById($id: String!) {
+						   user(id: $id) {
+							   _id
+							   firstName
+							   lastName
+							   image
+							   email
+							   apartment
+							   phone
+							   isBanned
+							   geoLocation {
+								   streetAddress
+								   city
+								   house
+								   notes
+								   loc {
+									   type
+									   coordinates
+								   }
+							   }
+						   }
+					   }
 			       `,
 			       variables: { id },
                })
@@ -127,9 +132,9 @@ export class UsersService
     {
         return this._apollo.mutate({
                                        mutation: gql`
-                                           mutation RemoveUsersByIds($ids: [String!]!) {
-                                               removeUsersByIds(ids: $ids)
-                                           }
+										   mutation RemoveUsersByIds($ids: [String!]!) {
+											   removeUsersByIds(ids: $ids)
+										   }
 			                           `,
 			                           variables: { ids },
                                    });
@@ -140,13 +145,13 @@ export class UsersService
         const res = await this._apollo
 		.mutate({
                     mutation: gql`
-                        mutation RegisterUser($registerInput: UserRegisterInput!) {
-                            registerUser(registerInput: $registerInput) {
-                                id
-                                firstName
-                                lastName
-                            }
-                        }
+						mutation RegisterUser($registerInput: UserRegisterInput!) {
+							registerUser(registerInput: $registerInput) {
+								id
+								firstName
+								lastName
+							}
+						}
 			        `,
 			        variables: { registerInput },
                 })
@@ -160,13 +165,13 @@ export class UsersService
         return this._apollo
 		.mutate({
                     mutation: gql`
-                        mutation BanUser($id: String!) {
-                            banUser(id: $id) {
-                                id
-                                firstName
-                                lastName
-                            }
-                        }
+						mutation BanUser($id: String!) {
+							banUser(id: $id) {
+								id
+								firstName
+								lastName
+							}
+						}
 			        `,
 			        variables: { id },
                 })
@@ -178,13 +183,13 @@ export class UsersService
         return this._apollo
 		.mutate({
                     mutation: gql`
-                        mutation UnbanUser($id: String!) {
-                            unbanUser(id: $id) {
-                                id
-                                firstName
-                                lastName
-                            }
-                        }
+						mutation UnbanUser($id: String!) {
+							unbanUser(id: $id) {
+								id
+								firstName
+								lastName
+							}
+						}
 			        `,
 			        variables: { id },
                 })
@@ -196,9 +201,9 @@ export class UsersService
         const res = await this._apollo
 		.query({
                    query: gql`
-                       query GetCountOfUsers {
-                           getCountOfUsers
-                       }
+					   query GetCountOfUsers {
+						   getCountOfUsers
+					   }
 			       `,
                })
 		.toPromise();
@@ -217,13 +222,13 @@ export class UsersService
         const res = await this._apollo
 		.query({
                    query: gql`
-                       query GetCustomerMetrics($id: String!) {
-                           getCustomerMetrics(id: $id) {
-                               totalOrders
-                               canceledOrders
-                               completedOrdersTotalSum
-                           }
-                       }
+					   query GetCustomerMetrics($id: String!) {
+						   getCustomerMetrics(id: $id) {
+							   totalOrders
+							   canceledOrders
+							   completedOrdersTotalSum
+						   }
+					   }
 			       `,
 			       variables: { id },
                })
@@ -236,26 +241,27 @@ export class UsersService
     generate1000Customers(
 			defaultLng: number,
 			defaultLat: number
-	): Observable<IResponseGenerate1000Customers>
+	): Observable<IResponseGenerateCustomers>
     {
         return this._apollo
-		.query<{ generate1000Customers: IResponseGenerate1000Customers }>({
-                                                                              query: gql`
-                                                                                  query Generate1000Customers(
-                                                                                      $defaultLng: Float!
-                                                                                      $defaultLat: Float!
-                                                                                  ) {
-                                                                                      generate1000Customers(
-                                                                                          defaultLng: $defaultLng
-                                                                                          defaultLat: $defaultLat
-                                                                                      ) {
-                                                                                          success
-                                                                                          message
-                                                                                      }
-                                                                                  }
-			                                                                  `,
-			                                                                  variables: { defaultLng, defaultLat },
-                                                                          })
+		.query<{ generate1000Customers: IResponseGenerateCustomers }>(
+            {
+                query: gql`
+					query Generate1000Customers(
+						$defaultLng: Float!
+						$defaultLat: Float!
+					) {
+						generate1000Customers(
+							defaultLng: $defaultLng
+							defaultLat: $defaultLat
+						) {
+							success
+							message
+						}
+					}
+				`,
+				variables: { defaultLng, defaultLat },
+            })
 		.pipe(
 				map((res) =>
 				    {

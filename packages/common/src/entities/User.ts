@@ -1,7 +1,13 @@
-import GeoLocation                                       from './GeoLocation';
-import { DBObject, getSchema, ModelName, Schema, Types } from '../@pyro/db';
-import IUser, { IUserCreateObject }                      from '../interfaces/IUser';
-import { Entity, Column }                                from 'typeorm';
+import { Entity, Column }           from 'typeorm';
+import GeoLocation                  from './GeoLocation';
+import {
+	DBObject,
+	getSchema,
+	ModelName,
+	Schema,
+	Types
+}                                   from '../@pyro/db';
+import IUser, { IUserCreateObject } from '../interfaces/IUser';
 
 /**
  * Customer who make orders
