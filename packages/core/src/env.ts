@@ -12,6 +12,8 @@ export type Env = Readonly<{
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
 	
+	CONNECTION_TIMEOUT: number;
+	
 	HTTPSPORT: number;
 	HTTPPORT: number;
 	GQLPORT: number;
@@ -22,10 +24,21 @@ export type Env = Readonly<{
 	
 	LOGS_PATH: string;
 	
+	DB_TYPE: string;
 	DB_URI: string;
-	TESTING_DB_URI: string;
+	DB_TESTING_URI: string;
+	DB_POOL_SIZE: number;
+	DB_CONNECT_TIMEOUT: number;
 	
 	STRIPE_SECRET_KEY: string;
+	
+	YOOMONEY_SHOP_ID: string;
+	YOOMONEY_SECRET_KEY: string;
+	
+	BITPAY_SHOP_NAME: string;
+	BITPAY_WALLET_ID: string;
+	BITPAY_PUBLIC_KEY: string;
+	BITPAY_SECRET_KEY: string;
 	
 	URBAN_AIRSHIP_KEY: string;
 	URBAN_AIRSHIP_SECRET: string;
@@ -40,8 +53,13 @@ export type Env = Readonly<{
 	GOOGLE_APP_ID: string;
 	GOOGLE_APP_SECRET: string;
 	
+	YANDEX_APP_ID: string;
+	YANDEX_APP_SECRET: string;
+	
 	FACEBOOK_APP_ID: string;
 	FACEBOOK_APP_SECRET: string;
+	
+	AVAILABLE_LOCALES: string;
 	
 	JWT_SECRET: string;
 	
@@ -55,7 +73,14 @@ export type Env = Readonly<{
 	ADMIN_PASSWORD_RESET?: boolean;
 	FAKE_DATA_GENERATOR?: boolean;
 	
+	DEFAULT_ADMIN_MAIL: string;
+	DEFAULT_ADMIN_PASSWORD: string;
+	
 	FAKE_INVITE_CODE: number;
+	
+	FAKE_USERNAME: string;
+	FAKE_PASSWORD: string;
+	FAKE_EMAIL: string;
 	
 	ARCGIS_CLIENT_ID: string;
 	ARCGIS_CLIENT_SECRET: string;
@@ -63,7 +88,10 @@ export type Env = Readonly<{
 	
 	LOG_LEVEL?: string;
 	
-	ENGINE_API_KEY?: string;
+	APOLLO_KEY?: string;
+	APOLLO_GRAPH_ID?: string;
+	APOLLO_GRAPH_VARIANT?: string;
+	APOLLO_SCHEMA_REPORTING: boolean;
 	
 	MAX_SOCKETS?: number;
 }>;
@@ -79,6 +107,8 @@ export const env: Env = cleanEnv(
 			WEB_CONCURRENCY: num({ default: 1 }),
 			WEB_MEMORY: num({ default: 2048 }),
 			
+			CONNECTION_TIMEOUT: num({ default: 30 }),
+			
 			HTTPSPORT: port({ default: 5501 }),
 			HTTPPORT: port({ default: 5500 }),
 			GQLPORT: port({ default: 5555 }),
@@ -89,10 +119,21 @@ export const env: Env = cleanEnv(
 			
 			LOGS_PATH: str({ default: './tmp/logs' }),
 			
+			DB_TYPE: str({ default: 'mongodb' }),
 			DB_URI: str({ default: 'mongodb://localhost/emarket_development' }),
-			TESTING_DB_URI: str({ default: 'mongodb://localhost/emarket_testing' }),
+			DB_TESTING_URI: str({ default: 'mongodb://localhost/emarket_testing' }),
+			DB_POOL_SIZE: num({ default: 50 }),
+			DB_CONNECT_TIMEOUT: num({ default: 40000 }),
 			
 			STRIPE_SECRET_KEY: str({ default: '' }),
+			
+			YOOMONEY_SHOP_ID: str({ default: '' }),
+			YOOMONEY_SECRET_KEY: str({ default: '' }),
+			
+			BITPAY_SHOP_NAME: str({ default: '' }),
+			BITPAY_WALLET_ID: str({ default: '' }),
+			BITPAY_PUBLIC_KEY: str({ default: '' }),
+			BITPAY_SECRET_KEY: str({ default: '' }),
 			
 			URBAN_AIRSHIP_KEY: str({ default: '' }),
 			URBAN_AIRSHIP_SECRET: str({ default: '' }),
@@ -107,8 +148,13 @@ export const env: Env = cleanEnv(
 			GOOGLE_APP_ID: str({ default: '' }),
 			GOOGLE_APP_SECRET: str({ default: '' }),
 			
+			YANDEX_APP_ID: str({ default: '' }),
+			YANDEX_APP_SECRET: str({ default: '' }),
+			
 			FACEBOOK_APP_ID: str({ default: '' }),
 			FACEBOOK_APP_SECRET: str({ default: '' }),
+			
+			AVAILABLE_LOCALES: str({ default: '' }),
 			
 			JWT_SECRET: str({ default: 'default' }),
 			
@@ -145,6 +191,13 @@ export const env: Env = cleanEnv(
 			ADMIN_PASSWORD_RESET: bool({ default: false }),
 			FAKE_DATA_GENERATOR: bool({ default: false }),
 			
+			DEFAULT_ADMIN_MAIL: str({ default: 'admin@mail.com' }),
+			DEFAULT_ADMIN_PASSWORD: str({ default: 'admin' }),
+			
+			FAKE_USERNAME: str({ default: 'user' }),
+			FAKE_PASSWORD: str({ default: '12345' }),
+			FAKE_EMAIL: str({ default: 'user@mail.com' }),
+			
 			FAKE_INVITE_CODE: num({ default: 0 }),
 			
 			ARCGIS_CLIENT_ID: str({ default: '' }),
@@ -154,12 +207,23 @@ export const env: Env = cleanEnv(
 				               choices: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
 				               default: 'error'
 			               }),
-			ENGINE_API_KEY: str({
-				                    desc:
-						                    'Apollo Engine Key (optional, see https://www.apollographql.com/docs/platform/schema-registry)',
-				                    default: ''
-			                    }),
+			APOLLO_KEY: str({
+				                desc:
+						                'Apollo Engine Key (optional, see https://www.apollographql.com/docs/platform/schema-registry)',
+				                default: ''
+			                }),
+			
+			APOLLO_GRAPH_ID: str({
+				                     desc: 'Apollo graph id',
+				                     default: ''
+			                     }),
+			APOLLO_GRAPH_VARIANT: str(
+					{ default: 'current' }
+			),
+			
+			APOLLO_SCHEMA_REPORTING: bool({ default: false }),
+			
 			MAX_SOCKETS: num({ default: Infinity })
 		},
-		{ strict: true, dotEnvPath: __dirname + '/../.env' }
+		{ strict: true, dotEnvPath: __dirname + '/../../.env' }
 );
