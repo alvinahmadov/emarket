@@ -1,21 +1,21 @@
-import IService                            from '../IService';
-import User                                from '@modules/server.common/entities/User';
-import { createLogger }                    from '../../helpers/Log';
-import { EntityService }                   from '@pyro/db-server/entity-service';
+import { inject, injectable }              from 'inversify';
+import Logger                              from 'bunyan';
 import { asyncListener, routerName }       from '@pyro/io';
-import { UsersService }                    from './UsersService';
-import { NotInvitedError }                 from '@modules/server.common/errors/NotInvitedError';
+import { EntityService }                   from '@pyro/db-server/entity-service';
 import { IUserCreateObject }               from '@modules/server.common/interfaces/IUser';
-import { InvitesService }                  from '../invites';
+import User                                from '@modules/server.common/entities/User';
 import IUserAuthRouter, {
 	AddableRegistrationInfo,
 	IUserLoginResponse,
 	IUserRegistrationInput
 }                                          from '@modules/server.common/routers/IUserAuthRouter';
-import { inject, injectable }              from 'inversify';
+import { NotInvitedError }                 from '@modules/server.common/errors/NotInvitedError';
+import { UsersService }                    from './UsersService';
+import IService                            from '../IService';
 import { AuthService, AuthServiceFactory } from '../auth';
+import { InvitesService }                  from '../invites';
+import { createLogger }                    from '../../helpers/Log';
 import { env }                             from '../../env';
-import Logger                              from 'bunyan';
 
 /**
  * Customers Authentication Service
@@ -32,8 +32,7 @@ import Logger                              from 'bunyan';
 export class UsersAuthService extends EntityService<User>
 		implements IUserAuthRouter, IService
 {
-	// TODO: why it's not in the settings and hardcoded to some default value here?
-	private static IS_INVITES_SYSTEM_ON: boolean = false;
+	private static IS_INVITES_SYSTEM_ON: boolean = env.SETTING_INVITES_ENABLED;
 	readonly DBObject: any = User;
 	protected readonly log: Logger = createLogger({
 		                                              name: 'userAuthService'
@@ -92,18 +91,16 @@ export class UsersAuthService extends EntityService<User>
 			delete input.user.email;
 		}
 		
-		const user = await this.usersService.create({
-			                                            ...input.user,
-			                                            ...(input.password
-			                                                ? {
-						                                            hash: await this.authService.getPasswordHash(
-								                                            input.password
-						                                            )
-					                                            }
-			                                                : {})
-		                                            });
-		
-		return user;
+		return await this.usersService.create({
+			                                      ...input.user,
+			                                      ...(input.password
+			                                          ? {
+						                                      hash: await this.authService.getPasswordHash(
+								                                      input.password
+						                                      )
+					                                      }
+			                                          : {})
+		                                      });
 	}
 	
 	/**
