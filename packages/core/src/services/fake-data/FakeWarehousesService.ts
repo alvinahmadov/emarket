@@ -1,4 +1,3 @@
-import { env }                      from "env";
 import { injectable }               from "inversify";
 import faker                        from "faker";
 import bcrypt                       from "bcryptjs";
@@ -8,6 +7,7 @@ import ForwardOrdersMethod          from "@modules/server.common/enums/ForwardOr
 import Warehouse                    from "@modules/server.common/entities/Warehouse";
 import { Country }                  from "@modules/server.common/entities/GeoLocation";
 import { WarehousesService }        from "../warehouses";
+import { env }                      from "../../env";
 
 type FakeUserInput = {
 	username: string;
