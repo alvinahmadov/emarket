@@ -1,30 +1,39 @@
-import Logger                                             from 'bunyan';
-import _                                                  from 'lodash';
-import { inject, injectable }                             from 'inversify';
-import { ProductsService }                                from '../products';
-import { createLogger }                                   from '../../helpers/Log';
-import Warehouse                                          from '@modules/server.common/entities/Warehouse';
-import { default as IWarehouse }                          from '@modules/server.common/interfaces/IWarehouse';
-import { IGeoLocationCreateObject }                       from '@modules/server.common/interfaces/IGeoLocation';
-import { Observable }                                     from 'rxjs';
-import IWarehouseRouter, {
-	IWarehouseRegistrationInput
-}                                                         from '@modules/server.common/routers/IWarehouseRouter';
+import Logger                                            from 'bunyan';
+import _                                                 from 'lodash';
+import { inject, injectable }                            from 'inversify';
+import { Observable }                                    from 'rxjs';
+import {
+	concat,
+	exhaustMap,
+	first,
+	map,
+	switchMap,
+	tap
+}                                                        from 'rxjs/operators';
+import { of }                                            from 'rxjs/observable/of';
+import { v1 as uuid }                                    from 'uuid';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
-}                                                         from '@pyro/io';
-import IService                                           from '../IService';
-import { concat, exhaustMap, tap, first, map, switchMap } from 'rxjs/operators';
-import { of }                                             from 'rxjs/observable/of';
-import { DBService }                                      from '@pyro/db-server';
-import { IWarehouseLoginResponse }                        from '@modules/server.common/routers/IWarehouseRouter';
-import { env }                                            from '../../env';
-import { AuthService, AuthServiceFactory }                from '../auth';
-import { v1 as uuid }                                     from 'uuid';
-import IPagingOptions                                     from '@modules/server.common/interfaces/IPagingOptions';
+}                                                        from '@pyro/io';
+import { DBService }                                     from '@pyro/db-server';
+import { CreateObject }                                  from "@pyro/db/db-create-object";
+import Warehouse                                         from '@modules/server.common/entities/Warehouse';
+import { default as IWarehouse, IWarehouseCreateObject } from '@modules/server.common/interfaces/IWarehouse';
+import { IGeoLocationCreateObject }                      from '@modules/server.common/interfaces/IGeoLocation';
+import IWarehouseRouter,
+{
+	IWarehouseLoginResponse,
+	IWarehouseRegistrationInput
+}                                                        from '@modules/server.common/routers/IWarehouseRouter';
+import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
+import IService                                          from '../IService';
+import { AuthService, AuthServiceFactory }               from '../auth';
+import { ProductsService }                               from '../products';
+import { createLogger }                                  from '../../helpers/Log';
+import { env }                                           from '../../env';
 
 /**
  * Warehouses Service
@@ -54,11 +63,19 @@ export class WarehousesService extends DBService<Warehouse>
 	)
 	{
 		super();
-		this.authService = this.authServiceFactory({
-			                                           role: 'warehouse',
-			                                           Entity: Warehouse,
-			                                           saltRounds: env.USER_PASSWORD_BCRYPT_SALT_ROUNDS
-		                                           });
+		const authConfig = {
+			role: 'warehouse',
+			Entity: Warehouse,
+			saltRounds: env.USER_PASSWORD_BCRYPT_SALT_ROUNDS
+		};
+		
+		this.authService = this.authServiceFactory(authConfig);
+	}
+	
+	@asyncListener()
+	async create(warehouse: CreateObject<Warehouse>): Promise<Warehouse>
+	{
+		return super.create(warehouse);
 	}
 	
 	/**
@@ -77,10 +94,11 @@ export class WarehousesService extends DBService<Warehouse>
 			sortObj[pagingOptions.sort.field] = pagingOptions.sort.sortBy;
 		}
 		
-		return this.Model.find({
-			                       ...findInput,
-			                       isDeleted: { $eq: false }
-		                       })
+		return this.Model
+		           .find({
+			                 ...findInput,
+			                 isDeleted: { $eq: false }
+		                 })
 		           .sort(sortObj)
 		           .skip(pagingOptions.skip)
 		           .limit(pagingOptions.limit)
@@ -176,17 +194,18 @@ export class WarehousesService extends DBService<Warehouse>
 	@asyncListener()
 	async register(input: IWarehouseRegistrationInput)
 	{
-		const warehouse = await super.create({
-			                                     ...input.warehouse,
-			                                     ...(input.password
-			                                         ? {
-						                                     hash: await this.authService.getPasswordHash(
-								                                     input.password
-						                                     )
-					                                     }
-			                                         : {})
-		                                     });
-		return warehouse;
+		const warehouseCreateObj: IWarehouseCreateObject = {
+			...input.warehouse,
+			...(input.password
+			    ? {
+						hash: await this.authService.getPasswordHash(
+								input.password
+						)
+					}
+			    : {})
+		}
+		
+		return await super.create(warehouseCreateObj);
 	}
 	
 	/**
@@ -222,17 +241,40 @@ export class WarehousesService extends DBService<Warehouse>
 			password: string
 	): Promise<IWarehouseLoginResponse | null>
 	{
-		const res = await this.authService.login({ username }, password);
-		
-		if(!res || res.entity.isDeleted)
+		try
 		{
-			return null;
+			this.log.info(
+					{
+						username,
+						password
+					},
+					'.login(username, password) called'
+			);
+			
+			const res = await this.authService.login({ username }, password);
+			
+			this.log.warn(
+					{
+						res
+					},
+					'.login(username, password) called'
+			)
+			
+			if(!res || res.entity.isDeleted)
+			{
+				return null;
+			}
+			
+			return {
+				warehouse: res.entity,
+				token: res.token
+			};
+		} catch(e)
+		{
+			this.log.debug(e);
 		}
 		
-		return {
-			warehouse: res.entity,
-			token: res.token
-		};
+		return null;
 	}
 	
 	/**
@@ -248,28 +290,28 @@ export class WarehousesService extends DBService<Warehouse>
 	{
 		if(!fullProducts)
 		{
-			return super.get(id).pipe(
-					map(async(warehouse) =>
-					    {
-						    await this.throwIfNotExists(id);
-						    return warehouse;
-					    }),
-					switchMap((warehouse) => warehouse)
-			);
+			return super.get(id)
+			            .pipe(
+					            map(async(warehouse) =>
+					                {
+						                await this.throwIfNotExists(id);
+						                return warehouse;
+					                }),
+					            switchMap((warehouse) => warehouse)
+			            );
 		}
 		else
 		{
-			return super
-					.get(id)
-					.pipe(
-							map(async(warehouse) =>
-							    {
-								    await this.throwIfNotExists(id);
-								    return warehouse;
-							    }),
-							switchMap((warehouse) => warehouse)
-					)
-					.pipe(exhaustMap(() => this._get(id, true)));
+			return super.get(id)
+			            .pipe(
+					            map(async(warehouse) =>
+					                {
+						                await this.throwIfNotExists(id);
+						                return warehouse;
+					                }),
+					            switchMap((warehouse) => warehouse)
+			            )
+			            .pipe(exhaustMap(() => this._get(id, true)));
 		}
 	}
 	
@@ -345,7 +387,9 @@ export class WarehousesService extends DBService<Warehouse>
 	 */
 	async throwIfNotExists(storeId: string): Promise<void>
 	{
-		const store = await super.get(storeId).pipe(first()).toPromise();
+		const store = await super.get(storeId)
+		                         .pipe(first())
+		                         .toPromise();
 		
 		if(!store || store.isDeleted)
 		{
@@ -355,7 +399,8 @@ export class WarehousesService extends DBService<Warehouse>
 	
 	private async _get(id: string, fullProducts = false): Promise<Warehouse>
 	{
-		const _warehouse = (await this.Model.findById(id)
+		const _warehouse = (await this.Model
+		                              .findById(id)
 		                              .populate(fullProducts ? 'products.product' : '')
 		                              .lean()
 		                              .exec()) as IWarehouse;
@@ -368,10 +413,11 @@ export class WarehousesService extends DBService<Warehouse>
 	): Promise<Warehouse[]>
 	{
 		return _.map(
-				(await this.Model.find({
-					                       isActive: true,
-					                       isDeleted: { $eq: false }
-				                       })
+				(await this.Model
+				           .find({
+					                 isActive: true,
+					                 isDeleted: { $eq: false }
+				                 })
 				           .populate(fullProducts ? 'products.product' : '')
 				           .lean()
 				           .exec()) as IWarehouse[],
@@ -382,9 +428,10 @@ export class WarehousesService extends DBService<Warehouse>
 	private async _getAllStores(fullProducts = false): Promise<Warehouse[]>
 	{
 		return _.map(
-				(await this.Model.find({
-					                       isDeleted: { $eq: false }
-				                       })
+				(await this.Model
+				           .find({
+					                 isDeleted: { $eq: false }
+				                 })
 				           .populate(fullProducts ? 'products.product' : '')
 				           .lean()
 				           .exec()) as IWarehouse[],
