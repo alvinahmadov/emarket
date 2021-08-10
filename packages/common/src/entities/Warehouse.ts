@@ -1,10 +1,10 @@
 import _                                                 from 'lodash';
+import { Entity, Column }                                from 'typeorm';
 import { DBObject, getSchema, ModelName, Schema, Types } from '../@pyro/db';
 import GeoLocation                                       from './GeoLocation';
 import WarehouseProduct, { WithPopulatedProduct }        from './WarehouseProduct';
 import IWarehouse, { IWarehouseCreateObject }            from '../interfaces/IWarehouse';
 import ForwardOrdersMethod                               from '../enums/ForwardOrdersMethod';
-import { Entity, Column }                                from 'typeorm';
 import IWarehouseProduct                                 from '../interfaces/IWarehouseProduct';
 import OrderBarcodeTypes                                 from '../enums/OrderBarcodeTypes';
 import PaymentGateway                                    from './PaymentGateway';
@@ -34,6 +34,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Types.Boolean(false)
 	@Column()
 	isActive: boolean;
+	
 	/**
 	 * Is online payment enabled?
 	 * If disabled, sales only possible using cash on delivery or takeaway and no online payments allowed
@@ -44,26 +45,27 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isPaymentEnabled: boolean;
+	
 	/**
 	 * Enable or disable cash payment method
 	 *
 	 * @type {boolean}
 	 * @memberof Warehouse
 	 */
-	
 	@Types.Boolean(true)
 	@Column()
 	isCashPaymentEnabled: boolean;
+	
 	/**
 	 * Enable or disable in-store mode
 	 *
 	 * @type {boolean}
 	 * @memberof Warehouse
 	 */
-	
 	@Types.Boolean(false)
 	@Column()
 	inStoreMode: boolean;
+	
 	/**
 	 * Warehouse current location (address)
 	 * Note: we do support "moving" warehouses (e.g. car with products)
@@ -73,6 +75,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema(getSchema(GeoLocation))
 	geoLocation: GeoLocation;
+	
 	/**
 	 * Warehouse delivery areas in GeoJSON format
 	 *
@@ -81,6 +84,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema({ type: Object })
 	deliveryAreas: object;
+	
 	/**
 	 * Products available at this warehouse for customer to purchase
 	 *
@@ -89,6 +93,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema([getSchema(WarehouseProduct)])
 	products: WarehouseProduct[];
+	
 	/**
 	 * The name of Store/Merchant
 	 *
@@ -98,6 +103,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Types.String()
 	@Column()
 	name: string;
+	
 	/**
 	 * The URL of store brand logo
 	 *
@@ -107,6 +113,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	logo: string;
+	
 	/**
 	 * Default administrator user for the store
 	 * (used for authentication during login into Merchant app together with hashed password)
@@ -117,6 +124,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, unique: true })
 	@Column()
 	username: string;
+	
 	/**
 	 * Hashed password of default store administrator
 	 *
@@ -126,6 +134,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, required: false, select: false })
 	@Column()
 	hash?: string;
+	
 	/**
 	 * Primary contact email for the store
 	 *
@@ -135,6 +144,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	contactEmail: string | null;
+	
 	/**
 	 * Primary contact phone for the store
 	 *
@@ -144,6 +154,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	contactPhone: string | null;
+	
 	/**
 	 * Phone number, which should be used to accept orders by phone calls
 	 * If null, Store did not accept orders by phone calls
@@ -154,6 +165,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	ordersPhone: string | null;
+	
 	/**
 	 * Email address, which should be used to accept orders by incoming emails
 	 * If null, Store did not accept orders by incoming emails
@@ -164,6 +176,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	ordersEmail: string | null;
+	
 	/**
 	 * Preferable way to forward orders to the Store (email, phone, etc)
 	 *
@@ -173,6 +186,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema([Number])
 	@Column()
 	forwardOrdersUsing: ForwardOrdersMethod[];
+	
 	/**
 	 * Is Warehouse products by default require manufacturing
 	 * (e.g. pizza requires manufacturing, but bottle of beer usually don't)
@@ -183,6 +197,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isManufacturing: boolean;
+	
 	/**
 	 * Is warehouse products by default become available only when carrier found
 	 * (Should we search for carrier before or after customer purchases product)
@@ -193,6 +208,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isCarrierRequired: boolean;
+	
 	/**
 	 * IDs of devices used to access Warehouse app (where app installed or running)
 	 * Note: used to send push notifications
@@ -202,6 +218,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema([String])
 	devicesIds: string[];
+	
 	/**
 	 * IDs of carriers which used by Store
 	 *
@@ -210,6 +227,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema([String])
 	usedCarriersIds: string[];
+	
 	/**
 	 * if true, has some carriers assigned to the Store
 	 *
@@ -219,6 +237,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Types.Boolean(false)
 	@Column()
 	hasRestrictedCarriers: boolean;
+	
 	/**
 	 * IDs of carriers which are "connected" (assigned) to the Store ("own carriers").
 	 *
@@ -227,9 +246,11 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema([String])
 	carriersIds: string[];
+	
 	@Types.Boolean(false)
 	@Column()
 	isDeleted: boolean;
+	
 	/**
 	 * Is Store allows deliveries for purchases
 	 *
@@ -239,6 +260,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: Boolean, required: false })
 	@Column()
 	productsDelivery?: boolean;
+	
 	/**
 	 * Is Store allows takeaway purchases
 	 *
@@ -248,6 +270,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: Boolean, required: false })
 	@Column()
 	productsTakeaway?: boolean;
+	
 	/**
 	 * The type of order barcode
 	 *
@@ -257,6 +280,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: Number, required: false })
 	@Column()
 	orderBarcodeType?: OrderBarcodeTypes;
+	
 	/**
 	 * Unique data for generate on barcode
 	 *
@@ -266,6 +290,7 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, unique: true, sparse: true })
 	@Column()
 	barcodeData: string;
+	
 	/**
 	 * Payment gateways
 	 *

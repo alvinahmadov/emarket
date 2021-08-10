@@ -1,22 +1,21 @@
 import { Component, OnInit }                  from '@angular/core';
+import { PopoverController, ModalController } from '@ionic/angular';
 import { Mixpanel }                           from '@ionic-native/mixpanel/ngx';
+import { BarcodeScanner }                     from '@ionic-native/barcode-scanner/ngx';
+import { ILocaleMember }                      from '@modules/server.common/interfaces/ILocale';
 import Order                                  from '@modules/server.common/entities/Order';
+import Product                                from '@modules/server.common/entities/Product';
 import Warehouse                              from '@modules/server.common/entities/Warehouse';
 import OrderCarrierStatus                     from '@modules/server.common/enums/OrderCarrierStatus';
 import OrderWarehouseStatus                   from '@modules/server.common/enums/OrderWarehouseStatus';
 import { OrderRouter }                        from '@modules/client.common.angular2/routers/order-router.service';
 import { WarehouseProductsRouter }            from '@modules/client.common.angular2/routers/warehouse-products-router.service';
 import { ProductLocalesService }              from '@modules/client.common.angular2/locale/product-locales.service';
-import { OrdersFilterModes }                  from '../../filters/orders-filters';
-import _                                      from 'lodash';
-import { ILocaleMember }                      from '@modules/server.common/interfaces/ILocale';
-import { Store }                              from '../../../src/services/store.service';
-import { BarcodeScanner }                     from '@ionic-native/barcode-scanner/ngx';
-import Product                                from '@modules/server.common/entities/Product';
-import { PopoverController, ModalController } from '@ionic/angular';
+import { WarehousesService }                  from 'services/warehouses.service';
 import { CreateProductTypePopupPage }         from './create-product-type-popup/create-product-type-popup';
 import { EditProductTypePopupPage }           from './edit-product-type-popup/edit-product-type-popup';
-import { WarehousesService }                  from 'services/warehouses.service';
+import { OrdersFilterModes }                  from '../../filters/orders-filters';
+import { Store }                              from '../../../src/services/store.service';
 
 export enum OrderState
 {
@@ -91,7 +90,9 @@ export class WarehousePage implements OnInit
 	
 	ngOnInit()
 	{
-		this.getOrderShortProcess();
+		this.getOrderShortProcess()
+		    .then(console.log)
+		    .catch(console.error);
 	}
 	
 	get isLogged()

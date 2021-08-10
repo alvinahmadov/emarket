@@ -1,10 +1,9 @@
-import Product                                from './Product';
-import { DBObject, ModelName, Schema, Types } from '../@pyro/db';
-import IWarehouseProduct, {
-	IWarehouseProductCreateObject
-}                                             from '../interfaces/IWarehouseProduct';
-import IProduct                               from '../interfaces/IProduct';
 import { Column }                             from 'typeorm';
+import { DBObject, ModelName, Schema, Types } from '@pyro/db';
+import IProduct                               from '../interfaces/IProduct';
+import IWarehouseProduct,
+{ IWarehouseProductCreateObject }             from '../interfaces/IWarehouseProduct';
+import Product                                from './Product';
 
 /**
  * Represent Warehouse (Merchant) inventory item (some product / service) for sale
@@ -33,6 +32,7 @@ class WarehouseProduct
 	@Types.Number()
 	@Column()
 	price: number;
+	
 	/**
 	 * Start price for product.
 	 * Initially equals to the value from price field, but over the time price can go down/up,
@@ -45,6 +45,7 @@ class WarehouseProduct
 	@Types.Number()
 	@Column()
 	initialPrice: number;
+	
 	/**
 	 * How many products available currently for purchase
 	 *
@@ -54,6 +55,7 @@ class WarehouseProduct
 	@Types.Number(0)
 	@Column()
 	count: number;
+	
 	/**
 	 * How many products are sold
 	 *
@@ -63,6 +65,7 @@ class WarehouseProduct
 	@Types.Number(0)
 	@Column()
 	soldCount: number;
+	
 	/**
 	 * Ref to Product
 	 *
@@ -71,6 +74,7 @@ class WarehouseProduct
 	 */
 	@Types.Ref(Product)
 	product: Product | string;
+	
 	/**
 	 * Is product(s) require manufacturing
 	 *
@@ -80,6 +84,7 @@ class WarehouseProduct
 	@Column()
 	@Types.Boolean(true)
 	isManufacturing: boolean;
+	
 	/**
 	 * Is product(s) become available only when carrier found
 	 *
@@ -89,6 +94,7 @@ class WarehouseProduct
 	@Column()
 	@Types.Boolean(true)
 	isCarrierRequired: boolean;
+	
 	/**
 	 * Is product(s) require delivery to customer or available for pickup
 	 *
@@ -98,6 +104,7 @@ class WarehouseProduct
 	@Column()
 	@Types.Boolean(true)
 	isDeliveryRequired: boolean;
+	
 	/**
 	 * Is product available for purchase
 	 *
@@ -107,9 +114,11 @@ class WarehouseProduct
 	@Column()
 	@Types.Boolean(true)
 	isProductAvailable: boolean;
+	
 	@Schema({ required: false, type: Boolean })
 	@Column()
 	isTakeaway?: boolean;
+	
 	/**
 	 * Min delivery time (in minutes)
 	 *
@@ -119,6 +128,7 @@ class WarehouseProduct
 	@Schema({ required: false, type: Number })
 	@Column()
 	deliveryTimeMin?: number;
+	
 	/**
 	 * Max delivery time (in minutes)
 	 *
@@ -146,8 +156,7 @@ class WarehouseProduct
 	 * @type {string}
 	 * @memberof WarehouseProduct
 	 */
-	
-	get productId(): string
+	public get productId(): string
 	{
 		if(typeof this.product === 'string')
 		{
