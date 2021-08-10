@@ -62,6 +62,7 @@ export type Env = Readonly<{
 	AVAILABLE_LOCALES: string;
 	
 	JWT_SECRET: string;
+	JWT_EXPIRES: number;
 	
 	ADMIN_PASSWORD_BCRYPT_SALT_ROUNDS: number;
 	WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS: number;
@@ -157,6 +158,7 @@ export const env: Env = cleanEnv(
 			AVAILABLE_LOCALES: str({ default: '' }),
 			
 			JWT_SECRET: str({ default: 'default' }),
+			JWT_EXPIRES: num({ default: 3600 }),
 			
 			ADMIN_PASSWORD_BCRYPT_SALT_ROUNDS: num({
 				                                       desc: 'Used for passwords encryption, recommended value: 12',
