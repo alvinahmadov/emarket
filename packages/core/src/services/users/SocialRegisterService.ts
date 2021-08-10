@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
-import { UsersService }       from './UsersService';
 import { routerName }         from '@pyro/io';
 import IService               from 'services/IService';
+import { UsersService }       from './UsersService';
 
 @routerName('social-register-service')
 @injectable()
@@ -15,7 +15,7 @@ export class SocialRegisterService implements IService
 		
 		const currentUser = await this.usersService.getSocial(socialId);
 		
-		let redirectUrl = '';
+		let redirectUrl: string;
 		
 		if(currentUser)
 		{
