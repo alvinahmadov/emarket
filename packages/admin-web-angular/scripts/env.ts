@@ -42,6 +42,7 @@ export type Env = Readonly<{
 	SETTINGS_MAINTENANCE_API_URL?: string;
 	
 	DEFAULT_LANGUAGE: string;
+	AVAILABLE_LOCALES: string;
 	
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
@@ -62,21 +63,21 @@ export const env: Env = cleanEnv(
 			
 			GOOGLE_MAPS_API_KEY: str({ default: '' }),
 			
-			DEFAULT_LATITUDE: num({ default: 42.6459136 }),
-			DEFAULT_LONGITUDE: num({ default: 23.3332736 }),
+			DEFAULT_LATITUDE: num({ default: 37.642036 }),
+			DEFAULT_LONGITUDE: num({ default: 55.708215 }),
 			
 			NO_INTERNET_LOGO: str({ default: 'assets/images/ever-logo.svg' }),
 			
 			MAP_MERCHANT_ICON_LINK: str({
-				                            default: 'http://maps.google.com/mapfiles/kml/pal3/icon21.png',
+				                            default: 'https://maps.google.com/mapfiles/kml/pal3/icon21.png',
 			                            }),
 			
 			MAP_USER_ICON_LINK: str({
-				                        default: 'http://maps.google.com/mapfiles/kml/pal3/icon48.png',
+				                        default: 'https://maps.google.com/mapfiles/kml/pal3/icon48.png',
 			                        }),
 			
 			MAP_CARRIER_ICON_LINK: str({
-				                           default: 'http://maps.google.com/mapfiles/kml/pal4/icon54.png',
+				                           default: 'https://maps.google.com/mapfiles/kml/pal4/icon54.png',
 			                           }),
 			
 			API_FILE_UPLOAD_URL: str({
@@ -99,7 +100,7 @@ export const env: Env = cleanEnv(
 						                               'abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$_',
 			                               }),
 			
-			CURRENCY_SYMBOL: str({ default: '$' }),
+			CURRENCY_SYMBOL: str({ default: '₽' }),
 			
 			// For maintenance micro service.
 			SETTINGS_APP_TYPE: str({ default: 'admin' }),
@@ -108,10 +109,15 @@ export const env: Env = cleanEnv(
 			                                  }),
 			
 			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
+			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
-			WEB_MEMORY: num({ default: 2048 }),
+			WEB_MEMORY: num({ default: 4096 }),
 			PORT: num({ default: 4200 }),
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );
+
+console.log("Environment variables for Admin App:");
+console.log(env);
+console.warn("Remove in production code from scripts/env.ts")

@@ -59,8 +59,9 @@ export const environment: Environment = {
   CURRENCY_SYMBOL: '${env.CURRENCY_SYMBOL}',
 
   DEFAULT_LANGUAGE: '${env.DEFAULT_LANGUAGE}',
+  AVAILABLE_LOCALES: '${env.AVAILABLE_LOCALES}',
 
-  // For maintenance micro service. Ever maintanance API URL: https://maintenance.ever.co/status
+  // For maintenance micro service.
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}'
 };
