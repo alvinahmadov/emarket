@@ -1,0 +1,53 @@
+@import "../common-angular/src/scss/everbie.common";
+
+$tab-border: 1px solid #898989;
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+:host {
+  padding: 10px 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: calc(50vh - 20px);
+}
+
+.tabs__tab-bar {
+  align-self: center;
+  border-radius: 6px 6px 0 0;
+  border-top: $tab-border;
+  border-right: $tab-border;
+  border-left: $tab-border;
+  border-bottom: 0;
+  overflow: hidden;
+  width: 100%;
+  z-index: 1000;
+}
+
+.tabs__tab {
+  background-color: transparent !important;
+  padding: 4px 10px;
+  display: inline-block;
+  width: 50%;
+  color: white;
+  cursor: pointer;
+}
+
+.tabs__tab.active {
+  background-color: $brand-darken !important;
+  color: white;
+}
+
+.overlay {
+  background: #e0e0e0;
+  opacity: 0.5;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
