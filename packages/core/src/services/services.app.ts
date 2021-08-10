@@ -28,22 +28,22 @@ import InviteRequest                       from '@modules/server.common/entities
 import Order                               from '@modules/server.common/entities/Order';
 import Product                             from '@modules/server.common/entities/Product';
 import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
-import User                                from '@modules/server.common/entities/User';
-import Warehouse                           from '@modules/server.common/entities/Warehouse';
-import Promotion                           from '@modules/server.common/entities/Promotion';
-import { getDummyImage }                   from '@modules/server.common/utils';
+import User                               from '@modules/server.common/entities/User';
+import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import Promotion                          from '@modules/server.common/entities/Promotion';
+import { getDummyImage }                  from '@modules/server.common/utils';
 import {
 	FakeUsersService,
 	FakeWarehousesService
-}                                          from './fake-data';
-import IService, { ServiceSymbol }         from './IService';
-import { AdminsService }                   from './admins';
-import { UsersAuthService, UsersService }  from './users';
-import { WarehousesService }               from './warehouses';
-import { SocialStrategiesService }         from './users';
-import { createLogger }                    from '../helpers/Log';
-import { ConfigService }                   from '../config/config.service';
-import { env }                             from '../env';
+}                                         from './fake-data';
+import IService, { ServiceSymbol }        from './IService';
+import { AdminsService }                  from './admins';
+import { UsersAuthService, UsersService } from './users';
+import { WarehousesAuthService }          from './warehouses';
+import { SocialStrategiesService }        from './users';
+import { createLogger }                   from '../helpers/Log';
+import { ConfigService }                  from '../config/config.service';
+import { env }                            from '../env';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -66,8 +66,8 @@ export class ServicesApp
 			protected services: IService[],
 			@inject('RoutersManager')
 			protected routersManager: IRoutersManager,
-			@inject(WarehousesService)
-			protected warehousesService: WarehousesService,
+			@inject(WarehousesAuthService)
+			protected warehousesAuthService: WarehousesAuthService,
 			@inject(SocialStrategiesService)
 			protected socialStrategiesService: SocialStrategiesService,
 			@inject(AdminsService)
@@ -333,7 +333,7 @@ export class ServicesApp
 	{
 		try
 		{
-			const fakeWarehousesService = new FakeWarehousesService(this.warehousesService);
+			const fakeWarehousesService = new FakeWarehousesService(this.warehousesAuthService);
 			
 			const warehouse = await fakeWarehousesService.generateWarehouse(
 					{
