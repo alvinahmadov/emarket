@@ -42,8 +42,8 @@ export class FakeUsersService
 	async generatePredefinedUser(): Promise<User>
 	{
 		return this._generateUser({
-			                          email: env.FAKE_USER_MAIL,
-			                          password: env.FAKE_USERPASSWORD,
+			                          email: env.FAKE_EMAIL,
+			                          password: env.FAKE_PASSWORD,
 			                          coordinates: [55.7522, 37.6156]
 		                          });
 	}
@@ -56,7 +56,7 @@ export class FakeUsersService
 	 */
 	async generateRandomUser(): Promise<User>
 	{
-		return this._generateUser({ password: env.FAKE_USERPASSWORD });
+		return this._generateUser({ password: env.FAKE_PASSWORD });
 	}
 	
 	/**
