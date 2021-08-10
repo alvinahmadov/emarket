@@ -2,51 +2,51 @@ import {
 	MiddlewareConsumer,
 	Module,
 	NestModule,
-	OnModuleInit,
-	HttpServer,
-	Inject
+	OnModuleInit
 }                                             from '@nestjs/common';
-import mongoose                               from 'mongoose';
-import { GraphQLSchema }                      from 'graphql';
+import { ModuleRef }                          from '@nestjs/core';
+import { CommandBus, CqrsModule, EventBus }   from '@nestjs/cqrs';
 import { GraphQLModule }                      from '@nestjs/graphql';
-import { SubscriptionsModule }                from './graphql/subscriptions/subscriptions.module';
+import { TypeOrmModule }                      from '@nestjs/typeorm';
+import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
+import Logger                                 from 'bunyan';
+import { GraphQLSchema }                      from 'graphql';
+import mongoose                               from 'mongoose';
+import { SCALARS }                            from './graphql/scalars';
+import {
+	AdminsModule,
+	AppsSettingsModule,
+	CarriersModule,
+	CarriersOrdersModule,
+	CurrencyModule,
+	DataModule,
+	DevicesModule,
+	GeoLocationsModule,
+	GeoLocationMerchantsModule,
+	GeoLocationOrdersModule,
+	InvitesModule,
+	InvitesRequestsModule,
+	OrdersModule,
+	ProductsModule,
+	PromotionModule,
+	SubscriptionsModule,
+	UsersModule,
+	WarehousesModule,
+	WarehousesCarriersModule,
+	WarehousesOrdersModule,
+	WarehousesProductsModule
+}                                             from './graphql/modules';
 import { SubscriptionsService }               from './graphql/subscriptions/subscriptions.service';
-import { InvitesModule }                      from './graphql/invites/invites.module';
-import { DevicesModule }                      from './graphql/devices/devices.module';
+import { AuthModule }                         from './auth/auth.module';
 import { ConfigModule }                       from './config/config.module';
 import { ProductModule }                      from './controllers/product/product.module';
-import { UsersModule }                        from './graphql/users/users.module';
-import { WarehousesModule }                   from './graphql/warehouses/warehouses.module';
-import { OrdersModule }                       from './graphql/orders/orders.module';
-import { CarriersModule }                     from './graphql/carriers/carriers.module';
-import { ProductsModule }                     from './graphql/products/products.module';
-import Logger                                 from 'bunyan';
-import { env }                                from './env';
-import { createLogger }                       from './helpers/Log';
-import { CommandBus, EventBus, CqrsModule }   from '@nestjs/cqrs';
 import { TestController }                     from './controllers/test.controller';
-import { ModuleRef }                          from '@nestjs/core';
-import { GeoLocationsModule }                 from './graphql/geo-locations/geo-locations.module';
-import { SCALARS }                            from './graphql/scalars';
-import { WarehousesProductsModule }           from './graphql/warehouses-products/warehouses-products.modules';
-import { WarehousesCarriersModule }           from './graphql/warehouses-carriers/warehouses-carriers.module';
-import { WarehousesOrdersModule }             from './graphql/warehouses-orders/warehouses-orders.module';
-import { InvitesRequestsModule }              from './graphql/invites-requests/invites-requests.module';
-import { AuthModule }                         from './auth/auth.module';
-import { AdminsModule }                       from './graphql/admin/admins.module';
-import { DataModule }                         from './graphql/data/data.module';
-import { CarriersOrdersModule }               from './graphql/carriers-orders/carriers-orders.module';
-import { GeoLocationOrdersModule }            from './graphql/geo-locations/orders/geo-location-orders.module';
-import { GeoLocationMerchantsModule }         from './graphql/geo-locations/merchants/geo-location-merchants.module';
-import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
-import { fileLoader, mergeTypes }             from 'merge-graphql-schemas';
 import { GetAboutUsHandler }                  from './services/users';
-import { TypeOrmModule }                      from '@nestjs/typeorm';
 import { ServicesModule }                     from './services/services.module';
 import { ServicesApp }                        from './services/services.app';
-import { CurrencyModule }                     from './graphql/currency/currency.module';
-import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
-import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
+import { env }                                from './env';
+import { mergeTypes, loadFiles }              from './helpers/GraphQLTools';
+import { createLogger }                       from './helpers/Log';
 
 const port = env.GQLPORT;
 
@@ -198,23 +198,18 @@ export class ApplicationModule implements NestModule, OnModuleInit
 	{
 		const graphqlPath = './**/*.graphql';
 		
-		console.log(`Searching for *.graphql files`);
-		
-		const typesArray = fileLoader(graphqlPath);
-		
-		const typeDefs = mergeTypes(typesArray, { all: true });
+		const typesArray = loadFiles(graphqlPath);
+		const typeDefs = mergeTypes(typesArray);
 		
 		// we can save all GraphQL types into one file for later usage by other systems
 		// import { writeFileSync } from 'fs';
 		// writeFileSync('./all.graphql', typeDefs);
 		
-		const schema = makeExecutableSchema({
-			                                    typeDefs,
-			                                    resolvers: {
-				                                    ...SCALARS
-			                                    }
-		                                    });
-		
-		return schema;
+		return makeExecutableSchema({
+			                            typeDefs,
+			                            resolvers: {
+				                            ...SCALARS
+			                            }
+		                            });
 	}
 }
