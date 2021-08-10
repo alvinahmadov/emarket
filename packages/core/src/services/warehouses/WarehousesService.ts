@@ -1,7 +1,7 @@
-import Logger                                            from 'bunyan';
-import _                                                 from 'lodash';
-import { inject, injectable }                            from 'inversify';
-import { Observable }                                    from 'rxjs';
+import Logger                       from 'bunyan';
+import _                            from 'lodash';
+import { inject, injectable }       from 'inversify';
+import { Observable }               from 'rxjs';
 import {
 	concat,
 	exhaustMap,
@@ -9,31 +9,25 @@ import {
 	map,
 	switchMap,
 	tap
-}                                                        from 'rxjs/operators';
-import { of }                                            from 'rxjs/observable/of';
-import { v1 as uuid }                                    from 'uuid';
+}                                   from 'rxjs/operators';
+import { of }                       from 'rxjs/observable/of';
+import { v1 as uuid }               from 'uuid';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
-}                                                        from '@pyro/io';
-import { DBService }                                     from '@pyro/db-server';
-import { CreateObject }                                  from "@pyro/db/db-create-object";
-import Warehouse                                         from '@modules/server.common/entities/Warehouse';
-import { default as IWarehouse, IWarehouseCreateObject } from '@modules/server.common/interfaces/IWarehouse';
-import { IGeoLocationCreateObject }                      from '@modules/server.common/interfaces/IGeoLocation';
-import IWarehouseRouter,
-{
-	IWarehouseLoginResponse,
-	IWarehouseRegistrationInput
-}                                                        from '@modules/server.common/routers/IWarehouseRouter';
-import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
-import IService                                          from '../IService';
-import { AuthService, AuthServiceFactory }               from '../auth';
-import { ProductsService }                               from '../products';
-import { createLogger }                                  from '../../helpers/Log';
-import { env }                                           from '../../env';
+}                                   from '@pyro/io';
+import { DBService }                from '@pyro/db-server';
+import { CreateObject }             from "@pyro/db/db-create-object";
+import IWarehouse                   from '@modules/server.common/interfaces/IWarehouse';
+import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
+import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
+import Warehouse                    from '@modules/server.common/entities/Warehouse';
+import IWarehouseRouter             from '@modules/server.common/routers/IWarehouseRouter';
+import IService                     from '../IService';
+import { ProductsService }          from '../products';
+import { createLogger }             from '../../helpers/Log';
 
 /**
  * Warehouses Service
@@ -53,23 +47,12 @@ export class WarehousesService extends DBService<Warehouse>
 	
 	protected log: Logger = createLogger({ name: 'warehousesService' });
 	
-	private readonly authService: AuthService<Warehouse>;
-	
 	constructor(
 			@inject(ProductsService)
-			private readonly productsService: ProductsService,
-			@inject('Factory<AuthService>')
-			private readonly authServiceFactory: AuthServiceFactory
+			private readonly productsService: ProductsService
 	)
 	{
 		super();
-		const authConfig = {
-			role: 'warehouse',
-			Entity: Warehouse,
-			saltRounds: env.USER_PASSWORD_BCRYPT_SALT_ROUNDS
-		};
-		
-		this.authService = this.authServiceFactory(authConfig);
 	}
 	
 	@asyncListener()
@@ -185,99 +168,6 @@ export class WarehousesService extends DBService<Warehouse>
 	}
 	
 	/**
-	 * Create new Merchant
-	 *
-	 * @param {IWarehouseRegistrationInput} input
-	 * @returns
-	 * @memberof WarehousesService
-	 */
-	@asyncListener()
-	async register(input: IWarehouseRegistrationInput)
-	{
-		const warehouseCreateObj: IWarehouseCreateObject = {
-			...input.warehouse,
-			...(input.password
-			    ? {
-						hash: await this.authService.getPasswordHash(
-								input.password
-						)
-					}
-			    : {})
-		}
-		
-		return await super.create(warehouseCreateObj);
-	}
-	
-	/**
-	 * Update password for Merchant admin user
-	 *
-	 * @param {Warehouse['id']} id
-	 * @param {{ current: string; new: string }} password
-	 * @returns {Promise<void>}
-	 * @memberof WarehousesService
-	 */
-	@asyncListener()
-	async updatePassword(
-			id: Warehouse['id'],
-			password: { current: string; new: string }
-	): Promise<void>
-	{
-		await this.throwIfNotExists(id);
-		await this.authService.updatePassword(id, password);
-	}
-	
-	/**
-	 * Authenticate user in the Merchant app
-	 * TODO: move to separate Auth service
-	 *
-	 * @param {string} username
-	 * @param {string} password
-	 * @returns {(Promise<IWarehouseLoginResponse | null>)}
-	 * @memberof WarehousesService
-	 */
-	@asyncListener()
-	async login(
-			username: string,
-			password: string
-	): Promise<IWarehouseLoginResponse | null>
-	{
-		try
-		{
-			this.log.info(
-					{
-						username,
-						password
-					},
-					'.login(username, password) called'
-			);
-			
-			const res = await this.authService.login({ username }, password);
-			
-			this.log.warn(
-					{
-						res
-					},
-					'.login(username, password) called'
-			)
-			
-			if(!res || res.entity.isDeleted)
-			{
-				return null;
-			}
-			
-			return {
-				warehouse: res.entity,
-				token: res.token
-			};
-		} catch(e)
-		{
-			this.log.debug(e);
-		}
-		
-		return null;
-	}
-	
-	/**
 	 * Get Merchant
 	 *
 	 * @param {string} id
@@ -350,7 +240,7 @@ export class WarehousesService extends DBService<Warehouse>
 			isAvailable: boolean
 	): Promise<Warehouse>
 	{
-		await this.throwIfNotExists(warehouseId);
+		// await this.throwIfNotExists(warehouseId);
 		return this.update(warehouseId, { isActive: isAvailable });
 	}
 	
@@ -366,7 +256,7 @@ export class WarehousesService extends DBService<Warehouse>
 			@serialization((w: IWarehouse) => new Warehouse(w)) warehouse: Warehouse
 	): Promise<Warehouse>
 	{
-		await this.throwIfNotExists(warehouse.id);
+		// await this.throwIfNotExists(warehouse.id);
 		
 		warehouse = _.clone(warehouse);
 		

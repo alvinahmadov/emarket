@@ -1,8 +1,28 @@
 import 'reflect-metadata';
 import { Container, interfaces, ContainerModule }                 from 'inversify';
 import _                                                          from 'lodash';
+import { getConnection, Repository }                              from 'typeorm';
 import { IRoutersManager, RoutersManager, RouterSymbol }          from '@pyro/io';
+import Admin                                                      from '@modules/server.common/entities/Admin';
+import Device                                                     from '@modules/server.common/entities/Device';
+import { AdminsService }                                          from './admins';
+import { AppsSettingsService }                                    from './apps-settings';
+import { AuthenticationService, AuthService, authServiceFactory } from './auth';
+import { DevicesService }                                         from './devices';
+import { FakeOrdersService }                                      from './fake-data/FakeOrdersService';
 import { CarriersOrdersService, CarriersService }                 from './carriers';
+import { CurrenciesService }                                      from './currency/CurrencyService';
+import {
+	GeoLocationsOrdersService,
+	GeoLocationsProductsService,
+	GeoLocationsWarehousesService,
+	GeoLocationsService
+}                                                                 from './geo-locations';
+import { InvitesRequestsService, InvitesService }                 from './invites';
+import { OrdersService }                                          from './orders';
+import { ProductsCategoriesService, ProductsService }             from './products';
+import { PromotionService }                                       from './products/PromotionService';
+import { ServicesApp }                                            from './services.app';
 import {
 	SocialRegisterService,
 	SocialStrategiesService,
@@ -11,36 +31,17 @@ import {
 	UsersService,
 	UserCommandService
 }                                                                 from './users';
-import { ProductsCategoriesService, ProductsService }             from './products';
+import { UsersAuthService }                                       from './users/UsersAuthService';
 import {
+	WarehousesAuthService,
 	WarehousesCarriersService,
 	WarehousesOrdersService,
 	WarehousesProductsService,
 	WarehousesService,
 	WarehousesUsersService
 }                                                                 from './warehouses';
-import { OrdersService }                                          from './orders';
-import { InvitesRequestsService, InvitesService }                 from './invites';
-import {
-	GeoLocationsOrdersService,
-	GeoLocationsProductsService,
-	GeoLocationsWarehousesService,
-	GeoLocationsService
-}                                                                 from './geo-locations';
-import { DevicesService }                                         from './devices';
 import { ServiceSymbol }                                          from './IService';
 import { ConfigService }                                          from '../config/config.service';
-import { ServicesApp }                                            from './services.app';
-import { AuthenticationService, AuthService, authServiceFactory } from './auth';
-import { UsersAuthService }                                       from './users/UsersAuthService';
-import { AdminsService }                                          from './admins';
-import { getConnection, Repository }                              from 'typeorm';
-import Admin                                                      from '@modules/server.common/entities/Admin';
-import Device                                                     from '@modules/server.common/entities/Device';
-import { FakeOrdersService }                                      from './fake-data/FakeOrdersService';
-import { CurrenciesService }                                      from './currency/CurrencyService';
-import { PromotionService }                                       from './products/PromotionService';
-import { AppsSettingsService }                                    from './apps-settings';
 
 function getRepository(t: any): any
 {
@@ -90,6 +91,7 @@ const bindings = new ContainerModule((bind: interfaces.Bind) =>
 				                                     WarehousesProductsService,
 				                                     WarehousesUsersService,
 				                                     WarehousesCarriersService,
+				                                     WarehousesAuthService,
 				                                     WarehousesService,
 				                                     UsersProductsService,
 				                                     AuthenticationService,

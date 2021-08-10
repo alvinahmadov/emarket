@@ -7,10 +7,6 @@ import IWarehouseRouter             from '@modules/server.common/routers/IWareho
 import Warehouse                    from '@modules/server.common/entities/Warehouse';
 import IWarehouse                   from '@modules/server.common/interfaces/IWarehouse';
 import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
-import {
-	IWarehouseLoginResponse,
-	IWarehouseRegistrationInput,
-}                                   from '@modules/server.common/routers/IWarehouseRouter';
 
 @Injectable()
 export class WarehouseRouter implements IWarehouseRouter
@@ -55,36 +51,6 @@ export class WarehouseRouter implements IWarehouseRouter
 		           );
 	}
 	
-	async login(
-			username: string,
-			password: string
-	): Promise<IWarehouseLoginResponse | null>
-	{
-		const res = await this.router.run<IWarehouseLoginResponse | null>(
-				'login',
-				username,
-				password
-		);
-		
-		if(res == null)
-		{
-			return null;
-		}
-		else
-		{
-			return {
-				token: res.token,
-				warehouse: this._warehouseFactory(res.warehouse),
-			};
-		}
-	}
-	
-	async register(input: IWarehouseRegistrationInput): Promise<Warehouse>
-	{
-		const warehouse = await this.router.run<IWarehouse>('register', input);
-		return this._warehouseFactory(warehouse);
-	}
-	
 	async updateGeoLocation(
 			warehouseId: string,
 			geoLocation: IGeoLocationCreateObject
@@ -96,14 +62,6 @@ export class WarehouseRouter implements IWarehouseRouter
 				geoLocation
 		);
 		return this._warehouseFactory(warehouse);
-	}
-	
-	async updatePassword(
-			id: string,
-			password: { current?: string; new: string }
-	): Promise<void>
-	{
-		await this.router.run('updatePassword', id, password);
 	}
 	
 	async updateAvailability(

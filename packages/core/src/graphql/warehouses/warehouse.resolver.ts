@@ -1,19 +1,19 @@
 import { Mutation, Query, ResolveProperty, Resolver } from '@nestjs/graphql';
 import { first }                                      from 'rxjs/operators';
 import IGeoLocation, {
-	IGeoLocationCreateObject,
-	ILocation
+	IGeoLocationCreateObject
 }                                                     from '@modules/server.common/interfaces/IGeoLocation';
 import { default as IWarehouse }                      from '@modules/server.common/interfaces/IWarehouse';
 import User                                           from '@modules/server.common/entities/User';
 import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
 import Warehouse                                      from '@modules/server.common/entities/Warehouse';
-import { IWarehouseRegistrationInput }                from '@modules/server.common/routers/IWarehouseRouter';
+import { IWarehouseRegistrationInput }                from '@modules/server.common/routers/IWarehouseAuthRouter';
 import Utils                                          from '@modules/server.common/utils';
 import {
 	WarehousesCarriersService,
 	WarehousesOrdersService,
 	WarehousesService,
+	WarehousesAuthService,
 	WarehousesUsersService,
 	WarehousesProductsService
 }                                                     from '../../services/warehouses';
@@ -28,6 +28,7 @@ export class WarehouseResolver
 	constructor(
 			private readonly _geoLocationWarehousesService: GeoLocationsWarehousesService,
 			private readonly _warehousesService: WarehousesService,
+			private readonly _warehousesAuthService: WarehousesAuthService,
 			private readonly _warehousesOrdersService: WarehousesOrdersService,
 			private readonly _warehousesUsersService: WarehousesUsersService,
 			private readonly _warehousesCarriersService: WarehousesCarriersService,
@@ -282,7 +283,7 @@ export class WarehouseResolver
 			{ registerInput }: { registerInput: IWarehouseRegistrationInput }
 	)
 	{
-		return this._warehousesService.register(registerInput);
+		return this._warehousesAuthService.register(registerInput);
 	}
 	
 	@Mutation()
@@ -291,7 +292,7 @@ export class WarehouseResolver
 			{ username, password }: { username: string; password: string }
 	)
 	{
-		return this._warehousesService.login(username, password);
+		return this._warehousesAuthService.login(username, password);
 	}
 	
 	@Mutation()
@@ -366,6 +367,6 @@ export class WarehouseResolver
 			}: { id: Warehouse['id']; password: { current: string; new: string } }
 	)
 	{
-		return this._warehousesService.updatePassword(id, password);
+		return this._warehousesAuthService.updatePassword(id, password);
 	}
 }
