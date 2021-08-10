@@ -1,22 +1,31 @@
-import { Mutation, Query, ResolveProperty, Resolver } from '@nestjs/graphql';
-import { UsersOrdersService, UsersService }           from '../../services/users';
-import { first }                                      from 'rxjs/operators';
+import {
+	Mutation,
+	Query,
+	ResolveProperty,
+	Resolver
+}                           from '@nestjs/graphql';
+import { UseGuards }        from '@nestjs/common';
+import { first }            from 'rxjs/operators';
+import { ObjectId }         from 'mongodb';
 import {
 	default as IUser,
-	IUserCreateObject,
-	IResponseGenerate1000Customers
-}                                                     from '@modules/server.common/interfaces/IUser';
-import User                                           from '@modules/server.common/entities/User';
-import { DevicesService }                             from '../../services/devices';
-import { UsersAuthService }                           from '../../services/users/UsersAuthService';
+	IResponseGenerateCustomers,
+	IUserCreateObject
+}                           from '@modules/server.common/interfaces/IUser';
+import User                 from '@modules/server.common/entities/User';
 import {
 	AddableRegistrationInfo,
 	IUserRegistrationInput
-}                                                     from '@modules/server.common/routers/IUserAuthRouter';
-import { ObjectId }                                   from 'mongodb';
-import { OrdersService }                              from '../../services/orders';
-import { UseGuards }                                  from '@nestjs/common';
-import { FakeDataGuard }                              from '../../auth/guards/fake-data.guard';
+}                           from '@modules/server.common/routers/IUserAuthRouter';
+import { DevicesService }   from '../../services/devices';
+import {
+	UsersOrdersService,
+	UsersService,
+	UsersAuthService
+}                           from '../../services/users';
+import { OrdersService }    from '../../services/orders';
+import { FakeUsersService } from '../../services/fake-data';
+import { FakeDataGuard }    from '../../auth/guards/fake-data.guard';
 
 @Resolver('User')
 export class UserResolver
@@ -34,36 +43,6 @@ export class UserResolver
 	async isUserEmailExists(_, { email }: { email: string }): Promise<boolean>
 	{
 		return this._usersService.isUserEmailExists(email);
-	}
-	
-	@Query()
-	@UseGuards(FakeDataGuard)
-	async generate1000Customers(
-			_,
-			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
-	): Promise<IResponseGenerate1000Customers>
-	{
-		let success = true;
-		let message = null;
-		
-		try
-		{
-			await this._ordersService.generateOrdersPerEachCustomer(
-					await this._usersService.generate1000Customers(
-							defaultLng,
-							defaultLat
-					)
-			);
-		} catch(err)
-		{
-			message = err.message;
-			success = false;
-		}
-		
-		return {
-			success,
-			message
-		};
 	}
 	
 	@Query()
@@ -115,18 +94,17 @@ export class UserResolver
 	{
 		await this._usersService.throwIfNotExists(userId);
 		
-		const result = await this._usersOrdersService
-		                         .get(userId)
-		                         .pipe(first())
-		                         .toPromise();
-		
-		return result;
+		return await this._usersOrdersService
+		                 .get(userId)
+		                 .pipe(first())
+		                 .toPromise();
 	}
 	
 	@Query()
 	async getCountOfUsers()
 	{
-		return this._usersService.Model.find({ isDeleted: { $eq: false } })
+		return this._usersService.Model
+		           .find({ isDeleted: { $eq: false } })
 		           .countDocuments()
 		           .exec();
 	}
@@ -134,7 +112,41 @@ export class UserResolver
 	@Query()
 	async getCustomerMetrics(_, { id }: { id: string })
 	{
-		return this._usersOrdersService.getCustomerMetrics(id);
+		return this._usersOrdersService
+		           .getCustomerMetrics(id);
+	}
+	
+	@Query()
+	@UseGuards(FakeDataGuard)
+	async generate1000Customers(
+			_,
+			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
+	): Promise<IResponseGenerateCustomers>
+	{
+		let success = true;
+		let message = null;
+		
+		const fakeUsersService = new FakeUsersService(this._usersService, this._usersAuthService);
+		
+		try
+		{
+			await this._ordersService.generateOrdersPerEachCustomer(
+					await fakeUsersService.generateCustomers(
+							1000,
+							defaultLng,
+							defaultLat
+					)
+			);
+		} catch(err)
+		{
+			message = err.message;
+			success = false;
+		}
+		
+		return {
+			success,
+			message
+		};
 	}
 	
 	@Mutation()
@@ -176,10 +188,11 @@ export class UserResolver
 	@Mutation()
 	async removeUsersByIds(obj, { ids }: { ids: string[] })
 	{
-		const users = await this._usersService.find({
-			                                            _id: { $in: ids },
-			                                            isDeleted: { $eq: false }
-		                                            });
+		const users = await this._usersService
+		                        .find({
+			                              _id: { $in: ids },
+			                              isDeleted: { $eq: false }
+		                              });
 		
 		const usersIds = users.map((u) => u.id);
 		
@@ -190,12 +203,12 @@ export class UserResolver
 	async getDevices(_user: IUser)
 	{
 		const user = new User(_user);
-		return (
-				(await this._devicesService.getMultipleDevices(user.devicesIds))
-						// .getMultiple(user.devicesIds)
-						.pipe(first())
-						.toPromise()
-		);
+		let userDevices = await this._devicesService
+		                            .getMultipleDevices(user.devicesIds);
+		
+		return userDevices
+				.pipe(first())
+				.toPromise();
 	}
 	
 	@Mutation()
