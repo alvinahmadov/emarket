@@ -1,13 +1,14 @@
+import { UseGuards }                 from '@nestjs/common';
 import { Mutation, Query, Resolver } from '@nestjs/graphql';
 import { first }                     from 'rxjs/operators';
 import IEnterByCode                  from '@modules/server.common/interfaces/IEnterByCode';
 import IEnterByLocation              from '@modules/server.common/interfaces/IEnterByLocation';
 import { IInviteCreateObject }       from '@modules/server.common/interfaces/IInvite';
-import { InvitesService }            from '../../services/invites/InvitesService';
-import { InvitesRequestsService }    from '../../services/invites';
 import Invite                        from '@modules/server.common/entities/Invite';
-import { UseGuards }                 from '@nestjs/common';
 import { FakeDataGuard }             from '../../auth/guards/fake-data.guard';
+import { InvitesRequestsService }    from '../../services/invites';
+import { InvitesService }            from '../../services/invites/InvitesService';
+import { FakeInvitesService }        from "../../services/fake-data/FakeInvitesService";
 
 @Resolver('Invite')
 export class InviteResolver
@@ -25,24 +26,33 @@ export class InviteResolver
 			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
 	): Promise<void>
 	{
+		const fakeInvitesService = new FakeInvitesService();
 		const {
 			invitesRequestsToCreate,
 			invitesToCreate
-		} = this._invitesService.generate1000InvitesConnectedToInviteRequests(
+		} = await fakeInvitesService.generateInvitesConnectedToInviteRequests(
+				1000,
 				defaultLng,
 				defaultLat
-		);
+		)
 		
-		await this._invitesService.Model.insertMany(invitesToCreate);
-		await this._inviteRequestsService.Model.insertMany(
-				invitesRequestsToCreate
-		);
+		await this._invitesService
+		          .Model
+		          .insertMany(invitesToCreate);
+		await this._inviteRequestsService
+		          .Model
+		          .insertMany(
+				          invitesRequestsToCreate
+		          );
 	}
 	
 	@Query('invite')
 	async getInvite(_, { id }: { id: string }): Promise<Invite>
 	{
-		return this._invitesService.get(id).pipe(first()).toPromise();
+		return this._invitesService
+		           .get(id)
+		           .pipe(first())
+		           .toPromise();
 	}
 	
 	@Query('getInviteByCode')
@@ -51,7 +61,10 @@ export class InviteResolver
 			{ info }: { info: IEnterByCode }
 	): Promise<Invite>
 	{
-		return this._invitesService.getByCode(info).pipe(first()).toPromise();
+		return this._invitesService
+		           .getByCode(info)
+		           .pipe(first())
+		           .toPromise();
 	}
 	
 	@Query('getInviteByLocation')
@@ -74,10 +87,11 @@ export class InviteResolver
 			pagingOptions['sort'] = { field: '_createdAt', sortBy: 'desc' };
 		}
 		
-		const invites = await this._invitesService.getInvites(
-				findInput,
-				pagingOptions
-		);
+		const invites = await this._invitesService
+		                          .getInvites(
+				                          findInput,
+				                          pagingOptions
+		                          );
 		
 		return invites.map((i) => new Invite(i));
 	}
@@ -85,7 +99,8 @@ export class InviteResolver
 	@Query()
 	async getCountOfInvites(): Promise<number>
 	{
-		return this._invitesService.Model.find({ isDeleted: { $eq: false } })
+		return this._invitesService.Model
+		           .find({ isDeleted: { $eq: false } })
 		           .countDocuments()
 		           .exec();
 	}
