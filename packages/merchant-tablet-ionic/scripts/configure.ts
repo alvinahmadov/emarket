@@ -60,8 +60,9 @@ export const environment: Environment = {
   MAP_CARRIER_ICON_LINK: '${env.MAP_CARRIER_ICON_LINK}',
 
   DEFAULT_LANGUAGE: '${env.DEFAULT_LANGUAGE}',
+  AVAILABLE_LOCALES: '${env.AVAILABLE_LOCALES}',
 
-  // For maintenance micro service
+  // For maintenance micro service.
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}'
 
@@ -77,7 +78,9 @@ export const environment: Environment = {
 
 `;
 
-const envFileDest: string = isProd ? 'environment.prod.ts' : 'environment.ts';
+const envFileDest: string = isProd
+                            ? 'environment.prod.ts'
+                            : 'environment.ts';
 const envFileDestOther: string = !isProd
                                  ? 'environment.prod.ts'
                                  : 'environment.ts';

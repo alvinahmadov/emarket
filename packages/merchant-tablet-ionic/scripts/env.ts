@@ -5,7 +5,7 @@
 import { cleanEnv, num, str, bool, makeValidator } from 'envalid';
 import { v4 as uuid }                              from 'uuid';
 
-export type Env = Readonly<{
+export type Environment = Readonly<{
 	production: boolean;
 	
 	SERVICES_ENDPOINT: string;
@@ -34,6 +34,8 @@ export type Env = Readonly<{
 	FAKE_UUID: string;
 	MIXPANEL_API_KEY: string;
 	
+	WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS: number;
+	
 	MAP_MERCHANT_ICON_LINK: string;
 	
 	MAP_USER_ICON_LINK: string;
@@ -41,6 +43,7 @@ export type Env = Readonly<{
 	MAP_CARRIER_ICON_LINK: string;
 	
 	DEFAULT_LANGUAGE: string;
+	AVAILABLE_LOCALES: string;
 	
 	// For maintenance micro service
 	SETTINGS_APP_TYPE?: string;
@@ -50,7 +53,7 @@ export type Env = Readonly<{
 	PORT: number;
 }>;
 
-export const env: Env = cleanEnv(
+export const env: Environment = cleanEnv(
 		process.env,
 		{
 			production: bool({ default: false }),
@@ -70,8 +73,8 @@ export const env: Env = cleanEnv(
 				                         default: 'https://api.cloudinary.com/v1_1/alvindre/upload',
 			                         }),
 			
-			DEFAULT_LOGIN_USERNAME: str({ default: 'hut_pizza' }),
-			DEFAULT_LOGIN_PASSWORD: str({ default: '123456' }),
+			DEFAULT_LOGIN_USERNAME: str({ default: 'user' }),
+			DEFAULT_LOGIN_PASSWORD: str({ default: '12345' }),
 			
 			LOGIN_LOGO: str({ default: 'assets/imgs/ever-logo.svg' }),
 			NO_INTERNET_LOGO: str({ default: 'assets/imgs/logo.png' }),
@@ -83,14 +86,16 @@ export const env: Env = cleanEnv(
 			FAKE_UUID: str({ default: uuid() }),
 			MIXPANEL_API_KEY: str({ default: '' }),
 			
+			WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS: num({ default: 12 }),
+			
 			MAP_MERCHANT_ICON_LINK: str({
-				                            default: 'http://maps.google.com/mapfiles/kml/pal3/icon21.png',
+				                            default: 'https://maps.google.com/mapfiles/kml/pal3/icon21.png',
 			                            }),
 			MAP_USER_ICON_LINK: str({
-				                        default: 'http://maps.google.com/mapfiles/kml/pal3/icon48.png',
+				                        default: 'https://maps.google.com/mapfiles/kml/pal3/icon48.png',
 			                        }),
 			MAP_CARRIER_ICON_LINK: str({
-				                           default: 'http://maps.google.com/mapfiles/kml/pal4/icon54.png',
+				                           default: 'https://maps.google.com/mapfiles/kml/pal4/icon54.png',
 			                           }),
 			
 			// For maintenance micro service
@@ -99,9 +104,14 @@ export const env: Env = cleanEnv(
 				                                  default: '',
 			                                  }),
 			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
+			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			WEB_CONCURRENCY: num({ default: 1 }),
-			WEB_MEMORY: num({ default: 2048 }),
+			WEB_MEMORY: num({ default: 4096 }),
 			PORT: num({ default: 4202 }),
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );
+
+console.log("Environment variables for Merchant App:");
+console.log(env);
+console.warn("Remove in production code from scripts/env.ts")

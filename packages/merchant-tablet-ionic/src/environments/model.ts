@@ -35,6 +35,7 @@ export interface Environment
 	MAP_CARRIER_ICON_LINK: string;
 	
 	DEFAULT_LANGUAGE: string;
+	AVAILABLE_LOCALES: string;
 	
 	// For maintenance micro service
 	SETTINGS_APP_TYPE: string;
