@@ -1,18 +1,7 @@
 import Logger                                            from 'bunyan';
 import { injectable }                                    from 'inversify';
-import Utils                                             from '@modules/server.common/utils';
-import { createLogger }                                  from '../../helpers/Log';
-import Invite                                            from '@modules/server.common/entities/Invite';
-import { DBService, ExistenceEventType }                 from '@pyro/db-server';
-import { IInviteCreateObject }                           from '@modules/server.common/interfaces/IInvite';
-import IEnterByCode                                      from '@modules/server.common/interfaces/IEnterByCode';
-import IEnterByLocation                                  from '@modules/server.common/interfaces/IEnterByLocation';
-import IStreetLocation                                   from '@modules/server.common/interfaces/IStreetLocation';
+import _                                                 from 'lodash';
 import { Observable }                                    from 'rxjs';
-import IInviteRouter                                     from '@modules/server.common/routers/IInviteRouter';
-import { asyncListener, observableListener, routerName } from '@pyro/io';
-import IService                                          from '../IService';
-import { of }                                            from 'rxjs/observable/of';
 import {
 	concat,
 	exhaustMap,
@@ -22,13 +11,20 @@ import {
 	switchMap
 }                                                        from 'rxjs/operators';
 import { from }                                          from 'rxjs/observable/from';
-import _ = require('lodash');
-import { env }                                           from '../../env';
-import { IGeoLocationCreateObject }                      from '@modules/server.common/interfaces/IGeoLocation';
-import { IInviteRequestCreateObject }                    from '@modules/server.common/interfaces/IInviteRequest';
-import faker                                             from 'faker';
-import { Country }                                       from '@modules/server.common/entities/GeoLocation';
+import { of }                                            from 'rxjs/observable/of';
+import { asyncListener, observableListener, routerName } from '@pyro/io';
+import { DBService, ExistenceEventType }                 from '@pyro/db-server';
+import { IInviteCreateObject }                           from '@modules/server.common/interfaces/IInvite';
+import IEnterByCode                                      from '@modules/server.common/interfaces/IEnterByCode';
+import IEnterByLocation                                  from '@modules/server.common/interfaces/IEnterByLocation';
 import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
+import IStreetLocation                                   from '@modules/server.common/interfaces/IStreetLocation';
+import Invite                                            from '@modules/server.common/entities/Invite';
+import IInviteRouter                                     from '@modules/server.common/routers/IInviteRouter';
+import Utils                                             from '@modules/server.common/utils';
+import IService                                          from '../IService';
+import { createLogger }                                  from '../../helpers/Log';
+import { env }                                           from '../../env';
 
 @injectable()
 @routerName('invite')
@@ -55,17 +51,18 @@ export class InvitesService extends DBService<Invite>
 	@observableListener()
 	get(id: string)
 	{
-		return super.get(id).pipe(
-				map(async(invite) =>
-				    {
-					    await this.throwIfNotExists(id);
-					    return invite;
-				    }),
-				switchMap((invite) =>
-				          {
-					          return invite;
-				          })
-		);
+		return super.get(id)
+		            .pipe(
+				            map(async(invite) =>
+				                {
+					                await this.throwIfNotExists(id);
+					                return invite;
+				                }),
+				            switchMap((invite) =>
+				                      {
+					                      return invite;
+				                      })
+		            );
 	}
 	
 	@observableListener()
@@ -87,10 +84,9 @@ export class InvitesService extends DBService<Invite>
 	@asyncListener()
 	getInvitesSettings(): Promise<{ isEnabled: boolean }>
 	{
-		return new Promise<{ isEnabled: boolean }>((resolve, reject) =>
-		                                           {
-			                                           resolve({ isEnabled: env.SETTING_INVITES_ENABLED });
-		                                           });
+		return new Promise<{ isEnabled: boolean }>(
+				(resolve, reject) => resolve({ isEnabled: env.SETTING_INVITES_ENABLED })
+		);
 	}
 	
 	/**
@@ -125,22 +121,23 @@ export class InvitesService extends DBService<Invite>
 				this.findOne({ ...findObject, isDeleted: { $eq: false } })
 		).pipe(
 				concat(
-						this.existence.pipe(
-								filter(
-										(event) => event.type !== ExistenceEventType.Removed
-								),
-								map((event) => event.value as Invite),
-								filter((invite) =>
-								       {
-									       return (
-											       Utils.getLocDistance(
-													       invite.geoLocation.loc,
-													       info.location
-											       ) <= InvitesService.InviteWorkingDistance &&
-											       invite.code === info.inviteCode
-									       );
-								       })
-						)
+						this.existence
+						    .pipe(
+								    filter(
+										    (event) => event.type !== ExistenceEventType.Removed
+								    ),
+								    map((event) => event.value as Invite),
+								    filter((invite) =>
+								           {
+									           return (
+											           Utils.getLocDistance(
+													           invite.geoLocation.loc,
+													           info.location
+											           ) <= InvitesService.InviteWorkingDistance &&
+											           invite.code === info.inviteCode
+									           );
+								           })
+						    )
 				)
 		);
 	}
@@ -224,79 +221,6 @@ export class InvitesService extends DBService<Invite>
 		{
 			throw Error(`Invite with id '${inviteId}' does not exists!`);
 		}
-	}
-	
-	/**
-	 * Generates Fake Invites, connected to Fake Invite Requests
-	 * TODO: rename, make async and add 1000 as parameter. Move to separate Fake Data service
-	 *
-	 * @param {number} defaultLng
-	 * @param {number} defaultLat
-	 * @memberof InvitesService
-	 */
-	generate1000InvitesConnectedToInviteRequests(
-			defaultLng: number,
-			defaultLat: number
-	): {
-		invitesRequestsToCreate: IInviteRequestCreateObject[];
-		invitesToCreate: IInviteCreateObject[];
-	}
-	{
-		const invitesToCreate: IInviteCreateObject[] = [];
-		const invitesRequestsToCreate: IInviteRequestCreateObject[] = [];
-		
-		let inviteCount = 1;
-		
-		while(inviteCount <= 1000)
-		{
-			const apartment: string = `${inviteCount}`;
-			const houseNumber = `${inviteCount}`;
-			const geoLocation: IGeoLocationCreateObject = this._getInviteGeoLocationCreateObj(
-					houseNumber,
-					defaultLng,
-					defaultLat
-			);
-			
-			invitesRequestsToCreate.push({
-				                             apartment,
-				                             geoLocation,
-				                             isInvited: true,
-				                             invitedDate: new Date()
-			                             });
-			
-			invitesToCreate.push({
-				                     code: `${999 + inviteCount}`,
-				                     apartment,
-				                     geoLocation
-			                     });
-			
-			inviteCount += 1;
-		}
-		
-		return {
-			invitesRequestsToCreate,
-			invitesToCreate
-		};
-	}
-	
-	private _getInviteGeoLocationCreateObj(
-			houseNumber: string,
-			defaultLng: number,
-			defaultLat: number
-	): IGeoLocationCreateObject
-	{
-		// TODO: make TSlint happy
-		// tslint:disable-next-line:no-object-literal-type-assertion
-		return {
-			countryId: faker.random.number(Country.ZW) as Country,
-			city: faker.address.city(),
-			house: houseNumber,
-			loc: {
-				type: 'Point',
-				coordinates: [defaultLng, defaultLat]
-			},
-			streetAddress: faker.address.streetAddress()
-		} as IGeoLocationCreateObject;
 	}
 	
 	private async _getInvitedStreetLocations(): Promise<IStreetLocation[]>
