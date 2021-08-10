@@ -1,42 +1,32 @@
-import Logger                                            from 'bunyan';
-import { inject, injectable, LazyServiceIdentifer }      from 'inversify';
-import moment                                            from 'moment';
-import Bluebird                                          from 'bluebird';
-import { createLogger }                                  from '../../helpers/Log';
-import OrderProduct                                      from '@modules/server.common/entities/OrderProduct';
-import Order                                             from '@modules/server.common/entities/Order';
-import Product                                           from '@modules/server.common/entities/Product';
-import { WarehousesService }                             from './WarehousesService';
-import { ProductsService }                               from '../products';
-import { OrdersService }                                 from '../orders';
-import { IOrderProductCreateObject }                     from '@modules/server.common/interfaces/IOrderProduct';
-import IOrder                                            from '@modules/server.common/interfaces/IOrder';
-import { WarehousesProductsService }                     from './WarehousesProductsService';
-import IWarehouseOrdersRouter, {
-	IOrderCreateInput
-}                                                        from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import { asyncListener, observableListener, routerName } from '@pyro/io';
-import { UsersService }                                  from '../users';
-import IService                                          from '../IService';
-import {
-	exhaustMap,
-	filter,
-	first,
-	share,
-	switchMap,
-	map
-}                                                        from 'rxjs/operators';
-import { ExistenceEvent, ExistenceEventType }            from '@pyro/db-server';
-import { concat, of, Observable }                        from 'rxjs';
-import Warehouse, {
-	WithFullProducts
-}                                                        from '@modules/server.common/entities/Warehouse';
-import _ = require('lodash');
-import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
-import OrderWarehouseStatus                              from '@modules/server.common/enums/OrderWarehouseStatus';
-import OrderCarrierStatus                                from '@modules/server.common/enums/OrderCarrierStatus';
-import DeliveryType                                      from '@modules/server.common/enums/DeliveryType';
-import User                                              from '@ever-platform/common/src/entities/User';
+import Logger                                               from 'bunyan';
+import Bluebird                                             from 'bluebird';
+import { inject, injectable, LazyServiceIdentifer }         from 'inversify';
+import _                                                    from 'lodash';
+import moment                                               from 'moment';
+import { concat, Observable, of }                           from 'rxjs';
+import { exhaustMap, filter, first, map, share, switchMap } from 'rxjs/operators';
+import { asyncListener, observableListener, routerName }    from '@pyro/io';
+import { ExistenceEvent, ExistenceEventType }               from '@pyro/db-server';
+import IOrder                                   from '@modules/server.common/interfaces/IOrder';
+import { IOrderProductCreateObject }            from '@modules/server.common/interfaces/IOrderProduct';
+import IPagingOptions                           from '@modules/server.common/interfaces/IPagingOptions';
+import DeliveryType                             from '@modules/server.common/enums/DeliveryType';
+import OrderWarehouseStatus                     from '@modules/server.common/enums/OrderWarehouseStatus';
+import OrderCarrierStatus                       from '@modules/server.common/enums/OrderCarrierStatus';
+import Order                                    from '@modules/server.common/entities/Order';
+import OrderProduct                             from '@modules/server.common/entities/OrderProduct';
+import Product                                  from '@modules/server.common/entities/Product';
+import Warehouse, { WithFullProducts }          from '@modules/server.common/entities/Warehouse';
+import User                                     from '@modules/server.common/entities/User';
+import IWarehouseOrdersRouter,
+{ IOrderCreateInput, IOrderCreateInputProduct } from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import { WarehousesService }                    from './WarehousesService';
+import { WarehousesProductsService }            from './WarehousesProductsService';
+import IService                                 from '../IService';
+import { OrdersService }                        from '../orders';
+import { ProductsService }                      from '../products';
+import { UsersService }                         from '../users';
+import { createLogger }                         from '../../helpers/Log';
 
 /**
  * Warehouses Orders Service
@@ -80,42 +70,45 @@ export class WarehousesOrdersService
 			warehouseId: Warehouse['id']
 	): Observable<ExistenceEvent<Order>>
 	{
-		return this.ordersService.existence.pipe(
-				filter((existenceEvent) =>
-				       {
-					       switch(existenceEvent.type as ExistenceEventType)
-					       {
-						       case ExistenceEventType.Created:
-							       return (
-									       existenceEvent.value != null &&
-									       existenceEvent.value.warehouseId === warehouseId
-							       );
+		return this.ordersService
+		           .existence
+		           .pipe(
+				           filter((existenceEvent) =>
+				                  {
+					                  switch(existenceEvent.type as ExistenceEventType)
+					                  {
+						                  case ExistenceEventType.Created:
+							                  return (
+									                  existenceEvent.value != null &&
+									                  existenceEvent.value.warehouseId === warehouseId
+							                  );
 						
-						       case ExistenceEventType.Updated:
-							       return (
-									       (existenceEvent.value != null &&
-									        existenceEvent.value.warehouseId ===
-									        warehouseId) ||
-									       (existenceEvent.lastValue != null &&
-									        existenceEvent.lastValue.warehouseId ===
-									        warehouseId)
-							       );
+						                  case ExistenceEventType.Updated:
+							                  return (
+									                  (existenceEvent.value != null &&
+									                   existenceEvent.value.warehouseId ===
+									                   warehouseId) ||
+									                  (existenceEvent.lastValue != null &&
+									                   existenceEvent.lastValue.warehouseId ===
+									                   warehouseId)
+							                  );
 						
-						       case ExistenceEventType.Removed:
-							       return (
-									       existenceEvent.lastValue != null &&
-									       existenceEvent.lastValue.warehouseId === warehouseId
-							       );
-					       }
-				       }),
-				share()
-		);
+						                  case ExistenceEventType.Removed:
+							                  return (
+									                  existenceEvent.lastValue != null &&
+									                  existenceEvent.lastValue.warehouseId === warehouseId
+							                  );
+					                  }
+				                  }),
+				           share()
+		           );
 	}
 	
 	/**
 	 * Get Orders from given Warehouse
 	 *
 	 * @param {Warehouse['id']} warehouseId
+	 * @param options
 	 * @returns {Observable<Order[]>}
 	 * @memberof WarehousesOrdersService
 	 */
@@ -129,21 +122,22 @@ export class WarehousesOrdersService
 			} = {}
 	): Observable<Order[]>
 	{
-		return concat(of(null), this.getExistence(warehouseId)).pipe(
-				map(async(res) =>
-				    {
-					    await this.warehousesService.throwIfNotExists(warehouseId);
-					    return res;
-				    }),
-				switchMap((res) => res),
-				exhaustMap(() =>
-						           this._get(warehouseId, {
-							           populateWarehouse: !!options.populateWarehouse,
-							           populateCarrier: !!options.populateCarrier,
-							           onlyAvailableToCarrier: false
-						           })
-				)
-		);
+		return concat(of(null), this.getExistence(warehouseId))
+				.pipe(
+						map(async(res) =>
+						    {
+							    await this.warehousesService.throwIfNotExists(warehouseId);
+							    return res;
+						    }),
+						switchMap((res) => res),
+						exhaustMap(() =>
+								           this._get(warehouseId, {
+									           populateWarehouse: !!options.populateWarehouse,
+									           populateCarrier: !!options.populateCarrier,
+									           onlyAvailableToCarrier: false
+								           })
+						)
+				);
 	}
 	
 	/**
@@ -164,18 +158,21 @@ export class WarehousesOrdersService
 	{
 		await this.warehousesService.throwIfNotExists(warehouseId);
 		
-		const orderDocument = (await this.ordersService.Model.findOne({
-			                                                              warehouse: warehouseId,
-			                                                              isDeleted: { $eq: false },
-			                                                              _createdAt: {
-				                                                              $gte: (<any>moment)()
-						                                                              .startOf('day')
-						                                                              .toDate()
-			                                                              }
-		                                                              })
-		                                 .select('orderNumber')
-		                                 .sort({ orderNumber: -1 })
-		                                 .exec()) as any;
+		const orderDocument =
+				(await this.ordersService
+				           .Model
+				           .findOne({
+					                    warehouse: warehouseId,
+					                    isDeleted: { $eq: false },
+					                    _createdAt: {
+						                    $gte: (<any>moment)()
+								                    .startOf('day')
+								                    .toDate()
+					                    }
+				                    })
+				           .select('orderNumber')
+				           .sort({ orderNumber: -1 })
+				           .exec()) as any;
 		
 		if(orderDocument == null)
 		{
@@ -248,15 +245,16 @@ export class WarehousesOrdersService
 		// (i.e. create order and decrease product availability in the warehouse)
 		// http://mongoosejs.com/docs/transactions.html
 		
-		const order = await this.ordersService.create({
-			                                              user,
-			                                              products: orderProducts,
-			                                              warehouse: warehouseId,
-			                                              orderNumber: await this.getNextOrderNumber(warehouseId),
-			                                              orderType,
-			                                              waitForCompletion: !!waitForCompletion,
-			                                              ...(options.autoConfirm ? { isConfirmed: true } : {})
-		                                              });
+		const order = await this.ordersService
+		                        .create({
+			                                user,
+			                                products: orderProducts,
+			                                warehouse: warehouseId,
+			                                orderNumber: await this.getNextOrderNumber(warehouseId),
+			                                orderType,
+			                                waitForCompletion: !!waitForCompletion,
+			                                ...(options.autoConfirm ? { isConfirmed: true } : {})
+		                                });
 		
 		// we do all remove operations and notify about warehouse orders change after we remove products from warehouse
 		await this._updateProductCount(order, warehouseId);
@@ -274,11 +272,11 @@ export class WarehousesOrdersService
 	@asyncListener()
 	async userComplete(orderId): Promise<Order>
 	{
-		const order = await this.ordersService.update(orderId, {
-			waitForCompletion: false
-		});
-		
-		return order;
+		return await this.ordersService
+		                 .update(
+				                 orderId,
+				                 { waitForCompletion: false }
+		                 );
 	}
 	
 	/**
@@ -287,17 +285,23 @@ export class WarehousesOrdersService
 	 * @param {string} warehouseId
 	 * @param {string} userId
 	 * @param {string} orderId
-	 * @param {IOrderCreateInputProduct} product
+	 * @param {IOrderCreateInputProduct[]} products
 	 * @returns {Promise<Order>}
 	 * @memberof WarehousesOrdersService
 	 */
 	@asyncListener()
-	async addMore(warehouseId, userId, orderId, products): Promise<Order>
+	async addMore(
+			warehouseId: string,
+			userId: string,
+			orderId: string,
+			products: IOrderCreateInputProduct[]
+	): Promise<Order>
 	{
-		const existedOrder = await this.ordersService
-		                               .get(orderId)
-		                               .pipe(first())
-		                               .toPromise();
+		const existedOrder =
+				await this.ordersService
+				          .get(orderId)
+				          .pipe(first())
+				          .toPromise();
 		
 		if(existedOrder.warehouseId !== warehouseId)
 		{
@@ -328,9 +332,12 @@ export class WarehousesOrdersService
 		
 		const newProducts = [...existedOrder.products, ...orderProducts];
 		
-		const order = await this.ordersService.update(orderId, {
-			products: newProducts
-		});
+		const order = await this.ordersService
+		                        .update(orderId,
+		                                {
+			                                products: newProducts
+		                                }
+		                        );
 		
 		await this._updateProductCount(order, warehouseId);
 		
@@ -344,6 +351,7 @@ export class WarehousesOrdersService
 	 * @param {string} userId
 	 * @param {string} warehouseId
 	 * @param {string} productId
+	 * @param orderType
 	 * @returns {Promise<Order>}
 	 * @memberof WarehousesOrdersService
 	 */
@@ -359,17 +367,19 @@ export class WarehousesOrdersService
 		await this.warehousesService.throwIfNotExists(warehouseId);
 		await this.productsService.throwIfNotExists(productId);
 		
-		return this.create({
-			                   userId,
-			                   warehouseId,
-			                   orderType,
-			                   products: [
-				                   {
-					                   productId,
-					                   count: 1
-				                   }
-			                   ]
-		                   });
+		const orderCreateInput: IOrderCreateInput = {
+			userId,
+			warehouseId,
+			orderType,
+			products: [
+				{
+					productId,
+					count: 1
+				}
+			]
+		};
+		
+		return this.create(orderCreateInput);
 	}
 	
 	/**
@@ -420,35 +430,35 @@ export class WarehousesOrdersService
 		);
 		
 		// add products back to warehouse
-		await this.warehousesProductsService.add(
-				order.warehouseId,
-				_.map(order.products, (orderProduct) =>
-				{
-					return {
-						product: orderProduct.product.id,
-						count: orderProduct.count,
-						price: orderProduct.price,
-						initialPrice: orderProduct.initialPrice,
-						deliveryTimeMin: orderProduct.deliveryTimeMin,
-						deliveryTimeMax: orderProduct.deliveryTimeMax
-					};
-				})
-		);
+		await this.warehousesProductsService
+		          .add(order.warehouseId,
+		               _.map(order.products, (orderProduct) =>
+		               {
+			               return {
+				               product: orderProduct.product.id,
+				               count: orderProduct.count,
+				               price: orderProduct.price,
+				               initialPrice: orderProduct.initialPrice,
+				               deliveryTimeMin: orderProduct.deliveryTimeMin,
+				               deliveryTimeMax: orderProduct.deliveryTimeMax
+			               };
+		               })
+		          );
 		
 		// revert order sold count
-		await (<any>Bluebird).map(
-				order.products,
-				async(orderProduct: OrderProduct) =>
-				{
-					const productId = orderProduct.product.id;
+		await (<any>Bluebird)
+				.map(order.products,
+				     async(orderProduct: OrderProduct) =>
+				     {
+					     const productId = orderProduct.product.id;
 					
-					await this.warehousesProductsService.decreaseSoldCount(
-							order.warehouseId,
-							productId,
-							orderProduct.count
-					);
-				}
-		);
+					     await this.warehousesProductsService
+					               .decreaseSoldCount(
+							               order.warehouseId,
+							               productId,
+							               orderProduct.count
+					               );
+				     });
 		
 		this.log.info(
 				{
@@ -485,7 +495,9 @@ export class WarehousesOrdersService
 			sortObj[pagingOptions.sort.field] = pagingOptions.sort.sortBy;
 		}
 		
-		return this.ordersService.Model.find(findObj)
+		return this.ordersService
+		           .Model
+		           .find(findObj)
 		           .sort(sortObj)
 		           .skip(pagingOptions.skip)
 		           .limit(pagingOptions.limit)
@@ -539,10 +551,12 @@ export class WarehousesOrdersService
 		}
 		
 		const orders = _.map(
-				(await this.ordersService.Model.find({
-					                                     ...findObj,
-					                                     isDeleted: { $eq: false }
-				                                     })
+				(await this.ordersService
+				           .Model
+				           .find({
+					                 ...findObj,
+					                 isDeleted: { $eq: false }
+				                 })
 				           .populate(toPopulate)
 				           .sort({
 					                 _createdAt: -1 // Sort by Date Added DESC
@@ -582,10 +596,12 @@ export class WarehousesOrdersService
 			warehouseId: string
 	): Promise<WithFullProducts>
 	{
-		const warehouse = (await this.warehousesService
-		                             .get(warehouseId, true)
-		                             .pipe(first())
-		                             .toPromise()) as WithFullProducts;
+		const warehouse = (
+				await this.warehousesService
+				          .get(warehouseId, true)
+				          .pipe(first())
+				          .toPromise()
+		) as WithFullProducts;
 		
 		if(warehouse == null)
 		{
