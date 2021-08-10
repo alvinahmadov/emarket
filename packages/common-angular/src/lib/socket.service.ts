@@ -1,5 +1,5 @@
-import { InjectionToken }            from '@angular/core';
-import { Observable, of, fromEvent } from 'rxjs';
+import { InjectionToken } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import {
 	delay,
 	filter,
@@ -8,9 +8,8 @@ import {
 	publishReplay,
 	refCount,
 	share,
-}                                    from 'rxjs/operators';
+}                         from 'rxjs/operators';
 import 'rxjs/add/observable/fromEvent';
-import _io                           from 'socket.io-client';
 
 export enum ConnectionStatus
 {
@@ -24,10 +23,10 @@ export const SOCKET_IO = new InjectionToken('socket.io');
 
 export class Socket
 {
-	public subscribersCounter: number = 0;
-	public ioSocket: SocketIOClient.Socket;
+	subscribersCounter: number = 0;
+	ioSocket: SocketIOClient.Socket;
 	
-	public connectionStatus: Observable<ConnectionStatus> = of(
+	connectionStatus: Observable<ConnectionStatus> = of(
 			ConnectionStatus.NotConnected
 	).pipe(
 			merge(
@@ -45,25 +44,23 @@ export class Socket
 			refCount()
 	);
 	
-	public connection: Observable<ConnectionStatus> = this.connectionStatus.pipe(
+	connection: Observable<ConnectionStatus> = this.connectionStatus.pipe(
 			filter((status) => status === ConnectionStatus.Connected)
 	);
 	
-	public disconnection: Observable<ConnectionStatus> = this.connectionStatus.pipe(
+	disconnection: Observable<ConnectionStatus> = this.connectionStatus.pipe(
 			filter((status) => status === ConnectionStatus.Disconnected)
 	);
 	
-	public connectionErrors: Observable<ConnectionStatus> = this.connectionStatus.pipe(
+	connectionErrors: Observable<ConnectionStatus> = this.connectionStatus.pipe(
 			filter((status) => status === ConnectionStatus.ConnectError)
 	);
 	
 	constructor(
 			private readonly socketUrl: string,
-			private readonly io: typeof _io
+			private readonly io: SocketIOClientStatic
 	)
 	{
-		console.log(`Socket with url ${socketUrl} created!`);
-		
 		const ioCallable = <any>this.io;
 		
 		this.ioSocket = ioCallable(`${this.socketUrl}`, {
