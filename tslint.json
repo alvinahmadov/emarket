@@ -92,7 +92,6 @@
       [
         "ngx",
         "ea"
-        // ea = ever admin
       ],
       "kebab-case"
     ],
@@ -118,7 +117,8 @@
       }
     ],
     "max-classes-per-file": [
-      false
+      false,
+      100
     ],
     "import-destructuring-spacing": true,
     "invoke-injectable": true,
