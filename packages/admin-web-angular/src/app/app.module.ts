@@ -4,30 +4,31 @@ import { BrowserModule }                    from '@angular/platform-browser';
 import { BrowserAnimationsModule }          from '@angular/platform-browser/animations';
 import { HttpClient, HttpClientModule }     from '@angular/common/http';
 import { NgbModule }                        from '@ng-bootstrap/ng-bootstrap';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
 import { FormWizardModule }                 from '@ever-co/angular2-wizard';
 import { SimpleTimer }                      from 'ng2-simple-timer';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
 import { ToasterModule }                    from 'angular2-toaster';
-import { Apollo, APOLLO_OPTIONS }           from 'apollo-angular';
-import { HttpLink }                         from 'apollo-angular/http';
-import { ApolloLink, InMemoryCache }        from '@apollo/client/core';
-import { WebSocketLink }                    from '@apollo/client/link/ws';
-import { setContext }                       from '@apollo/client/link/context';
+import { Apollo, ApolloModule }             from 'apollo-angular';
+import { HttpLink, HttpLinkModule }         from 'apollo-angular-link-http';
+import { InMemoryCache }                    from 'apollo-cache-inmemory';
+import { ApolloLink }                       from 'apollo-link';
+import { WebSocketLink }                    from 'apollo-link-ws';
+import { setContext }                       from 'apollo-link-context';
 import { getOperationAST }                  from 'graphql/utilities/getOperationAST';
-import { CommonModule }                     from '@modules/client.common.angular2/common.module';
-import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/google-maps-loader';
-import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
-import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
-import { environment }                      from 'environments/environment';
-import { ThemeModule }                      from './@theme/theme.module';
 import { CoreModule }                       from './@core/core.module';
-import { Store }                            from './@core/data/store.service';
-import { ServerSettingsService }            from './@core/services/server-settings.service';
+import { ThemeModule }                      from './@theme/theme.module';
+import { CommonModule }                     from '@modules/client.common.angular2/common.module';
 import { AppComponent }                     from './app.component';
 import { AppRoutingModule }                 from './app-routing.module';
+import { environment }                      from 'environments/environment';
+import { Store }                            from './@core/data/store.service';
+import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/google-maps-loader';
+import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
 import { AppModuleGuard }                   from './app.module.guard';
 import { MaintenanceModuleGuard }           from './pages/+maintenance-info/maintenance-info.module.guard';
+import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
+import { ServerSettingsService }            from './@core/services/server-settings.service';
 
 // It's more 'standard' way to use Font-Awesome module and special package,
 // but for some reason ngx-admin works without it. So we leave next line commented for now.
@@ -42,6 +43,8 @@ import { MaintenanceModuleGuard }           from './pages/+maintenance-info/main
 		          BrowserAnimationsModule,
 		          HttpClientModule,
 		          AppRoutingModule,
+		          ApolloModule,
+		          HttpLinkModule,
 		          TranslateModule.forRoot({
 			                                  loader: {
 				                                  provide: TranslateLoader,
@@ -53,7 +56,6 @@ import { MaintenanceModuleGuard }           from './pages/+maintenance-info/main
 		          NgbModule,
 		          ThemeModule.forRoot(),
 		          CoreModule.forRoot(),
-		          ToasterModule,
 	          ],
 	          declarations: [AppComponent],
 	          bootstrap: [AppComponent],
@@ -85,11 +87,6 @@ import { MaintenanceModuleGuard }           from './pages/+maintenance-info/main
 			          useFactory: serverSettingsFactory,
 			          deps: [ServerSettingsService],
 			          multi: true,
-		          },
-		          {
-			          provide: APOLLO_OPTIONS,
-			          useFactory: apolloFactory,
-			          deps: [HttpLink],
 		          },
 		          { provide: APP_BASE_HREF, useValue: '/' },
 		          SimpleTimer,
@@ -123,9 +120,7 @@ export class AppModule
 			                            return {
 				                            headers: {
 					                            ...headers,
-					                            authorization: token
-					                                           ? `Bearer ${token}`
-					                                           : '',
+					                            authorization: token ? `Bearer ${token}` : '',
 				                            },
 			                            };
 		                            });
@@ -196,12 +191,4 @@ export function maintenanceFactory(provider: MaintenanceService)
 export function serverSettingsFactory(provider: ServerSettingsService)
 {
 	return () => provider.load();
-}
-
-export function apolloFactory(httpLink: HttpLink)
-{
-	return {
-		link: httpLink.create({ uri: environment.GQL_ENDPOINT }),
-		cache: new InMemoryCache(),
-	};
 }
