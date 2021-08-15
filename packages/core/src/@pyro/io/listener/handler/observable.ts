@@ -2,6 +2,7 @@ import { IRouter }             from '../../router/router';
 import { IListenerHandler }    from './handler';
 import _                       from 'lodash';
 import Logger                  from 'bunyan';
+import SocketIO                from 'socket.io';
 import { BaseListenerHandler } from './base';
 import { ObservableListener }  from '../observable';
 
@@ -28,54 +29,62 @@ export class ObservableListenerHandler<T> extends BaseListenerHandler<T>
 		
 		const observable = Reflect.apply(this.listener, this.router, args);
 		
-		this.socket.on(`${callId}_subscribe`, (subscriptionId) =>
-		{
-			const subscription = observable.subscribe({
-				                                          next: (value) =>
-				                                          {
-					                                          this.log.info(
-							                                          {
-								                                          ...this.baseLogDetails,
-								                                          callId,
-								                                          value
-							                                          },
-							                                          `Listener emitted next value`
-					                                          );
-					                                          this.socket.emit(`${subscriptionId}_next`, value);
-				                                          },
-				                                          error: (err) =>
-				                                          {
-					                                          this.log.error(
-							                                          {
-								                                          ...this.baseLogDetails,
-								                                          callId,
-								                                          err
-							                                          },
-							                                          `Listener thrown error!`
-					                                          );
-					                                          this.socket.emit(
-							                                          `${subscriptionId}_error`,
-							                                          this.serializeError(err)
-					                                          );
-				                                          },
-				                                          complete: () =>
-				                                          {
-					                                          this.log.info(
-							                                          {
-								                                          ...this.baseLogDetails,
-								                                          callId
-							                                          },
-							                                          `Listener completed`
-					                                          );
-					                                          this.socket.emit(`_${subscriptionId}_complete`);
-				                                          }
-			                                          });
-			
-			this.socket.on(`${subscriptionId}_unsubscribe`, () =>
-					subscription.unsubscribe()
-			);
-			
-			this.socket.on('disconnect', () => subscription.unsubscribe());
-		});
+		this.socket.on(
+				`${callId}_subscribe`,
+				(subscriptionId) =>
+				{
+					const subscription = observable.subscribe(
+							{
+								next: (value) =>
+								{
+									this.log.info(
+											{
+												...this.baseLogDetails,
+												callId,
+												value
+											},
+											`Listener emitted next value`
+									);
+									this.socket.emit(`${subscriptionId}_next`, value);
+								},
+								error: (err) =>
+								{
+									this.log.error(
+											{
+												...this.baseLogDetails,
+												callId,
+												err
+											},
+											`Listener thrown error!`
+									);
+									this.socket.emit(
+											`${subscriptionId}_error`,
+											this.serializeError(err)
+									);
+								},
+								complete: () =>
+								{
+									this.log.info(
+											{
+												...this.baseLogDetails,
+												callId
+											},
+											`Listener completed`
+									);
+									this.socket.emit(`_${subscriptionId}_complete`);
+								}
+							}
+					);
+					
+					this.socket.on(`${subscriptionId}_unsubscribe`,
+					               () =>
+					               {
+						               console.warn(`Unsubscribing from ${this.routerName}`);
+						               subscription.unsubscribe()
+					               }
+					);
+					
+					this.socket.on('disconnect', () => subscription.unsubscribe());
+				});
 	}
 }
