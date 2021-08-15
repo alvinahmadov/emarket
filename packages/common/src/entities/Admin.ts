@@ -5,7 +5,6 @@ import { Entity, Column }             from 'typeorm';
 
 /**
  * Registered Admin Users (e.g. Administrators)
- * TODO: will be renamed to "Users" (after we rename "Users" to "Customers")
  * Note: not related to Customers!
  *
  * @class Admin
