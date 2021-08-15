@@ -1,12 +1,10 @@
 import mongoose                                        from 'mongoose';
 import _                                               from 'lodash';
 import Logger                                          from 'bunyan';
-import { Observable, Subject }                         from 'rxjs';
+import { from as scheduled, Observable, of, Subject }  from 'rxjs';
 import { injectable }                                  from 'inversify';
 import { ExistenceEvent, ExistenceEventType }          from './existence';
-import { from }                                        from 'rxjs/observable/from';
 import { concat, exhaustMap, filter, map, share, tap } from 'rxjs/operators';
-import { of }                                          from 'rxjs/observable/of';
 import { v1 as uuid }                                  from 'uuid';
 import { IDbService }                                  from '@pyro/db-server/i-db-service';
 import { DBObject }                                    from '@pyro/db';
@@ -42,7 +40,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		this.log.info({ objectId: id, callId }, '.get(id) called');
 		
-		return from(this.getCurrent(id)).pipe(
+		return scheduled(this.getCurrent(id)).pipe(
 				concat(
 						this.existence.pipe(
 								filter((existenceEvent) => id === existenceEvent.id),
@@ -83,7 +81,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		this.log.info({ objectId: id, callId }, '.getCurrent(id) called');
 		
-		const obj = await this.Model.findById(id).lean().exec();
+		const obj = await this.Model
+		                      .findById(id)
+		                      .lean()
+		                      .exec();
 		
 		return this.parse(obj as RawObject<T>);
 	}
@@ -97,7 +98,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return of(null).pipe(
 				concat(
 						this.existence.pipe(
-								filter((event) => _.includes(ids, event.id)),
+								filter((event, index) => _.includes(ids, event.id)),
 								share()
 						)
 				),
@@ -130,11 +131,12 @@ export abstract class DBService<T extends DBObject<any, any>>
 				'.getCurrentMultiple(ids) called'
 		);
 		
-		const objs = await this.Model.find({
-			                                   _id: {
-				                                   $in: _.map(ids, (id) => this.getObjectId(id))
-			                                   }
-		                                   })
+		const objs = await this.Model
+		                       .find({
+			                             _id: {
+				                             $in: _.map(ids, (id) => this.getObjectId(id))
+			                             }
+		                             })
 		                       .lean()
 		                       .exec();
 		
@@ -193,7 +195,9 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		try
 		{
-			await this.Model.remove({}).exec();
+			await this.Model
+			          .remove({})
+			          .exec();
 		} catch(err)
 		{
 			this.log.error({ callId, err }, '.removeAll() thrown error!');
@@ -221,7 +225,8 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		try
 		{
-			const lastValueRaw = (await this.Model.findByIdAndRemove(objectId)
+			const lastValueRaw = (await this.Model
+			                                .findByIdAndRemove(objectId)
 			                                .lean()
 			                                .exec()) as RawObject<T>;
 			
@@ -278,9 +283,11 @@ export abstract class DBService<T extends DBObject<any, any>>
 		{
 			lastValues = await this.find(conditions);
 			
-			await this.Model.deleteMany({
-				                            _id: { $in: lastValues.map((o) => this.getObjectId(o.id)) }
-			                            }).exec();
+			await this.Model
+			          .deleteMany({
+				                      _id: { $in: lastValues.map((o: T) => this.getObjectId(o.id)) }
+			                      })
+			          .exec();
 		} catch(err)
 		{
 			this.log.error(
@@ -319,13 +326,15 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 */
 	async removeMultipleByIds(ids: T['id'][]): Promise<void>
 	{
-		this.Model.update(
-				{
-					_id: { $in: ids.map((id) => this.getObjectId(id)) }
-				},
-				{ isDeleted: true },
-				{ multi: true }
-		).exec();
+		this.Model
+		    .update(
+				    {
+					    _id: { $in: ids.map((id) => this.getObjectId(id)) }
+				    },
+				    { isDeleted: true },
+				    { multi: true }
+		    )
+		    .exec();
 	}
 	
 	async find(conditions: FindObject<RawObject<T>>): Promise<T[]>
@@ -338,11 +347,12 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		try
 		{
-			const documents = (await this.Model.find(
-					                             conditions == null ? {} : conditions
-			                             )
-			                             .lean()
-			                             .exec()) as RawObject<T>[];
+			const documents = (
+					await this.Model
+					          .find(conditions == null ? {} : conditions)
+					          .lean()
+					          .exec()
+			) as RawObject<T>[];
 			
 			results = _.map(documents, (obj) => this.parse(obj));
 		} catch(err)
@@ -372,7 +382,8 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		try
 		{
-			const obj = (await this.Model.findOne(conditions)
+			const obj = (await this.Model
+			                       .findOne(conditions)
 			                       .lean()
 			                       .exec()) as RawObject<T>;
 			
@@ -412,13 +423,16 @@ export abstract class DBService<T extends DBObject<any, any>>
 			
 			if(beforeUpdateObject != null)
 			{
-				const obj = (await this.Model.findByIdAndUpdate(
-						                       objectId,
-						                       updateObj as any,
-						                       { new: true }
-				                       )
-				                       .lean()
-				                       .exec()) as RawObject<T>;
+				const obj = (
+						await this.Model
+						          .findByIdAndUpdate(
+								          objectId,
+								          updateObj as any,
+								          { new: true }
+						          )
+						          .lean()
+						          .exec()
+				) as RawObject<T>;
 				
 				updatedObject = this.parse(obj);
 			}
@@ -476,9 +490,9 @@ export abstract class DBService<T extends DBObject<any, any>>
 		{
 			lastValues = await this.find(findObj);
 			
-			await this.Model.updateMany(findObj, updateObj, {
-				new: true
-			}).exec();
+			await this.Model
+			          .updateMany(findObj, updateObj, { new: true })
+			          .exec();
 			
 			updatedObjects = await this.getCurrentMultiple(
 					_.map(lastValues, (value) => value.id)
@@ -582,7 +596,11 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		try
 		{
-			count = (await this.Model.countDocuments(findObj).exec()) as number;
+			count = (
+					await this.Model
+					          .countDocuments(findObj)
+					          .exec()
+			) as number;
 		} catch(err)
 		{
 			this.log.error(
@@ -606,6 +624,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 */
 	async findAll(selectFields: any = {})
 	{
-		return this.Model.find({}).select(selectFields).lean().exec();
+		return this.Model
+		           .find({})
+		           .select(selectFields)
+		           .lean()
+		           .exec();
 	}
 }
