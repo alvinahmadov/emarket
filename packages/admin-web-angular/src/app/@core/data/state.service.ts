@@ -3,6 +3,9 @@ import { Observable, BehaviorSubject, of as observableOf } from 'rxjs';
 import { takeWhile }                                       from 'rxjs/operators';
 import { NbLayoutDirection, NbLayoutDirectionService }     from '@nebular/theme';
 
+/*
+ * Controls visual state of admin panel
+ * */
 @Injectable()
 export class StateService implements OnDestroy
 {
@@ -12,7 +15,6 @@ export class StateService implements OnDestroy
 			name: 'One Column',
 			icon: 'nb-layout-default',
 			id: 'one-column',
-			selected: true,
 		},
 		{
 			name: 'Two Column',
@@ -23,6 +25,7 @@ export class StateService implements OnDestroy
 			name: 'Center Column',
 			icon: 'nb-layout-centre',
 			id: 'center-column',
+			selected: true,
 		},
 	];
 	

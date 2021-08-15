@@ -3,7 +3,6 @@ import { Observable }               from 'rxjs';
 import InviteRequest                from '@modules/server.common/entities/InviteRequest';
 import { Apollo }                   from 'apollo-angular';
 import { map, share }               from 'rxjs/operators';
-import gql                          from 'graphql-tag';
 import {
 	IInviteRequestCreateObject,
 	IInviteRequestUpdateObject,
@@ -13,6 +12,7 @@ import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeo
 import { InviteRequestViewModel }   from '../../pages/+customers/+invites/+invites-requests/invites-requests.component';
 import { countries }                from '@modules/server.common/data/abbreviation-to-country';
 import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
+import { GQLMutations, GQLQueries } from '@modules/server.common/utilities/graphql';
 
 interface RemovedObject
 {
@@ -23,161 +23,105 @@ interface RemovedObject
 @Injectable()
 export class InvitesRequestsService
 {
-	private invitesRequests$: Observable<InviteRequest[]> = this._apollo
-	.watchQuery<{ invitesRequests: InviteRequest[] }>({
-                                                          query: gql`
-                                                              query allInvitesRequests {
-                                                                  invitesRequests {
-                                                                      id
-                                                                      geoLocation {
-                                                                          city
-                                                                          streetAddress
-                                                                          house
-                                                                          countryId
-                                                                          loc {
-                                                                              coordinates
-                                                                              type
-                                                                          }
-                                                                      }
-                                                                      isInvited
-                                                                      invitedDate
-                                                                      apartment
-                                                                  }
-                                                              }
-		                                                  `,
-		                                                  pollInterval: 2000,
-                                                      })
-	.valueChanges.pipe(
-			map((res) => res.data.invitesRequests),
-			share()
-	);
+	private readonly invitesRequests$: Observable<InviteRequest[]>;
 	
-	constructor(private readonly _apollo: Apollo) {}
+	constructor(private readonly _apollo: Apollo)
+	{
+		this.invitesRequests$ = this._apollo
+		                            .watchQuery<{
+			                            invitesRequests: InviteRequest[]
+		                            }>({
+			                               query: GQLQueries.InviteRequestsAll,
+			                               pollInterval: 2000,
+		                               })
+		                            .valueChanges.pipe(
+						map((res) => res.data.invitesRequests),
+						share()
+				);
+	}
 	
 	getAllInvitesRequests(): Observable<InviteRequest[]>
 	{
 		return this.invitesRequests$;
 	}
-
-    getInvitesRequests(
+	
+	getInvitesRequests(
 			pagingOptions?: IPagingOptions,
 			invited?: boolean
 	): Observable<InviteRequest[]>
-    {
-        return this._apollo
-		.watchQuery<{ invitesRequests: InviteRequest[] }>({
-                                                              query: gql`
-                                                                  query AllInvitesRequests(
-                                                                      $pagingOptions: PagingOptionsInput
-                                                                      $invited: Boolean
-                                                                  ) {
-                                                                      invitesRequests(
-                                                                          pagingOptions: $pagingOptions
-                                                                          invited: $invited
-                                                                      ) {
-                                                                          id
-                                                                          geoLocation {
-                                                                              city
-                                                                              streetAddress
-                                                                              house
-                                                                              countryId
-                                                                              loc {
-                                                                                  coordinates
-                                                                                  type
-                                                                              }
-                                                                          }
-                                                                          isInvited
-                                                                          invitedDate
-                                                                          apartment
-                                                                      }
-                                                                  }
-			                                                  `,
-			                                                  variables: { pagingOptions, invited },
-			                                                  pollInterval: 2000,
-                                                          })
-		.valueChanges.pipe(
-				map((res) => res.data.invitesRequests),
-				share()
-		);
-    }
-
-    createInviteRequest(
+	{
+		return this._apollo
+		           .watchQuery<{
+			           invitesRequests: InviteRequest[]
+		           }>({
+			              query: GQLQueries.InviteBy,
+			              variables: { pagingOptions, invited },
+			              pollInterval: 2000,
+		              })
+		           .valueChanges.pipe(
+						map((res) => res.data.invitesRequests),
+						share()
+				);
+	}
+	
+	createInviteRequest(
 			createInput: IInviteRequestCreateObject
 	): Observable<InviteRequest>
-    {
-        return this._apollo
-		.mutate<{ createInput: IInviteRequestCreateObject }>({
-                                                                 mutation: gql`
-                                                                     mutation CreateInviteRequest(
-                                                                         $createInput: InviteRequestCreateInput!
-                                                                     ) {
-                                                                         createInviteRequest(createInput: $createInput) {
-                                                                             id
-                                                                         }
-                                                                     }
-			                                                     `,
-			                                                     variables: {
-				                                                     createInput,
-			                                                     },
-                                                             })
-		.pipe(
-				map((result: any) => result.data.createInviteRequest),
-				share()
-		);
-    }
-
-    removeByIds(ids: string[]): Observable<RemovedObject>
-    {
-        return this._apollo
-		.mutate({
-                    mutation: gql`
-                        mutation RemoveInvitesRequestsByIds($ids: [String!]!) {
-                            removeInvitesRequestsByIds(ids: $ids) {
-                                n
-                            }
-                        }
-			        `,
-			        variables: { ids },
-                })
-		.pipe(
-				map((result: any) => result.data.removeInvitesRequestsByIds),
-				share()
-		);
-    }
-
-    updateInviteRequest(
+	{
+		return this._apollo
+		           .mutate<{
+			           createInput: IInviteRequestCreateObject
+		           }>({
+			              mutation: GQLMutations.InviteRequestCreate,
+			              variables: {
+				              createInput,
+			              },
+		              })
+		           .pipe(
+				           map((result: any) => result.data.createInviteRequest),
+				           share()
+		           );
+	}
+	
+	removeByIds(ids: string[]): Observable<RemovedObject>
+	{
+		return this._apollo
+		           .mutate({
+			                   mutation: GQLMutations.InviteRequestsRemoveByIds,
+			                   variables: { ids },
+		                   })
+		           .pipe(
+				           map((result: any) => result.data.removeInvitesRequestsByIds),
+				           share()
+		           );
+	}
+	
+	updateInviteRequest(
 			id: string,
 			updateInput: IInviteRequestUpdateObject
 	): Observable<InviteRequest>
-    {
-        return this._apollo
-		.mutate<{ id: string; updateInput: IInviteRequestUpdateObject }>({
-                                                                             mutation: gql`
-                                                                                 mutation UpdateInviteRequest(
-                                                                                     $id: String!
-                                                                                     $updateInput: InviteRequestUpdateInput!
-                                                                                 ) {
-                                                                                     updateInviteRequest(
-                                                                                         id: $id
-                                                                                         updateInput: $updateInput
-                                                                                     ) {
-                                                                                         id
-                                                                                     }
-                                                                                 }
-			                                                                 `,
-			                                                                 variables: {
-				                                                                 id,
-				                                                                 updateInput,
-			                                                                 },
-                                                                         })
-		.pipe(
-				map((result: any) => result.data.updateInviteRequest),
-				share()
-		);
-    }
+	{
+		return this._apollo
+		           .mutate<{
+			           id: string;
+			           updateInput: IInviteRequestUpdateObject
+		           }>
+		           ({
+			            mutation: GQLMutations.InviteRequestUpdate,
+			            variables: {
+				            id,
+				            updateInput,
+			            },
+		            })
+		           .pipe(
+				           map((result: any) => result.data.updateInviteRequest),
+				           share()
+		           );
+	}
 	
 	async getCreateInviteRequestObject(data: InviteRequestViewModel)
 	{
+		// noinspection DuplicatedCode
 		const res = await this._tryFindNewAddress(
 				data.house,
 				data.address,
@@ -207,41 +151,28 @@ export class InvitesRequestsService
 		
 		return inviteRequest;
 	}
-
-    generate1000InviteRequests(defaultLng: number, defaultLat: number): any
-    {
-        return this._apollo.query({
-                                      query: gql`
-                                          query Generate1000InviteRequests(
-                                              $defaultLng: Float!
-                                              $defaultLat: Float!
-                                          ) {
-                                              generate1000InviteRequests(
-                                                  defaultLng: $defaultLng
-                                                  defaultLat: $defaultLat
-                                              )
-                                          }
-			                          `,
+	
+	generate1000InviteRequests(defaultLng: number, defaultLat: number): any
+	{
+		return this._apollo.query({
+			                          query: GQLQueries.InviteRequestFake,
 			                          variables: { defaultLng, defaultLat },
-                                  });
-    }
+		                          });
+	}
 	
 	async getCountOfInvitesRequests(invited?: boolean)
-    {
-        const res = await this._apollo
-		.query({
-                   query: gql`
-                       query GetCountOfInvitesRequests($invited: Boolean) {
-                           getCountOfInvitesRequests(invited: $invited)
-                       }
-			       `,
-			       variables: { invited },
-               })
-		.toPromise();
+	{
+		const res = await this._apollo
+		                      .query({
+			                             query: GQLQueries.InviteRequestCount,
+			                             variables: { invited },
+		                             })
+		                      .toPromise();
 		
 		return res.data['getCountOfInvitesRequests'];
-    }
+	}
 	
+	// noinspection DuplicatedCode
 	private _tryFindNewAddress(
 			house: string,
 			streetAddress: string,

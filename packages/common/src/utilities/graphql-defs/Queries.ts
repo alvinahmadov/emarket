@@ -1,4 +1,5 @@
-import gql from "graphql-tag";
+import gql            from "graphql-tag";
+import { fileLoader } from 'merge-graphql-schemas';
 
 namespace GQLQueries
 {
@@ -19,62 +20,7 @@ namespace GQLQueries
 		}
 	`;
 
-// #Carriers
-	
-	export const CarriersCurrentOrder = gql`
-		query GetCarrierCurrentOrder($carrierId: String!) {
-			getCarrierCurrentOrder(carrierId: $carrierId) {
-				id
-				carrierStatus
-				carrierStatusText
-				warehouseStatusText
-				createdAt
-				startDeliveryTime
-				status
-				deliveryTime
-				finishedProcessingTime
-				user {
-					id
-					phone
-					email
-					apartment
-					firstName
-					lastName
-					image
-					geoLocation {
-						house
-						postcode
-						notes
-						countryName
-						city
-						streetAddress
-						loc {
-							coordinates
-							type
-						}
-					}
-				}
-				warehouse {
-					id
-					name
-					logo
-					contactEmail
-					contactPhone
-					geoLocation {
-						house
-						postcode
-						countryName
-						city
-						streetAddress
-						loc {
-							coordinates
-							type
-						}
-					}
-				}
-			}
-		}
-	`;
+    // #Carriers
 	
 	export const CarrierAll = gql`
 		query getCarriers
@@ -105,7 +51,36 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const CarriersGet = gql`
+	export const CarrierCarriers = gql`
+		query getCarriers
+		{
+			getCarriers
+			{
+				_id
+				firstName
+				lastName
+				phone
+				logo
+				isDeleted
+				numberOfDeliveries
+				skippedOrderIds
+				status
+				geoLocation
+				{
+					city
+					streetAddress
+					house
+					loc
+					{
+						type
+						coordinates
+					}
+				}
+			}
+		}
+	`;
+	
+	export const CarrierCarriersBy = gql`
 		query GetCarriers(
 			$pagingOptions: PagingOptionsInput
 			$carriersFindInput: CarriersFindInput
@@ -141,45 +116,6 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const CarriersWatch = gql`
-		query getCarriers
-		{
-			getCarriers
-			{
-				_id
-				firstName
-				lastName
-				phone
-				logo
-				isDeleted
-				numberOfDeliveries
-				skippedOrderIds
-				status
-				geoLocation
-				{
-					city
-					streetAddress
-					house
-					loc
-					{
-						type
-						coordinates
-					}
-				}
-			}
-		}
-	`;
-	
-	export const CarrierByUsername = gql`
-		query GetCarrierByUsername($username: String!)
-		{
-			getCarrierByUsername(username: $username)
-			{
-				username
-			}
-		}
-	`;
-	
 	export const CarrierById = gql`
 		query GetCarrierById($id: String!)
 		{
@@ -209,6 +145,27 @@ namespace GQLQueries
 					}
 				}
 			}
+		}
+	`;
+	
+	export const CarrierByUsername = gql`
+		query GetCarrierByUsername($username: String!)
+		{
+			getCarrierByUsername(username: $username)
+			{
+				username
+			}
+		}
+	`;
+	
+	export const CarrierCount = gql`
+		query GetCountOfCarriers(
+			$carriersFindInput: CarriersFindInput
+		)
+		{
+			getCountOfCarriers(
+				carriersFindInput: $carriersFindInput
+			)
 		}
 	`;
 	
@@ -273,17 +230,6 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const CarrierCount = gql`
-		query GetCountOfCarriers(
-			$carriersFindInput: CarriersFindInput
-		)
-		{
-			getCountOfCarriers(
-				carriersFindInput: $carriersFindInput
-			)
-		}
-	`;
-	
 	export const CarrierOrdersHistory = gql`
 		query GetCarrierOrdersHistory(
 			$carrierId: String!
@@ -328,7 +274,7 @@ namespace GQLQueries
 				}
 			}
 		}
-	`
+	`;
 	
 	export const CarrierOrdersHistoryCount = gql`
 		query GetCountOfCarrierOrdersHistory($carrierId: String!)
@@ -337,7 +283,7 @@ namespace GQLQueries
 		}
 	`;
 
-// #Currencies
+    // #Currencies
 	
 	export const CurrenciesAll = gql`
 		query allCurrencies
@@ -348,10 +294,8 @@ namespace GQLQueries
 			}
 		}
 	`;
-	
-	/*
-	 #Data
-	 */
+
+    // #Data
 	
 	export const DataClearAll = gql`
 		query ClearAll {
@@ -359,9 +303,9 @@ namespace GQLQueries
 		}
 	`;
 
-// #Devices
+    // #Devices
 	
-	export const DevicesAll = gql`
+	export const DeviceAll = gql`
 		query allDevices
 		{
 			devices
@@ -374,7 +318,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const DevicesByUuid = gql`
+	export const DeviceByUuid = gql`
 		query GetByUuid($findInput: DeviceFindInput)
 		{
 			devices(findInput: $findInput)
@@ -384,7 +328,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const DevicesByWebsocket = gql`
+	export const DeviceByWebsocket = gql`
 		query _allDevices
 		{
 			devices
@@ -397,9 +341,9 @@ namespace GQLQueries
 		}
 	`;
 
-// #GeolocationProducts
+    // #GeolocationProducts
 	
-	export const GeoLocationProducts = gql`
+	export const GeoLocationProduct = gql`
 		query geoLocationProducts(
 			$geoLocation: GeoLocationFindInput!
 		)
@@ -452,7 +396,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const GeoLocationProductsByPaging = gql`
+	export const GeoLocationProductByPaging = gql`
 		query GeoLocationProductsByPaging(
 			$geoLocation: GeoLocationFindInput!
 			$options: GetGeoLocationProductsOptions
@@ -517,7 +461,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const GeoLocationProductsCount = gql`
+	export const GeoLocationProductCount = gql`
 		query GetCountOfGeoLocationProducts(
 			$geoLocation: GeoLocationFindInput!
 			$options: GetGeoLocationProductsOptions
@@ -593,9 +537,9 @@ namespace GQLQueries
 		}
 	`;
 
-// #Invites
+    // #Invites
 	
-	export const InvitesAll = gql`
+	export const InviteAll = gql`
 		query allInvites
 		{
 			invites
@@ -619,7 +563,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const InvitesByPaging = gql`
+	export const InviteByPaging = gql`
 		query AllInvites($pagingOptions: PagingOptionsInput)
 		{
 			invites(pagingOptions: $pagingOptions)
@@ -643,7 +587,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const InvitesGet = gql`
+	export const InviteBy = gql`
 		query AllInvitesRequests(
 			$pagingOptions: PagingOptionsInput
 			$invited: Boolean
@@ -674,14 +618,14 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const InvitesCount = gql`
+	export const InviteCount = gql`
 		query GetCountOfInvites
 		{
 			getCountOfInvites
 		}
 	`
 	
-	export const InvitesRequestsAll = gql`
+	export const InviteRequestsAll = gql`
 		query allInvitesRequests {
 			invitesRequests {
 				id
@@ -702,7 +646,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const InvitesFake = gql`
+	export const InviteFake = gql`
 		query Generate1000InvitesConnectedToInviteRequests(
 			$defaultLng: Float!
 			$defaultLat: Float!
@@ -734,9 +678,9 @@ namespace GQLQueries
 		}
 	`
 
-// #Orders
+    // #Orders
 	
-	export const Orders = gql`
+	export const OrderOrders = gql`
 		query Orders
 		{
 			orders
@@ -747,7 +691,172 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const OrdersOrderedUsersInfo = gql`
+	export const OrderDetails = gql`
+		query Orders
+		{
+			orders
+			{
+				user
+				{
+					_id
+				}
+				warehouseId
+				totalPrice
+				isCompleted
+			}
+		}
+	`;
+	
+	export const OrderDashboardChartOrders = gql`
+		query GetDashboardOrdersChartOrders($storeId: String!)
+		{
+			getDashboardOrdersChartOrders(storeId: $storeId)
+			{
+				isCompleted
+				isCancelled
+				_createdAt
+				totalPrice
+			}
+		}
+	`;
+	
+	export const OrderStoreOrders = gql`
+		query GetStoreOrders($storeId: String!)
+		{
+			getStoreOrders(storeId: $storeId)
+			{
+				id
+				isCompleted
+				products
+				{
+					count
+					price
+				}
+			}
+		}
+	`;
+	
+	export const OrderStoreOrdersTableData = gql`
+		query GetStoreOrdersTableData(
+			$storeId: String!
+			$pagingOptions: PagingOptionsInput
+			$status: String
+		)
+		{
+			getStoreOrdersTableData(
+				storeId: $storeId
+				pagingOptions: $pagingOptions
+				status: $status
+			)
+			{
+				orders
+				{
+					id
+					carrierStatus
+					carrierStatusText
+					warehouseStatusText
+					createdAt
+					warehouseStatus
+					deliveryTime
+					status
+					isConfirmed
+					finishedProcessingTime
+					isCancelled
+					isPaid
+					orderType
+					orderNumber
+					_createdAt
+					user
+					{
+						id
+						firstName
+						lastName
+						geoLocation
+						{
+							streetAddress
+							house
+							postcode
+							countryName
+							city
+						}
+					}
+					warehouse
+					{
+						id
+						name
+						geoLocation
+						{
+							house
+							postcode
+							countryName
+							city
+						}
+					}
+
+					products
+					{
+						count
+						price
+						product
+						{
+							id
+							title
+							{
+								locale
+								value
+							}
+							description
+							{
+								locale
+								value
+							}
+							details
+							{
+								locale
+								value
+							}
+							images
+							{
+								locale
+								url
+								width
+								height
+								orientation
+							}
+						}
+					}
+				}
+			}
+		}
+	`;
+	
+	export const OrderStoreOrdersCount = gql`
+		query getCountOfStoreOrders(
+			$storeId: String!
+			$status: String!
+		) {
+			getCountOfStoreOrders(
+				storeId: $storeId
+				status: $status
+			)
+		}
+	`;
+	
+	export const OrderById = gql`
+		query GetOrderById($id: String!)
+		{
+			getOrder(id: $id)
+			{
+				id
+				warehouseId
+				carrierId
+				createdAt
+				orderNumber
+			}
+		}
+	`;
+	
+	export const OrderOrderedUsersInfo = gql`
 		query GetOrderedUsersInfo($storeId: String!)
 		{
 			getOrderedUsersInfo(storeId: $storeId)
@@ -780,6 +889,43 @@ namespace GQLQueries
 		}
 	`;
 	
+	export const OrderMerchants = gql`
+		query getMerchantsOrders
+		{
+			getMerchantsOrders
+			{
+				_id
+				ordersCount
+			}
+		}
+	`;
+	
+	export const OrderUsersCountInfo = gql`
+		query GetUsersOrdersCountInfo($usersIds: [String!])
+		{
+			getUsersOrdersCountInfo(usersIds: $usersIds)
+			{
+				id
+				ordersCount
+			}
+		}
+	`;
+	
+	export const OrderMerchantsCountInfo = gql`
+		query GetMerchantsOrdersCountInfo(
+			$merchantsIds: [String!]
+		)
+		{
+			getMerchantsOrdersCountInfo(
+				merchantsIds: $merchantsIds
+			)
+			{
+				id
+				ordersCount
+			}
+		}
+	`;
+	
 	export const OrderPastGeneratePerCarrier = gql`
 		query GeneratePastOrdersPerCarrier
 		{
@@ -787,7 +933,7 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const OrdersGenerateActiveAndAvailablePerCarrier = gql`
+	export const OrderGenerateActiveAndAvailablePerCarrier = gql`
 		query GenerateActiveAndAvailableOrdersPerCarrier {
 			generateActiveAndAvailableOrdersPerCarrier
 		}
@@ -800,24 +946,96 @@ namespace GQLQueries
 		}
 	`;
 	
+	export const OrderAddToTake = gql`
+		query AddOrdersToTake
+		{
+			addOrdersToTake
+		}
+	`;
+	
 	export const OrderGenerateRandomCurrentStore = gql`
 		query GenerateRandomOrdersCurrentStore(
 			$storeId: String!
 			$storeCreatedAt: Date!
 			$ordersLimit: Int!
-		) {
+		)
+		{
 			generateRandomOrdersCurrentStore(
 				storeId: $storeId
 				storeCreatedAt: $storeCreatedAt
 				ordersLimit: $ordersLimit
-			) {
+			)
+			{
 				error
 				message
 			}
 		}
 	`;
+	
+	export const OrderChartTotalOrders = gql`
+		query GetOrdersChartTotalOrders
+		{
+			getOrdersChartTotalOrders
+			{
+				isCancelled
+				_createdAt
+				totalPrice
+			}
+		}
+	`;
+	
+	export const OrderChartTotalOrdersIsCompleted = gql`
+		query GetOrdersChartTotalOrders
+		{
+			getOrdersChartTotalOrders
+			{
+				isCancelled
+				_createdAt
+				totalPrice
+				isCompleted
+			}
+		}
+	`;
+	
+	export const OrderDashboardCompleted = gql`
+		query GetDashboardCompletedOrders
+		{
+			getDashboardCompletedOrders
+			{
+				warehouseId
+				totalPrice
+			}
+		}
+	`;
+	
+	export const OrderCompletedInfo = gql`
+		query GetCompletedOrdersInfo($storeId: String)
+		{
+			getCompletedOrdersInfo(storeId: $storeId)
+			{
+				totalOrders
+				totalRevenue
+			}
+		}
+	`;
+	
+	export const OrderDashboardCompletedToday = gql`
+		query GetDashboardCompletedOrdersToday
+		{
+			getDashboardCompletedOrdersToday
+			{
+				user
+				{
+					_id
+				}
+				warehouseId
+				totalPrice
+				isCompleted
+			}
+		}
+	`;
 
-// #Promotion
+    // #Promotion
 	
 	export const PromotionAll = gql`
 		query allPromotions($findInput: PromotionsFindInput)
@@ -847,13 +1065,110 @@ namespace GQLQueries
 		}
 	`;
 
-// #Product
+    // #Product
 	
-	export const ProductCategoriesAll = gql`
-		query allCategories {
-			productsCategories {
+	export const ProductAll = gql`
+		query AllProducts(
+			$pagingOptions: PagingOptionsInput
+			$existedProductsIds: [String]
+		) {
+			products(
+				pagingOptions: $pagingOptions
+				existedProductsIds: $existedProductsIds
+			) {
 				id
-				name {
+				title {
+					locale
+					value
+				}
+				description {
+					locale
+					value
+				}
+				details {
+					locale
+					value
+				}
+				images {
+					locale
+					url
+					width
+					height
+					orientation
+				}
+				categories
+			}
+		}
+	`;
+	
+	export const ProductById = gql`
+		query GetProductById($id: String!)
+		{
+			product(id: $id)
+			{
+				id
+				title
+				{
+					locale
+					value
+				}
+				description
+				{
+					locale
+					value
+				}
+				details
+				{
+					locale
+					value
+				}
+				images
+				{
+					locale
+					url
+					width
+					height
+					orientation
+				}
+				categories
+			}
+		}
+	`;
+	
+	export const ProductCount = gql`
+		query GetCountOfProducts($existedProductsIds: [String])
+		{
+			getCountOfProducts(
+				existedProductsIds: $existedProductsIds
+			)
+		}
+	`;
+
+    // #ProductCategory
+	
+	export const ProductCategoryAll = gql`
+		query allCategories {
+			productsCategories
+			{
+				id
+				name
+				{
+					locale
+					value
+				}
+			}
+		}
+	`;
+	
+	export const ProductCategoryAllWithImage = gql`
+		query allCategories
+		{
+			productsCategories
+			{
+				id
+				image
+				name
+				{
 					locale
 					value
 				}
@@ -861,19 +1176,46 @@ namespace GQLQueries
 		}
 	`;
 
-// #Users
+    // #Users
 	
-	export const UsersAll = gql`
+	export const UserAll = gql`
 		query AllUsers
 		{
-			users
-			{
+			users {
 				_id
 				firstName
 				lastName
 				email
 				apartment
 				phone
+				geoLocation {
+					countryId
+					city
+					house
+					streetAddress
+					loc
+					{
+						type
+						coordinates
+					}
+				}
+			}
+		}
+	`;
+	
+	export const UserAllBy = gql`
+		query AllUsers($pagingOptions: PagingOptionsInput)
+		{
+			users(pagingOptions: $pagingOptions)
+			{
+				_id
+				firstName
+				lastName
+				image
+				email
+				apartment
+				phone
+				isBanned
 				geoLocation
 				{
 					countryId
@@ -889,10 +1231,91 @@ namespace GQLQueries
 			}
 		}
 	`;
-
-// #Warehouses
 	
-	export const StoreAll = gql`
+	export const UserById = gql`
+		query GetUserById($id: String!)
+		{
+			user(id: $id)
+			{
+				_id
+				firstName
+				lastName
+				image
+				email
+				apartment
+				phone
+				isBanned
+				geoLocation
+				{
+					streetAddress
+					city
+					house
+					notes
+					loc
+					{
+						type
+						coordinates
+					}
+				}
+			}
+		}
+	`;
+	
+	export const UserCount = gql`
+		query GetCountOfUsers
+		{
+			getCountOfUsers
+		}
+	`;
+	
+	export const UserEmailExists = gql`
+		query IsUserEmailExists($email: String!)
+		{
+			isUserEmailExists(email: $email)
+		}
+	`;
+	
+	export const UserExists = gql`
+		query IsUserExists($conditions: UserMemberInput!)
+		{
+			isUserExists(conditions: $conditions)
+		}
+	`;
+	
+	export const UserMetrics = gql`
+		query GetCustomerMetrics($id: String!)
+		{
+			getCustomerMetrics(id: $id)
+			{
+				totalOrders
+				canceledOrders
+				completedOrdersTotalSum
+			}
+		}
+	`;
+	
+	export const UserGenerateCustom = gql`
+		query GenerateCustomers(
+			$qty: Int!
+			$defaultLng: Float!
+			$defaultLat: Float!
+		)
+		{
+			generateCustomers(
+				qty: $qty
+				defaultLng: $defaultLng
+				defaultLat: $defaultLat
+			)
+			{
+				success
+				message
+			}
+		}
+	`;
+
+    // #Warehouses
+	
+	export const StoreAllFull = gql`
 		query GetAllStores
 		{
 			getAllStores
@@ -909,6 +1332,83 @@ namespace GQLQueries
 					{
 						coordinates
 					}
+				}
+			}
+		}
+	`;
+	
+	export const StoreAllLight = gql`
+		query GetAllStores {
+			getAllStores {
+				id
+				_createdAt
+				geoLocation {
+					loc {
+						coordinates
+					}
+				}
+			}
+		}
+	`;
+	
+	export const StoreAllBy = gql`
+		query AllWarehouses($pagingOptions: PagingOptionsInput)
+		{
+			warehouses(pagingOptions: $pagingOptions)
+			{
+				_id
+				_createdAt
+				name
+				contactEmail
+				contactPhone
+				logo
+				username
+				usedCarriersIds
+				carriersIds
+				geoLocation
+				{
+					city
+					streetAddress
+					house
+				}
+			}
+		}
+	`;
+	
+	export const StoreLivePosition = gql`
+		query GetAllStores
+		{
+			getAllStores
+			{
+				id
+				_createdAt
+				name
+				logo
+				geoLocation
+				{
+					loc
+					{
+						coordinates
+					}
+					city
+					countryId
+				}
+			}
+		}
+	`;
+	
+	export const StoreNearbyStores = gql`
+		query GetNearbyStores($geoLocation: GeoLocationFindInput!) {
+			nearbyStores(geoLocation: $geoLocation) {
+				_id
+				name
+				contactEmail
+				contactPhone
+				logo
+				geoLocation {
+					city
+					streetAddress
+					house
 				}
 			}
 		}
@@ -1075,6 +1575,18 @@ namespace GQLQueries
 						coordinates
 					}
 				}
+			}
+		}
+	`;
+	
+	export const WarehouseStoreByIdLight = gql`
+		query GetStoreById($id: String!)
+		{
+			warehouse(id: $id)
+			{
+				id
+				name
+				logo
 			}
 		}
 	`;

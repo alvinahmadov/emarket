@@ -38,7 +38,7 @@ namespace GQLMutations
 		}
 	`;
 
-// #Carriers
+	// #Carriers
 	
 	export const CarrierUpdate = gql`
 		mutation UpdateCarrier(
@@ -53,7 +53,7 @@ namespace GQLMutations
 		}
 	`;
 
-// #Currencies
+    // #Currencies
 	
 	export const CurrencyCreate = gql`
 		mutation CreateCurrency($createInput: CurrencyCreateInput!)
@@ -67,9 +67,9 @@ namespace GQLMutations
 			}
 		}`;
 
-// #Devices
+    // #Devices
 	
-	export const DevicesCreate = gql`
+	export const DeviceCreate = gql`
 		mutation CreateDevice($createInput: DeviceCreateInput!) {
 			createDevice(createInput: $createInput) {
 				id
@@ -77,7 +77,7 @@ namespace GQLMutations
 		}
 	`;
 	
-	export const DevicesRemoveById = gql`
+	export const DeviceRemoveById = gql`
 		mutation RemoveDeviceByIds($ids: [String!]!)
 		{
 			removeDeviceByIds(ids: $ids)
@@ -87,7 +87,7 @@ namespace GQLMutations
 		}
 	`;
 	
-	export const DevicesUpdate = gql`
+	export const DeviceUpdate = gql`
 		mutation UpdateDevice(
 			$deviceId: String!
 			$updateInput: DeviceUpdateInput!
@@ -100,7 +100,7 @@ namespace GQLMutations
 		}
 	`;
 
-// Geolocationn
+    // Geolocationn
 	
 	export const GeoLocationMakeOrder = gql`
 		mutation MakeOrder($createInput: OrderCreateInput!)
@@ -126,9 +126,9 @@ namespace GQLMutations
 		}
 	`;
 
-// #Invites
+    // #Invites
 	
-	export const InvitesCreate = gql`
+	export const InviteCreate = gql`
 		mutation CreateInvite($createInput: InviteCreateInput!)
 		{
 			createInvite(createInput: $createInput)
@@ -202,7 +202,139 @@ namespace GQLMutations
 		}
 	`
 
-// #Promotion
+    // #Order
+	
+	export const OrderCreate = gql`
+		mutation MakeOrder($createInput: OrderCreateInput!)
+		{
+			createOrder(createInput: $createInput)
+			{
+				_id
+				_createdAt
+				_updatedAt
+				carrierStatus
+				isConfirmed
+				warehouseId
+				warehouseStatus
+				user
+				{
+					_id
+				}
+				carrier
+				{
+					_id
+				}
+			}
+		}
+	`;
+
+    // #Product
+	
+	export const ProductCreate = gql`
+		mutation CreateProduct($product: ProductCreateInput!)
+		{
+			createProduct(product: $product)
+			{
+				id
+				title
+				{
+					locale
+					value
+				}
+				description
+				{
+					locale
+					value
+				}
+				details
+				{
+					locale
+					value
+				}
+				images
+				{
+					locale
+					url
+					width
+					height
+					orientation
+				}
+			}
+		}
+	`;
+	
+	export const ProductSave = gql`
+		mutation SaveProduct($product: ProductSaveInput!) {
+			saveProduct(product: $product) {
+				id
+			}
+		}
+	`;
+	
+	export const ProductRemoveByIds = gql`
+		mutation RemoveProductsByIds($ids: [String!]!)
+		{
+			removeProductsByIds(ids: $ids)
+			{
+				n
+			}
+		}
+	`;
+
+    // #ProductCategory
+	
+	export const ProductCategoryCreate = gql`
+		mutation CreateProductsCategory(
+			$productsCategory: ProductsCategoriesCreateInput!
+		)
+		{
+			createProductsCategory(createInput: $productsCategory)
+			{
+				id
+				image
+				name
+				{
+					locale
+					value
+				}
+			}
+		}
+	`;
+	
+	export const ProductCategoryUpdate = gql`
+		mutation UpdateProductsCategory(
+			$id: String!
+			$productsCategory: ProductsCategoriesCreateInput!
+		)
+		{
+			updateProductsCategory(
+				id: $id
+				updateInput: $productsCategory
+			)
+			{
+				id
+				image
+				name
+				{
+					locale
+					value
+				}
+			}
+		}
+	`;
+	
+	export const ProductsCategoryRemoveByIds = gql`
+		mutation removeProductsCategoriesByIds($ids: [String!]!)
+		{
+			removeProductsCategoriesByIds(ids: $ids)
+			{
+				ok
+				n
+			}
+		}
+	`;
+
+    // #Promotion
 	
 	export const PromotionCreate = gql`
 		mutation CreatePromotion($promotion: PromotionInput)
@@ -238,7 +370,52 @@ namespace GQLMutations
 		}
 	`;
 
-// #Warehouses
+    // #User
+	
+	export const UserRegister = gql`
+		mutation RegisterUser($registerInput: UserRegisterInput!)
+		{
+			registerUser(registerInput: $registerInput)
+			{
+				id
+				firstName
+				lastName
+			}
+		}
+	`;
+	
+	export const UserBan = gql`
+		mutation BanUser($id: String!)
+		{
+			banUser(id: $id)
+			{
+				id
+				firstName
+				lastName
+			}
+		}
+	`;
+	
+	export const UserUnban = gql`
+		mutation UnbanUser($id: String!)
+		{
+			unbanUser(id: $id)
+			{
+				id
+				firstName
+				lastName
+			}
+		}
+	`;
+	
+	export const UserRemoveById = gql`
+		mutation RemoveUsersByIds($ids: [String!]!)
+		{
+			removeUsersByIds(ids: $ids)
+		}
+	`;
+
+    // #Warehouses
 	
 	export const WarehouseLogin = gql`
 		mutation WarehouseLogin(
@@ -328,7 +505,7 @@ namespace GQLMutations
 		}
 	`;
 
-// #WarehouseOrders
+    // #WarehouseOrders
 	
 	export const StoreOrdersMakeOrder = gql`
 		mutation MakeOrder($createInput: OrderCreateInput!)
