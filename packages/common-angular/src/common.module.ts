@@ -14,7 +14,7 @@ interface CommonModuleConfig
           })
 export class CommonModule
 {
-	static forRoot(options: CommonModuleConfig): ModuleWithProviders
+	static forRoot(options: CommonModuleConfig): ModuleWithProviders<CommonModule>
 	{
 		return {
 			ngModule: CommonModule,
