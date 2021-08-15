@@ -8,7 +8,7 @@ import User                                           from '@modules/server.comm
 import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
 import Warehouse                                      from '@modules/server.common/entities/Warehouse';
 import { IWarehouseRegistrationInput }                from '@modules/server.common/routers/IWarehouseAuthRouter';
-import Utils                                          from '@modules/server.common/utils';
+import { GeoUtils }                                   from '@modules/server.common/utilities';
 import {
 	WarehousesCarriersService,
 	WarehousesOrdersService,
@@ -263,11 +263,11 @@ export class WarehouseResolver
 		{
 			merchants = merchants.sort(
 					(m1, m2) =>
-							Utils.getDistance(
+							GeoUtils.getDistance(
 									new GeoLocation(m1.geoLocation),
 									new GeoLocation(geoLocation)
 							) -
-							Utils.getDistance(
+							GeoUtils.getDistance(
 									new GeoLocation(m2.geoLocation),
 									new GeoLocation(geoLocation)
 							)
