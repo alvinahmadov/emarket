@@ -118,9 +118,9 @@ export class UserResolver
 	
 	@Query()
 	@UseGuards(FakeDataGuard)
-	async generate1000Customers(
+	async generateCustomers(
 			_,
-			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
+			{ qty, defaultLng, defaultLat }: { qty?: number, defaultLng: number; defaultLat: number }
 	): Promise<IResponseGenerateCustomers>
 	{
 		let success = true;
@@ -132,7 +132,7 @@ export class UserResolver
 		{
 			await this._ordersService.generateOrdersPerEachCustomer(
 					await fakeUsersService.generateCustomers(
-							1000,
+							qty,
 							defaultLng,
 							defaultLat
 					)
