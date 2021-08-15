@@ -93,12 +93,9 @@
       "element",
       [
         "e-cu",
-        // e-cu = customer
         "ngx",
         "ea",
-        // ea = admin
         "es"
-        // es = store
       ],
       "kebab-case"
     ],
@@ -124,7 +121,8 @@
       }
     ],
     "max-classes-per-file": [
-      false
+      false,
+      10
     ],
     "import-destructuring-spacing": true,
     "invoke-injectable": true,
