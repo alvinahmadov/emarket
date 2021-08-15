@@ -8,14 +8,13 @@ import IUserOrdersRouter                            from '@modules/server.common
 import { observableListener, routerName }           from '@pyro/io';
 import IService                                     from '../IService';
 import { ExistenceEventType }                       from '@pyro/db-server';
-import { concat, of, Observable }                   from 'rxjs';
+import { Observable, of, concat }                   from 'rxjs';
 import { exhaustMap, filter, share }                from 'rxjs/operators';
 import User                                         from '@modules/server.common/entities/User';
-import mongoose = require('mongoose');
-import { ObjectId }                                 from 'mongodb';
 import OrderCarrierStatus                           from '@modules/server.common/enums/OrderCarrierStatus';
 import OrderWarehouseStatus                         from '@modules/server.common/enums/OrderWarehouseStatus';
 import Logger                                       from 'bunyan';
+import mongoose = require('mongoose');
 
 /**
  * Customers Orders Service
@@ -55,10 +54,12 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	{
 		return concat(
 				of(null),
-				this.ordersService.existence.pipe(
-						filter((e) => this._shouldPull(userId, e)),
-						share()
-				)
+				this.ordersService
+				    .existence
+				    .pipe(
+						    filter((e) => UsersOrdersService._shouldPull(userId, e)),
+						    share()
+				    )
 		).pipe(exhaustMap(() => this.getCurrent(userId)));
 	}
 	
@@ -72,10 +73,11 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	 */
 	async getCurrent(userId: string): Promise<Order[]>
 	{
-		const orders = await this.ordersService.find({
-			                                             'user._id': new mongoose.Types.ObjectId(userId),
-			                                             isDeleted: { $eq: false }
-		                                             });
+		const orders = await this.ordersService
+		                         .find({
+			                               'user._id': new mongoose.Types.ObjectId(userId),
+			                               isDeleted: { $eq: false }
+		                               });
 		
 		return _.orderBy(
 				orders,
@@ -86,21 +88,24 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	
 	async getCustomerMetrics(id: string)
 	{
-		const completedUserOrders = await this.ordersService.Model.find({
-			                                                                $and: [
-				                                                                { 'user._id': id },
-				                                                                {
-					                                                                $or: [
-						                                                                { carrierStatus: OrderCarrierStatus.DeliveryCompleted },
-						                                                                {
-							                                                                warehouseStatus:
-							                                                                OrderWarehouseStatus.GivenToCustomer
-						                                                                }
-					                                                                ]
-				                                                                },
-				                                                                { isCancelled: false }
-			                                                                ]
-		                                                                }).select({ products: 1 });
+		const completedUserOrders =
+				await this.ordersService
+				          .Model
+				          .find({
+					                $and: [
+						                { 'user._id': id },
+						                {
+							                $or: [
+								                { carrierStatus: OrderCarrierStatus.DeliveryCompleted },
+								                {
+									                warehouseStatus:
+									                OrderWarehouseStatus.GivenToCustomer
+								                }
+							                ]
+						                },
+						                { isCancelled: false }
+					                ]
+				                }).select({ products: 1 });
 		
 		const completedOrdersTotalSum = completedUserOrders
 				.map((o) =>
@@ -114,17 +119,21 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 				     })
 				.reduce((a, b) => a + b, 0);
 		
-		const totalOrders = await this.ordersService.Model.find({
-			                                                        'user._id': id
-		                                                        })
+		const totalOrders = await this.ordersService
+		                              .Model
+		                              .find({
+			                                    'user._id': id
+		                                    })
 		                              .countDocuments()
 		                              .exec();
 		
-		const canceledOrders = await this.ordersService.Model.find({
-			                                                           $and: [
-				                                                           { 'user._id': id }, { isCancelled: true }
-			                                                           ]
-		                                                           })
+		const canceledOrders = await this.ordersService
+		                                 .Model
+		                                 .find({
+			                                       $and: [
+				                                       { 'user._id': id }, { isCancelled: true }
+			                                       ]
+		                                       })
 		                                 .countDocuments()
 		                                 .exec();
 		
@@ -135,7 +144,7 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 		};
 	}
 	
-	private _shouldPull(userId: User['id'], event)
+	private static _shouldPull(userId: User['id'], event)
 	{
 		switch(event.type as ExistenceEventType)
 		{
