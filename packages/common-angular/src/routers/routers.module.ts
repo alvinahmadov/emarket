@@ -14,6 +14,7 @@ import { UserRouter }                  from './user-router.service';
 import { WarehouseCarriersRouter }     from './warehouse-carriers-router.service';
 import { WarehouseProductsRouter }     from './warehouse-products-router.service';
 import { WarehouseRouter }             from './warehouse-router.service';
+import { WarehouseAuthRouter }         from './warehouse-auth-router.service';
 import { UserProductsRouter }          from './user-products-router.service';
 import { WarehouseOrdersRouter }       from './warehouse-orders-router.service';
 import { UserOrdersRouter }            from './user-orders-router.service';
@@ -41,6 +42,7 @@ import { GeoLocationRouter }           from './geo-location-router.service';
 		          UserAuthRouter,
 		          WarehouseCarriersRouter,
 		          WarehouseRouter,
+		          WarehouseAuthRouter,
 		          WarehouseProductsRouter,
 		          WarehouseOrdersRouter,
 		          UserProductsRouter,
