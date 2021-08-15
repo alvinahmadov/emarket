@@ -6,6 +6,7 @@ import { ListenerType }              from '../types';
 import { getListenerSerializer }     from '../serialization';
 import _                             from 'lodash';
 import getArgsNames                  from '@captemulation/get-parameter-names';
+import SocketIO                      from "socket.io";
 
 export abstract class BaseListenerHandler<T> implements IListenerHandler<T>
 {
@@ -25,7 +26,7 @@ export abstract class BaseListenerHandler<T> implements IListenerHandler<T>
 		routerName: this.routerName
 	};
 	
-	constructor(
+	protected constructor(
 			private readonly _router: IRouter,
 			private readonly _listener: Listener<T>,
 			private readonly _socket: SocketIO.Socket,
