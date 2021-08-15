@@ -111,7 +111,7 @@ export class PeriodsService
 	)
 	{
 		const orderWeek = getDateWeekNumber(orderDate);
-		let orderWeekLabel = '';
+		let orderWeekLabel: string;
 		
 		if(orderWeek === 1)
 		{

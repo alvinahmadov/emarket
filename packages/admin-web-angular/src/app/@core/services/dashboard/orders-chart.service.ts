@@ -7,17 +7,29 @@ export class OrdersChart
 	linesData: number[][];
 }
 
-// tslint:disable-next-line:max-classes-per-file
 @Injectable()
 export class OrdersChartService
 {
-	// TODO: replace with dynamic range
-	private _years = ['2012', '2013', '2014', '2015', '2016', '2017', '2018'];
-	
-	private data = {};
+	private readonly startYear: number = 2021;
+	private readonly dateDistance: number = 7;
+	private readonly yearsRange: string[] = [];
+	private readonly data = {};
 	
 	constructor(private period: PeriodsService)
 	{
+		const date: Date = new Date();
+		const currentYear: number = date.getUTCFullYear();
+		let range = currentYear !== this.startYear
+		            ? ((currentYear - this.startYear > this.dateDistance)
+		               ? this.dateDistance
+		               : currentYear - 2021)
+		            : 0;
+		
+		for(let y = currentYear - range; y <= currentYear; y++)
+		{
+			this.yearsRange.push(y.toString());
+		}
+		
 		this.data = {
 			today: this.getDataForDayPeriod(),
 			lastWeek: this.getDataForWeekPeriod(),
@@ -354,7 +366,7 @@ export class OrdersChartService
 	private getDataForYearPeriod(): OrdersChart
 	{
 		return {
-			chartLabel: this.getDataLabels(42, this._years),
+			chartLabel: this.getDataLabels(42, this.yearsRange),
 			linesData: [
 				[
 					190,
