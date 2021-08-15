@@ -28,22 +28,22 @@ import InviteRequest                       from '@modules/server.common/entities
 import Order                               from '@modules/server.common/entities/Order';
 import Product                             from '@modules/server.common/entities/Product';
 import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
-import User                               from '@modules/server.common/entities/User';
-import Warehouse                          from '@modules/server.common/entities/Warehouse';
-import Promotion                          from '@modules/server.common/entities/Promotion';
-import { getDummyImage }                  from '@modules/server.common/utils';
+import User                                from '@modules/server.common/entities/User';
+import Warehouse                           from '@modules/server.common/entities/Warehouse';
+import Promotion                           from '@modules/server.common/entities/Promotion';
+import CommonUtils                         from '@modules/server.common/utilities/common';
 import {
 	FakeUsersService,
 	FakeWarehousesService
-}                                         from './fake-data';
-import IService, { ServiceSymbol }        from './IService';
-import { AdminsService }                  from './admins';
-import { UsersAuthService, UsersService } from './users';
-import { WarehousesAuthService }          from './warehouses';
-import { SocialStrategiesService }        from './users';
-import { createLogger }                   from '../helpers/Log';
-import { ConfigService }                  from '../config/config.service';
-import { env }                            from '../env';
+}                                          from './fake-data';
+import IService, { ServiceSymbol }         from './IService';
+import { AdminsService }                   from './admins';
+import { UsersAuthService, UsersService }  from './users';
+import { WarehousesAuthService }           from './warehouses';
+import { SocialStrategiesService }         from './users';
+import { createLogger }                    from '../helpers/Log';
+import { ConfigService }                   from '../config/config.service';
+import { env }                             from '../env';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -133,10 +133,6 @@ export class ServicesApp
 			                                    useUnifiedTopology: true
 		                                    });
 		
-		console.log(
-				`TypeORM DB connection created. DB connected: ${conn.isConnected}`
-		);
-		
 		typeORMLog.info(
 				`TypeORM DB connection created. DB connected: ${conn.isConnected}`
 		);
@@ -171,7 +167,7 @@ export class ServicesApp
 						              this.log.error(err);
 					              }
 					              process.exit(0);
-				              });
+				              }).then();
 			}
 		} catch(err)
 		{
@@ -290,15 +286,16 @@ export class ServicesApp
 		adminName.slice(0, 2);
 		if(adminCollectionCount === 0)
 		{
-			await this._adminsService.register({
-				                                   admin: {
-					                                   email: adminEmail,
-					                                   name: adminName,
-					                                   hash: null,
-					                                   pictureUrl: getDummyImage(300, 300, adminName.slice(0, 2))
-				                                   },
-				                                   password: adminPassword
-			                                   });
+			await this._adminsService
+			          .register({
+				                    admin: {
+					                    email: adminEmail,
+					                    name: adminName,
+					                    hash: null,
+					                    pictureUrl: CommonUtils.getDummyImage(300, 300, adminName.slice(0, 2))
+				                    },
+				                    password: adminPassword
+			                    });
 		}
 	}
 	
@@ -498,12 +495,15 @@ export class ServicesApp
 		// CORS configuration
 		// TODO: we may want to restric access some way
 		// (but needs to be careful because we serve some HTML pages for all clients too, e.g. About Us)
-		this.expressApp.use(
-				(<any>cors)({
-					            origin: true,
-					            credentials: true
-				            })
-		);
+		
+		const methods: string[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+		
+		const corsOptions = {
+			origin: '*',
+			credentials: true
+		};
+		
+		this.expressApp.use(cors(corsOptions));
 		
 		this.expressApp.use(bodyParser.urlencoded({ extended: false }));
 		this.expressApp.use(bodyParser.json());
@@ -511,19 +511,16 @@ export class ServicesApp
 				bodyParser.json({ type: 'application/vnd.api+json' })
 		);
 		
-		const mo: any = methodOverride;
-		
-		this.expressApp.use(mo('X-HTTP-Method')); // Microsoft
-		this.expressApp.use(mo('X-HTTP-Method-Override')); // Google/GData
-		this.expressApp.use(mo('X-Method-Override')); // IBM
+		this.expressApp.use(methodOverride('X-HTTP-Method')); // Microsoft
+		this.expressApp.use(methodOverride('X-HTTP-Method-Override')); // Google/GData
+		this.expressApp.use(methodOverride('X-Method-Override')); // IBM
 		this.expressApp.use(morgan('dev'));
 		this.expressApp.use(passport.initialize());
 		this.expressApp.use(requestIp.mw());
 		
 		if(this.expressApp.get('environment') === 'development')
 		{
-			const eh: any = errorhandler;
-			this.expressApp.use(eh());
+			this.expressApp.use(errorhandler());
 		}
 		
 		this.expressApp.get('/',
