@@ -38,8 +38,8 @@ export class InviteRequestResolver
 	async notifyAboutLaunch(
 			_,
 			{
-				invite,
-				devicesIds
+				devicesIds,
+				invite
 			}: {
 				invite: Invite;
 				devicesIds: string[];
