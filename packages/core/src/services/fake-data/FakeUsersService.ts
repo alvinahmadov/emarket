@@ -9,7 +9,7 @@ import {
 import User                       from '@modules/server.common/entities/User';
 import GeoLocation, { Country }   from "@modules/server.common/entities/GeoLocation";
 import { IUserRegistrationInput } from '@modules/server.common/routers/IUserAuthRouter';
-import { getDummyImage }          from "@modules/server.common/utils";
+import CommonUtils                from "@modules/server.common/utilities/common";
 import { env }                    from "../../env";
 import {
 	UsersAuthService,
@@ -62,14 +62,14 @@ export class FakeUsersService
 	/**
 	 * Generates Fake Customer records
 	 *
-	 * @param {number} count Generate `count` customers
+	 * @param {number} qty Quantity of customers to generate
 	 * @param {number} defaultLng Default longitude
 	 * @param {number} defaultLat Default latitude
 	 * @returns {Promise<IUserCreateObject[]>}
 	 * @memberof FakeUsersService
 	 */
 	async generateCustomers(
-			count: number,
+			qty: number,
 			defaultLng: number,
 			defaultLat: number
 	): Promise<IUserCreateObject[]>
@@ -90,7 +90,7 @@ export class FakeUsersService
 		
 		let customerCount = 1;
 		
-		while(customerCount <= count)
+		while(customerCount <= qty)
 		{
 			const firstName = faker.name.firstName();
 			const lastName = faker.name.lastName();
@@ -171,7 +171,7 @@ export class FakeUsersService
 				                               lastName: lastName,
 				                               email: email,
 				                               phone: phone,
-				                               image: getDummyImage(
+				                               image: CommonUtils.getDummyImage(
 						                               300, 300,
 						                               firstName.slice(0, 2)
 				                               ),
