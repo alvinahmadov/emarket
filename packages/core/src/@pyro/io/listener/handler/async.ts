@@ -3,6 +3,7 @@ import { IListenerHandler }    from './handler';
 import { v1 as uuid }          from 'uuid';
 import _                       from 'lodash';
 import Logger                  from 'bunyan';
+import SocketIO                from 'socket.io';
 import { BaseListenerHandler } from './base';
 import { AsyncListener }       from '../async';
 
