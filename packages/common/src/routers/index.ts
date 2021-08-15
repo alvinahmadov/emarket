@@ -18,5 +18,6 @@ export * from './IUserRouter';
 export * from './IWarehouseCarriersRouter';
 export * from './IWarehouseOrdersRouter';
 export * from './IWarehouseProductsRouter';
+export * from './IWarehouseAuthRouter';
 export * from './IWarehouseRouter';
 export * from './IWarehouseUsersRouter';
