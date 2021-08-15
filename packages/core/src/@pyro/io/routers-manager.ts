@@ -3,6 +3,7 @@ import { injectable, multiInject } from 'inversify';
 import { IRouter, RouterSymbol }   from './router/router';
 import { RouterHandler }           from './router/handler';
 import Logger                      from 'bunyan';
+import SocketIO                    from 'socket.io';
 
 export interface IRoutersManager
 {
@@ -21,21 +22,28 @@ export class RoutersManager implements IRoutersManager
 	{
 		this.io = io;
 		
-		this.routers.forEach(async(router) =>
-		                     {
-			                     await this.startRouterListening(router);
-		                     });
+		for(const router of this.routers)
+		{
+			await this.startRouterListening(router)
+			          .then(
+					          () => this.log.info(
+							          {
+								          socketIO: this.io,
+								          routerName: router.routerName
+							          },
+							          `Successfully started listening socketIO`
+					          )
+			          )
+			          .catch(err => this.log.fatal(
+					          'Couldn\'t start router listening!',
+					          { router, err }
+			          ));
+		}
 	}
 	
 	private async startRouterListening(router: IRouter)
 	{
-		try
-		{
-			const routerHandler = new RouterHandler(this.io, router, this.log);
-			await routerHandler.listen();
-		} catch(err)
-		{
-			this.log.fatal('Couldn\'t start router listening!', { err });
-		}
+		const routerHandler = new RouterHandler(this.io, router, this.log);
+		await routerHandler.listen();
 	}
 }

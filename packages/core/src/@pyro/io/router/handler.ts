@@ -2,6 +2,7 @@ import { getListeners, getRouterName, IRouter } from './router';
 import { ConnectionHandler }                    from '../connection-handler';
 import { Listener }                             from '../listener/listener';
 import Logger                                   from 'bunyan';
+import SocketIO                                 from 'socket.io';
 
 export class RouterHandler
 {
@@ -21,11 +22,13 @@ export class RouterHandler
 	
 	async listen(): Promise<void>
 	{
+		const listeners: string[] = this.listeners
+		                            ? this.listeners
+		                                  .map((listener) => listener.name)
+		                            : null;
 		this.log.info(`Starting router listening`, {
 			routerName: this.routerName,
-			listeners: this.listeners
-			           ? this.listeners.map((listener) => listener.name)
-			           : null
+			listeners: listeners
 		});
 		
 		const routerNamespace: SocketIO.Namespace = this.io.of(
