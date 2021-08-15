@@ -1,14 +1,9 @@
-import {
-	Component,
-	OnDestroy,
-	OnInit,
-	ViewChild,
-	ViewEncapsulation,
-}                           from '@angular/core';
-import { RouterOutlet }     from '@angular/router';
-import { AppState }         from './app.service';
-import { TranslateService } from '@ngx-translate/core';
-import { Store }            from './services/store';
+import { Component, OnInit, ViewChild, ViewEncapsulation, } from '@angular/core';
+import { RouterOutlet }                                     from '@angular/router';
+import { TranslateService }                                 from '@ngx-translate/core';
+import { AppState }                                         from './app.service';
+import { Store }                                            from './services/store';
+import { environment }                                      from '../environments/environment'
 
 export interface ToolbarController
 {
@@ -70,6 +65,8 @@ export class AppComponent implements OnInit
 	)
 	{
 		// Here we initialize translates for the all app, when loads for the first time. Do not remove it
+		const defaultLanguage = environment.DEFAULT_LANGUAGE ?? 'ru-RU';
+		const availableLanguages = environment.AVAILABLE_LOCALES;
 		
 		if(translateService.currentLang)
 		{
@@ -78,23 +75,14 @@ export class AppComponent implements OnInit
 		}
 		else
 		{
-			// TODO: load list of supported languages from config service
-			translateService.addLangs([
-				                          'en-US',
-				                          'es-ES',
-				                          'bg-BG',
-				                          'he-IL',
-				                          'ru-RU',
-			                          ]);
-			
-			translateService.setDefaultLang('en-US');
+			translateService.addLangs(availableLanguages.split('|'));
+			translateService.setDefaultLang(defaultLanguage);
 			
 			const browserLang = translateService.getBrowserLang();
-			// TODO: load list of supported languages from config service
 			translateService.use(
-					browserLang.match(/en-US|bg-BG|he-HE|ru-RU|es-ES/)
+					browserLang.match(availableLanguages)
 					? browserLang
-					: 'en-US'
+					: defaultLanguage
 			);
 		}
 	}

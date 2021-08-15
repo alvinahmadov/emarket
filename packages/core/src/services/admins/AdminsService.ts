@@ -1,20 +1,16 @@
-import { DBService }                         from '@pyro/db-server';
-import Admin                                 from '@modules/server.common/entities/Admin';
-import { createLogger }                      from '../../helpers/Log';
-import { AuthService, AuthServiceFactory }   from '../auth';
-import { env }                               from '../../env';
-import IAdminRouter, {
-	IAdminLoginResponse,
-	IAdminRegistrationInput
-}                                            from '@modules/server.common/routers/IAdminRouter';
-import { Observable }                        from 'rxjs';
-import { asyncListener, observableListener } from '@pyro/io';
-import { inject, injectable }                from 'inversify';
-import { first, map, switchMap }             from 'rxjs/operators';
-import { Repository }                        from 'typeorm';
-import Logger                                from 'bunyan';
+import Logger                                                         from 'bunyan';
+import { inject, injectable }                                         from 'inversify';
+import { Observable }                                                 from 'rxjs';
+import { first, map, switchMap }                                      from 'rxjs/operators';
+import { Repository }                                                 from 'typeorm';
+import { asyncListener, observableListener }                          from '@pyro/io';
+import { DBService }                                                  from '@pyro/db-server';
+import Admin                                                          from '@modules/server.common/entities/Admin';
+import IAdminRouter, { IAdminLoginResponse, IAdminRegistrationInput } from '@modules/server.common/routers/IAdminRouter';
+import { AuthService, AuthServiceFactory, PasswordUpdate }            from '../auth';
+import { createLogger }                                               from '../../helpers/Log';
+import { env }                                                        from '../../env';
 
-// TODO: Rename! "Admin" is not a great name, but currently "Users" mean "Customers"...
 /**
  * Users (not customers!) management service
  * In most cases such users are Administrators, which need to get access into Admin or Mechant app
@@ -38,7 +34,6 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter
 	{
 		super();
 		
-		// TODO: move to base class (DBService) and make it fail everything if no admin users found in DB
 		_adminRepository
 				.count()
 				.then((c) =>
@@ -58,16 +53,17 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter
 	}
 	
 	@observableListener()
-	get(id: Admin['id']): Observable<Admin | null>
+	get(id: Admin['id']): Observable<Admin>
 	{
-		return super.get(id).pipe(
-				map(async(admin) =>
-				    {
-					    await this.throwIfNotExists(id);
-					    return admin;
-				    }),
-				switchMap((admin) => admin)
-		);
+		return super.get(id)
+		            .pipe(
+				            map(async(admin: Admin) =>
+				                {
+					                await this.throwIfNotExists(id);
+					                return admin;
+				                }),
+				            switchMap((admin: Promise<Admin>) => admin)
+		            );
 	}
 	
 	@asyncListener()
@@ -79,24 +75,19 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter
 	@asyncListener()
 	async register(input: IAdminRegistrationInput): Promise<Admin>
 	{
-		const admin = await this.create({
-			                                ...input.admin,
-			                                ...(input.password
-			                                    ? {
-						                                hash: await this.authService.getPasswordHash(
-								                                input.password
-						                                )
-					                                }
-			                                    : {})
-		                                });
-		
-		return admin;
+		return await this.create({
+			                         ...input.admin,
+			                         ...(input.password
+			                             ? { hash: await this.authService.getPasswordHash(input.password) }
+			                             : {}
+			                         )
+		                         });
 	}
 	
 	@asyncListener()
 	async updatePassword(
 			id: Admin['id'],
-			password: { current: string; new: string }
+			password: PasswordUpdate
 	): Promise<void>
 	{
 		await this.throwIfNotExists(id);
@@ -144,9 +135,11 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter
 		return super.update(id, updateObject);
 	}
 	
-	async throwIfNotExists(adminId: string)
+	async throwIfNotExists(adminId: string): Promise<void>
 	{
-		const admin = await super.get(adminId).pipe(first()).toPromise();
+		const admin: Admin = await super.get(adminId)
+		                                .pipe(first())
+		                                .toPromise();
 		
 		if(!admin || admin.isDeleted)
 		{
