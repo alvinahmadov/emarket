@@ -189,12 +189,11 @@ export class UsersAuthService extends EntityService<User>
 	
 	/**
 	 * Get current Registration settings (e.g. registrationRequiredOnStart)
-	 * TODO: make async
 	 *
 	 * @memberof UsersAuthService
 	 */
 	@asyncListener()
-	getRegistrationsSettings(): Promise<{
+	async getRegistrationsSettings(): Promise<{
 		registrationRequiredOnStart: boolean;
 	}>
 	{
