@@ -1,25 +1,20 @@
-import { injectable }                        from 'inversify';
-import Logger                                from 'bunyan';
-import _                                     from 'lodash';
-import Utils                                 from '@modules/server.common/utils';
-import { createLogger }                      from '../../helpers/Log';
-import { WarehousesService }                 from '../warehouses';
-import GeoLocation                           from '@modules/server.common/entities/GeoLocation';
-import Warehouse                             from '@modules/server.common/entities/Warehouse';
-import IWarehouse                            from '@modules/server.common/interfaces/IWarehouse';
-import { Observable }                        from 'rxjs';
-import {
-	observableListener,
-	routerName,
-	serialization,
-	asyncListener
-}                                            from '@pyro/io';
-import IGeoLocation                          from '@modules/server.common/interfaces/IGeoLocation';
-import IGeoLocationWarehousesRouter          from '@modules/server.common/routers/IGeoLocationWarehousesRouter';
-import IService                              from '../IService';
-import { ExistenceEventType }                from '@pyro/db-server';
-import { of }                                from 'rxjs/observable/of';
-import { concat, exhaustMap, filter, share } from 'rxjs/operators';
+import { injectable }                                                   from 'inversify';
+import Logger                                                           from 'bunyan';
+import _                                                                from 'lodash';
+import { GeoUtils }                                                     from '@modules/server.common/utilities';
+import { createLogger }                                                 from '../../helpers/Log';
+import { WarehousesService }                                            from '../warehouses';
+import GeoLocation                                                      from '@modules/server.common/entities/GeoLocation';
+import Warehouse                                                        from '@modules/server.common/entities/Warehouse';
+import IWarehouse                                                       from '@modules/server.common/interfaces/IWarehouse';
+import { Observable }                                                   from 'rxjs';
+import { asyncListener, observableListener, routerName, serialization } from '@pyro/io';
+import IGeoLocation                                                     from '@modules/server.common/interfaces/IGeoLocation';
+import IGeoLocationWarehousesRouter                                     from '@modules/server.common/routers/IGeoLocationWarehousesRouter';
+import IService                                                         from '../IService';
+import { ExistenceEventType }                                           from '@pyro/db-server';
+import { of }                                                           from 'rxjs/observable/of';
+import { concat, exhaustMap, filter, share }                            from 'rxjs/operators';
 
 @injectable()
 @routerName('geo-location-warehouses')
@@ -37,7 +32,7 @@ export class GeoLocationsWarehousesService
 	static isNearly(warehouse: Warehouse, geoLocation: GeoLocation): boolean
 	{
 		return (
-				Utils.getDistance(warehouse.geoLocation, geoLocation) <=
+				GeoUtils.getDistance(warehouse.geoLocation, geoLocation) <=
 				GeoLocationsWarehousesService.TrackingDistance
 		);
 	}
@@ -156,33 +151,31 @@ export class GeoLocationsWarehousesService
 	): Promise<IWarehouse[]>
 	{
 		const merchantsIds = options.merchantsIds;
-		const merchants = (await this.warehousesService.Model.find(
-				                             _.assign(
-						                             {
-							                             'geoLocation.loc': {
-								                             $near: {
-									                             $geometry: {
-										                             type: 'Point',
-										                             coordinates: geoLocation.loc.coordinates
-									                             },
-									                             $maxDistance: maxDistance
-								                             }
-							                             }
-						                             },
-						                             options.activeOnly ? { isActive: true } : {},
-						                             options.inStoreMode ? { inStoreMode: true } : {},
-						                             merchantsIds && merchantsIds.length > 0
-						                             ? {
-									                             _id: { $in: merchantsIds }
-								                             }
-						                             : {}
-				                             )
-		                             )
-		                             .populate(options.fullProducts ? 'products.product' : '')
-		                             .lean()
-		                             .exec()) as IWarehouse[];
-		
-		return merchants;
+		return (await this.warehousesService.Model.find(
+				                  _.assign(
+						                  {
+							                  'geoLocation.loc': {
+								                  $near: {
+									                  $geometry: {
+										                  type: 'Point',
+										                  coordinates: geoLocation.loc.coordinates
+									                  },
+									                  $maxDistance: maxDistance
+								                  }
+							                  }
+						                  },
+						                  options.activeOnly ? { isActive: true } : {},
+						                  options.inStoreMode ? { inStoreMode: true } : {},
+						                  merchantsIds && merchantsIds.length > 0
+						                  ? {
+									                  _id: { $in: merchantsIds }
+								                  }
+						                  : {}
+				                  )
+		                  )
+		                  .populate(options.fullProducts ? 'products.product' : '')
+		                  .lean()
+		                  .exec()) as IWarehouse[];
 	}
 	
 	/**
@@ -202,25 +195,26 @@ export class GeoLocationsWarehousesService
 	): Promise<Warehouse[]>
 	{
 		// TODO: first filter by City / Country and only then look up by coordinates
-		const warehouses = (await this.warehousesService.Model.find(
-				                              _.assign(
-						                              {
-							                              'geoLocation.loc': {
-								                              $near: {
-									                              $geometry: {
-										                              type: 'Point',
-										                              coordinates: geoLocation.loc.coordinates
-									                              },
-									
-									                              // TODO: set distance PER warehouse?
-									                              // It's hard to make this work however, as seems this should be constant value...
-									                              // however we may want to check MongoDB docs!
-									                              $maxDistance: maxDistance
-								                              }
-							                              }
-						                              },
-						                              options.activeOnly ? { isActive: true } : {}
-				                              )
+		const warehouses = (await this.warehousesService
+		                              .Model
+		                              .find(_.assign(
+				                                    {
+					                                    'geoLocation.loc': {
+						                                    $near: {
+							                                    $geometry: {
+								                                    type: 'Point',
+								                                    coordinates: geoLocation.loc.coordinates
+							                                    },
+							
+							                                    // TODO: set distance PER warehouse?
+							                                    // It's hard to make this work however, as seems this should be constant value...
+							                                    // however we may want to check MongoDB docs!
+							                                    $maxDistance: maxDistance
+						                                    }
+					                                    }
+				                                    },
+				                                    options.activeOnly ? { isActive: true } : {}
+		                                    )
 		                              )
 		                              .populate(options.fullProducts ? 'products.product' : '')
 		                              .lean()
