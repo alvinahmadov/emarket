@@ -14,7 +14,7 @@ import { LoginComponent }                   from './login.component';
 import { LoginByLocationModule }            from './byLocation';
 import { FontAwesomeModule }                from '@fortawesome/angular-fontawesome';
 import { library }                          from '@fortawesome/fontawesome-svg-core';
-import { faGoogle, faFacebook }             from '@fortawesome/free-brands-svg-icons';
+import { faGoogle, faFacebook, faYandex }   from '@fortawesome/free-brands-svg-icons';
 import { far }                              from '@fortawesome/free-regular-svg-icons';
 import { ByCodeModuleGuard }                from './by-code.module.guard';
 import { SocieModuleGuard }                 from './socie.module.guard';
@@ -26,6 +26,7 @@ import { MessagePopUpModalModule }          from 'app/shared/message-pop-up/mess
 library.add(far);
 library.add(faFacebook);
 library.add(faGoogle);
+library.add(faYandex)
 
 console.log('`Login` bundle loaded asynchronously');
 
