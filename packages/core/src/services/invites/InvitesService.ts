@@ -21,7 +21,8 @@ import IPagingOptions                                    from '@modules/server.c
 import IStreetLocation                                   from '@modules/server.common/interfaces/IStreetLocation';
 import Invite                                            from '@modules/server.common/entities/Invite';
 import IInviteRouter                                     from '@modules/server.common/routers/IInviteRouter';
-import Utils                                             from '@modules/server.common/utils';
+import FakeDataUtils                                     from '@modules/server.common/utilities/fake-data';
+import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
 import IService                                          from '../IService';
 import { createLogger }                                  from '../../helpers/Log';
 import { env }                                           from '../../env';
@@ -76,7 +77,7 @@ export class InvitesService extends DBService<Invite>
 	{
 		if(!invite.code)
 		{
-			invite.code = Utils.getRandomInt(1001, 9999) + '';
+			invite.code = FakeDataUtils.getRandomInt(1001, 9999) + '';
 		}
 		return super.create(invite);
 	}
@@ -130,7 +131,7 @@ export class InvitesService extends DBService<Invite>
 								    filter((invite) =>
 								           {
 									           return (
-											           Utils.getLocDistance(
+											           GeoUtils.getLocDistance(
 													           invite.geoLocation.loc,
 													           info.location
 											           ) <= InvitesService.InviteWorkingDistance &&
