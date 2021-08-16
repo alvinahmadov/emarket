@@ -16,7 +16,7 @@ require('zone.js/dist/long-stack-trace-zone');
 export const environment: Environment = {
 	production: false,
 	
-	SERVICES_ENDPOINT: 'http://localhUpdate environment configost:5500',
+	SERVICES_ENDPOINT: 'http://localhost:5500',
 	HTTPS_SERVICES_ENDPOINT: 'https://localhost:5501',
 	GQL_ENDPOINT: 'http://localhost:5555/graphql',
 	GQL_SUBSCRIPTIONS_ENDPOINT: 'ws://localhost:5050/subscriptions',
