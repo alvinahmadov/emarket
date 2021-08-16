@@ -29,8 +29,7 @@ export class Store
 	
 	get inviteSystem(): boolean
 	{
-		const isEnabled = localStorage.getItem('_inviteSystem') === 'enabled';
-		return isEnabled;
+		return localStorage.getItem('_inviteSystem') === 'enabled';
 	}
 	
 	set inviteSystem(isEndabled: boolean)
@@ -62,14 +61,14 @@ export class Store
 		localStorage.setItem('_buyProduct', warehouseProductId);
 	}
 	
-	get mechantId(): string
+	get merchantId(): string
 	{
-		return localStorage.getItem('_mechantId');
+		return localStorage.getItem('_merchantId');
 	}
 	
-	set mechantId(mechantId: string)
+	set merchantId(merchantId: string)
 	{
-		localStorage.setItem('_mechantId', mechantId);
+		localStorage.setItem('_merchantId', merchantId);
 	}
 	
 	get maintenanceMode(): string | null
@@ -152,11 +151,16 @@ export class Store
 		{
 			try
 			{
-				await this.userRouter.get(userId).pipe(first()).toPromise();
+				await this.userRouter
+				          .get(userId)
+				          .pipe(first())
+				          .toPromise();
+				
 				return true;
 			} catch(error)
 			{
 				this.userId = null;
+				console.error(error.message);
 			}
 		}
 		
