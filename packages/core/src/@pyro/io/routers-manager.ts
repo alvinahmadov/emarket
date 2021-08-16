@@ -25,15 +25,6 @@ export class RoutersManager implements IRoutersManager
 		for(const router of this.routers)
 		{
 			await this.startRouterListening(router)
-			          .then(
-					          () => this.log.info(
-							          {
-								          socketIO: this.io,
-								          routerName: router.routerName
-							          },
-							          `Successfully started listening socketIO`
-					          )
-			          )
 			          .catch(err => this.log.fatal(
 					          'Couldn\'t start router listening!',
 					          { router, err }
