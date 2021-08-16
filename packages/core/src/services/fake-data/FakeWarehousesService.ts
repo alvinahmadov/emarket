@@ -6,8 +6,9 @@ import { IGeoLocationCreateObject } from "@modules/server.common/interfaces/IGeo
 import ForwardOrdersMethod          from "@modules/server.common/enums/ForwardOrdersMethod";
 import Warehouse                    from "@modules/server.common/entities/Warehouse";
 import { Country }                  from "@modules/server.common/entities/GeoLocation";
-import { WarehousesService }        from "../warehouses";
+import { WarehousesAuthService }    from "../warehouses";
 import { env }                      from "../../env";
+import { Inject }                   from "@nestjs/common";
 
 type FakeUserInput = {
 	username: string;
@@ -20,7 +21,8 @@ type FakeUserInput = {
 export class FakeWarehousesService
 {
 	constructor(
-			private readonly _warehousesService: WarehousesService
+			@Inject(WarehousesAuthService)
+			private readonly warehousesAuthService: WarehousesAuthService
 	)
 	{}
 	
@@ -45,7 +47,7 @@ export class FakeWarehousesService
 			streetAddress: faker.address.streetAddress()
 		};
 		
-		const existingWarehouse = await this._warehousesService
+		const existingWarehouse = await this.warehousesAuthService
 		                                    .Model
 		                                    .findOne({ username: username });
 		
@@ -76,13 +78,13 @@ export class FakeWarehousesService
 			};
 			
 			// init
-			let warehouse = await this._warehousesService.create(warehouseCreateObj);
+			let warehouse = await this.warehousesAuthService.create(warehouseCreateObj);
 			
 			// register
-			return this._warehousesService.register({
-				                                        warehouse: warehouse,
-				                                        password: password
-			                                        });
+			return this.warehousesAuthService.register({
+				                                           warehouse: warehouse,
+				                                           password: password
+			                                           });
 		}
 	}
 }
