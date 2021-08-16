@@ -1,4 +1,4 @@
-import { NgModule, APP_INITIALIZER }        from '@angular/core';
+import { APP_INITIALIZER, NgModule }        from '@angular/core';
 import { APP_BASE_HREF }                    from '@angular/common';
 import { BrowserModule }                    from '@angular/platform-browser';
 import { BrowserAnimationsModule }          from '@angular/platform-browser/animations';
@@ -23,7 +23,7 @@ import { AppComponent }                     from './app.component';
 import { AppRoutingModule }                 from './app-routing.module';
 import { environment }                      from 'environments/environment';
 import { Store }                            from './@core/data/store.service';
-import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/google-maps-loader';
+import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/googlemaps-loader';
 import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
 import { AppModuleGuard }                   from './app.module.guard';
 import { MaintenanceModuleGuard }           from './pages/+maintenance-info/maintenance-info.module.guard';
@@ -33,6 +33,7 @@ import { ServerSettingsService }            from './@core/services/server-settin
 // It's more 'standard' way to use Font-Awesome module and special package,
 // but for some reason ngx-admin works without it. So we leave next line commented for now.
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+// noinspection AngularInvalidImportedOrDeclaredSymbol
 @NgModule({
 	          imports: [
 		          BrowserModule,
