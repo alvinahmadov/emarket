@@ -1,7 +1,10 @@
-import Logger                       from 'bunyan';
-import _                            from 'lodash';
-import { inject, injectable }       from 'inversify';
-import { Observable }               from 'rxjs';
+import Logger                 from 'bunyan';
+import _                      from 'lodash';
+import { inject, injectable } from 'inversify';
+import {
+	Observable,
+	of
+}                             from 'rxjs';
 import {
 	concat,
 	exhaustMap,
@@ -9,18 +12,17 @@ import {
 	map,
 	switchMap,
 	tap
-}                                   from 'rxjs/operators';
-import { of }                       from 'rxjs/observable/of';
-import { v1 as uuid }               from 'uuid';
+}                             from 'rxjs/operators';
+import { v1 as uuid }         from 'uuid';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
-}                                   from '@pyro/io';
-import { DBService }                from '@pyro/db-server';
-import { CreateObject }             from "@pyro/db/db-create-object";
-import IWarehouse                   from '@modules/server.common/interfaces/IWarehouse';
+}                             from '@pyro/io';
+import { DBService }          from '@pyro/db-server';
+import { CreateObject }       from "@pyro/db/db-create-object";
+import IWarehouse             from '@modules/server.common/interfaces/IWarehouse';
 import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
 import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
 import Warehouse                    from '@modules/server.common/entities/Warehouse';
@@ -110,14 +112,14 @@ export class WarehousesService extends DBService<Warehouse>
 				concat(this.existence),
 				exhaustMap(() => this._getAllCurrentActive(fullProducts)),
 				tap({
-					    next: (warehouses) =>
+					    next: (warehouses: Warehouse[]) =>
 					    {
 						    this.log.info(
 								    { callId, fullProducts, warehouses },
 								    '.getAllActive(fullProducts) emitted next value'
 						    );
 					    },
-					    error: (err) =>
+					    error: (err: any) =>
 					    {
 						    this.log.error(
 								    { callId, fullProducts, err },
@@ -145,26 +147,27 @@ export class WarehousesService extends DBService<Warehouse>
 				'.getAllStores(fullProducts) called'
 		);
 		
-		return of(null).pipe(
-				concat(this.existence),
-				exhaustMap(() => this._getAllStores(fullProducts)),
-				tap({
-					    next: (warehouses) =>
-					    {
-						    this.log.info(
-								    { callId, fullProducts, warehouses },
-								    '.getAllStores(fullProducts) emitted next value'
-						    );
-					    },
-					    error: (err) =>
-					    {
-						    this.log.error(
-								    { callId, fullProducts, err },
-								    '.getAllStores(fullProducts) thrown error!'
-						    );
-					    }
-				    })
-		);
+		return of(null)
+				.pipe(
+						concat(this.existence),
+						exhaustMap(() => this._getAllStores(fullProducts)),
+						tap({
+							    next: (warehouses: Warehouse[]) =>
+							    {
+								    this.log.info(
+										    { callId, fullProducts, warehouses },
+										    '.getAllStores(fullProducts) emitted next value'
+								    );
+							    },
+							    error: (err: any) =>
+							    {
+								    this.log.error(
+										    { callId, fullProducts, err },
+										    '.getAllStores(fullProducts) thrown error!'
+								    );
+							    }
+						    })
+				);
 	}
 	
 	/**
@@ -182,19 +185,19 @@ export class WarehousesService extends DBService<Warehouse>
 		{
 			return super.get(id)
 			            .pipe(
-					            map(async(warehouse) =>
+					            map(async(warehouse: Warehouse | null) =>
 					                {
 						                await this.throwIfNotExists(id);
 						                return warehouse;
 					                }),
-					            switchMap((warehouse) => warehouse)
+					            switchMap((warehouse: Promise<Warehouse>) => warehouse)
 			            );
 		}
 		else
 		{
 			return super.get(id)
 			            .pipe(
-					            map(async(warehouse) =>
+					            map(async(warehouse: Warehouse | null) =>
 					                {
 						                await this.throwIfNotExists(id);
 						                return warehouse;
