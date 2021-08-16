@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Apollo }     from 'apollo-angular';
-import gql            from 'graphql-tag';
 import { map, share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import IUser          from '@modules/server.common/interfaces/IUser';
 import User           from '@modules/server.common/entities/User';
+import { GQLQueries } from '@modules/server.common/utilities/graphql';
 
 @Injectable()
 export class UsersService
@@ -15,30 +15,9 @@ export class UsersService
     {
         return this._apollo
 		.watchQuery<{ users: IUser[] }>({
-                                            query: gql`
-                                                query AllUsers {
-                                                    users {
-                                                        _id
-                                                        firstName
-                                                        lastName
-                                                        email
-                                                        apartment
-                                                        phone
-                                                        geoLocation {
-                                                            countryId
-                                                            city
-                                                            house
-                                                            streetAddress
-                                                            loc {
-                                                                type
-                                                                coordinates
-                                                            }
-                                                        }
-                                                    }
-                                                }
-			                                `,
+			                                query: GQLQueries.UserAll,
 			                                pollInterval: 5000,
-                                        })
+		                                })
 		.valueChanges.pipe(
 				map((res) => res.data.users),
 				map((users) => users.map((user) => this._userFactory(user))),
