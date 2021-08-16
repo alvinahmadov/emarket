@@ -12,9 +12,11 @@ export interface Environment
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
 	GOOGLE_MAPS_API_KEY: string;
+	DEFAULT_COORDINATES?: boolean;
 	DEFAULT_LATITUDE?: number;
 	DEFAULT_LONGITUDE?: number;
 	DEFAULT_LANGUAGE: string;
+	AVAILABLE_LOCALES: string;
 	DELIVERY_TIME_MIN?: number;
 	DELIVERY_TIME_MAX?: number;
 	NO_INTERNET_LOGO: string;
