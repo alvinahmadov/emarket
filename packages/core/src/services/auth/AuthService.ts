@@ -1,10 +1,15 @@
-import { EntityService }                                       from '@pyro/db-server/entity-service';
-import { DBCreateObject, DBObject, DBRawObject, PyroObjectId } from '@pyro/db';
-import { env }                                                 from '../../env';
-import { WrongPasswordError }                                  from '@modules/server.common/errors/WrongPasswordError';
-import bcrypt                                                  from 'bcrypt';
-import { injectable, interfaces }                              from 'inversify';
-import { RawObject }                                           from '@pyro/db/db-raw-object';
+import { EntityService }          from '@pyro/db-server/entity-service';
+import {
+	DBCreateObject,
+	DBObject,
+	DBRawObject,
+	PyroObjectId
+}                                 from '@pyro/db';
+import { env }                    from '../../env';
+import { WrongPasswordError }     from '@modules/server.common/errors/WrongPasswordError';
+import bcrypt                     from 'bcryptjs';
+import { injectable, interfaces } from 'inversify';
+import { RawObject }              from '@pyro/db/db-raw-object';
 
 // have to combine the two imports
 import jwt                   from 'jsonwebtoken';
@@ -56,18 +61,22 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 	
 	async addPassword(id: T['id'], password: string)
 	{
-		const entity = this.parse(
-				await this.Model.findById(id).select('+hash').lean().exec()
-		);
+		const query: Promise<T> = this.Model
+		                              .findById(id)
+		                              .select('+hash')
+		                              .lean()
+		                              .exec();
 		
-		if(entity.hash != null)
+		const entity = this.parse(await query);
+		
+		if(entity?.hash != null)
 		{
 			throw new Error(
 					'Password already exists, please call updatePassword instead.'
 			);
 		}
 		
-		await this._savePassword(id, password);
+		await this.savePassword(id, password);
 	}
 	
 	async updatePassword(
@@ -75,8 +84,13 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 			password: { current: string; new: string }
 	): Promise<void>
 	{
+		const query: Promise<T> = this.Model
+		                              .findById(id)
+		                              .select('+hash')
+		                              .lean()
+		                              .exec();
 		const entity = this.parse(
-				await this.Model.findById(id).select('+hash').lean().exec()
+				await query
 		);
 		
 		if(!(await bcrypt.compare(password.current, entity.hash)))
@@ -84,10 +98,10 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 			throw new WrongPasswordError();
 		}
 		
-		await this._savePassword(id, password.new);
+		await this.savePassword(id, password.new);
 	}
 	
-	async _savePassword(id: T['id'], password: string)
+	async savePassword(id: T['id'], password: string)
 	{
 		const hash = await this.getPasswordHash(password);
 		
@@ -103,27 +117,40 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 			password: string
 	): Promise<{ entity: T; token: string } | null>
 	{
-		const entity = this.parse(
-				await this.Model.findOne(findObj).select('+hash').lean().exec()
-		);
-		
-		if(!entity || !(await bcrypt.compare(password, entity.hash)))
+		try
 		{
-			return null;
+			const query: Promise<T> = this.Model
+			                              .findOne(findObj)
+			                              .select('+hash')
+			                              .lean()
+			                              .exec()
+			
+			const entity = this.parse(await query);
+			
+			if(!entity || !(await bcrypt.compare(password, entity.hash)))
+			{
+				return null;
+			}
+			
+			const token = jwt.sign(
+					{ id: entity.id, role: this.role },
+					env.JWT_SECRET,
+					{}
+			); // Never expires
+			
+			delete entity.hash;
+			
+			return {
+				entity,
+				token
+			};
+		} catch(e)
+		{
+			console.error({
+				              where: 'Auth.login',
+				              error: e
+			              });
 		}
-		
-		const token = jwt.sign(
-				{ id: entity.id, role: this.role },
-				env.JWT_SECRET,
-				{}
-		); // Never expires
-		
-		delete entity.hash;
-		
-		return {
-			entity,
-			token
-		};
 	}
 	
 	/**
@@ -139,7 +166,10 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 				role: string;
 			};
 			
-			const entity = await this.Model.findById(id).lean().exec();
+			const entity = await this.Model
+			                         .findById(id)
+			                         .lean()
+			                         .exec();
 			
 			if(!entity)
 			{
