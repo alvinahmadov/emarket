@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { getIdFromTheDate } from '@modules/server.common/utils';
+import CommonUtils          from '@modules/server.common/utilities/common';
 
 @Component({
 	           selector: 'order-title',
@@ -13,7 +13,7 @@ export class OrderTitleComponent
 	
 	get orderName()
 	{
-		return getIdFromTheDate(this.order);
+		return CommonUtils.getIdFromTheDate(this.order);
 	}
 	
 	get userFullName()
