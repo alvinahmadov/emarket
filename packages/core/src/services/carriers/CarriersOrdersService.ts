@@ -17,7 +17,7 @@ import {
 	GeoLocationsOrdersService,
 	GeoLocationOrdersOptions
 }                                                        from '../geo-locations';
-import { getDistance }                                   from '@modules/server.common/utils';
+import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
 import { ExistenceEventType }                            from '@pyro/db-server';
 import {
 	concat,
@@ -259,7 +259,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 					                     }
 					                     else
 					                     {
-						                     return getDistance(geoLocation1, geoLocation2) <= 0.001;
+						                     return GeoUtils.getDistance(geoLocation1, geoLocation2) <= 0.001;
 					                     }
 				                     }),
 				switchMap((geoLocation) =>
