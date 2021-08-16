@@ -81,16 +81,20 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 	
 	ngOnInit()
 	{
-		this.getMinutesText();
-		this.getReadyForText();
-		this.warehouseRouter.get(this.warehouseId, true).subscribe((w) =>
-		                                                           {
-			                                                           this.warehouseProduct = w.products.filter(
-					                                                           (res) => res.product['id'] === this.productId
-			                                                           )[0];
-			                                                           this.warehouse = w;
-			                                                           this.loadImages();
-		                                                           });
+		this.getMinutesText().catch(console.error);
+		;
+		this.getReadyForText().catch(console.error);
+		;
+		this.warehouseRouter
+		    .get(this.warehouseId, true)
+		    .subscribe((w) =>
+		               {
+			               this.warehouseProduct = w.products.filter(
+					               (res) => res.product['id'] === this.productId
+			               )[0];
+			               this.warehouse = w;
+			               this.loadImages();
+		               });
 	}
 	
 	ngOnDestroy()
@@ -108,8 +112,9 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 		{
 			this.store.registrationSystem = RegistrationSystem.Once;
 			this.store.buyProduct = this.warehouseProduct.id;
-			this.store.mechantId = this.warehouseId;
-			this.router.navigate(['/login']);
+			this.store.merchantId = this.warehouseId;
+			this.router.navigate(['/login']).catch(console.error);
+			;
 		}
 		else
 		{
@@ -124,7 +129,8 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 			
 			await this.orderRouter.confirm(order.id);
 			
-			this.router.navigate(['/orders']);
+			this.router.navigate(['/orders']).catch(console.error);
+			;
 		}
 	}
 	
@@ -132,19 +138,18 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 	{
 		if(this.warehouseProduct != null)
 		{
-			const productInfo = this.warehouseProduct;
 			
 			if(!this.isTakeaway)
 			{
 				if(
-						productInfo.deliveryTimeMax != null &&
-						productInfo.deliveryTimeMin != null
+						this.warehouseProduct.deliveryTimeMax != null &&
+						this.warehouseProduct.deliveryTimeMin != null
 				)
 				{
 					return (
-							productInfo.deliveryTimeMin +
+							this.warehouseProduct.deliveryTimeMin +
 							'-' +
-							productInfo.deliveryTimeMax +
+							this.warehouseProduct.deliveryTimeMax +
 							' ' +
 							this.minutesText
 					);
@@ -163,23 +168,24 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 			else
 			{
 				if(
-						productInfo.deliveryTimeMax == null ||
-						productInfo.deliveryTimeMax <= 15
+						this.warehouseProduct.deliveryTimeMax == null ||
+						this.warehouseProduct.deliveryTimeMax <= 15
 				)
 				{
 					return this.readyForText;
 				}
 				else
 				{
+					// noinspection PointlessBooleanExpressionJS
 					if(
-							productInfo.deliveryTimeMax != null &&
-							productInfo.deliveryTimeMin != null
+							this.warehouseProduct.deliveryTimeMax != null &&
+							this.warehouseProduct.deliveryTimeMin != null
 					)
 					{
 						return (
-								productInfo.deliveryTimeMin +
+								this.warehouseProduct.deliveryTimeMin +
 								'-' +
-								productInfo.deliveryTimeMax +
+								this.warehouseProduct.deliveryTimeMax +
 								' ' +
 								this.minutesText
 						);

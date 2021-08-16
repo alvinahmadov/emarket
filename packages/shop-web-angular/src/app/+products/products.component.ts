@@ -1,35 +1,24 @@
-import {
-	Component,
-	ElementRef,
-	OnDestroy,
-	OnInit,
-	ViewChild,
-}                                     from '@angular/core';
-import ProductInfo                    from '@modules/server.common/entities/ProductInfo';
-import { Store }                      from 'app/services/store';
-import { WarehouseOrdersRouter }      from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { IOrderCreateInput }          from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import { Router }                     from '@angular/router';
-import GeoLocation                    from '@modules/server.common/entities/GeoLocation';
-import {
-	first,
-	takeUntil,
-	debounceTime,
-	distinctUntilChanged,
-}                                     from 'rxjs/operators';
-import { UserRouter }                 from '@modules/client.common.angular2/routers/user-router.service';
-import { GeoLocationService }         from 'app/services/geo-location';
-import RegistrationSystem             from '@modules/server.common/enums/RegistrationSystem';
-import { GeoLocationProductsService } from 'app/services/geo-location-products';
-import { ILocation }                  from '@modules/server.common/interfaces/IGeoLocation';
-import { WarehouseProductsService }   from 'app/services/warehouse-products';
-import WarehouseProduct               from '@modules/server.common/entities/WarehouseProduct';
-import DeliveryType                   from '@modules/server.common/enums/DeliveryType';
-import { Subject }                    from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild, }   from '@angular/core';
+import ProductInfo                                    from '@modules/server.common/entities/ProductInfo';
+import { Store }                                      from 'app/services/store';
+import { WarehouseOrdersRouter }                      from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { IOrderCreateInput }                          from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import { Router }                                     from '@angular/router';
+import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
+import { debounceTime, distinctUntilChanged, first, } from 'rxjs/operators';
+import { UserRouter }                                 from '@modules/client.common.angular2/routers/user-router.service';
+import { GeoLocationService }                         from 'app/services/geo-location';
+import RegistrationSystem                             from '@modules/server.common/enums/RegistrationSystem';
+import { GeoLocationProductsService }                 from 'app/services/geo-location-products';
+import { ILocation }                                  from '@modules/server.common/interfaces/IGeoLocation';
+import { WarehouseProductsService }                   from 'app/services/warehouse-products';
+import WarehouseProduct                               from '@modules/server.common/entities/WarehouseProduct';
+import DeliveryType                                   from '@modules/server.common/enums/DeliveryType';
+import { Subject }                                    from 'rxjs';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
-import { CarouselViewComponent }      from './views/carousel/carousel-view.component';
-import { environment }                from 'environments/environment';
+import { CarouselViewComponent }                      from './views/carousel/carousel-view.component';
+import { environment }                                from 'environments/environment';
 
 const initializeProductsNumber: number = 10;
 
@@ -65,7 +54,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 	)
 	{
 		this.isWideView = this.store.productListViewSpace === 'wide';
-		this.loadGeoLocationProducts();
+		this.loadGeoLocationProducts().catch(console.error);
 		this.productsFilter();
 	}
 	
@@ -127,7 +116,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 		
 		await this.warehouseOrdersRouter.create(orderCreateInput);
 		
-		this.router.navigate(['/orders']);
+		this.router.navigate(['/orders']).catch(console.error);
 	}
 	
 	private async continueOrder()
@@ -137,7 +126,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 		if(buyProduct)
 		{
 			const userId = this.store.userId;
-			const mechantId = this.store.mechantId;
+			const mechantId = this.store.merchantId;
 			
 			if(userId && mechantId)
 			{
@@ -148,15 +137,15 @@ export class ProductsComponent implements OnInit, OnDestroy
 				
 				if(productForBuy)
 				{
-					this.buyItem(productForBuy, mechantId);
+					await this.buyItem(productForBuy, mechantId);
 					this.store.buyProduct = '';
-					this.store.mechantId = '';
+					this.store.merchantId = '';
 				}
 			}
 			else
 			{
 				this.store.buyProduct = '';
-				this.store.mechantId = '';
+				this.store.merchantId = '';
 			}
 		}
 	}
@@ -194,10 +183,10 @@ export class ProductsComponent implements OnInit, OnDestroy
 			},
 		};
 		
-		this.loadProducts();
+		await this.loadProducts();
 	}
 	
-	private async loadProducts(count?: number)
+	public async loadProducts(count?: number)
 	{
 		this.productsLoading = true;
 		await this.loadProductsCount();
@@ -229,7 +218,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 			else
 			{
 				this.store.registrationSystem = RegistrationSystem.Once;
-				this.router.navigate(['/login']);
+				this.router.navigate(['/login']).catch(console.error);
 			}
 		}
 		this.productsLoading = false;
