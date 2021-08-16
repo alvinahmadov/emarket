@@ -15,39 +15,43 @@ require('zone.js/dist/long-stack-trace-zone');
 
 export const environment: Environment = {
 	production: false,
-
-	DEFAULT_LATITUDE: 42.6459136,
-	DEFAULT_LONGITUDE: 23.3332736,
-
-	DEFAULT_LANGUAGE: 'en-US',
-
-	SERVICES_ENDPOINT: 'http://localhost:5500',
+	
+	SERVICES_ENDPOINT: 'http://localhUpdate environment configost:5500',
 	HTTPS_SERVICES_ENDPOINT: 'https://localhost:5501',
 	GQL_ENDPOINT: 'http://localhost:5555/graphql',
 	GQL_SUBSCRIPTIONS_ENDPOINT: 'ws://localhost:5050/subscriptions',
+	
+	DEFAULT_LANGUAGE: 'ru-RU',
+	AVAILABLE_LOCALES: 'en-US|ru-RU|es-ES',
+	
+	DEFAULT_COORDINATES: false,
+	DEFAULT_LATITUDE: 37.6156,
+	DEFAULT_LONGITUDE: 55.7522,
+	
 	AUTH_LOGO: 'assets/img/ever-logo.svg',
 	NO_INTERNET_LOGO: 'assets/img/ever-logo.svg',
-
-	GOOGLE_MAPS_API_KEY: 'AIzaSyCu9rBjnlRE2RO4d8qCSl7P5TweLwm49AU',
-
+	
 	DELIVERY_TIME_MIN: 30,
 	DELIVERY_TIME_MAX: 60,
-
+	
+	GOOGLE_MAPS_API_KEY: 'AIzaSyCu9rBjnlRE2RO4d8qCSl7P5TweLwm49AU',
+	
 	SETTINGS_APP_TYPE: 'shop-web',
 	SETTINGS_MAINTENANCE_API_URL: '',
-
+	
 	ENV_PROVIDERS: [],
-
+	
 	/**
 	 * Angular debug tools in the dev console
 	 * https://github.com/angular/angular/blob/86405345b781a9dc2438c0fbe3e9409245647019/TOOLS_JS.md
 	 * @param modRef
 	 * @return {any}
 	 */
-	decorateModuleRef(modRef: NgModuleRef<any>) {
+	decorateModuleRef(modRef: NgModuleRef<any>)
+	{
 		const appRef = modRef.injector.get(ApplicationRef);
 		const cmpRef = appRef.components[0];
-
+		
 		const _ng = (window as any).ng;
 		enableDebugTools(cmpRef);
 		(window as any).ng.probe = _ng.probe;
