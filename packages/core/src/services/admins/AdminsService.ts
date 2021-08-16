@@ -1,15 +1,19 @@
-import Logger                                                         from 'bunyan';
-import { inject, injectable }                                         from 'inversify';
-import { Observable }                                                 from 'rxjs';
-import { first, map, switchMap }                                      from 'rxjs/operators';
-import { Repository }                                                 from 'typeorm';
-import { asyncListener, observableListener }                          from '@pyro/io';
-import { DBService }                                                  from '@pyro/db-server';
-import Admin                                                          from '@modules/server.common/entities/Admin';
-import IAdminRouter, { IAdminLoginResponse, IAdminRegistrationInput } from '@modules/server.common/routers/IAdminRouter';
-import { AuthService, AuthServiceFactory, PasswordUpdate }            from '../auth';
-import { createLogger }                                               from '../../helpers/Log';
-import { env }                                                        from '../../env';
+import Logger                                from 'bunyan';
+import { inject, injectable }                from 'inversify';
+import { Observable }                        from 'rxjs';
+import { first, map, switchMap }             from 'rxjs/operators';
+import { Repository }                        from 'typeorm';
+import { asyncListener, observableListener } from '@pyro/io';
+import { DBService }                         from '@pyro/db-server';
+import Admin                                 from '@modules/server.common/entities/Admin';
+import IAdminRouter,
+{
+	IAdminLoginResponse,
+	IAdminRegistrationInput
+}                                            from '@modules/server.common/routers/IAdminRouter';
+import { AuthService, AuthServiceFactory }   from '../auth';
+import { createLogger }                      from '../../helpers/Log';
+import { env }                               from '../../env';
 
 /**
  * Users (not customers!) management service
@@ -87,7 +91,7 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter
 	@asyncListener()
 	async updatePassword(
 			id: Admin['id'],
-			password: PasswordUpdate
+			password: { current: string; new: string }
 	): Promise<void>
 	{
 		await this.throwIfNotExists(id);
