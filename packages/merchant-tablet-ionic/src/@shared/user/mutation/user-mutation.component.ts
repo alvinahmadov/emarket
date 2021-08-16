@@ -13,7 +13,7 @@ import { LocationFormComponent }            from '../forms/location/location-for
 import { ModalController, ToastController } from '@ionic/angular';
 import User                                 from '@modules/server.common/entities/User';
 import { UserRouter }                       from '@modules/client.common.angular2/routers/user-router.service';
-import { getDummyImage }                    from '@modules/server.common/utils';
+import CommonUtils                          from '@modules/server.common/utilities/common';
 
 @Component({
 	           selector: 'user-mutation',
@@ -190,7 +190,7 @@ export class UserMutationComponent
 			
 			if(firstNameLetter || lastNameLetter)
 			{
-				user.image = getDummyImage(
+				user.image = CommonUtils.getDummyImage(
 						300,
 						300,
 						firstNameLetter + lastNameLetter
@@ -202,7 +202,7 @@ export class UserMutationComponent
 				                            .charAt(0)
 				                            .toUpperCase();
 				
-				user.image = getDummyImage(300, 300, firstCityLetter);
+				user.image = CommonUtils.getDummyImage(300, 300, firstCityLetter);
 			}
 		}
 		

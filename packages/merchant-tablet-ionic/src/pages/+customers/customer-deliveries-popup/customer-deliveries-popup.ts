@@ -1,18 +1,18 @@
 import { Component, OnDestroy, Input, OnInit } from '@angular/core';
 import User                                    from '@modules/server.common/entities/User';
-import Order                                   from '@modules/server.common/entities/Order';
-import { UserOrdersRouter }                    from '@modules/client.common.angular2/routers/user-orders-router.service';
-import Carrier                                 from '@modules/server.common/entities/Carrier';
-import { LocalDataSource }                     from 'ng2-smart-table';
-import { Subject, Observable, forkJoin }       from 'rxjs';
-import { TranslateService }                    from '@ngx-translate/core';
-import { takeUntil }                           from 'rxjs/operators';
-import { OrderIdComponent }                    from '../../../components/customer-deliveries-table/orderId';
-import { DeliveryComponent }                   from '../../../components/customer-deliveries-table/delivery';
-import { AddressComponent }                    from '../../../components/customer-deliveries-table/address';
-import { StatusComponent }                     from '../../../components/customer-deliveries-table/status';
-import { getIdFromTheDate }                    from '@modules/server.common/utils';
-import { ModalController }                     from '@ionic/angular';
+import Order                             from '@modules/server.common/entities/Order';
+import { UserOrdersRouter }              from '@modules/client.common.angular2/routers/user-orders-router.service';
+import Carrier                           from '@modules/server.common/entities/Carrier';
+import { LocalDataSource }               from 'ng2-smart-table';
+import { Subject, Observable, forkJoin } from 'rxjs';
+import { TranslateService }              from '@ngx-translate/core';
+import { takeUntil }                     from 'rxjs/operators';
+import { OrderIdComponent }              from '../../../components/customer-deliveries-table/orderId';
+import { DeliveryComponent }             from '../../../components/customer-deliveries-table/delivery';
+import { AddressComponent }              from '../../../components/customer-deliveries-table/address';
+import { StatusComponent }               from '../../../components/customer-deliveries-table/status';
+import CommonUtils                       from '@modules/server.common/utilities/common';
+import { ModalController }               from '@ionic/angular';
 
 @Component({
 	           selector: 'customer-deliveries-popup',
@@ -132,7 +132,7 @@ export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 				                           let status = o.isCompleted ? 'Completed' : '';
 				                           status += o.isPaid ? 'Paid' : '';
 				                           return {
-					                           orderId: getIdFromTheDate(o),
+					                           orderId: CommonUtils.getIdFromTheDate(o),
 					                           status,
 					                           address: this.getCustomerFullAddress(o),
 					                           delivery: this.getTotalDeliveryTime(o),

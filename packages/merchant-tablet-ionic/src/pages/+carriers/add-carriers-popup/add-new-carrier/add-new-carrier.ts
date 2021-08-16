@@ -1,15 +1,15 @@
 import {
 	Component,
+	EventEmitter,
+	Input,
+	OnChanges,
 	OnDestroy,
 	OnInit,
 	Output,
-	EventEmitter,
-	Input,
 	ViewChild,
-	OnChanges,
 }                                 from '@angular/core';
 import { ICarrierCreateObject }   from '@modules/server.common/interfaces/ICarrier';
-import { getDummyImage }          from '@modules/server.common/utils';
+import CommonUtils                from '@modules/server.common/utilities/common';
 import { FileUploader }           from 'ng2-file-upload';
 import { BasicInfoFormComponent } from './basic-info/basic-info-form.component';
 import { AccountFormComponent }   from './account/account-form.component';
@@ -70,13 +70,13 @@ export class AddNewCarrierComponent implements OnInit, OnDestroy, OnChanges
 		                   .charAt(0)
 		                   .toUpperCase();
 		
-		let logo = '';
+		let logo: string;
 		
 		this.basicInfoForm.logo.value === ''
-		? (logo = getDummyImage(300, 300, letter))
+		? (logo = CommonUtils.getDummyImage(300, 300, letter))
 		: (logo = this.basicInfoForm.logo.value);
 		
-		const CarrierCreateObject: ICarrierCreateObject = {
+		return {
 			firstName: this.basicInfoForm.firstName.value,
 			lastName: this.basicInfoForm.lastName.value,
 			email: this.basicInfoForm.email.value,
@@ -101,8 +101,6 @@ export class AddNewCarrierComponent implements OnInit, OnDestroy, OnChanges
 				postcode: this.locationForm.postcode.value,
 			},
 		};
-		
-		return CarrierCreateObject;
 	}
 	
 	backToStep1()
