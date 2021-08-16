@@ -1,8 +1,8 @@
-import { Resolver, Query }               from '@nestjs/graphql';
+import { Query, Resolver }               from '@nestjs/graphql';
 import { GeoLocationsWarehousesService } from '../../../services/geo-locations';
 import IGeoLocation                      from '@modules/server.common/interfaces/IGeoLocation';
 import Warehouse                         from '@modules/server.common/entities/Warehouse';
-import Utils                             from '@modules/server.common/utils';
+import GeoUtils                          from '@modules/server.common/utilities/geolocation';
 import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
 
 const IN_STORE_DISTANCE = 50;
@@ -26,11 +26,11 @@ export class GeoLocationMerchantsResolver
 		
 		merchants = merchants.sort(
 				(m1, m2) =>
-						Utils.getDistance(
+						GeoUtils.getDistance(
 								new GeoLocation(m1.geoLocation),
 								new GeoLocation(geoLocation)
 						) -
-						Utils.getDistance(
+						GeoUtils.getDistance(
 								new GeoLocation(m2.geoLocation),
 								new GeoLocation(geoLocation)
 						)
