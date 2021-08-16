@@ -18,8 +18,9 @@ let isLogsFolderExists = env.LOGS_PATH ? existsSync(env.LOGS_PATH) : false;
 const getAdditionalLoggerStreams = ({ name }: LogArgs): Logger.Stream[] =>
 {
 	const hostname = os.hostname();
+	const awsDeploy = env.AWS_ACCESS_KEY_ID.length > 0 && env.AWS_SECRET_ACCESS_KEY.length > 0;
 	
-	if(env.isProd)
+	if(env.isProd && awsDeploy)
 	{
 		const logLevels: Logger.LogLevel[] = ['info', 'error', 'debug'];
 		
