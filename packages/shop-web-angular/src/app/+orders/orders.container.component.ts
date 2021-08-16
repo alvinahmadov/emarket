@@ -6,14 +6,14 @@ import { Store }             from 'app/services/store';
 @Component({
 	           selector: 'orders-container',
 	           template: `
-		<orders *ngIf="orders" [orders]="orders"></orders>
-		<div
-			*ngIf="!orders.length"
-			style="text-align:center; font-size:28px;margin:20px 0"
-		>
-			There are no orders ...
-		</div>
-	`,
+		           <orders *ngIf="orders" [orders]="orders"></orders>
+		           <div
+				           *ngIf="!orders.length"
+				           style="text-align:center; font-size:28px;margin:20px 0"
+		           >
+			           {{ 'ORDER_VIEW.NO_ORDERS' | translate }}  ...
+		           </div>
+	           `,
            })
 export class OrdersContainerComponent
 {
@@ -28,12 +28,15 @@ export class OrdersContainerComponent
 		const userId = store.userId;
 		
 		// During testing: this.userOrdersRouter.getOrderedProducts('23');
-		this.userOrdersRouter.get(userId).subscribe((res) =>
-		                                            {
-			                                            this.ngZone.run(() =>
-			                                                            {
-				                                                            this.orders = res.filter((r) => !r.isCancelled);
-			                                                            });
-		                                            });
+		this.userOrdersRouter
+		    .get(userId)
+		    .subscribe((res: Order[]) =>
+		               {
+			               this.ngZone
+			                   .run(() =>
+			                        {
+				                        this.orders = res.filter((r: Order) => !r.isCancelled);
+			                        });
+		               });
 	}
 }
