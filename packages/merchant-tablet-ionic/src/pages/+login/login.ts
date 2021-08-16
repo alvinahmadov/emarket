@@ -25,9 +25,13 @@ export class LoginPage
 		localStorage.removeItem('_warehouseId');
 		localStorage.removeItem('_language');
 		localStorage.removeItem('token');
-		this.username = environment.DEFAULT_LOGIN_USERNAME;
-		this.password = environment.DEFAULT_LOGIN_PASSWORD;
-		this.loginLogo = environment.LOGIN_LOGO;
+		
+		if(!environment.production)
+		{
+			this.username = environment.DEFAULT_LOGIN_USERNAME;
+			this.password = environment.DEFAULT_LOGIN_PASSWORD;
+			this.loginLogo = environment.LOGIN_LOGO;
+		}
 	}
 	
 	async login()
@@ -48,6 +52,7 @@ export class LoginPage
 		this.store.warehouseId = res.warehouse.id;
 		this.store.token = res.token;
 		
-		this.router.navigate(['warehouse']);
+		this.router.navigate(['warehouse'])
+		    .catch(console.error);
 	}
 }
