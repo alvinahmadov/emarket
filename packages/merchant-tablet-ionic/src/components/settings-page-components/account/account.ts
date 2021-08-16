@@ -1,13 +1,20 @@
-import { Component, Input, OnInit, OnChanges, OnDestroy } from '@angular/core';
+import {
+	Component,
+	Input,
+	OnInit,
+	OnChanges,
+	OnDestroy
+}                              from '@angular/core';
 import {
 	FormGroup,
 	FormBuilder,
 	Validators,
 	AbstractControl,
-}                                                         from '@angular/forms';
-import Warehouse                                          from '@modules/server.common/entities/Warehouse';
-import { WarehouseRouter }                                from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { AlertController }                                from '@ionic/angular';
+}                              from '@angular/forms';
+import Warehouse               from '@modules/server.common/entities/Warehouse';
+import { WarehouseRouter }     from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter } from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
+import { AlertController }     from '@ionic/angular';
 
 @Component({
 	           selector: 'merchant-account',
@@ -28,6 +35,7 @@ export class AccountComponent implements OnInit, OnChanges, OnDestroy
 	constructor(
 			private formBuilder: FormBuilder,
 			private warehouseRouter: WarehouseRouter,
+			private warehouseAuthRouter: WarehouseAuthRouter,
 			public alertController: AlertController
 	)
 	{
@@ -43,7 +51,7 @@ export class AccountComponent implements OnInit, OnChanges, OnDestroy
 		{
 			try
 			{
-				await this.warehouseRouter.updatePassword(
+				await this.warehouseAuthRouter.updatePassword(
 						this.currWarehouse.id,
 						{
 							current: this.oldPassword.value,
