@@ -51,7 +51,6 @@ interface IWatchedFiles
 
 /**
  * Customers Service
- * TODO: rename from UsersService to CustomersService
  *
  * @export
  * @class UsersService
@@ -234,12 +233,14 @@ export class UsersService extends DBService<User>
 			if(user.stripeCustomerId != null)
 			{
 				return (
-						await this.stripe.customers.listSources(
-								user.stripeCustomerId,
-								{
-									object: 'card'
-								}
-						)
+						await this.stripe
+						          .customers
+						          .listSources(
+								          user.stripeCustomerId,
+								          {
+									          object: 'card'
+								          }
+						          )
 				).data;
 			}
 			else
@@ -289,25 +290,31 @@ export class UsersService extends DBService<User>
 			{
 				if(user.stripeCustomerId == null)
 				{
-					const customer = await this.stripe.customers.create({
-						                                                    email: user.email,
-						                                                    description: 'User id: ' + user.id,
-						                                                    metadata: {
-							                                                    userId: user.id
-						                                                    }
-					                                                    });
+					const customer = await this.stripe
+					                           .customers
+					                           .create({
+						                                   email: user.email,
+						                                   description: 'User id: ' + user.id,
+						                                   metadata: {
+							                                   userId: user.id
+						                                   }
+					                                   });
 					
 					user = await this.update(userId, {
 						stripeCustomerId: customer.id
 					});
 				}
 				
-				card = (await this.stripe.customers.createSource(
-						user.stripeCustomerId as string,
-						{
-							source: tokenId
-						}
-				)) as Stripe.cards.ICard;
+				card = (
+						await this.stripe
+						          .customers
+						          .createSource(
+								          user.stripeCustomerId as string,
+								          {
+									          source: tokenId
+								          }
+						          )
+				) as Stripe.cards.ICard;
 			}
 			else
 			{

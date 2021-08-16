@@ -6,6 +6,7 @@ import { first, map, switchMap }               from 'rxjs/operators';
 import { ContactInfoFormComponent }            from '../../../../@shared/warehouse/forms';
 import { LocationFormComponent }               from '../../../../@shared/forms/location';
 import { WarehouseRouter }                     from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter }                 from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 import Warehouse                               from '@modules/server.common/entities/Warehouse';
 import { WarehouseManageTabsComponent }        from '../../../../@shared/warehouse/forms/warehouse-manage-tabs/warehouse-manage-tabs.component';
 
@@ -43,7 +44,8 @@ export class WarehouseManageComponent implements OnInit
 			private readonly _formBuilder: FormBuilder,
 			private readonly activatedRoute: ActivatedRoute,
 			private readonly toasterService: ToasterService,
-			private readonly warehouseRouter: WarehouseRouter
+			private readonly warehouseRouter: WarehouseRouter,
+			private readonly warehouseAuthRouter: WarehouseAuthRouter
 	)
 	{}
 	
@@ -92,7 +94,7 @@ export class WarehouseManageComponent implements OnInit
 			
 			if(passwordNew.length > 0)
 			{
-				await this.warehouseRouter.updatePassword(
+				await this.warehouseAuthRouter.updatePassword(
 						this._currentWarehouse.id,
 						{
 							current: passwordOld,
@@ -110,14 +112,17 @@ export class WarehouseManageComponent implements OnInit
 			this._showWarehouseUpdateSuccessMessage(warehouse);
 			
 			this.warehouseManageTabs.warehouseUpdateFinish();
-			this.warehouseManageTabs.accountComponent.form.setValue({
-				                                                        username: username,
-				                                                        password: {
-					                                                        confirm: '',
-					                                                        current: '',
-					                                                        new: '',
-				                                                        },
-			                                                        });
+			this.warehouseManageTabs
+			    .accountComponent
+			    .form
+			    .setValue({
+				              username: username,
+				              password: {
+					              confirm: '',
+					              current: '',
+					              new: '',
+				              },
+			              });
 		} catch(err)
 		{
 			this.loading = false;

@@ -5,7 +5,7 @@ import {
 	AfterViewInit,
 }                                                           from '@angular/core';
 import { NgbActiveModal }                                   from '@ng-bootstrap/ng-bootstrap';
-import { WarehouseRouter }                                  from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter }                              from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 import { ToasterService }                                   from 'angular2-toaster';
 import { FormBuilder, FormControl, FormGroup }              from '@angular/forms';
 import { BasicInfoFormComponent, ContactInfoFormComponent } from '../forms';
@@ -57,7 +57,7 @@ export class WarehouseMutationComponent implements AfterViewInit
 			private readonly activeModal: NgbActiveModal,
 			private readonly formBuilder: FormBuilder,
 			private readonly toasterService: ToasterService,
-			private readonly warehouseRouter: WarehouseRouter,
+			private readonly warehouseAuthRouter: WarehouseAuthRouter,
 			private readonly _translateService: TranslateService
 	)
 	{}
@@ -126,19 +126,20 @@ export class WarehouseMutationComponent implements AfterViewInit
 			geoLocationInput.loc.coordinates.reverse();
 			
 			this.loading = true;
-			const w = await this.warehouseRouter.register({
-				                                              warehouse: {
-					                                              ...this.basicInfoForm.getValue(),
-					                                              ...this.contactInfoForm.getValue(),
-					                                              geoLocation: geoLocationInput,
-					                                              isPaymentEnabled: this.paymentsSettingsForm
-							                                              .isPaymentEnabled,
-					                                              paymentGateways: this.paymentsSettingsForm.paymentsGateways,
-					                                              isCashPaymentEnabled: this.paymentsSettingsForm
-							                                              .isCashPaymentEnabled,
-				                                              },
-				                                              password: this.basicInfoForm.getPassword(),
-			                                              });
+			const w = await this.warehouseAuthRouter
+			                    .register({
+				                              warehouse: {
+					                              ...this.basicInfoForm.getValue(),
+					                              ...this.contactInfoForm.getValue(),
+					                              geoLocation: geoLocationInput,
+					                              isPaymentEnabled: this.paymentsSettingsForm
+							                              .isPaymentEnabled,
+					                              paymentGateways: this.paymentsSettingsForm.paymentsGateways,
+					                              isCashPaymentEnabled: this.paymentsSettingsForm
+							                              .isCashPaymentEnabled,
+				                              },
+				                              password: this.basicInfoForm.getPassword(),
+			                              });
 			this.loading = false;
 			this.toasterService.pop(
 					'success',
@@ -165,10 +166,12 @@ export class WarehouseMutationComponent implements AfterViewInit
 	{
 		let translationResult = '';
 		
-		this._translateService.get(key).subscribe((res) =>
-		                                          {
-			                                          translationResult = res;
-		                                          });
+		this._translateService
+		    .get(key)
+		    .subscribe((res) =>
+		               {
+			               translationResult = res;
+		               });
 		
 		return translationResult;
 	}
