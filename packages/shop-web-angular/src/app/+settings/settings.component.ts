@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
 import { TranslateService }                     from '@ngx-translate/core';
 import { environment }                          from 'environments/environment';
 import { DOCUMENT }                             from '@angular/common';
+import { Store }                                from '../services/store';
 
 @Component({
 	           selector: 'settings',
@@ -15,11 +16,14 @@ export class SettingsComponent implements OnInit, OnDestroy
 	public dir: 'ltr' | 'rtl';
 	
 	constructor(
-			private translateService: TranslateService,
-			@Inject(DOCUMENT) public document: Document
+			public translateService: TranslateService,
+			@Inject(DOCUMENT)
+			public document: Document,
+			private store: Store
 	)
 	{
-		this.defaultLanguage = environment['DEFAULT_LANGUAGE'];
+		this.defaultLanguage = environment.DEFAULT_LANGUAGE;
+		const languages = environment.AVAILABLE_LOCALES;
 		
 		if(translateService.currentLang)
 		{
@@ -29,19 +33,10 @@ export class SettingsComponent implements OnInit, OnDestroy
 		}
 		else
 		{
-			// TODO: load list of supported languages from config service
-			translateService.addLangs([
-				                          'en-US',
-				                          'es-ES',
-				                          'bg-BG',
-				                          'he-IL',
-				                          'ru-RU',
-			                          ]);
-			
-			translateService.setDefaultLang('en-US');
+			translateService.addLangs(languages.split('|'));
+			translateService.setDefaultLang('ru-RU');
 			
 			const browserLang = translateService.getBrowserLang();
-			// TODO: load list of supported languages from config service
 			
 			if(this.defaultLanguage)
 			{
@@ -49,9 +44,10 @@ export class SettingsComponent implements OnInit, OnDestroy
 			}
 			else
 			{
-				browserLang.match(/en-US|es-ES|bg-BG|he-IL|ru-RU/)
-				? browserLang
-				: 'en-US';
+				let language = browserLang.match(languages)
+				               ? browserLang
+				               : 'ru-RU';
+				translateService.use(language)
 			}
 			
 			this.selectedLang = this.translateService.currentLang;
