@@ -13,7 +13,7 @@ export interface IWarehouseLoginResponse
 	token: string;
 }
 
-export interface IWarehouseAuthRouter
+interface IWarehouseAuthRouter
 {
 	register(input: IWarehouseRegistrationInput): Promise<Warehouse>;
 	
@@ -27,3 +27,5 @@ export interface IWarehouseAuthRouter
 			password: { current?: string; new: string }
 	): Promise<void>;
 }
+
+export default IWarehouseAuthRouter;
