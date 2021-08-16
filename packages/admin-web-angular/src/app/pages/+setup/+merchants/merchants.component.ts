@@ -9,7 +9,7 @@ import { SetupMerchantDeliveryAndTakeawayComponent } from './components/settings
 import { SetupMerchantOrdersSettingsComponent }      from './components/settings/orders/orders.component';
 import { IWarehouseCreateObject }                    from '@modules/server.common/interfaces/IWarehouse';
 import GeoLocation                                   from '@modules/server.common/entities/GeoLocation';
-import { WarehouseRouter }                           from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter }                       from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 import { ToasterService }                            from 'angular2-toaster';
 import { NbStepperComponent }                        from '@nebular/theme';
 import Warehouse                                     from '@modules/server.common/entities/Warehouse';
@@ -43,7 +43,7 @@ export class SetupMerchantsComponent
 	currentStore: Warehouse;
 	
 	constructor(
-			private warehouseRouter: WarehouseRouter,
+			private warehouseAuthRouter: WarehouseAuthRouter,
 			private readonly toasterService: ToasterService
 	)
 	{}
@@ -62,7 +62,7 @@ export class SetupMerchantsComponent
 	{
 		try
 		{
-			this.currentStore = await this.warehouseRouter.register(
+			this.currentStore = await this.warehouseAuthRouter.register(
 					this.getMerchantCreateObj()
 			);
 			
