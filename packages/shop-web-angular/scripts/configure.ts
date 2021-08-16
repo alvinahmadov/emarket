@@ -42,6 +42,7 @@ export const environment: Environment = {
   DEFAULT_LANGUAGE: '${env.DEFAULT_LANGUAGE}',
   AVAILABLE_LOCALES: '${env.AVAILABLE_LOCALES}',
 
+  DEFAULT_COORDINATES: ${env.DEFAULT_COORDINATES},
   DEFAULT_LATITUDE: ${env.DEFAULT_LATITUDE},
   DEFAULT_LONGITUDE: ${env.DEFAULT_LONGITUDE},
   
@@ -56,6 +57,8 @@ export const environment: Environment = {
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}',
 
+  HOST: '${env.HOST}',
+  PORT: ${env.PORT},
   ENV_PROVIDERS: [],
 
   /**
@@ -101,6 +104,7 @@ export const environment: Environment = {
   DEFAULT_LANGUAGE: '${env.DEFAULT_LANGUAGE}',
   AVAILABLE_LOCALES: '${env.AVAILABLE_LOCALES}',
 
+  DEFAULT_COORDINATES: ${env.DEFAULT_COORDINATES},
   DEFAULT_LATITUDE: ${env.DEFAULT_LATITUDE},
   DEFAULT_LONGITUDE: ${env.DEFAULT_LONGITUDE},
   
@@ -115,6 +119,8 @@ export const environment: Environment = {
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}',
 
+  HOST: '${env.HOST}',
+  PORT: ${env.PORT},
   ENV_PROVIDERS: [],
 
   /**

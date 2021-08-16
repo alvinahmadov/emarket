@@ -4,6 +4,8 @@ export interface Environment
 {
 	production: boolean;
 	ENV_PROVIDERS: any;
+	HOST: string;
+	PORT: number;
 	SERVICES_ENDPOINT: string;
 	HTTPS_SERVICES_ENDPOINT: string;
 	GQL_ENDPOINT: string;
