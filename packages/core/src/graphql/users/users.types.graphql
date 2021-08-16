@@ -60,17 +60,18 @@ type Query {
 
     isUserEmailExists(email: String!): Boolean!
 
-    generate1000Customers(
+    generateCustomers(
+        qty: Int
         defaultLng: Float!
         defaultLat: Float!
-    ): ResponseGenerate1000Customers
+    ): ResponseGenerateCustomers
 
     getCountOfUsers: Int!
 
     getCustomerMetrics(id: String!): CustomerMetrics
 }
 
-type ResponseGenerate1000Customers {
+type ResponseGenerateCustomers {
     success: Boolean!
     message: String
 }
