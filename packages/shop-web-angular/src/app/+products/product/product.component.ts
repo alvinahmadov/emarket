@@ -1,32 +1,18 @@
-import { Router }                from '@angular/router';
-import {
-	Component,
-	Input,
-	AfterViewInit,
-	EventEmitter,
-	Output,
-	OnChanges,
-	Inject,
-}                                from '@angular/core';
-import {
-	animate,
-	state,
-	style,
-	transition,
-	trigger,
-}                                from '@angular/animations';
-import { Observable }            from 'rxjs';
+import { Router }                                                     from '@angular/router';
+import { Component, EventEmitter, Inject, Input, OnChanges, Output, } from '@angular/core';
+import { animate, state, style, transition, trigger, }                from '@angular/animations';
+import { Observable }                                                 from 'rxjs';
 import 'rxjs/add/observable/fromEvent';
-import { ElementQueries }        from 'css-element-queries/src/ElementQueries';
-import ProductInfo               from '@modules/server.common/entities/ProductInfo';
-import { OrderRouter }           from '@modules/client.common.angular2/routers/order-router.service';
-import { WarehouseOrdersRouter } from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
-import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale';
-import { Store }                 from 'app/services/store';
-import RegistrationSystem        from '@modules/server.common/enums/RegistrationSystem';
-import { IProductImage }         from '@modules/server.common/interfaces/IProduct';
-import { DOCUMENT }              from '@angular/common';
+import { ElementQueries }                                             from 'css-element-queries/src/ElementQueries';
+import ProductInfo                                                    from '@modules/server.common/entities/ProductInfo';
+import { OrderRouter }                                                from '@modules/client.common.angular2/routers/order-router.service';
+import { WarehouseOrdersRouter }                                      from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { ProductLocalesService }                                      from '@modules/client.common.angular2/locale/product-locales.service';
+import { ILocaleMember }                                              from '@modules/server.common/interfaces/ILocale';
+import { Store }                                                      from 'app/services/store';
+import RegistrationSystem                                             from '@modules/server.common/enums/RegistrationSystem';
+import { IProductImage }                                              from '@modules/server.common/interfaces/IProduct';
+import { DOCUMENT }                                                   from '@angular/common';
 
 @Component({
 	           selector: 'product',
@@ -77,9 +63,7 @@ export class ProductComponent implements OnChanges
 					       {
 						       return (
 								       i.url ===
-								       this.localeTranslate(
-										       this.info.warehouseProduct.product['images']
-								       )
+								       this.localeTranslate(this.info.warehouseProduct.product['images'])
 						       );
 					       });
 		}
@@ -110,8 +94,8 @@ export class ProductComponent implements OnChanges
 		{
 			this.store.registrationSystem = RegistrationSystem.Once;
 			this.store.buyProduct = this.info.warehouseProduct.id;
-			this.store.mechantId = this.info.warehouseId;
-			this.router.navigate(['/login']);
+			this.store.merchantId = this.info.warehouseId;
+			this.router.navigate(['/login']).catch(console.error);
 		}
 		else
 		{
@@ -126,11 +110,11 @@ export class ProductComponent implements OnChanges
 			
 			await this.orderRouter.confirm(order.id);
 			
-			this.router.navigate(['/orders']);
+			this.router.navigate(['/orders']).catch(console.error);
 		}
 	}
 	
-	protected localeTranslate(member: ILocaleMember[]): string
+	localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._productLocalesService.getTranslate(member);
 	}
