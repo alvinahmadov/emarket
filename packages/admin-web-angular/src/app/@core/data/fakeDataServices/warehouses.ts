@@ -2,8 +2,8 @@ import { Injectable }                  from '@angular/core';
 import { IGeoLocationCreateObject }    from '@modules/server.common/interfaces/IGeoLocation';
 import { Country }                     from '@modules/server.common/entities/GeoLocation';
 import ForwardOrdersMethod             from '@modules/server.common/enums/ForwardOrdersMethod';
-import { IWarehouseRegistrationInput } from '@modules/server.common/routers/IWarehouseRouter';
-import { getFakeImg }                  from '@modules/server.common/utils';
+import { IWarehouseRegistrationInput } from '@modules/server.common/routers/IWarehouseAuthRouter';
+import FakeDataUtils                   from '@modules/server.common/utilities/fake-data';
 import { environment }                 from 'environments/environment';
 import faker                           from 'faker';
 import _                               from 'lodash';
@@ -35,7 +35,7 @@ export default class FakeDataWarehouses
 									name: `Restaurant ${warehouseName}`,
 									isActive: true,
 									username: faker.internet.userName(),
-									logo: getFakeImg(200, 200, 75, warehouseName),
+									logo: FakeDataUtils.getFakeImg(200, 200, 75, warehouseName),
 									contactEmail: faker.internet.email(),
 									contactPhone: faker.phone.phoneNumber(),
 									ordersEmail: null,
@@ -59,7 +59,7 @@ export default class FakeDataWarehouses
 											coordinates: [lng, lat],
 										},
 									},
-									_createdAt: this._getRandomDateRange(),
+									_createdAt: FakeDataWarehouses._getRandomDateRange(),
 								},
 								password: '123456',
 							};
@@ -70,7 +70,7 @@ export default class FakeDataWarehouses
 								name: 'Pizza Dan',
 								isActive: true,
 								username: 'restaurant_pizza',
-								logo: getFakeImg(200, 200, 75, 'Pizza Dan'),
+								logo: FakeDataUtils.getFakeImg(200, 200, 75, 'Pizza Dan'),
 								contactEmail: faker.internet.email(),
 								contactPhone: faker.phone.phoneNumber(),
 								forwardOrdersUsing: [
@@ -94,7 +94,7 @@ export default class FakeDataWarehouses
 										coordinates: [lng + 0.05, lat + 0.09],
 									},
 								},
-								_createdAt: this._getRandomDateRange(),
+								_createdAt: FakeDataWarehouses._getRandomDateRange(),
 							},
 							password: '123456',
 						} as any,
@@ -104,7 +104,7 @@ export default class FakeDataWarehouses
 								name: 'Pizza Hit',
 								isActive: true,
 								username: 'hut_pizza',
-								logo: getFakeImg(200, 200, 75, 'Pizza Hit'),
+								logo: FakeDataUtils.getFakeImg(200, 200, 75, 'Pizza Hit'),
 								contactEmail: faker.internet.email(),
 								contactPhone: faker.phone.phoneNumber(),
 								forwardOrdersUsing: [
@@ -128,7 +128,7 @@ export default class FakeDataWarehouses
 										coordinates: [lng - 0.05, lat - 0.09],
 									},
 								},
-								_createdAt: this._getRandomDateRange(),
+								_createdAt: FakeDataWarehouses._getRandomDateRange(),
 							},
 							password: '123456',
 						} as any,
@@ -138,7 +138,7 @@ export default class FakeDataWarehouses
 								name: 'Pizza Troya',
 								isActive: true,
 								username: 'trova_pizza',
-								logo: getFakeImg(200, 200, 75, 'Pizza Troya'),
+								logo: FakeDataUtils.getFakeImg(200, 200, 75, 'Pizza Troya'),
 								contactEmail: faker.internet.email(),
 								contactPhone: faker.phone.phoneNumber(),
 								forwardOrdersUsing: [
@@ -162,7 +162,7 @@ export default class FakeDataWarehouses
 										coordinates: [lng + 0.08, lat + 0.07],
 									},
 								},
-								_createdAt: this._getRandomDateRange(),
+								_createdAt: FakeDataWarehouses._getRandomDateRange(),
 							} as any,
 							password: '123456',
 						},
@@ -172,7 +172,7 @@ export default class FakeDataWarehouses
 								name: 'Dominex Pizza',
 								isActive: true,
 								username: 'dominex_pizza',
-								logo: getFakeImg(200, 200, 75, 'Pizza Pizza'),
+								logo: FakeDataUtils.getFakeImg(200, 200, 75, 'Pizza Pizza'),
 								contactEmail: faker.internet.email(),
 								contactPhone: faker.phone.phoneNumber(),
 								forwardOrdersUsing: [
@@ -196,7 +196,7 @@ export default class FakeDataWarehouses
 										coordinates: [lng - 0.08, lat - 0.07],
 									},
 								},
-								_createdAt: this._getRandomDateRange(),
+								_createdAt: FakeDataWarehouses._getRandomDateRange(),
 							} as any,
 							password: '123456',
 						},
@@ -249,7 +249,7 @@ export default class FakeDataWarehouses
 		}
 	}
 	
-	private _getRandomDateRange(yearsRange: number = 6)
+	private static _getRandomDateRange(yearsRange: number = 6)
 	{
 		const now = new Date();
 		const currentYear = now.getFullYear();
