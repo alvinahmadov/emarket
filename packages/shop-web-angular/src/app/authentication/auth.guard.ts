@@ -23,13 +23,11 @@ export class AuthGuard implements CanActivate
 	): Promise<boolean>
 	{
 		const isLogged = await this.store.isLogged();
+		const isRegistrationEnabled = this.store.registrationSystem === RegistrationSystem.Enabled;
 		
-		if(
-				!isLogged &&
-				this.store.registrationSystem === RegistrationSystem.Enabled
-		)
+		if(!isLogged && isRegistrationEnabled)
 		{
-			this.router.navigate(['login']);
+			await this.router.navigate(['auth']);
 			return false;
 		}
 		
