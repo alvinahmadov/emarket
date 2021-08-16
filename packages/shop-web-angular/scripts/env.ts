@@ -12,6 +12,7 @@ export type Env = Readonly<{
 	GQL_ENDPOINT: string;
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
+	DEFAULT_COORDINATES: boolean;
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
 	
@@ -46,8 +47,9 @@ export const env: Env = cleanEnv(
 				                                default: 'ws://localhost:5050/subscriptions',
 			                                }),
 			
-			DEFAULT_LATITUDE: num({ default: 42.6459136 }),
-			DEFAULT_LONGITUDE: num({ default: 23.3332736 }),
+			DEFAULT_COORDINATES: bool({ default: false }),
+			DEFAULT_LATITUDE: num({ default: 37.6156 }),
+			DEFAULT_LONGITUDE: num({ default: 55.7522 }),
 			
 			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
 			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
@@ -67,7 +69,7 @@ export const env: Env = cleanEnv(
 			                                  }),
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
-			WEB_MEMORY: num({ default: 2048 }),
+			WEB_MEMORY: num({ default: 4096 }),
 			PORT: num({ default: 3000 }),
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
