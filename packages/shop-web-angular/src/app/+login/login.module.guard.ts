@@ -29,7 +29,8 @@ export class LoginModuleGuard implements CanActivate
 				 !id)
 		)
 		{
-			this.router.navigate(['products']);
+			this.router.navigate(['products'])
+			    .catch(console.error);
 			return false;
 		}
 		return true;
