@@ -13,7 +13,7 @@ export class OrderImageComponent
 	order: Order;
 	
 	constructor(
-			private readonly productLocalesService: ProductLocalesService
+			readonly productLocalesService: ProductLocalesService
 	)
 	{}
 	
