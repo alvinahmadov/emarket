@@ -1,77 +1,58 @@
-import { NgModule, APP_INITIALIZER }        from '@angular/core';
-import { BrowserModule }                    from '@angular/platform-browser';
-import { FormsModule }                      from '@angular/forms';
-import { PreloadAllModules, RouterModule }  from '@angular/router';
-import { MatButtonModule }                  from '@angular/material/button';
-import { MatButtonToggleModule }            from '@angular/material/button-toggle';
-import { MatCardModule }                    from '@angular/material/card';
-import { MatCheckboxModule }                from '@angular/material/checkbox';
-import { MatFormFieldModule }               from '@angular/material/form-field';
-import { MatIconModule }                    from '@angular/material/icon';
-import { MatListModule }                    from '@angular/material/list';
-import { MatSidenavModule }                 from '@angular/material/sidenav';
-import { MatSlideToggleModule }             from '@angular/material/slide-toggle';
-import { MatToolbarModule }                 from '@angular/material/toolbar';
-import { BrowserAnimationsModule }          from '@angular/platform-browser/animations';
-import { environment }                      from 'environments/environment';
-import { IconsModule }                      from '../modules/icons';
-import {
-	MatBoldInputModule,
-	MatSearchModule,
-}                                           from '../modules/material-extensions';
-import { ROUTES }                           from './app.routes';
-import { AppComponent }                     from './app.component';
-import { APP_RESOLVER_PROVIDERS }           from './app.resolver';
-import { AppState }                         from './app.service';
-import { ToolbarComponent }                 from './toolbar/toolbar.component';
-import { NoContentComponent }               from './no-content';
-import { CommonModule }                     from '@modules/client.common.angular2/common.module';
-// import { Logger } from 'angular2-logger/core';
-import { SidenavService }                   from './sidenav/sidenav.service';
-import { SidenavContentComponent }          from './sidenav/sidenav-content.component';
 import '../styles/styles.scss';
-import { HttpClientModule, HttpClient }     from '@angular/common/http';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
-import { ServerSettings }                   from './services/server-settings';
-import { LoginModuleGuard }                 from './+login/login.module.guard';
-import { ProductsModuleGuard }              from './+products/products.module.guard';
-import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
-import { AppModuleGuard }                   from './app.module.guard';
-import { MaintenanceModuleGuard }           from './+maintenance-info/maintenance-info.module.guard';
-import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/googleMapsLoader';
-import { ApolloModule, Apollo }             from 'apollo-angular';
-import { HttpLinkModule, HttpLink }         from 'apollo-angular-link-http';
-import { InMemoryCache }                    from 'apollo-cache-inmemory';
-import { setContext }                       from 'apollo-link-context';
-import { Store }                            from './services/store';
-import { InfiniteScrollModule }             from 'ngx-infinite-scroll';
-import { platformBrowserDynamic }           from '@angular/platform-browser-dynamic';
-import { GeoLocationService }               from './services/geo-location';
-import { LocationPopupModalModule }         from './shared/location-popup/location-popup.module';
-import { AuthGuard }                        from './authentication/auth.guard';
-import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
+import { APP_INITIALIZER, NgModule }            from '@angular/core';
+import { BrowserModule }                        from '@angular/platform-browser';
+import { FormsModule }                          from '@angular/forms';
+import { PreloadAllModules, RouterModule }      from '@angular/router';
+import { MatButtonModule }                      from '@angular/material/button';
+import { MatButtonToggleModule }                from '@angular/material/button-toggle';
+import { MatCardModule }                        from '@angular/material/card';
+import { MatCheckboxModule }                    from '@angular/material/checkbox';
+import { MatFormFieldModule }                   from '@angular/material/form-field';
+import { MatIconModule }                        from '@angular/material/icon';
+import { MatListModule }                        from '@angular/material/list';
+import { MatSidenavModule }                     from '@angular/material/sidenav';
+import { MatSlideToggleModule }                 from '@angular/material/slide-toggle';
+import { MatToolbarModule }                     from '@angular/material/toolbar';
+import { BrowserAnimationsModule }              from '@angular/platform-browser/animations';
+import { environment }                          from 'environments/environment';
+import { IconsModule }                          from '../modules/icons';
+import { MatBoldInputModule, MatSearchModule, } from '../modules/material-extensions';
+import { ROUTES }                               from './app.routes';
+import { AppComponent }                         from './app.component';
+import { APP_RESOLVER_PROVIDERS }               from './app.resolver';
+import { AppState }                             from './app.service';
+import { ToolbarComponent }                     from './toolbar/toolbar.component';
+import { NoContentComponent }                   from './no-content';
+import { CommonModule }                         from '@modules/client.common.angular2/common.module';
+// import { Logger } from 'angular2-logger/core';
+import { SidenavService }                       from './sidenav/sidenav.service';
+import { SidenavContentComponent }              from './sidenav/sidenav-content.component';
+import { HttpClient, HttpClientModule }         from '@angular/common/http';
+import { TranslateLoader, TranslateModule }     from '@ngx-translate/core';
+import { TranslateHttpLoader }                  from '@ngx-translate/http-loader';
+import { ServerSettings }                       from './services/server-settings';
+import { LoginModuleGuard }                     from './+login/login.module.guard';
+import { ProductsModuleGuard }                  from './+products/products.module.guard';
+import { MaintenanceService }                   from '@modules/client.common.angular2/services/maintenance.service';
+import { AppModuleGuard }                       from './app.module.guard';
+import { MaintenanceModuleGuard }               from './+maintenance-info/maintenance-info.module.guard';
+import { GoogleMapsLoader }                     from '@modules/client.common.angular2/services/googlemaps-loader';
+import { Apollo, ApolloModule }                 from 'apollo-angular';
+import { HttpLink, HttpLinkModule }             from 'apollo-angular-link-http';
+import { InMemoryCache }                        from 'apollo-cache-inmemory';
+import { setContext }                           from 'apollo-link-context';
+import { Store }                                from './services/store';
+import { InfiniteScrollModule }                 from 'ngx-infinite-scroll';
+import { platformBrowserDynamic }               from '@angular/platform-browser-dynamic';
+import { GeoLocationService }                   from './services/geo-location';
+import { LocationPopupModalModule }             from './shared/location-popup/location-popup.module';
+import { AuthGuard }                            from './authentication/auth.guard';
+import { ServerConnectionService }              from '@modules/client.common.angular2/services/server-connection.service';
 
-export function HttpLoaderFactory(http: HttpClient)
+export function HttpLoaderWebFactory(http: HttpClient)
 {
 	return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
-
-/*
- export function serverSettingsFactory(
- serverSettings: ServerSettings,
- serverConnectionService: ServerConnectionService,
- store: Store
- ) {
- return async () => {
- await serverConnectionService.load(
- environment.SERVICES_ENDPOINT,
- store
- );
- await serverSettings.load();
- };
- }
- */
 
 export function serverSettingsFactory(provider: ServerSettings)
 {
@@ -82,8 +63,8 @@ export function maintenanceFactory(provider: MaintenanceService)
 {
 	return () =>
 			provider.load(
-					environment['SETTINGS_APP_TYPE'],
-					environment['SETTINGS_MAINTENANCE_API_URL']
+					environment.SETTINGS_APP_TYPE,
+					environment.SETTINGS_MAINTENANCE_API_URL
 			);
 }
 
@@ -151,7 +132,7 @@ const APP_PROVIDERS = [
 		          TranslateModule.forRoot({
 			                                  loader: {
 				                                  provide: TranslateLoader,
-				                                  useFactory: HttpLoaderFactory,
+				                                  useFactory: HttpLoaderWebFactory,
 				                                  deps: [HttpClient],
 			                                  },
 		                                  }),
@@ -234,4 +215,6 @@ export class AppModule
 	}
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule);
+platformBrowserDynamic()
+		.bootstrapModule(AppModule)
+		.catch(console.warn);
