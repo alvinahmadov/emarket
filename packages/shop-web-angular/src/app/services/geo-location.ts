@@ -52,46 +52,54 @@ export class GeoLocationService
 	
 	getCurrentCoords(): Promise<Coords>
 	{
-		return new Promise((resolve, reject) =>
-		                   {
-			                   const defaultLat = environment.DEFAULT_LATITUDE;
-			                   const defaultLng = environment.DEFAULT_LONGITUDE;
-			
-			                   if(defaultLat && defaultLng)
-			                   {
-				                   resolve(
-						                   this.getCoordsObj({
-							                                     latitude: defaultLat,
-							                                     longitude: defaultLng,
-						                                     })
-				                   );
-				
-				                   return;
-			                   }
-			
-			                   navigator.geolocation.getCurrentPosition(
-					                   (res) =>
-					                   {
-						                   // If user is enable GPS on browser
-						                   resolve(this.getCoordsObj(res.coords));
-					                   },
-					                   (err) =>
-					                   {
-						                   // If user is denied GPS on browser
-						                   this.getLocationByIP().subscribe((res) =>
-						                                                    {
-							                                                    if(res)
-							                                                    {
-								                                                    resolve(this.getCoordsObj(res));
-							                                                    }
-							                                                    else
-							                                                    {
-								                                                    reject(err.message);
-							                                                    }
-						                                                    });
-					                   }
-			                   );
-		                   });
+		return new Promise(
+				(resolve, reject) =>
+				{
+					const useDefaultCoordinates = environment.DEFAULT_COORDINATES ?? false;
+					const defaultLat = environment.DEFAULT_LATITUDE;
+					const defaultLng = environment.DEFAULT_LONGITUDE;
+					
+					if(useDefaultCoordinates)
+					{
+						if(defaultLat && defaultLng)
+						{
+							resolve(
+									GeoLocationService.getCoordsObj({
+										                                latitude: defaultLat,
+										                                longitude: defaultLng,
+									                                })
+							);
+							
+							return;
+						}
+					}
+					
+					navigator.geolocation
+					         .getCurrentPosition(
+							         (res) =>
+							         {
+								         // If user is enable GPS on browser
+								         resolve(GeoLocationService.getCoordsObj(res.coords));
+							         },
+							         (err) =>
+							         {
+								         // If user is denied GPS on browser
+								         this.getLocationByIP()
+								             .subscribe((res) =>
+								                        {
+									                        if(res)
+									                        {
+										                        resolve(GeoLocationService.getCoordsObj(res));
+									                        }
+									                        else
+									                        {
+										                        reject(err.message);
+									                        }
+								                        });
+							         }
+					         );
+				}
+		);
 	}
 	
 	private getLocationByIP(): Subscribable<Coords | null>
@@ -102,7 +110,7 @@ export class GeoLocationService
 		);
 	}
 	
-	private getCoordsObj(coords: Coords)
+	private static getCoordsObj(coords: Coords)
 	{
 		return {
 			longitude: coords.longitude,
