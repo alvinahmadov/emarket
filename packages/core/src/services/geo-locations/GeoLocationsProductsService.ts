@@ -1,22 +1,22 @@
-import { inject, injectable }             from 'inversify';
-import Logger                             from 'bunyan';
-import { WarehousesService }              from '../warehouses';
-import Warehouse                          from '@modules/server.common/entities/Warehouse';
-import GeoLocation                        from '@modules/server.common/entities/GeoLocation';
-import ProductInfo                        from '@modules/server.common/entities/ProductInfo';
-import _                                  from 'lodash';
-import Utils                              from '@modules/server.common/utils';
-import { createLogger }                   from '../../helpers/Log';
-import { GeoLocationsWarehousesService }  from './GeoLocationsWarehousesService';
-import IGeoLocation                       from '@modules/server.common/interfaces/IGeoLocation';
+import { inject, injectable }            from 'inversify';
+import Logger                            from 'bunyan';
+import { WarehousesService }             from '../warehouses';
+import Warehouse                         from '@modules/server.common/entities/Warehouse';
+import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
+import ProductInfo                       from '@modules/server.common/entities/ProductInfo';
+import _                                 from 'lodash';
+import GeoUtils                          from '@modules/server.common/utilities/geolocation';
+import { createLogger }                  from '../../helpers/Log';
+import { GeoLocationsWarehousesService } from './GeoLocationsWarehousesService';
+import IGeoLocation                      from '@modules/server.common/interfaces/IGeoLocation';
 import {
 	observableListener,
 	routerName,
 	serialization,
 	asyncListener
-}                                         from '@pyro/io';
-import IGeoLocationProductsRouter         from '@modules/server.common/routers/IGeoLocationProductsRouter';
-import IService                           from '../IService';
+}                                        from '@pyro/io';
+import IGeoLocationProductsRouter        from '@modules/server.common/routers/IGeoLocationProductsRouter';
+import IService                          from '../IService';
 import { map }                            from 'rxjs/operators';
 import {
 	IProductTitle,
@@ -107,7 +107,6 @@ export class GeoLocationsProductsService
 						);
 					});
 			
-			// TODO: Test if everything is OK after changes (removed productsIds.flat())
 			return (
 					productsIds
 							.filter((x, i, a) => a.indexOf(x) == i)
@@ -155,9 +154,7 @@ export class GeoLocationsProductsService
 			searchText?: string
 	): ProductInfo[]
 	{
-		const underscore_: any = _; // TODO: remove sh..t
-		// noinspection JSUnusedLocalSymbols
-		return underscore_(warehouses)
+		return _(warehouses)
 				.map((_warehouse) =>
 				     {
 					     const warehouse = _.clone(_warehouse);
@@ -171,14 +168,14 @@ export class GeoLocationsProductsService
 					
 					     if(options)
 					     {
-						     warehouse.products = warehouse.products.filter((wProduct) =>
-								                                                    this.productsFilter(wProduct, options)
-						     );
+						     warehouse.products =
+								     warehouse.products
+								              .filter(wProduct => this.productsFilter(wProduct, options));
 					     }
 					
-					     warehouse.products = warehouse.products.filter((wProduct) =>
-							                                                    GeoLocationsProductsService.filterBySearchText(wProduct, searchText)
-					     );
+					     warehouse.products =
+							     warehouse.products
+							              .filter(wProduct => GeoLocationsProductsService.filterBySearchText(wProduct, searchText));
 					
 					     return warehouse;
 				     }) // remove all warehouse products which count is 0.
@@ -189,7 +186,7 @@ export class GeoLocationsProductsService
 								                            warehouseId: warehouse.id,
 								                            warehouseLogo: warehouse.logo,
 								                            warehouseProduct,
-								                            distance: Utils.getDistance(
+								                            distance: GeoUtils.getDistance(
 										                            geoLocation,
 										                            warehouse.geoLocation
 								                            )
@@ -217,20 +214,23 @@ export class GeoLocationsProductsService
 			return true;
 		}
 		
-		wProduct.product.images = wProduct.product.images.filter((i) =>
-		                                                         {
-			                                                         return (
-					                                                         (options.imageOrientation !== undefined
-					                                                          ? options.imageOrientation === 1
-					                                                            ? i.orientation === 1
-					                                                            : i.orientation === 0 || i.orientation
-					                                                              === 2
-					                                                          : true) &&
-					                                                         (options.locale !== undefined
-					                                                          ? i.locale === options.locale
-					                                                          : true)
-			                                                         );
-		                                                         });
+		wProduct.product.images = wProduct.product
+		                                  .images
+		                                  .filter(
+				                                  (i) =>
+				                                  {
+					                                  return (
+							                                  (options.imageOrientation !== undefined
+							                                   ? options.imageOrientation === 1
+							                                     ? i.orientation === 1
+							                                     : i.orientation === 0 || i.orientation
+							                                       === 2
+							                                   : true) &&
+							                                  (options.locale !== undefined
+							                                   ? i.locale === options.locale
+							                                   : true)
+					                                  );
+				                                  });
 		
 		if(!wProduct.product.images || wProduct.product.images.length === 0)
 		{
