@@ -21,7 +21,8 @@ export class AppModuleGuard implements CanActivate
 		
 		if(maintenanceMode)
 		{
-			this.router.navigate(['maintenance-info']);
+			this.router.navigate(['maintenance-info'])
+			    .catch(console.warn);
 			return false;
 		}
 		
@@ -29,7 +30,8 @@ export class AppModuleGuard implements CanActivate
 		
 		if(serverConnection === 0)
 		{
-			this.router.navigate(['server-down']);
+			this.router.navigate(['server-down'])
+			    .catch(console.warn);
 			return false;
 		}
 		return true;
