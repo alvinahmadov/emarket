@@ -13,7 +13,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BasicInfoFormComponent } from '../forms';
 import { LocationFormComponent }  from '../../forms/location';
 
-import { getDummyImage }    from '@modules/server.common/utils';
+import CommonUtils          from '@modules/server.common/utilities/common';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -29,11 +29,12 @@ export class CarrierMutationComponent implements AfterViewInit
 	@ViewChild('locationForm')
 	locationForm: LocationFormComponent;
 	
-	readonly form: FormGroup = this.formBuilder.group({
-		                                                  basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
-		                                                  location: LocationFormComponent.buildForm(this.formBuilder),
-		                                                  password: BasicInfoFormComponent.buildPasswordForm(this.formBuilder),
-	                                                  });
+	readonly form: FormGroup = this.formBuilder
+	                               .group({
+		                                      basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
+		                                      location: LocationFormComponent.buildForm(this.formBuilder),
+		                                      password: BasicInfoFormComponent.buildPasswordForm(this.formBuilder),
+	                                      });
 	
 	readonly basicInfo = this.form.get('basicInfo') as FormControl;
 	readonly location = this.form.get('location') as FormControl;
@@ -116,7 +117,7 @@ export class CarrierMutationComponent implements AfterViewInit
 				const letter = carrierCreateObj.firstName
 				                               .charAt(0)
 				                               .toUpperCase();
-				carrierCreateObj.logo = getDummyImage(300, 300, letter);
+				carrierCreateObj.logo = CommonUtils.getDummyImage(300, 300, letter);
 			}
 			
 			const carrier = await this.carrierRouter.register({

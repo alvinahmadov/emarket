@@ -16,7 +16,7 @@ import { WarehousesService }                   from '../../../../../@core/data/w
 import { ToasterService }                      from 'angular2-toaster';
 import { WarehouseRouter }                     from '@modules/client.common.angular2/routers/warehouse-router.service';
 import { Subject }                             from 'rxjs';
-import { getIdFromTheDate }                    from '@modules/server.common/utils';
+import { CommonUtils }                         from '@modules/server.common/utilities';
 import Order                                   from '@modules/server.common/entities/Order';
 import { IOrderCreateInput }                   from '@modules/server.common/routers/IWarehouseOrdersRouter';
 
@@ -103,7 +103,7 @@ export class CustomOrderComponent implements OnInit, OnDestroy
 			
 			this.toasterService.pop(
 					'success',
-					`Order #${getIdFromTheDate(order)} was created`
+					`Order #${CommonUtils.getIdFromTheDate(order)} was created`
 			);
 			
 			this.activeModal.close(order);

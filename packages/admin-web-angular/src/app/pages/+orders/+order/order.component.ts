@@ -11,7 +11,7 @@ import OrderCarrierStatus       from '@modules/server.common/enums/OrderCarrierS
 import OrderProduct             from '@modules/server.common/entities/OrderProduct';
 import GeoLocation              from '@modules/server.common/entities/GeoLocation';
 import { TranslateService }     from '@ngx-translate/core';
-import { getIdFromTheDate }     from '@modules/server.common/utils';
+import { CommonUtils }          from '@modules/server.common/utilities';
 
 const service = new google.maps.DistanceMatrixService();
 
@@ -89,7 +89,7 @@ export class OrderComponent implements OnDestroy
 		}
 		if(warehouse.geoLocation)
 		{
-			details.push(this.getFullAddress(warehouse.geoLocation));
+			details.push(OrderComponent.getFullAddress(warehouse.geoLocation));
 		}
 		return details.filter((d) => d);
 	}
@@ -140,7 +140,7 @@ export class OrderComponent implements OnDestroy
 		}
 		if(carrier.geoLocation)
 		{
-			details.push(this.getFullAddress(carrier.geoLocation));
+			details.push(OrderComponent.getFullAddress(carrier.geoLocation));
 		}
 		return details.filter((d) => d);
 	}
@@ -149,7 +149,7 @@ export class OrderComponent implements OnDestroy
 	{
 		if(order)
 		{
-			return getIdFromTheDate(order);
+			return CommonUtils.getIdFromTheDate(order);
 		}
 	}
 	
@@ -205,7 +205,7 @@ export class OrderComponent implements OnDestroy
 		this.ngDestroy$.complete();
 	}
 	
-	private getFullAddress(geoLocation: GeoLocation)
+	private static getFullAddress(geoLocation: GeoLocation)
 	{
 		return (
 				`${geoLocation.city}, ${geoLocation.streetAddress} ` +

@@ -10,7 +10,7 @@ import { takeUntil, first, debounceTime }         from 'rxjs/operators';
 import { Subject }                                from 'rxjs';
 import { IAdminUpdateObject }                     from '@modules/server.common/interfaces/IAdmin';
 import { AdminsService }                          from '../../../../@core/data/admins.service';
-import { getDummyImage }                          from '@modules/server.common/utils';
+import { CommonUtils }                            from '@modules/server.common/utilities';
 import { ToasterService }                         from 'angular2-toaster';
 import { TranslateService }                       from '@ngx-translate/core';
 import 'rxjs/add/operator/debounceTime';
@@ -52,7 +52,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
 			    .subscribe((value) =>
 			               {
-				               this.usernameErrorMsg = this.hasError(this.username)
+				               this.usernameErrorMsg = BasicInfoComponent.hasError(this.username)
 				                                       ? Object.keys(this.username.errors)[0]
 				                                       : '';
 			               });
@@ -63,7 +63,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
 			    .subscribe((value) =>
 			               {
-				               this.emailErrorMsg = this.hasError(this.email)
+				               this.emailErrorMsg = BasicInfoComponent.hasError(this.email)
 				                                    ? this.email.errors.email
 				                                      ? this.invalidEmailAddress()
 				                                      : Object.keys(this.email.errors)[0]
@@ -76,7 +76,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
 			    .subscribe((value) =>
 			               {
-				               this.firstNameErrorMsg = this.hasError(this.firstName)
+				               this.firstNameErrorMsg = BasicInfoComponent.hasError(this.firstName)
 				                                        ? this.firstName.errors.pattern
 				                                          ? this.nameMustContainOnlyLetters()
 				                                          : Object.keys(this.firstName.errors)[0]
@@ -89,7 +89,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
 			    .subscribe((value) =>
 			               {
-				               this.lastNameErrorMsg = this.hasError(this.lastName)
+				               this.lastNameErrorMsg = BasicInfoComponent.hasError(this.lastName)
 				                                       ? this.lastName.errors.pattern
 				                                         ? this.nameMustContainOnlyLetters()
 				                                         : Object.keys(this.lastName.errors)[0]
@@ -116,7 +116,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 			private _translateService: TranslateService
 	)
 	{
-		this.getUploaderPlaceholderText();
+		this.getUploaderPlaceholderText().then();
 		this.buildForm();
 		this.bindFormControls();
 		this._applyTranslationOnSmartTable();
@@ -189,7 +189,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 	buildForm()
 	{
 		const imgUrlRegex: RegExp = new RegExp(
-				`(http(s?):)s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))`
+				`(http(s?):)s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|svg))`
 		);
 		const nameRegex: RegExp = new RegExp(`^[a-z ,.'-]+$`, 'i');
 		
@@ -234,7 +234,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		                                              });
 	}
 	
-	private hasError(control: AbstractControl)
+	private static hasError(control: AbstractControl)
 	{
 		return (control.touched || control.dirty) && control.errors;
 	}
@@ -244,7 +244,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		if(!this.picture.value)
 		{
 			const letter = this.username.value.charAt(0).toUpperCase();
-			this.picture.setValue(getDummyImage(300, 300, letter));
+			this.picture.setValue(CommonUtils.getDummyImage(300, 300, letter));
 		}
 		return {
 			name: this.username.value,

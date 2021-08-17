@@ -14,7 +14,7 @@ import {
 }                                               from '@app/@shared/carrier/carriers-table/carriers-table.component';
 import { Subject }                              from 'rxjs';
 import { SetupMerchantAddNewCarrierComponent }  from './add-new-carrier/add-new-carrier.component';
-import { getDummyImage }                        from '@modules/server.common/utils';
+import { CommonUtils }                          from '@modules/server.common/utilities';
 import { CarrierRouter }                        from '@modules/client.common.angular2/routers/carrier-router.service';
 
 @Component({
@@ -130,7 +130,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 				const letter = carrierCreateObj.firstName
 				                               .charAt(0)
 				                               .toUpperCase();
-				carrierCreateObj.logo = getDummyImage(300, 300, letter);
+				carrierCreateObj.logo = CommonUtils.getDummyImage(300, 300, letter);
 			}
 			
 			let carrier = await this.carrierRouter.register({
@@ -186,7 +186,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 			);
 		}
 		
-		this.carriersTable.loadData(this.restrictedCarriers);
+		this.carriersTable.loadData(this.restrictedCarriers).then();
 	}
 	
 	editCarrier(e)

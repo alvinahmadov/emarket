@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import {
 	AbstractControl,
 	FormBuilder,
@@ -7,13 +7,12 @@ import {
 	Validators,
 }                                              from '@angular/forms';
 import { IWarehouseCreateObject }              from '@modules/server.common/interfaces/IWarehouse';
-import { map, first }                          from 'rxjs/operators';
+import { first }                               from 'rxjs/operators';
 import { CarrierRouter }                       from '@modules/client.common.angular2/routers/carrier-router.service';
 import { IMultiSelectOption }                  from 'angular-2-dropdown-multiselect';
-import { Observable, concat }                  from 'rxjs';
 import { pick }                                from 'lodash';
 import { FormHelpers }                         from '../../../forms/helpers';
-import { getDummyImage }                       from '@modules/server.common/utils';
+import { CommonUtils }                         from '@modules/server.common/utilities';
 import { TranslateService }                    from '@ngx-translate/core';
 
 export type WarehouseBasicInfo = Pick<IWarehouseCreateObject,
@@ -190,7 +189,7 @@ export class BasicInfoFormComponent implements OnInit
 		if(!basicInfo.logo)
 		{
 			const letter = basicInfo.name.charAt(0).toUpperCase();
-			basicInfo.logo = getDummyImage(300, 300, letter);
+			basicInfo.logo = CommonUtils.getDummyImage(300, 300, letter);
 		}
 		
 		return {

@@ -1,14 +1,14 @@
-import { Component, Input, OnInit, EventEmitter } from '@angular/core';
-import { ViewCell }                               from 'ng2-smart-table';
-import { Router }                                 from '@angular/router';
-import { getIdFromTheDate }                       from '@modules/server.common/utils';
+import { Component, Input, OnInit } from '@angular/core';
+import { ViewCell }                 from 'ng2-smart-table';
+import { Router }                   from '@angular/router';
+import CommonUtils                  from '@modules/server.common/utilities/common';
 
 @Component({
 	           template: `
-		<button class="btn btn-sm btn-outline-secondary" (click)="redirect()">
-			{{ orderId }}
-		</button>
-	`,
+		           <button class="btn btn-sm btn-outline-secondary" (click)="redirect()">
+			           {{ orderId }}
+		           </button>
+	           `,
            })
 export class RedirectOrderComponent implements ViewCell, OnInit
 {
@@ -22,7 +22,7 @@ export class RedirectOrderComponent implements ViewCell, OnInit
 	
 	ngOnInit()
 	{
-		this.orderId = getIdFromTheDate(this.rowData);
+		this.orderId = CommonUtils.getIdFromTheDate(this.rowData);
 	}
 	
 	redirect()
