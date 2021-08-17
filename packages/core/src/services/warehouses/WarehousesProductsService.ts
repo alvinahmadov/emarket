@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 import { injectable }                    from 'inversify';
 import { createLogger }                  from '../../helpers/Log';
 import Logger                            from 'bunyan';
@@ -341,10 +343,7 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
+		const warehouse = await this._getWarehouse(warehouseId);
 		
 		if(warehouse)
 		{
@@ -743,10 +742,7 @@ export class WarehousesProductsService
 			isAvailable: boolean
 	): Promise<WarehouseProduct>
 	{
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
+		const warehouse = await this._getWarehouse(warehouseId);
 		if(warehouse)
 		{
 			const existedProduct = _.find(
@@ -821,10 +817,7 @@ export class WarehousesProductsService
 			isDelivery: boolean
 	): Promise<WarehouseProduct>
 	{
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
+		const warehouse = await this._getWarehouse(warehouseId);
 		if(warehouse)
 		{
 			const existedProduct = _.find(
@@ -851,5 +844,13 @@ export class WarehousesProductsService
 			this.log.error(new Error(errMsg));
 			throw new Error(errMsg);
 		}
+	}
+	
+	private _getWarehouse(warehouseId: string): Promise<Warehouse>
+	{
+		return this.warehousesService
+		           .get(warehouseId)
+		           .pipe(first())
+		           .toPromise();
 	}
 }
