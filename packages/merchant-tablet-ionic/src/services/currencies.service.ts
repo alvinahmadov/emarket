@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo }     from 'apollo-angular';
 import { Observable } from 'rxjs';
 import Currency       from '@modules/server.common/entities/Currency';
-import gql            from 'graphql-tag';
+import { GQLQueries } from '@modules/server.common/utilities/graphql';
 import { map, share } from 'rxjs/operators';
 
 export interface CurrencyMutationRespone
@@ -17,21 +17,18 @@ export class CurrenciesService
 {
 	constructor(private readonly apollo: Apollo) {}
 	
-	private currencies$: Observable<Currency[]> = this.apollo
-	.watchQuery<{ currencies: Currency[] }>({
-                                                query: gql`
-                                                    query allCurrencies {
-                                                        currencies {
-                                                            currencyCode
-                                                        }
-                                                    }
-		                                        `,
-		                                        pollInterval: 2000,
-                                            })
-	.valueChanges.pipe(
-			map((result) => result.data.currencies),
-			share()
-	);
+	private currencies$: Observable<Currency[]> =
+			this.apollo
+			    .watchQuery<{ currencies: Currency[] }>(
+					    {
+						    query: GQLQueries.CurrenciesAll,
+						    pollInterval: 2000,
+					    }
+			    ).valueChanges
+			    .pipe(
+					    map((result) => result.data.currencies),
+					    share()
+			    );
 	
 	getCurrencies(): Observable<Currency[]>
 	{

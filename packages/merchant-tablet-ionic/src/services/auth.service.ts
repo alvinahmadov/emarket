@@ -1,9 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import Warehouse      from '@modules/server.common/entities/Warehouse';
-import gql            from 'graphql-tag';
-import { map, share } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Injectable }                  from '@angular/core';
+import { Apollo }                      from 'apollo-angular';
+import bcrypt                          from 'bcryptjs';
+import { environment }                 from "../environments/environment";
+import Warehouse                       from '@modules/server.common/entities/Warehouse';
+import { IWarehouseRegistrationInput } from '@modules/server.common/routers/IWarehouseAuthRouter';
+import { GQLMutations }                from '@modules/server.common/utilities/graphql';
+import { map, share }                  from 'rxjs/operators';
+import { Observable }                  from 'rxjs';
 
 export interface WarehouseLoginInfo
 {
@@ -11,39 +14,62 @@ export interface WarehouseLoginInfo
 	token: string;
 }
 
+export interface WarehouseRegisterInfo
+{
+	warehouse: Warehouse;
+}
+
+export interface WarehouseRegisterInput
+{
+	warehouse: Warehouse,
+	password: string
+}
+
 @Injectable()
 export class AuthService
 {
 	constructor(private readonly apollo: Apollo) {}
-
-    login(username: string, password: string): Observable<WarehouseLoginInfo>
-    {
-        return this.apollo
-		.mutate<{ warehouseLogin: WarehouseLoginInfo }>({
-                                                            mutation: gql`
-                                                                mutation WarehouseLogin(
-                                                                    $username: String!
-                                                                    $password: String!
-                                                                ) {
-                                                                    warehouseLogin(
-                                                                        username: $username
-                                                                        password: $password
-                                                                    ) {
-                                                                        token
-                                                                        warehouse {
-                                                                            id
-                                                                        }
-                                                                    }
-                                                                }
-			                                                `,
-			                                                variables: {
-				                                                username,
-				                                                password,
-			                                                },
-                                                        })
-		.pipe(
-				map((result) => result.data.warehouseLogin),
-				share<WarehouseLoginInfo>()
-		);
-    }
+	
+	public login(
+			username: string,
+			password: string
+	): Observable<WarehouseLoginInfo>
+	{
+		return this.apollo
+		           .mutate<{ warehouseLogin: WarehouseLoginInfo }>(
+				           {
+					           mutation: GQLMutations.WarehouseLogin,
+					           variables: {
+						           username,
+						           password,
+					           },
+				           })
+		           .pipe(
+				           map(result => result.data.warehouseLogin),
+				           share<WarehouseLoginInfo>()
+		           );
+	}
+	
+	public register(
+			input: IWarehouseRegistrationInput
+	): Observable<WarehouseRegisterInfo>
+	{
+		const salt = bcrypt.genSaltSync(environment.WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS);
+		input.warehouse.hash = bcrypt.hashSync(input.password, salt);
+		
+		return this.apollo
+		           .mutate<{
+			           warehouseRegister: WarehouseRegisterInput
+		           }>(
+				           {
+					           mutation: GQLMutations.WarehouseRegister,
+					           variables: {
+						           input
+					           },
+				           })
+		           .pipe(
+				           map(result => result.data.warehouseRegister),
+				           share<WarehouseRegisterInfo>()
+		           );
+	}
 }
