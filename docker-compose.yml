@@ -97,7 +97,9 @@ services:
         depends_on:
             - core
         ports:
-            - "3000:3000"
+            - "8080:8080"
+        expose:
+            - 8080
         networks:
             - overlay
     
@@ -110,7 +112,7 @@ services:
         environment:
             NODE_ENV: production
             WAIT_HOSTS: mongo:27017
-            DB_URI: mongodb://mongo/emarket_dev
+            DB_URI: mongodb://mongo/emarket
             TESTING_DB_URI: mongodb://mongo/emarket_test
         restart: on-failure
         depends_on:
