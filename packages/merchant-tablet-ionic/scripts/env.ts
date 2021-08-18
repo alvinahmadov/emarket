@@ -17,6 +17,9 @@ export type Environment = Readonly<{
 	
 	APP_VERSION: string;
 	
+	CLOUDINARY_SIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UNSIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UPLOAD_URL: string;
 	API_FILE_UPLOAD_URL: string;
 	
 	DEFAULT_LOGIN_USERNAME: string;
@@ -69,6 +72,9 @@ export const env: Environment = cleanEnv(
 			
 			APP_VERSION: str({ default: '0.2.0' }),
 			
+			CLOUDINARY_SIGNED_UPLOAD_PRESET: str({ default: '' }),
+			CLOUDINARY_UNSIGNED_UPLOAD_PRESET: str({ default: '' }),
+			CLOUDINARY_UPLOAD_URL: str({ default: '' }),
 			API_FILE_UPLOAD_URL: str({
 				                         default: 'https://api.cloudinary.com/v1_1/alvindre/upload',
 			                         }),
