@@ -13,7 +13,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "preserveSymlinks": true,
-            "outputPath": "build",
+            "outputPath": "www",
             "index": "src/index.html",
             "main": "src/main.browser.ts",
             "tsConfig": "tsconfig.webpack.json",
@@ -154,10 +154,12 @@
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "ea",
-      "style": "scss"
+      "style": "scss",
+      "name": "ever-shop-web"
     },
     "@schematics/angular:directive": {
-      "prefix": "ea"
+      "prefix": "ea",
+      "name": "ever-shop-web"
     }
   }
 }
