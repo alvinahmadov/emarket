@@ -8,6 +8,9 @@ import { InjectionToken }    from '@angular/core';
 
 export const API_URL = new InjectionToken<string>('api_url');
 
+/**
+ * A class responsible for connection with backend service
+ */
 export class Router
 {
 	private readonly socket: Socket;

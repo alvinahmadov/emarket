@@ -1,7 +1,16 @@
 import { Socket } from '../socket.service';
 
+/**
+ * Sends socket.io requests to the backend
+ * */
 export class Request<T>
 {
+	/**
+	 * @param socket {Socket} A socket service for connection
+	 * @param event {string} Event name to send to backend
+	 * and then resolved as a service
+	 * @param args {any[]} Arguments for event
+	 * */
 	constructor(
 			private readonly socket: Socket,
 			private readonly event: string,
@@ -9,6 +18,11 @@ export class Request<T>
 	)
 	{}
 	
+	/**
+	 * Executes request
+	 *
+	 * @returns Promise<T>
+	 * */
 	async run(): Promise<T>
 	{
 		return new Promise<T>((resolve, reject) =>
