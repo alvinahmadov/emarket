@@ -1,6 +1,8 @@
 @import '../../@theme/styles/themes';
 
 $shadow-green: #00977e;
+$font-family-default: "Roboto Light";
+$font-size-default: 14px;
 
 @include nb-install-component() {
   .progress-info {
@@ -13,8 +15,8 @@ $shadow-green: #00977e;
   }
 
   .title {
-    font-family: font-main !important;
-    // font-size: 1.125rem !important;
+    font-family: $font-family-default !important;
+    font-size: $font-size-default !important;
     font-weight: 600 !important;
   }
 
