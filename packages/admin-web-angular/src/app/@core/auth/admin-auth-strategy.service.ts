@@ -1,15 +1,13 @@
-import { Observable, from, of }         from 'rxjs';
+import { from, Observable, of }         from 'rxjs';
 import { NbAuthResult, NbAuthStrategy } from '@nebular/auth';
 import { ActivatedRoute }               from '@angular/router';
 import { Apollo }                       from 'apollo-angular';
-import gql                              from 'graphql-tag';
 import { catchError, map }              from 'rxjs/operators';
 import { Injectable }                   from '@angular/core';
 import { Store }                        from '../data/store.service';
-import Admin                            from '@modules/server.common/entities/Admin';
 import { NbAuthStrategyClass }          from '@nebular/auth/auth.options';
-import { IAdminLoginResponse }          from '@modules/server.common/routers/IAdminRouter';
-import { getDummyImage }                from '@modules/server.common/utils';
+import { GQLMutations, GQLQueries }     from '@modules/server.common/utilities/graphql'
+import CommonUtils                      from '@modules/server.common/utilities/common';
 
 @Injectable()
 export class AdminAuthStrategy extends NbAuthStrategy
@@ -75,56 +73,32 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	{
 		return [AdminAuthStrategy, options];
 	}
-
-    getByEmail(email: string)
-    {
-        return this.apollo
-		.query({
-                   query: gql`
-                       query GetAdminByEmail($email: String!) {
-                           adminByEmail(email: $email) {
-                               _id
-                           }
-                       }
-			       `,
-			       variables: { email },
-               })
-		.pipe(map((res) => res.data['adminByEmail']));
-    }
-
-    authenticate(args: {
+	
+	getByEmail(email: string)
+	{
+		return this.apollo
+		           .query({
+			                  query: GQLQueries.AdminByEmail,
+			                  variables: { email },
+		                  })
+		           .pipe(map((res) => res.data['adminByEmail']));
+	}
+	
+	authenticate(args: {
 		email: string;
 		password: string;
 		rememberMe?: boolean | null;
 	}): Observable<NbAuthResult>
-    {
+	{
 		const { email, password } = args;
-
-        // TODO implement remember me feature
+		
+		// TODO implement remember me feature
 		const rememberMe = !!args.rememberMe;
-
-        const Login = gql`
-            mutation Login($email: String!, $password: String!) {
-                adminLogin(email: $email, password: $password) {
-                    token
-                    admin {
-                        _id
-                        id
-                        email
-                        name
-                        pictureUrl
-                    }
-                }
-            }
-		`;
 		
 		return this.apollo
 		           .mutate({
-			                   mutation: Login,
-			                   variables: {
-				                   email,
-				                   password,
-			                   },
+			                   mutation: GQLMutations.AdminLogin,
+			                   variables: { email, password },
 			                   errorPolicy: 'all',
 		                   })
 		           .pipe(
@@ -187,7 +161,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 					                      );
 				                      })
 		           );
-    }
+	}
 
     register(args: {
 		email: string;
@@ -207,38 +181,15 @@ export class AdminAuthStrategy extends NbAuthStrategy
 					])
 			);
 		}
-		
-		const letter = fullName.charAt(0).toUpperCase();
-		const pictureUrl = getDummyImage(300, 300, letter);
-
-        const mutation = gql`
-            mutation Register(
-                $email: String!
-                $fullName: String!
-                $pictureUrl: String!
-                $password: String!
-            ) {
-                registerAdmin(
-                    registerInput: {
-                        admin: {
-                            email: $email
-                            name: $fullName
-                            pictureUrl: $pictureUrl
-                        }
-                        password: $password
-                    }
-                ) {
-                    _id
-                    id
-                    email
-                    pictureUrl
-                }
-            }
-		`;
+	
+	    const letter = fullName.charAt(0).toUpperCase();
+	    const pictureUrl = CommonUtils.getDummyImage(300, 300, letter);
+	
+	    const mutation = GQLMutations.AdminRegister;
 		
 		return this.apollo
 		           .mutate({
-			                   mutation,
+			                   mutation: GQLMutations.AdminRegister,
 			                   variables: {
 				                   email,
 				                   fullName,
