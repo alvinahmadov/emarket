@@ -1,14 +1,14 @@
-<nb-layout [center]="layout.id === 'center-column'" windowMode>
-    <nb-layout-header fixed>
-        <ngx-header
-                [position]="sidebar.id === 'start' ? 'normal': 'inverse'"
-        ></ngx-header>
-    </nb-layout-header>
-
-    <nb-sidebar
-            [end]="sidebar.id === 'end'"
-            class="menu-sidebar"
-            responsive
+<nb-layout [center]="layout.id === 'center-column'" withScroll>
+	<nb-layout-header fixed>
+		<ngx-header
+				[position]="sidebar.id === 'start' ? 'normal': 'inverse'"
+		></ngx-header>
+	</nb-layout-header>
+	
+	<nb-sidebar
+			[end]="sidebar.id === 'end'"
+			class="menu-sidebar"
+			responsive
             tag="menu-sidebar"
     >
         <ng-content select="nb-menu"></ng-content>
