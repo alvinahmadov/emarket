@@ -6,11 +6,13 @@ const helpers = require('./helpers');
 const buildUtils = require('./build-utils');
 const webpackMerge = require('webpack-merge'); // used to merge webpack configs
 const commonConfig = require('./webpack.common.js'); // the settings that are common to prod and dev
+const path = require('path');
 
 /**
  * Webpack Plugins
  */
 const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /**
  * Webpack configuration
@@ -20,7 +22,7 @@ const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
 module.exports = function (options) {
 	const ENV = (process.env.ENV = process.env.NODE_ENV = 'development');
 	const HOST = process.env.HOST || 'localhost';
-	const PORT = process.env.PORT || 3000;
+	const PORT = process.env.PORT || 8080;
 
 	const METADATA = Object.assign({}, buildUtils.DEFAULT_METADATA, {
 		host: HOST,
@@ -29,14 +31,17 @@ module.exports = function (options) {
 		HMR: helpers.hasProcessFlag('hot'),
 		PUBLIC: process.env.PUBLIC_DEV || HOST + ':' + PORT,
 	});
+	const staticPath = helpers.root('www');
+	const destPath = helpers.root('dist', 'out-tsc', 'packages', 'shop-web-angular');
+	const envFile = path.join(__dirname, "/../.env");
 
-	return webpackMerge(commonConfig({ env: ENV, metadata: METADATA }), {
+	return webpackMerge(commonConfig({env: ENV, metadata: METADATA}), {
 		mode: 'development',
 
 		devtool: 'cheap-module-source-map',
 
 		output: {
-			path: helpers.root('dist'),
+			path: staticPath,
 			filename: '[name].bundle.js',
 			sourceMapFilename: '[file].map',
 			chunkFilename: '[id].chunk.js',
