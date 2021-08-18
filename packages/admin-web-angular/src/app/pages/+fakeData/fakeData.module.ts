@@ -64,7 +64,5 @@ export class FakeDataModule
 	public static routes = routes;
 	
 	constructor()
-	{
-		console.log('`FakeData` module initialized');
-	}
+	{}
 }
