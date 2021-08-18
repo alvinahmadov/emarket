@@ -206,17 +206,17 @@
     "CONFIMR_1st_ORDER": "Подтвердить 1 заказ",
     "CONFIMR_2nd_ORDER": "Подтвердить второй заказ",
     "SETUP_MERCHANTS": {
-      "SETUP_MERCHANTS": "Настройки ресторана",
-      "PREV": "НАЗАД",
-      "NEXT": "СЛЕДУЮЩИЙ",
-      "ADD": "Добавлять",
-      "BACK": "Назад",
-      "SAVE": "Сохранить",
-      "SELECT": "Выбрать",
-      "CREATE": "Создайте",
-      "HOW_TO_SET_UP": {
-        "HOW_TO_SET_UP": "Как настроить"
-      },
+	    "SETUP_MERCHANTS": "Настройки Маркета",
+	    "PREV": "НАЗАД",
+	    "NEXT": "СЛЕДУЮЩИЙ",
+	    "ADD": "Добавлять",
+	    "BACK": "Назад",
+	    "SAVE": "Сохранить",
+	    "SELECT": "Выбрать",
+	    "CREATE": "Создайте",
+	    "HOW_TO_SET_UP": {
+		    "HOW_TO_SET_UP": "Как настроить"
+	    },
       "STEPPER": {
         "ACCOUNT": "Счет",
         "BASIC_INFO": "Базовая информация",
