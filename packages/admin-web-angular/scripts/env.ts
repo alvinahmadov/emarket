@@ -52,7 +52,7 @@ export type Env = Readonly<{
 export const env: Env = cleanEnv(
 		process.env,
 		{
-			production: bool({ default: false }),
+			production: bool({ default: true }),
 			
 			SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
 			HTTPS_SERVICES_ENDPOINT: str({ default: 'https://localhost:5501' }),
@@ -66,7 +66,7 @@ export const env: Env = cleanEnv(
 			DEFAULT_LATITUDE: num({ default: 37.642036 }),
 			DEFAULT_LONGITUDE: num({ default: 55.708215 }),
 			
-			NO_INTERNET_LOGO: str({ default: 'assets/images/ever-logo.svg' }),
+			NO_INTERNET_LOGO: str({ default: '' }),
 			
 			MAP_MERCHANT_ICON_LINK: str({
 				                            default: 'https://maps.google.com/mapfiles/kml/pal3/icon21.png',
@@ -81,7 +81,7 @@ export const env: Env = cleanEnv(
 			                           }),
 			
 			API_FILE_UPLOAD_URL: str({
-				                         default: 'https://api.cloudinary.com/v1_1/alvindre/upload',
+				                         default: '',
 			                         }),
 			
 			COMPANY_NAME: str({ default: 'Company' }),

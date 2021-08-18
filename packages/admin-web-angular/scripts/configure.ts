@@ -7,7 +7,13 @@ import { writeFile, unlinkSync } from 'fs';
 import { argv }                  from 'yargs';
 
 const environment = argv.environment;
-const isProd = environment === 'prod';
+const isProd = environment === 'prod' || env.production;
+
+let mode = isProd
+           ? 'production'
+           : 'development';
+
+console.info(`Configuring in ${mode} mode`)
 
 if(!env.GOOGLE_MAPS_API_KEY)
 {
