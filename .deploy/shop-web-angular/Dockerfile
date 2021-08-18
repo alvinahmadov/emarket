@@ -17,8 +17,8 @@ WORKDIR $APP_HOME
 
 COPY package.json yarn.lock lerna.json package.workspaces.json ./
 COPY packages/shop-web-angular/package.json ./packages/shop-web-angular/package.json
+COPY packages/shop-web-angular/.nginx/default.conf .nginx/default.conf
 COPY .snyk ./.snyk
-COPY .nginx/emarket-shopweb.conf .nginx/default.conf
 COPY packages/common ./packages/common
 COPY packages/common-angular ./packages/common-angular
 
@@ -44,12 +44,12 @@ ENV NODE_ENV production
  
 RUN rm -rf /usr/share/nginx/html/*
 
-COPY --from=development $APP_HOME/.nginx ./nginx
+COPY --from=development $APP_HOME/.nginx ./.nginx
 COPY --from=development $APP_HOME/node_modules ./node_modules
 COPY --from=development $APP_HOME/packages/common/node_modules ./packages/common/node_modules
 COPY --from=development $APP_HOME/packages/common-angular/node_modules ./packages/common-angular/node_modules
 COPY --from=development $APP_HOME/packages/shop-web-angular/node_modules ./packages/shop-web-angular/node_modules
-COPY --from=development $APP_HOME/packages/shop-web-angular/www /usr/share/nginx/html
+COPY --from=development $APP_HOME/packages/shop-web-angular/www /usr/share/nginx/html/
 COPY package.json yarn.lock lerna.json package.workspaces.json tsconfig.base.json ./
 COPY packages/common ./packages/common
 COPY packages/common-angular ./packages/common-angular
