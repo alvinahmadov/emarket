@@ -14,6 +14,9 @@ declare const module: any;
 export async function bootstrapNest(): Promise<void>
 {
 	const port: number = env.GQLPORT;
+	const mode = env.isProd
+	             ? 'production'
+	             : 'development';
 	
 	const app: INestApplication = await NestFactory.create(ApplicationModule, {
 		logger: new NestJSLogger()
@@ -38,6 +41,7 @@ export async function bootstrapNest(): Promise<void>
 		module.hot.dispose((_) => app.close());
 	}
 	
+	log.info("Starting server in '%s' mode", mode);
 	log.info(`Swagger UI available at http://localhost:${port}/api`);
 	log.info(`GraphQL Playground available at http://localhost:${port}/graphql`);
 	log.info(`GraphQL Subscriptions available at ws://localhost:${port}/subscriptions`);
