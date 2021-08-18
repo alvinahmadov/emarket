@@ -1,6 +1,5 @@
 import { injectable }                from 'inversify';
 import Logger                        from 'bunyan';
-import _                             from 'lodash';
 import { createLogger }              from '../../helpers/Log';
 import { routerName, asyncListener } from '@pyro/io';
 import IService                      from '../IService';
@@ -17,8 +16,8 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 		                                     name: 'GeoLocationsService'
 	                                     });
 	
-	private arcgisClientID: string;
-	private arcgisClientSecret: string;
+	private readonly arcgisClientID: string;
+	private readonly arcgisClientSecret: string;
 	
 	constructor()
 	{
@@ -34,7 +33,7 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 	{
 		if(!this.arcgisClientID || !this.arcgisClientSecret)
 		{
-			this.log.info(
+			this.log.warn(
 					`Cannot use getAddressByCoordinatesUsingArcGIS without${
 							this.arcgisClientID ? '' : ' arcgisClientID'
 					}${this.arcgisClientSecret ? '' : ' arcgisClientSecret'}`
@@ -59,7 +58,7 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 					!tokenResult.data['access_token']
 			)
 			{
-				this.log.info(
+				this.log.warn(
 						`Cannot get arcgis token with client_id=${this.arcgisClientID}, client_secret=${this.arcgisClientSecret}`
 				);
 				return null;
@@ -123,7 +122,7 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 				}
 				else
 				{
-					this.log.info(
+					this.log.warn(
 							`Attempted to reverse Geocode coordinates: ${lat}, ${lng}. ` +
 							`Got empty response: ${resp ? inspect(resp) : ''}`
 					);
@@ -133,7 +132,7 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 		} catch(err)
 		{
 			// Do not report it as error because geo-coding may simply not work for given coordinates
-			this.log.info(err);
+			this.log.warn(err);
 			return null;
 		}
 	}
