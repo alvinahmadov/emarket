@@ -3,11 +3,13 @@ import jwt                                          from 'jsonwebtoken';
 import { first }                                    from 'rxjs/operators';
 import { inject, injectable, LazyServiceIdentifer } from 'inversify';
 import { routerName }                               from '@pyro/io';
+import JwtAppName                                   from "@modules/server.common/enums/JwtAppName"
 import { WarehousesService }                        from '../warehouses';
 import { CarriersService }                          from '../carriers';
 import { env }                                      from '../../env';
 
 const jwtSecret = env.JWT_SECRET;
+const jwtExpires = env.JWT_EXPIRES;
 
 if(jwtSecret === 'default')
 {
@@ -25,16 +27,15 @@ export interface JwtPayload
 {
 	// id of carrier or warehouse
 	id: string;
-	// name of app, e.g. 'carrier' or 'warehouse'. TODO: switch to use enum
-	appName: string;
+	// name of app, e.g. 'carrier' or 'warehouse'.
+	appName: JwtAppName;
 }
 
-export function createToken(id: string, appName: string)
+export function createToken(id: string, appName: JwtAppName)
 {
 	const user: JwtPayload = { id, appName };
 	return jwt.sign(user, 'secretKey', {
-		// TODO: add expires timeout to config (.env)
-		expiresIn: 3600
+		expiresIn: jwtExpires
 	});
 }
 
