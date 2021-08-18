@@ -24,17 +24,17 @@
     "TO_BE_INVITED_ALLOW_GPS": "To be invited allow GPS."
   },
   "PRODUCTS_VIEW": {
-    "SEARCH_PRODUCTS": "e.g Pepperoni Pizza Sushi...",
-    "PRODUCTS": "Products",
-    "ORDERS": "Orders",
-    "BUY_FOR": "Buy for",
-    "DETAILS": "Details",
-    "DELIVERY_FROM": "Delivery from",
-    "TAKEOUT_FROM": "Takeout from",
-    "MINUTES": "min",
-    "DELIVERY": "Delivery",
-    "TAKEAWAY": "Takeout",
-    "READYFOR": "Ready for",
+	  "SEARCH_PRODUCTS": "Search for products",
+	  "PRODUCTS": "Products",
+	  "ORDERS": "Orders",
+	  "BUY_FOR": "Buy for",
+	  "DETAILS": "Details",
+	  "DELIVERY_FROM": "Delivery from",
+	  "TAKEOUT_FROM": "Takeout from",
+	  "MINUTES": "min",
+	  "DELIVERY": "Delivery",
+	  "TAKEAWAY": "Takeout",
+	  "READYFOR": "Ready for",
     "NO_PRODUCTS_FOUND": "No products found for",
     "NO_PRODUCTS": "No products.",
     "FASTFOOD": "fastfood",
@@ -75,18 +75,19 @@
     }
   },
   "ORDER_VIEW": {
-    "CANCEL": "Cancel",
-    "CANCEL_ORDER": "In just 5-10 minutes you will be eating this delicious meal! By canceling it you will miss a great and tasty food, and we will likely have to throw it",
-    "PAY": "Or pay with cash",
-    "PAY_NOW": "Pay Now",
-    "PRODUCTS": "Products",
-    "ORDERS": "Orders",
-    "ORDER_ID": "order ID:",
-    "SHOW_CARRIER_ON_MAP": "Show carrier on map",
-    "ORER_TYPE": {
-      "DELIVERY": "Delivery",
-      "TAKEAWAY": "Takeaway"
-    }
+	  "CANCEL": "Cancel",
+	  "CANCEL_ORDER": "In just 5-10 minutes you will be eating this delicious meal! By canceling it you will miss a great and tasty food, and we will likely have to throw it",
+	  "PAY": "Or pay with cash",
+	  "PAY_NOW": "Pay Now",
+	  "PRODUCTS": "Products",
+	  "ORDERS": "Orders",
+	  "ORDER_ID": "order ID:",
+	  "NO_ORDERS": "There are no orders",
+	  "SHOW_CARRIER_ON_MAP": "Show carrier on map",
+	  "ORER_TYPE": {
+		  "DELIVERY": "Delivery",
+		  "TAKEAWAY": "Takeaway"
+	  }
   },
   "ORDER_CARRIER_STATUS": {
     "CARRIER_STATUS": "Carrier Status",

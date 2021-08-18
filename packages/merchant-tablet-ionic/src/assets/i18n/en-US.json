@@ -257,11 +257,12 @@
     "USER_PASSWORD": "Password"
   },
   "REGISTER_VIEW": {
-    "REGISTER": "Sign Up",
-    "WAREHOUSE_NAME": "Store name",
-    "USER_NAME": "Username",
-    "USER_PASSWORD": "Password",
-    "TERMS": "Accept usage terms"
+	  "REGISTER": "Sign Up",
+	  "WAREHOUSE_NAME": "Store name",
+	  "USER_NAME": "Username",
+	  "USER_MAIL": "Email",
+	  "USER_PASSWORD": "Password",
+	  "TERMS": "Accept usage terms"
   },
   "LANGUAGE_VIEW": {
     "TITLE": "Select Language",
