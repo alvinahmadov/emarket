@@ -35,31 +35,38 @@
 					<div class="auth-form">
 						<div>
 							<input
-								class="auth-input"
-								placeholder="{{ 'REGISTER_VIEW.WAREHOUSE_NAME' | translate }}"
-								[(ngModel)]="warehouseName"
+									class="auth-input"
+									placeholder="{{ 'REGISTER_VIEW.WAREHOUSE_NAME' | translate }}"
+									[(ngModel)]="registrationInput.name"
 							/>
 						</div>
 						<div>
 							<input
-								class="auth-input"
-								placeholder="{{ 'REGISTER_VIEW.USER_NAME' | translate }}"
-								[(ngModel)]="username"
+									class="auth-input"
+									placeholder="{{ 'REGISTER_VIEW.USER_NAME' | translate }}"
+									[(ngModel)]="registrationInput.username"
 							/>
 						</div>
 						<div>
 							<input
-								class="auth-input"
-								type="password"
-								placeholder="{{ 'REGISTER_VIEW.USER_PASSWORD' | translate }}"
-								[(ngModel)]="password"
+									class="auth-input"
+									placeholder="{{ 'REGISTER_VIEW.USER_MAIL' | translate }}"
+									[(ngModel)]="registrationInput.email"
+							/>
+						</div>
+						<div>
+							<input
+									class="auth-input"
+									type="password"
+									placeholder="{{ 'REGISTER_VIEW.USER_PASSWORD' | translate }}"
+									[(ngModel)]="registrationInput.password"
 							/>
 						</div>
 						<div class="auth-terms">
 							<input
-								id="terms"
-								type="checkbox"
-								[(ngModel)]="acceptTerms"
+									id="terms"
+									type="checkbox"
+									[(ngModel)]="registrationInput.acceptTerms"
 							/>
 							<label for="terms">
 								<a href="#">
@@ -69,9 +76,9 @@
 						</div>
 						<div>
 							<button
-								class="auth-button"
-								(click)="register()"
-								[disabled]="!acceptTerms"
+									class="auth-button"
+									(click)="register()"
+									[disabled]="!registrationInput.acceptTerms"
 							>
 								{{ 'REGISTER_VIEW.REGISTER' | translate }}
 							</button>
