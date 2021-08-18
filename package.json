@@ -2,7 +2,7 @@
 	"name": "ever-platform",
 	"description": "Multi-vendor marketplace",
 	"license": "AGPL-3.0",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/alvinahmadov/emarket.git"
@@ -21,7 +21,7 @@
 		"lint": "yarn tslint --fix",
 		"run:ncu": "yarn ncu --configFileName=.ncurc.json --configFilePath=./",
 		"run:server": "yarn --cwd ./packages/core start:prod",
-		"run:admin": "yarn --cwd ./packages/admin-web-angular start:server:prod",
+		"run:admin": "yarn --cwd ./packages/admin-web-angular start:server:pm2",
 		"run:merchant": "yarn   --cwd ./packages/merchant-tablet-ionic start:prod",
 		"run:shopmobile": "yarn --cwd ./packages/shop-mobile-ionic start",
 		"run:shopweb": "yarn --cwd ./packages/shop-web-angular start",
@@ -37,7 +37,7 @@
 		"build:admin": "yarn run build:common && yarn --cwd ./packages/admin-web-angular run build",
 		"build:merchant": "yarn run build:common && yarn --cwd ./packages/merchant-tablet-ionic run build",
 		"build:shopmobile": "yarn run build:common && yarn --cwd ./packages/shop-mobile-ionic run build",
-		"build:shopweb": "yarn run build:common && yarn --cwd ./packages/shop-web-angular run build",
+		"build:shopweb": "yarn run build:common && yarn --cwd ./packages/shop-web-angular run build:prod:webpack",
 		"build:carrier": "yarn run build:common && yarn --cwd ./packages/carrier-mobile-ionic run build",
 		"build:all": "yarn run build:common && yarn run build:server && yarn run build:admin && yarn run build:merchant && yarn run build:shopmobile && yarn run build:shopweb && yarn run build:carrier",
 		"tslint-check": "tslint-config-prettier-check ./tslint.json",
@@ -91,6 +91,7 @@
 		"apollo-link-ws": "^1.0.17",
 		"bootstrap": "^4.3.1",
 		"call-number": "^1.0.1",
+		"bcryptjs-cfw": "^3.0.5",
 		"cordova-android": "^8.0.0",
 		"cordova-android-support-gradle-release": "^3.0.1",
 		"cordova-browser": "^6.0.0",
@@ -127,6 +128,7 @@
 		"mx.ferreyra.callnumber": "0.0.2",
 		"neo-async": "^2.6.1",
 		"phonegap-plugin-barcodescanner": "^8.0.1",
+		"popper.js": "^1.16.1",
 		"qrcode": "^1.4.1",
 		"reflect-metadata": "^0.1.13",
 		"rxjs": "^6.5.2",
@@ -277,7 +279,12 @@
 	},
 	"workspaces": {
 		"packages": [
-			"packages/*"
+			"packages/common",
+			"packages/common-angular",
+			"packages/core",
+			"packages/admin-web-angular",
+			"packages/merchant-tablet-ionic",
+			"packages/shop-web-angular"
 		],
 		"nohoist": [
 			"**/@nebular",
@@ -289,24 +296,6 @@
 			"**/@ngx-translate",
 			"**/@ngx-translate/**"
 		]
-	},
-	"config": {
-		"commitizen": {
-			"path": "./node_modules/cz-conventional-changelog"
-		}
-	},
-	"commitlint": {
-		"extends": [
-			"@commitlint/config-conventional"
-		],
-		"rules": {}
-	},
-	"husky": {
-		"hooks": {
-			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-			"post-commit": "git update-index --again",
-			"pre-commit": "pretty-quick --no-verify --staged"
-		}
 	},
 	"engines": {
 		"node": ">=10.15.0",

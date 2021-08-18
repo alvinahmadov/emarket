@@ -1,8 +1,8 @@
-import util                  from 'util';
-import pm2, { StartOptions } from 'pm2';
-import csts                  from 'pm2/constants.js';
-import { createLogger }      from './helpers/Log';
-import { env }               from './env';
+import util                        from 'util';
+import pm2, { Proc, StartOptions } from 'pm2';
+import csts                        from 'pm2/constants.js';
+import { createLogger }            from './helpers/Log';
+import { env }                     from './env';
 
 const mode = env.isProd ? 'production' : 'development';
 
@@ -40,7 +40,7 @@ pm2.connect(
 			};
 			
 			pm2.start(startOptions,
-			          () =>
+			          (err: Error, proc: Proc) =>
 			          {
 				          pm2.dump(console.error);
 				

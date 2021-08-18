@@ -3,7 +3,7 @@
  */
 const helpers = require('./helpers');
 const buildUtils = require('./build-utils');
-
+const path = require('path');
 
 /**
  * Used to merge webpack configs
@@ -24,6 +24,7 @@ const HashedModuleIdsPlugin = require('webpack/lib/HashedModuleIdsPlugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 /***
  * Ref: https://github.com/mishoo/UglifyJS2/tree/harmony#minify-options
@@ -32,109 +33,120 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
  * @returns {{ecma: number, warnings: boolean, ie8: boolean, mangle: boolean, compress: {pure_getters: boolean, passes: number}, output: {ascii_only: boolean, comments: boolean}}}
  */
 function getUglifyOptions(supportES2015, enableCompress) {
-	const uglifyCompressOptions = {
-		pure_getters: true /* buildOptimizer */,
-		// PURE comments work best with 3 passes.
-		// See https://github.com/webpack/webpack/issues/2899#issuecomment-317425926.
-		passes: 2 /* buildOptimizer */,
-	};
+    const uglifyCompressOptions = {
+        pure_getters: true /* buildOptimizer */,
+        // PURE comments work best with 3 passes.
+        // See https://github.com/webpack/webpack/issues/2899#issuecomment-317425926.
+        passes: 2 /* buildOptimizer */,
+    };
 
-	return {
-		ecma: supportES2015 ? 6 : 5,
-		warnings: false, // TODO verbose based on option?
-		ie8: false,
-		mangle: true,
-		compress: enableCompress ? uglifyCompressOptions : false,
-		output: {
-			ascii_only: true,
-			comments: false,
-		},
-	};
+    return {
+        ecma: supportES2015 ? 6 : 5,
+        warnings: false, // TODO verbose based on option?
+        ie8: false,
+        mangle: true,
+        compress: enableCompress ? uglifyCompressOptions : false,
+        output: {
+            ascii_only: true,
+            comments: false,
+        },
+    };
 }
 
 module.exports = function (env) {
-	const ENV = (process.env.NODE_ENV = process.env.ENV = 'production');
-	const HOST = process.env.HOST || 'localhost';
-	const PORT = process.env.PORT || 3000;
+    const ENV = (process.env.NODE_ENV = process.env.ENV = 'production');
+    const HOST = process.env.HOST || 'localhost';
+    const PORT = process.env.PORT || 8080;
 
-	const supportES2015 = buildUtils.supportES2015(
-		buildUtils.DEFAULT_METADATA.tsConfigPath
-	);
-	const sourceMapEnabled = process.env.SOURCE_MAP === '1';
-	const METADATA = Object.assign({}, buildUtils.DEFAULT_METADATA, {
-		host: HOST || 'localhost',
-		port: PORT,
-		ENV: ENV,
-		HMR: false,
-		PUBLIC: HOST + ':' + PORT,
-	});
+    const supportES2015 = buildUtils.supportES2015(
+        buildUtils.DEFAULT_METADATA.tsConfigPath
+    );
+    const sourceMapEnabled = process.env.SOURCE_MAP === '1';
+    const METADATA = Object.assign({}, buildUtils.DEFAULT_METADATA, {
+        host: HOST,
+        port: PORT,
+        ENV: ENV,
+        HMR: false,
+        PUBLIC: HOST + ':' + PORT,
+    });
 
-	// set environment suffix so these environments are loaded.
-	METADATA.envFileSuffix = METADATA.E2E ? 'e2e.prod' : 'prod';
+    // set environment suffix so these environments are loaded.
+    METADATA.envFileSuffix = METADATA.E2E ? 'e2e.prod' : 'prod';
 
-	return webpackMerge(commonConfig({ env: ENV, metadata: METADATA }), {
-		mode: 'production',
+    const staticPath = helpers.root('www');
+    const destPath = helpers.root('dist', 'out-tsc', 'packages', 'shop-web-angular');
+    const envFile = path.join(__dirname, "/../.env");
 
-		devtool: 'source-map',
+    return webpackMerge(commonConfig({env: ENV, metadata: METADATA}), {
+        mode: 'production',
 
-		output: {
-			path: helpers.root('dist'),
-			filename: '[name].[chunkhash].bundle.js',
-			sourceMapFilename: '[file].map',
-			chunkFilename: '[name].[chunkhash].chunk.js',
-		},
+        devtool: 'source-map',
 
-		module: {
-			rules: [
-				{
-					test: /\.css$/,
-					use: [MiniCssExtractPlugin.loader, 'css-loader'],
-					include: [helpers.root('src', 'styles')],
-				},
-				{
-					test: /\.scss$/,
-					use: [
-						MiniCssExtractPlugin.loader,
-						'css-loader',
-						'sass-loader',
-					],
-					include: [helpers.root('src', 'styles')],
-				},
-			],
-		},
+        output: {
+            path: staticPath,
+            filename: '[name].[chunkhash].bundle.js',
+            sourceMapFilename: '[file].map',
+            chunkFilename: '[name].[chunkhash].chunk.js',
+        },
 
-		optimization: {
-			minimizer: [
-				// TODO fixes error when un-comment below
-				// new UglifyJsPlugin({
-				// 	sourceMap: sourceMapEnabled,
-				// 	parallel: true,
-				// 	cache: helpers.root('webpack-cache/uglify-cache'),
-				// 	uglifyOptions: getUglifyOptions(supportES2015, true),
-				// }),
-				// new TerserPlugin(),
-			],
-			splitChunks: {
-				chunks: 'all',
-			},
-		},
+        module: {
+            rules: [
+                {
+                    test: /\.css$/,
+                    use: [MiniCssExtractPlugin.loader, 'css-loader'],
+                    include: [helpers.root('src', 'styles')],
+                },
+                {
+                    test: /\.scss$/,
+                    use: [
+                        MiniCssExtractPlugin.loader,
+                        'css-loader',
+                        'sass-loader',
+                    ],
+                    include: [helpers.root('src', 'styles')],
+                },
+            ],
+        },
 
-		plugins: [
-			new MiniCssExtractPlugin({
-				filename: '[name]-[hash].css',
-				chunkFilename: '[name]-[chunkhash].css',
-			}),
-			new HashedModuleIdsPlugin(),
-		],
+        optimization: {
+            minimizer: [
+                // TODO fixes error when un-comment below
+                // new UglifyJsPlugin({
+                // 	sourceMap: sourceMapEnabled,
+                // 	parallel: true,
+                // 	cache: helpers.root('webpack-cache/uglify-cache'),
+                // 	uglifyOptions: getUglifyOptions(supportES2015, true),
+                // }),
+                // new TerserPlugin(),
+            ],
+            splitChunks: {
+                chunks: 'all',
+            },
+        },
 
-		node: {
-			global: true,
-			crypto: 'empty',
-			process: false,
-			module: false,
-			clearImmediate: false,
-			setImmediate: false,
-			fs: 'empty',
-		},
-	});
+        plugins: [
+            new CopyWebpackPlugin(
+                [
+                    {
+                        from: envFile,
+                        to: destPath
+                    }
+                ]),
+            new MiniCssExtractPlugin({
+                filename: '[name]-[hash].css',
+                chunkFilename: '[name]-[chunkhash].css',
+            }),
+            new HashedModuleIdsPlugin(),
+        ],
+
+        node: {
+            global: true,
+            crypto: 'empty',
+            process: false,
+            module: false,
+            clearImmediate: false,
+            setImmediate: false,
+            fs: 'empty',
+        },
+    });
 };

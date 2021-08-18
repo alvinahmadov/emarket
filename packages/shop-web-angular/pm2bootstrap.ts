@@ -1,7 +1,7 @@
 // noinspection JSUnusedLocalSymbols
 
 require('dotenv').config();
-const pm2 = require('pm2');
+import pm2, { StartOptions } from 'pm2';
 
 import { env } from './scripts/env';
 
@@ -15,23 +15,24 @@ const port = env.PORT;
 
 pm2.connect(function()
             {
+	            const startOptions: StartOptions = {
+		            script: './dist/out-tsc/packages/shop-web-angular/app.js',
+		            name: appName,
+		            exec_mode: 'fork',
+		            instances,
+		            max_memory_restart: maxMemory + 'M',
+		            env: {
+			            // If needed declare some environment variables
+			            NODE_ENV: 'production',
+			            PORT: `${port}`,
+			            KEYMETRICS_PUBLIC: PUBLIC_KEY,
+			            KEYMETRICS_SECRET: PRIVATE_KEY,
+		            },
+	            }
+	
 	            pm2.start(
-			            {
-				            script: './dist/out-tsc/packages/shop-web-angular/app.js',
-				            name: appName, // ----> THESE ATTRIBUTES ARE OPTIONAL:
-				            exec_mode: 'fork', // ----> https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#schema
-				            instances,
-				            max_memory_restart: maxMemory + 'M', // Auto restart if process taking more than XXmo
-				            env: {
-					            // If needed declare some environment variables
-					            NODE_ENV: 'production',
-					            PORT: port,
-					            KEYMETRICS_PUBLIC: PUBLIC_KEY,
-					            KEYMETRICS_SECRET: PRIVATE_KEY,
-				            },
-				            post_update: ['yarn install'], // Commands to execute once we do a pull from Keymetrics
-			            },
-			            function()
+			            startOptions,
+			            () =>
 			            {
 				            pm2.dump(console.error);
 				            // Display logs in standard output
