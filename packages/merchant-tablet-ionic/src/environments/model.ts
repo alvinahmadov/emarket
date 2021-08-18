@@ -9,6 +9,9 @@ export interface Environment
 	
 	APP_VERSION: string;
 	
+	CLOUDINARY_SIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UNSIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UPLOAD_URL: string;
 	API_FILE_UPLOAD_URL: string;
 	
 	DEFAULT_LOGIN_USERNAME: string;
