@@ -31,7 +31,6 @@ export class ServerConnectionService
 		} catch(error)
 		{
 			store.serverConnection = error.status;
-			console.error(error.message);
 		}
 	}
 }
