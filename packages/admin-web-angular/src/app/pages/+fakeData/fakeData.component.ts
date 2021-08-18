@@ -6,6 +6,7 @@ import { CarrierRouter }                 from '@modules/client.common.angular2/r
 import { UserRouter }                    from '@modules/client.common.angular2/routers/user-router.service';
 import { ProductRouter }                 from '@modules/client.common.angular2/routers/product-router.service';
 import { WarehouseRouter }               from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter }           from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 import Product                           from '@modules/server.common/entities/Product';
 import { WarehouseProductsRouter }       from '@modules/client.common.angular2/routers/warehouse-products-router.service';
 import Warehouse                         from '@modules/server.common/entities/Warehouse';
@@ -47,6 +48,8 @@ import { CurrenciesService }             from '@app/@core/data/currencies.servic
 
 const NEED_DEFAULT_SETTINGS_MESSAGE =
 		"Can't generate fake data without DEFAULT_LONGITUDE and DEFAULT_LATITUDE";
+// TODO: Add to environment file
+const qty = 1000;
 const lng = environment['DEFAULT_LONGITUDE'];
 const lat = environment['DEFAULT_LATITUDE'];
 
@@ -73,7 +76,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	includeHardcodedData: boolean = true;
 	
 	public loading: FakeDataBtnState;
-	protected isBtnDisabled: FakeDataBtnState;
+	isBtnDisabled: FakeDataBtnState;
 	
 	private _existingWarehouses: Warehouse[] = [];
 	private _ngDestroy$ = new Subject<void>();
@@ -100,6 +103,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 			protected fakeDataProducts: FakeDataProducts,
 			protected productRouter: ProductRouter,
 			protected warehouseRouter: WarehouseRouter,
+			protected warehouseAuthRouter: WarehouseAuthRouter,
 			protected toasterService: ToasterService,
 			protected inviteRouter: InviteRouter,
 			protected warehouseProductsRouter: WarehouseProductsRouter,
@@ -509,7 +513,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		const create = async() =>
 		{
 			const warehouseRegisterInput = this.fakeDataWarehouses.registrationInputs.generate();
-			const warehouse: Warehouse = await this.warehouseRouter.register(
+			const warehouse: Warehouse = await this.warehouseAuthRouter.register(
 					warehouseRegisterInput
 			);
 			
@@ -752,7 +756,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		if(lng && lat)
 		{
 			const response = await this._usersService // maybe _usersService?
-			                           .generate1000Customers(lng, lat)
+			                           .generateCustomCustomers(qty, lng, lat)
 			                           .toPromise();
 			
 			if(!response.success)
@@ -1008,7 +1012,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 				                   objToRegister.warehouse.usedCarriersIds.push(carrierId);
 			                   });
 			
-			const createdObject = await this.warehouseRouter.register(
+			const createdObject = await this.warehouseAuthRouter.register(
 					objToRegister
 			);
 			
@@ -1025,7 +1029,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		const carrier: Carrier = await this._createCarrier();
 		warehouseRegisterInput.warehouse.usedCarriersIds.push(carrier.id);
 		
-		const warehouse: Warehouse = await this.warehouseRouter.register(
+		const warehouse: Warehouse = await this.warehouseAuthRouter.register(
 				warehouseRegisterInput
 		);
 		
