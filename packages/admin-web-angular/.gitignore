@@ -3,6 +3,7 @@
 /build
 /tmp
 /out-tsc
+/www
 
 
 **/*.d.ts
