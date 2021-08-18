@@ -1,5 +1,4 @@
-import gql            from "graphql-tag";
-import { fileLoader } from 'merge-graphql-schemas';
+import gql from "graphql-tag";
 
 namespace GQLQueries
 {
@@ -16,6 +15,16 @@ namespace GQLQueries
 				pictureUrl
 				firstName
 				lastName
+			}
+		}
+	`;
+	
+	export const AdminByEmail = gql`
+		query GetAdminByEmail($email: String!)
+		{
+			adminByEmail(email: $email)
+			{
+				_id
 			}
 		}
 	`;

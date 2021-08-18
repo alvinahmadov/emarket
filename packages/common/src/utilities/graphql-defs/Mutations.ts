@@ -3,6 +3,55 @@ import gql from "graphql-tag";
 namespace GQLMutations
 {
     // #Admin
+	export const AdminLogin = gql`
+		mutation Login($email: String!, $password: String!)
+		{
+			adminLogin(
+				email: $email,
+				password: $password
+			)
+			{
+				token
+				admin {
+					_id
+					id
+					email
+					name
+					pictureUrl
+				}
+			}
+		}
+	`;
+	
+	export const AdminRegister = gql`
+		mutation Register(
+			$email: String!
+			$fullName: String!
+			$pictureUrl: String!
+			$password: String!
+		)
+		{
+			registerAdmin(
+				registerInput:
+				{
+					admin:
+					{
+						email: $email
+						name: $fullName
+						pictureUrl: $pictureUrl
+					}
+					password: $password
+				}
+			)
+			{
+				_id
+				id
+				email
+				pictureUrl
+			}
+		}
+	`;
+	
 	export const AdminUpdatePassword = gql`
 		mutation UpdateAdminPassword(
 			$id: String!
