@@ -125,8 +125,8 @@ export class ServicesApp
 			                                    entities,
 			                                    synchronize: true,
 			                                    useNewUrlParser: true,
-			                                    autoReconnect: true,
-			                                    reconnectTries: Number.MAX_VALUE,
+			                                    // autoReconnect: true,
+			                                    // reconnectTries: Number.MAX_VALUE,
 			                                    poolSize: ServicesApp._poolSize,
 			                                    connectTimeoutMS: ServicesApp._connectTimeoutMS,
 			                                    logging: true,
@@ -146,35 +146,6 @@ export class ServicesApp
 		await this._connectDB();
 	}
 	
-	private _gracefulExit()
-	{
-		try
-		{
-			if(this.db != null)
-			{
-				this.db.close((err) =>
-				              {
-					              if(!err)
-					              {
-						              this.log.info(
-								              'Mongoose default connection with DB :' +
-								              this.db_server +
-								              ' is disconnected through app termination'
-						              );
-					              }
-					              else
-					              {
-						              this.log.error(err);
-					              }
-					              process.exit(0);
-				              }).then();
-			}
-		} catch(err)
-		{
-			process.exit(0);
-		}
-	}
-	
 	private async _connectDB()
 	{
 		try
@@ -182,9 +153,9 @@ export class ServicesApp
 			const connectionOptions: mongoose.ConnectionOptions = {
 				useCreateIndex: true,
 				useNewUrlParser: true,
-				autoReconnect: true,
+				// autoReconnect: true,
 				useFindAndModify: false,
-				reconnectTries: Number.MAX_VALUE,
+				// reconnectTries: Number.MAX_VALUE,
 				poolSize: env.DB_POOL_SIZE,
 				connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
 				useUnifiedTopology: true
@@ -230,6 +201,35 @@ export class ServicesApp
 					' connected'
 			);
 		});
+	}
+	
+	private _gracefulExit()
+	{
+		try
+		{
+			if(this.db != null)
+			{
+				this.db.close((err) =>
+				              {
+					              if(!err)
+					              {
+						              this.log.info(
+								              'Mongoose default connection with DB :' +
+								              this.db_server +
+								              ' is disconnected through app termination'
+						              );
+					              }
+					              else
+					              {
+						              this.log.error(err);
+					              }
+					              process.exit(0);
+				              }).then();
+			}
+		} catch(err)
+		{
+			process.exit(0);
+		}
 	}
 	
 	private async _onDBConnect()
@@ -379,12 +379,13 @@ export class ServicesApp
 		if(googleStrategy != null)
 		{
 			passport.use(googleStrategy);
+			this.log.info("Found GoogleStrategy config!");
 		}
 		else
 		{
 			if(env.isDev || env.isTest)
 			{
-				console.warn("GoogleStrategy is not enabled");
+				this.log.warn("GoogleStrategy is not enabled");
 			}
 		}
 		
@@ -393,12 +394,13 @@ export class ServicesApp
 		if(yandexStrategy != null)
 		{
 			passport.use(yandexStrategy);
+			this.log.info("Found YandexStrategy config!");
 		}
 		else
 		{
 			if(env.isDev || env.isTest)
 			{
-				console.warn("YandexStrategy is not enabled");
+				this.log.warn("YandexStrategy is not enabled");
 			}
 		}
 		
@@ -407,12 +409,13 @@ export class ServicesApp
 		if(facebookStrategy != null)
 		{
 			passport.use(facebookStrategy);
+			this.log.info("Found FacebookStrategy config!");
 		}
 		else
 		{
 			if(env.isDev || env.isTest)
 			{
-				console.warn("FacebookStrategy is not enabled");
+				this.log.warn("FacebookStrategy is not enabled");
 			}
 		}
 	}
@@ -431,7 +434,7 @@ export class ServicesApp
 	
 	private async _startExpress()
 	{
-		this.expressApp = (<any>express)();
+		this.expressApp = express();
 		
 		const hbs = exphbs.create({
 			                          extname: '.hbs',
@@ -717,35 +720,23 @@ export class ServicesApp
 	
 	private _setupStaticRoutes()
 	{
-		this.expressApp.get('/en/about', function(req, res)
-		{
-			res.render('about_us_en');
-		});
-		
-		this.expressApp.get('/ru/about', function(req, res)
-		{
-			res.render('about_us_ru');
-		});
-		
-		this.expressApp.get('/en/privacy', function(req, res)
-		{
-			res.render('privacy_en');
-		});
-		
-		this.expressApp.get('/ru/privacy', function(req, res)
-		{
-			res.render('privacy_ru');
-		});
-		
-		this.expressApp.get('/en/terms', function(req, res)
-		{
-			res.render('terms_of_use_en');
-		});
-		
-		this.expressApp.get('/ru/terms', function(req, res)
-		{
-			res.render('terms_of_use_ru');
-		});
+		env.AVAILABLE_LOCALES
+		   .split('|')
+		   .map((lang: string) => lang.slice(0, 2))
+		   .forEach((lang: string) =>
+		            {
+			            this.expressApp
+			                .get(`/${lang}/about`,
+			                     (req, res) => res.render(`about_us_${lang}`));
+			
+			            this.expressApp
+			                .get(`/${lang}/privacy`,
+			                     (req, res) => res.render(`privacy_${lang}`));
+			
+			            this.expressApp
+			                .get(`/${lang}/terms`,
+			                     (req, res) => res.render(`terms_of_use_${lang}`));
+		            })
 	}
 	
 	private _setupAuthRoutes()
