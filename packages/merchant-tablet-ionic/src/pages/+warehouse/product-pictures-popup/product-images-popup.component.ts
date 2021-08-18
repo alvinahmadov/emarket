@@ -16,7 +16,9 @@ export class ProductImagesPopup
 	
 	get imagesUrls()
 	{
-		return this.images ? this.images.map((i) => i.url).join(' ') : '';
+		return this.images
+		       ? this.images.map((i) => i.url).join(' ')
+		       : '';
 	}
 	
 	get imagesArr()

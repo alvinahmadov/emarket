@@ -1,10 +1,11 @@
 <h4 class="custom-title-popup d-flex">
-	<span class="ml-auto">{{
-        'WAREHOUSE_VIEW.EDIT_PICTURE.PRODUCT_IMAGES' | translate
-        }}</span>
-    <span class="ml-auto"
-    ><ion-icon (click)="cancelModal()" name="close"></ion-icon
-    ></span>
+	<span class="ml-auto">
+		{{ 'WAREHOUSE_VIEW.EDIT_PICTURE.PRODUCT_IMAGES' | translate }}
+	</span>
+	<span class="ml-auto">
+	    <ion-icon (click)="cancelModal()" name="close">
+	    </ion-icon>
+    </span>
 </h4>
 
 <div class="product-images-container p-4">
@@ -37,14 +38,13 @@
             </div>
         </ion-row>
         <ion-row class="mt-4 mb-4 actions">
-            <ion-button
-                    (click)="saveImages()"
-                    color="success"
-                    [disabled]="images?.length === 0"
-            >{{
-                'WAREHOUSE_VIEW.EDIT_PICTURE.SAVE_IMAGES' | translate
-                }}</ion-button
-            >
+	        <ion-button
+			        (click)="saveImages()"
+			        color="success"
+			        [disabled]="images?.length === 0"
+	        >
+		        {{ 'WAREHOUSE_VIEW.EDIT_PICTURE.SAVE_IMAGES' | translate }}
+	        </ion-button>
         </ion-row>
     </ion-grid>
 </div>
