@@ -51,49 +51,54 @@ export class AppComponent
 	
 	initializeApp()
 	{
-		this.platform.ready().then(() =>
-		                           {
-			                           this._watchNetworkConnection();
+		this.platform
+		    .ready()
+		    .then(() =>
+		          {
+			          this._watchNetworkConnection();
 			
-			                           this.defaultLanguage = environment['DEFAULT_LANGUAGE'];
+			          const availableLanguages = environment.AVAILABLE_LOCALES;
+			          this.defaultLanguage = environment.DEFAULT_LANGUAGE;
 			
-			                           const browserLang = this.translate.getBrowserLang();
+			          const browserLang = this.translate.getBrowserLang();
 			
-			                           if(this.defaultLanguage)
-			                           {
-				                           this.translate.use(this.defaultLanguage);
-			                           }
-			                           else
-			                           {
-				                           this.translate.use(
-						                           browserLang.match(/en-US|bg-BG|he-IL|ru-RU|es-ES/)
-						                           ? browserLang
-						                           : 'en-US'
-				                           );
-			                           }
+			          if(this.defaultLanguage)
+			          {
+				          this.translate.use(this.defaultLanguage);
+			          }
+			          else
+			          {
+				          this.translate.use(
+						          browserLang.match(availableLanguages)
+						          ? browserLang
+						          : 'ru-RU'
+				          );
+			          }
 			
-			                           this.store.language = this.translate.currentLang;
+			          this.store.language = this.translate.currentLang;
 			
-			                           // Plugins only working on the mobile devices
-			                           if(this.device.platform)
-			                           {
-				                           this.startGoogleAnalytics();
-				                           this.preferredLanguage();
-				                           this.startMixpanel();
-				                           this.screenOrientation.lock(
-						                           this.screenOrientation.ORIENTATIONS.LANDSCAPE
-				                           );
-			                           }
+			          // Plugins only working on the mobile devices
+			          if(this.device.platform)
+			          {
+				          this.startGoogleAnalytics();
+				          this.preferredLanguage();
+				          this.startMixpanel();
+				          this.screenOrientation.lock(
+						          this.screenOrientation.ORIENTATIONS.LANDSCAPE
+				          );
+			          }
 			
-			                           if(!this.deviceId)
-			                           {
-				                           this._registerDevice();
-			                           }
+			          if(!this.deviceId)
+			          {
+				          this._registerDevice()
+				              .then(r => console.log(r))
+				              .catch(e => console.error(e));
+			          }
 			
-			                           this.statusBar.styleBlackOpaque();
+			          this.statusBar.styleBlackOpaque();
 			
-			                           this.splashScreen.hide();
-		                           });
+			          this.splashScreen.hide();
+		          });
 	}
 	
 	get deviceId()
@@ -110,7 +115,7 @@ export class AppComponent
 			               .then(() =>
 			                     {
 				                     console.log('Google analytics is ready now!');
-				                     this.ga.trackView('test');
+				                     this.ga.trackView('test').then(r => console.log(r)).catch(e => console.log(e));
 				                     // Tracker is ready
 				                     // You can now track pages or set additional information such as AppVersion or UserId
 			                     })
@@ -120,19 +125,15 @@ export class AppComponent
 	
 	preferredLanguage()
 	{
-		console.log('Preferred Language');
 		this.globalization
 		    .getPreferredLanguage()
-		    .then((res) =>
-		          {
-			          this.store.language = res.value.substr(0, 2);
-		          })
-		    .catch((e) => console.log(e));
+		    .then(res => this.store.language = res.value.substr(0, 2))
+		    .catch(console.log);
 	}
 	
 	deviceCreateObject(): IDeviceCreateObject
 	{
-		const language = localStorage.getItem('_language') || 'en-US';
+		const language = localStorage.getItem('_language') || 'ru-RU';
 		if(!this.device.platform || this.device.platform === 'browser')
 		{
 			return {
@@ -153,11 +154,12 @@ export class AppComponent
 	
 	startMixpanel()
 	{
-		this.mixpanel.init(environment.MIXPANEL_API_KEY).then(() =>
-		                                                      {
-			                                                      console.log('Mixpanel is ready now!');
-			                                                      this.mixpanel.track('App Booted');
-		                                                      });
+		this.mixpanel.init(environment.MIXPANEL_API_KEY)
+		    .then(() =>
+		          {
+			          console.log('Mixpanel is ready now!');
+			          this.mixpanel.track('App Booted');
+		          });
 	}
 	
 	async openPage(page)
@@ -172,24 +174,28 @@ export class AppComponent
 	
 	private _watchNetworkConnection()
 	{
-		this._network.onDisconnect().subscribe(async(_) =>
-		                                       {
-			                                       console.error('network was disconnected :-(');
-			                                       await this.router.navigate(['errors', 'connection-lost']);
-		                                       });
+		this._network
+		    .onDisconnect()
+		    .subscribe(async(_) =>
+		               {
+			               console.error('network was disconnected :-(');
+			               await this.router.navigate(['errors', 'connection-lost']);
+		               });
 		
-		this._network.onConnect().subscribe((_) =>
-		                                    {
-			                                    console.log('network connected!');
-			                                    this.location.back();
-			                                    setTimeout(() =>
-			                                               {
-				                                               if(this._network.type === 'wifi')
-				                                               {
-					                                               console.log('we got a wifi connection, woohoo!');
-				                                               }
-			                                               }, 3000);
-		                                    });
+		this._network
+		    .onConnect()
+		    .subscribe((_) =>
+		               {
+			               console.log('network connected!');
+			               this.location.back();
+			               setTimeout(() =>
+			                          {
+				                          if(this._network.type === 'wifi')
+				                          {
+					                          console.log('we got a wifi connection, woohoo!');
+				                          }
+			                          }, 3000);
+		               });
 	}
 	
 	private async _registerDevice()
