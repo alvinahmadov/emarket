@@ -15,25 +15,25 @@ import { MenuModule }                       from './components/menu/menu.module'
 import { AppRoutingModule }                 from './app-routing.module';
 import { AppComponent }                     from './app.component';
 // import { Logger } from 'angular2-logger/core';
-import { environment }                      from 'environments/environment';
-import { HttpLink, HttpLinkModule }         from 'apollo-angular-link-http';
-import { Apollo, ApolloModule }             from 'apollo-angular';
-import { InMemoryCache }                    from 'apollo-cache-inmemory';
-import { WebSocketLink }                    from 'apollo-link-ws';
-import { setContext }                       from 'apollo-link-context';
-import { ApolloLink }                       from 'apollo-link';
-import { getOperationAST }                  from 'graphql';
-import { Store }                            from './services/store.service';
-import { ServerSettings }                   from './services/server-settings';
-import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/googleMapsLoader';
-import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
-import { PagesModuleGuard }                 from './pages/pages.module.guard';
-import { MaintenanceModuleGuard }           from './maintenance-info/maintenance-info.module.guard';
-import { ServiceWorkerModule }              from '@angular/service-worker';
-import { Network }                          from '@ionic-native/network/ngx';
-import { Device }                           from '@ionic-native/device/ngx';
-import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
-import { CallPageModule }                   from './pages/+products/+order/+call/call.module';
+import { environment }              from 'environments/environment';
+import { HttpLink, HttpLinkModule } from 'apollo-angular-link-http';
+import { Apollo, ApolloModule }     from 'apollo-angular';
+import { InMemoryCache }            from 'apollo-cache-inmemory';
+import { WebSocketLink }            from 'apollo-link-ws';
+import { setContext }               from 'apollo-link-context';
+import { ApolloLink }               from 'apollo-link';
+import { getOperationAST }          from 'graphql';
+import { Store }                    from './services/store.service';
+import { ServerSettings }           from './services/server-settings';
+import { GoogleMapsLoader }         from '@modules/client.common.angular2/services/googlemaps-loader';
+import { MaintenanceService }       from '@modules/client.common.angular2/services/maintenance.service';
+import { PagesModuleGuard }         from './pages/pages.module.guard';
+import { MaintenanceModuleGuard }   from './maintenance-info/maintenance-info.module.guard';
+import { ServiceWorkerModule }      from '@angular/service-worker';
+import { Network }                  from '@ionic-native/network/ngx';
+import { Device }                   from '@ionic-native/device/ngx';
+import { ServerConnectionService }  from '@modules/client.common.angular2/services/server-connection.service';
+import { CallPageModule }           from './pages/+products/+order/+call/call.module';
 
 @NgModule({
 	          declarations: [AppComponent],
