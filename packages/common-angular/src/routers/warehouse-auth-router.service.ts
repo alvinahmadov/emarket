@@ -1,9 +1,8 @@
 import { Injectable }            from '@angular/core';
 import IWarehouse                from '@modules/server.common/interfaces/IWarehouse';
 import Warehouse                 from '@modules/server.common/entities/Warehouse';
-import
+import IWarehouseAuthRouter,
 {
-	IWarehouseAuthRouter,
 	IWarehouseLoginResponse,
 	IWarehouseRegistrationInput,
 }                                from '@modules/server.common/routers/IWarehouseAuthRouter';
