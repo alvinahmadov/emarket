@@ -38,7 +38,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ objectId: id, callId }, '.get(id) called');
+		this.log.debug({ objectId: id, callId }, '.get(id) called');
 		
 		return scheduled(this.getCurrent(id)).pipe(
 				concat(
@@ -51,7 +51,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 				tap({
 					    next: (obj) =>
 					    {
-						    this.log.info(
+						    this.log.debug(
 								    {
 									    objectId: id,
 									    object: obj,
@@ -79,7 +79,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ objectId: id, callId }, '.getCurrent(id) called');
+		this.log.debug({ objectId: id, callId }, '.getCurrent(id) called');
 		
 		const obj = await this.Model
 		                      .findById(id)
@@ -93,7 +93,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ objectIds: ids, callId }, '.getMultiple(ids) called');
+		this.log.debug({ objectIds: ids, callId }, '.getMultiple(ids) called');
 		
 		return of(null).pipe(
 				concat(
@@ -106,7 +106,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 				tap({
 					    next: (objects) =>
 					    {
-						    this.log.info(
+						    this.log.debug(
 								    { objectIds: ids, objects, callId },
 								    '.getMultiple(ids) emitted next value'
 						    );
@@ -126,7 +126,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info(
+		this.log.debug(
 				{ objectIds: ids, callId },
 				'.getCurrentMultiple(ids) called'
 		);
@@ -147,7 +147,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ callId, createObject }, '.create(createObject) called');
+		this.log.debug({ callId, createObject }, '.create(createObject) called');
 		
 		let object;
 		
@@ -172,7 +172,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			                    type: ExistenceEventType.Created
 		                    });
 		
-		this.log.info(
+		this.log.debug(
 				{ callId, createObject, object },
 				'.create(createObject) created object'
 		);
@@ -191,7 +191,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ callId }, '.removeAll() called!');
+		this.log.debug({ callId }, '.removeAll() called!');
 		
 		try
 		{
@@ -204,7 +204,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			throw err;
 		}
 		
-		this.log.info({ callId }, '.removeAll() removed all!');
+		this.log.debug({ callId }, '.removeAll() removed all!');
 	}
 	
 	/**
@@ -219,7 +219,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ callId, objectId }, '.remove(objectId) called');
+		this.log.debug({ callId, objectId }, '.remove(objectId) called');
 		
 		let lastValue: T | null;
 		
@@ -254,7 +254,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 				                    type: ExistenceEventType.Removed
 			                    });
 			
-			this.log.info(
+			this.log.debug(
 					{ callId, objectId, lastValue },
 					'.remove(objectId) removed object'
 			);
@@ -272,7 +272,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info(
+		this.log.debug(
 				{ callId, conditions },
 				'.removeMultiple(conditions) called'
 		);
@@ -307,7 +307,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			                    });
 		});
 		
-		this.log.info(
+		this.log.debug(
 				{
 					callId,
 					conditions,
@@ -341,7 +341,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ callId, conditions }, '.find(conditions) called');
+		this.log.debug({ callId, conditions }, '.find(conditions) called');
 		
 		let results: T[];
 		
@@ -364,7 +364,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			throw err;
 		}
 		
-		this.log.info(
+		this.log.debug(
 				{ callId, conditions, results },
 				'.find(conditions) found results'
 		);
@@ -376,7 +376,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ callId, conditions }, '.findOne(conditions) called');
+		this.log.debug({ callId, conditions }, '.findOne(conditions) called');
 		
 		let result: T;
 		
@@ -397,7 +397,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			throw err;
 		}
 		
-		this.log.info(
+		this.log.debug(
 				{ callId, conditions, result },
 				'.findOne(conditions) found result'
 		);
@@ -408,7 +408,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	async update(objectId: T['id'], updateObj: UpdateObject<T>): Promise<T>
 	{
 		const callId = uuid();
-		this.log.info(
+		this.log.debug(
 				{ callId, objectId, updateObj },
 				'.update(objectId, updateObj) called'
 		);
@@ -458,7 +458,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			                    type: ExistenceEventType.Updated
 		                    });
 		
-		this.log.info(
+		this.log.debug(
 				{
 					callId,
 					objectId,
@@ -478,7 +478,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	): Promise<T[]>
 	{
 		const callId = uuid();
-		this.log.info(
+		this.log.debug(
 				{ callId, findObj, updateObj },
 				'.updateMultiple(findObj, updateObj) called'
 		);
@@ -521,7 +521,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			                    });
 		});
 		
-		this.log.info(
+		this.log.debug(
 				{
 					callId,
 					findObj,
@@ -542,7 +542,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info(
+		this.log.debug(
 				{ callId, ids, updateObj },
 				'.updateMultipleByIds(ids, updateObj) called'
 		);
@@ -573,7 +573,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			throw err;
 		}
 		
-		this.log.info(
+		this.log.debug(
 				{
 					callId,
 					ids,
@@ -590,7 +590,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	{
 		const callId = uuid();
 		
-		this.log.info({ callId, findObj }, '.countDocuments(findObj) called');
+		this.log.debug({ callId, findObj }, '.countDocuments(findObj) called');
 		
 		let count: number;
 		
@@ -610,7 +610,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 			throw err;
 		}
 		
-		this.log.info(
+		this.log.debug(
 				{ callId, findObj, count },
 				'.countDocuments(findObj) counted objects'
 		);
