@@ -48,6 +48,7 @@ body {
 
 .ion-page {
   background-color: $brand-darken;
+  overflow-y: visible !important;
 }
 
 ion-item.payments-gateways-select-container {
@@ -455,7 +456,7 @@ ion-content.app-view {
 .create-product-type-popup,
 .edit-product-type-popup {
   padding: 0;
-  background: white;
+  background: ivory;
   font-family: 'open sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   .popup-half {
@@ -666,7 +667,7 @@ ion-content.app-view {
   box-sizing: border-box;
   padding: 5px;
   width: 100%;
-  height: 44px;
+  height: 75px;
   border-width: 0;
   border-style: solid;
   border-top: 1px solid transparent;
@@ -682,6 +683,7 @@ ion-content.app-view {
   border-top-width: 0;
   border-bottom-width: 1px;
 
+  //noinspection ALL
   .disable-user-behavior {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -969,7 +971,7 @@ ion-modal.customer-email {
     opacity: 0;
     height: auto;
     border-radius: 2px;
-    background-color: #fafafa;
+    background-color: ivory;
     padding: 5px;
     min-width: 800px;
     margin: auto;
