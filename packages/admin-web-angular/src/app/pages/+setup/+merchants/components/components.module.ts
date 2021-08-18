@@ -15,6 +15,7 @@ import { SetupMerchantProductCategoriesComponent } from './product-categories/pr
 import { ProductCategoriesFormsModule }            from '@app/@shared/product/categories/forms/product-categories-forms.module';
 import { NotifyService }                           from '@app/@core/services/notify/notify.service';
 import { NgxBarcodeModule }                        from '@modules/client.common.angular2/components/ngx-barcode/ngx-barcode.module';
+import { TabModule }                               from '@modules/client.common.angular2/components/tabs/tab.module';
 
 const COMPONENTS = [
 	SetupMerchantAccountComponent,
@@ -36,6 +37,7 @@ const COMPONENTS = [
 		          FileUploaderModule,
 		          ProductCategoriesFormsModule,
 		          NgxBarcodeModule,
+		          TabModule,
 		          NbButtonModule,
 	          ],
 	          declarations: COMPONENTS,
