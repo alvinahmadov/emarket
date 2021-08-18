@@ -66,7 +66,7 @@ export class WarehousePage implements OnInit
 			// public navCtrl: NavController,
 			// public navParams: NavParams,
 			public popoverCtrl: PopoverController,
-			public modalCtrl: ModalController,
+			public modalController: ModalController,
 			private orderRouter: OrderRouter,
 			private warehouseProductsRouter: WarehouseProductsRouter,
 			private mixpanel: Mixpanel,
@@ -177,9 +177,7 @@ export class WarehousePage implements OnInit
 	{
 		if(p instanceof Product)
 		{
-			const productImg = p.images.filter((i) =>
-					                                   i.locale.includes(this.language)
-			)[0];
+			const productImg = p.images.filter((i) => i.locale.includes(this.language))[0];
 			if(productImg)
 			{
 				return productImg.url;
@@ -247,7 +245,7 @@ export class WarehousePage implements OnInit
 		{
 			if(this.mixpanel)
 			{
-				this.mixpanel.track('Order Failed');
+				this.mixpanel.track('Order Failed').catch(console.error);
 			}
 		}
 		return this.orderRouter.updateWarehouseStatus(orderId, status);
@@ -264,23 +262,23 @@ export class WarehousePage implements OnInit
 	
 	async presentCreateProductPopover()
 	{
-		const modal = await this.modalCtrl.create({
-			                                          component: CreateProductTypePopupPage,
-			                                          // backdropDismiss: false,
-			                                          cssClass: 'mutation-product-modal',
-		                                          });
+		const modal = await this.modalController.create({
+			                                                component: CreateProductTypePopupPage,
+			                                                backdropDismiss: true,
+			                                                cssClass: 'mutation-product-modal',
+		                                                });
 		
 		await modal.present();
 	}
 	
 	async openEditProductModal(product)
 	{
-		const modal = await this.modalCtrl.create({
-			                                          component: EditProductTypePopupPage,
-			                                          // backdropDismiss: false,
-			                                          componentProps: { warehouseProduct: product },
-			                                          cssClass: 'mutation-product-modal',
-		                                          });
+		const modal = await this.modalController.create({
+			                                                component: EditProductTypePopupPage,
+			                                                backdropDismiss: true,
+			                                                componentProps: { warehouseProduct: product },
+			                                                cssClass: 'mutation-product-modal',
+		                                                });
 		
 		await modal.present();
 	}
