@@ -313,12 +313,22 @@ export class OrdersService extends DBService<Order>
 				}
 				else
 				{
-					throw new Error('User specified in order is not found!');
+					const msg = "User specified in order is not found!";
+					this.log.error(
+							{ callId, orderId, cardId, message: msg },
+							'.payWithStripe(orderId, cardId) thrown error!'
+					);
+					throw new Error(msg);
 				}
 			}
 			else
 			{
-				throw new Error('couldn\'t find order with such id');
+				const msg = "couldn't find order with such id";
+				this.log.error(
+						{ callId, orderId, cardId, message: msg },
+						'.payWithStripe(orderId, cardId) thrown error!'
+				);
+				throw new Error(msg);
 			}
 		} catch(err)
 		{
