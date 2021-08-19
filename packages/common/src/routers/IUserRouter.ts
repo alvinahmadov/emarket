@@ -2,7 +2,7 @@ import { Observable }        from 'rxjs';
 import User                  from '../entities/User';
 import GeoLocation           from '../entities/GeoLocation';
 import { IUserCreateObject } from '../interfaces/IUser';
-import Stripe                from 'stripe';
+import { cards }             from 'stripe';
 import Device                from '../entities/Device';
 
 interface IUserRouter
@@ -13,7 +13,7 @@ interface IUserRouter
 	
 	addPaymentMethod(userId: User['id'], tokenId: string): Promise<string>;
 	
-	getCards(userId: User['id']): Promise<Stripe.cards.ICard[]>;
+	getCards(userId: User['id']): Promise<cards.ICard[]>;
 	
 	updateEmail(userId: User['id'], email: string): Promise<User>;
 	
