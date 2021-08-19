@@ -34,7 +34,7 @@
 		"run:carrier:dev": "yarn --cwd ./packages/carrier-mobile-ionic start",
 		"build:server": "yarn run build:common && yarn --cwd ./packages/core run build",
 		"build:common": "yarn --cwd ./packages/common build && yarn --cwd ./packages/common-angular build",
-		"build:admin": "yarn run build:common && yarn --cwd ./packages/admin-web-angular run build",
+		"build:admin": "yarn run build:common && yarn --cwd ./packages/admin-web-angular run build:prod",
 		"build:merchant": "yarn run build:common && yarn --cwd ./packages/merchant-tablet-ionic run build",
 		"build:shopmobile": "yarn run build:common && yarn --cwd ./packages/shop-mobile-ionic run build",
 		"build:shopweb": "yarn run build:common && yarn --cwd ./packages/shop-web-angular run build:prod:webpack",
