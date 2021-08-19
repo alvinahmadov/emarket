@@ -42,8 +42,6 @@ pm2.connect(
 			pm2.start(startOptions,
 			          (err: Error, proc: Proc) =>
 			          {
-				          pm2.dump(console.error);
-				
 				          pm2.launchBus(function(err, bus)
 				                        {
 					                        console.log('Start in `%s` mode', mode)
