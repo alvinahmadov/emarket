@@ -21,7 +21,7 @@ services:
     #        command: yarn run:carrier
     #        build:
     #            context: .
-    #            dockerfile: .docker/carrier-mobile-ionic/Dockerfile
+    #            dockerfile: .deploy/docker/carrier-mobile-ionic/Dockerfile
     #        environment:
     #            NODE_ENV: production
     #        restart: on-failure
@@ -39,7 +39,7 @@ services:
     #        command: yarn run:shopmobile
     #        build:
     #            context: .
-    #            dockerfile: .docker/shop-mobile-ionic/Dockerfile
+    #            dockerfile: .deploy/docker/shop-mobile-ionic/Dockerfile
     #        environment:
     #            NODE_ENV: production
     #        restart: on-failure
@@ -56,7 +56,7 @@ services:
         command: yarn run:merchant
         build:
             context: .
-            dockerfile: .docker/merchant-tablet-ionic/Dockerfile
+            dockerfile: .deploy/docker/merchant-tablet-ionic/Dockerfile
         environment:
             NODE_ENV: production
         restart: on-failure
@@ -73,7 +73,7 @@ services:
         command: yarn run:admin
         build:
             context: .
-            dockerfile: .docker/admin-web-angular/Dockerfile
+            dockerfile: .deploy/docker/admin-web-angular/Dockerfile
         environment:
             NODE_ENV: production
         restart: on-failure
@@ -90,7 +90,7 @@ services:
         command: yarn run:shopweb
         build:
             context: .
-            dockerfile: .docker/shop-web-angular/Dockerfile
+            dockerfile: .deploy/docker/shop-web-angular/Dockerfile
         environment:
             NODE_ENV: production
         restart: on-failure
@@ -108,7 +108,7 @@ services:
         image: emarket-core:latest
         build:
             context: .
-            dockerfile: .docker/core/Dockerfile
+            dockerfile: .deploy/docker/core/Dockerfile
         environment:
             NODE_ENV: production
             WAIT_HOSTS: mongo:27017
