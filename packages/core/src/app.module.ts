@@ -45,9 +45,9 @@ import { ServicesApp }                        from './services/services.app';
 import { CurrencyModule }                     from './graphql/currency/currency.module';
 import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
 import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
-import { join }                               from 'path';
 
-const port = env.GQLPORT;
+const gqlEndpoint = env.GQL_ENDPOINT;
+const subscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT;
 const graphqlPath = './**/*.graphql';
 
 const log: Logger = createLogger({
@@ -166,7 +166,7 @@ export class ApplicationModule implements NestModule, OnModuleInit
 		 */
 		
 		log.info(
-				`GraphQL playground available at http://localhost:${port}/graphql`
+				`GraphQL playground available at ${gqlEndpoint}`
 		);
 	}
 	
@@ -181,8 +181,8 @@ export class ApplicationModule implements NestModule, OnModuleInit
 				                        req
 			                        }),
 			                        playground: {
-				                        endpoint: `http://localhost:${port}/graphql`,
-				                        subscriptionEndpoint: `ws://localhost:${port}/subscriptions`,
+				                        endpoint: gqlEndpoint,
+				                        subscriptionEndpoint: subscriptionsEndpoint,
 				                        settings: {
 					                        'editor.theme': 'dark'
 				                        }
