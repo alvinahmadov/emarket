@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./www/out-tsc",
+    "outDir": "./dist/out-tsc",
     "baseUrl": "./src",
     "target": "es5",
     "sourceMap": true,
