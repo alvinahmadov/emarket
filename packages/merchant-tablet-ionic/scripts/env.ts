@@ -76,14 +76,14 @@ export const env: Environment = cleanEnv(
 			CLOUDINARY_UNSIGNED_UPLOAD_PRESET: str({ default: '' }),
 			CLOUDINARY_UPLOAD_URL: str({ default: '' }),
 			API_FILE_UPLOAD_URL: str({
-				                         default: 'https://api.cloudinary.com/v1_1/alvindre/upload',
+				                         default: '',
 			                         }),
 			
 			DEFAULT_LOGIN_USERNAME: str({ default: 'user' }),
 			DEFAULT_LOGIN_PASSWORD: str({ default: '12345' }),
 			
-			LOGIN_LOGO: str({ default: 'assets/imgs/ever-logo.svg' }),
-			NO_INTERNET_LOGO: str({ default: 'assets/imgs/logo.png' }),
+			LOGIN_LOGO: str({ default: '' }),
+			NO_INTERNET_LOGO: str({ default: '' }),
 			
 			COMPANY_NAME: str({ default: 'Company' }),
 			APP_NAME: str({ default: 'Merchant' }),
@@ -117,7 +117,3 @@ export const env: Environment = cleanEnv(
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );
-
-console.log("Environment variables for Merchant App:");
-console.log(env);
-console.warn("Remove in production code from scripts/env.ts")

@@ -47,7 +47,10 @@ export class LoginPage
 			return;
 		}
 		
-		console.log(`Merchant logged in with id ${res.warehouse.id}`);
+		if(!environment.production)
+		{
+			console.log(`Merchant logged in with id ${res.warehouse.id}`);
+		}
 		
 		this.store.warehouseId = res.warehouse.id;
 		this.store.token = res.token;
