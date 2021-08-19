@@ -9,14 +9,6 @@ const appName = process.env.PM2_APP_NAME || 'Merchants';
 const instances = env.WEB_CONCURRENCY;
 const maxMemory = env.WEB_MEMORY;
 const port = env.PORT;
-const isProd = env.production;
-
-console.log("Running in %s mode", isProd ? 'production' : 'development');
-if(!isProd)
-{
-	console.warn("Environment details: ")
-	console.warn(env);
-}
 
 const startOptions: StartOptions = {
 	script: './dist/out-tsc/packages/merchant-tablet-ionic/app.js',
@@ -31,7 +23,6 @@ const startOptions: StartOptions = {
 		KEYMETRICS_PUBLIC: PUBLIC_KEY,
 		KEYMETRICS_SECRET: PRIVATE_KEY,
 	},
-	watch: !isProd,
 }
 
 pm2.connect(function()
@@ -40,7 +31,6 @@ pm2.connect(function()
 			            startOptions,
 			            function()
 			            {
-				            pm2.dump(console.error);
 				            // Display logs in standard output
 				            pm2.launchBus(function(err, bus)
 				                          {

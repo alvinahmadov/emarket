@@ -11,23 +11,23 @@ const instances = env.WEB_CONCURRENCY;
 const maxMemory = env.WEB_MEMORY;
 const port = env.PORT;
 
+const startOptions: StartOptions = {
+	script: './dist/out-tsc/packages/shop-web-angular/app.js',
+	name: appName,
+	exec_mode: 'fork',
+	instances,
+	max_memory_restart: maxMemory + 'M',
+	env: {
+		// If needed declare some environment variables
+		NODE_ENV: 'production',
+		PORT: `${port}`,
+		KEYMETRICS_PUBLIC: PUBLIC_KEY,
+		KEYMETRICS_SECRET: PRIVATE_KEY,
+	},
+}
+
 pm2.connect(function()
             {
-	            const startOptions: StartOptions = {
-		            script: './dist/out-tsc/packages/shop-web-angular/app.js',
-		            name: appName,
-		            exec_mode: 'fork',
-		            instances,
-		            max_memory_restart: maxMemory + 'M',
-		            env: {
-			            // If needed declare some environment variables
-			            NODE_ENV: 'production',
-			            PORT: `${port}`,
-			            KEYMETRICS_PUBLIC: PUBLIC_KEY,
-			            KEYMETRICS_SECRET: PRIVATE_KEY,
-		            },
-	            }
-	
 	            pm2.start(
 			            startOptions,
 			            () =>
