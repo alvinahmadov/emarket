@@ -3,7 +3,7 @@ import jwt                                          from 'jsonwebtoken';
 import { first }                                    from 'rxjs/operators';
 import { inject, injectable, LazyServiceIdentifer } from 'inversify';
 import { routerName }                               from '@pyro/io';
-import JwtAppName                                   from "@modules/server.common/enums/JwtAppName"
+import JwtAppType                                   from "@modules/server.common/enums/JwtAppType"
 import { WarehousesService }                        from '../warehouses';
 import { CarriersService }                          from '../carriers';
 import { env }                                      from '../../env';
@@ -28,10 +28,10 @@ export interface JwtPayload
 	// id of carrier or warehouse
 	id: string;
 	// name of app, e.g. 'carrier' or 'warehouse'.
-	appName: JwtAppName;
+	appName: JwtAppType;
 }
 
-export function createToken(id: string, appName: JwtAppName)
+export function createToken(id: string, appName: JwtAppType)
 {
 	const user: JwtPayload = { id, appName };
 	return jwt.sign(user, 'secretKey', {
