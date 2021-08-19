@@ -1,5 +1,3 @@
-// noinspection JSUnusedLocalSymbols
-
 require('dotenv').config();
 import pm2, { StartOptions } from 'pm2';
 
