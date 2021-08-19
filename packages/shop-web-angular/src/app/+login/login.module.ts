@@ -28,8 +28,6 @@ library.add(faFacebook);
 library.add(faGoogle);
 library.add(faYandex)
 
-console.log('`Login` bundle loaded asynchronously');
-
 export function HttpLoaderFactory(http: HttpClient)
 {
 	return new TranslateHttpLoader(http, './assets/i18n/', '.json');
