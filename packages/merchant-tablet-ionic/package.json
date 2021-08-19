@@ -19,7 +19,7 @@
     "clean": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 yarn run config:dev && yarn ionic-app-scripts clean",
     "start": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 yarn rimraf dist www && yarn run start:server:pm2",
     "start:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 yarn run config:prod && yarn run build:prod && yarn ng:prod serve",
-    "start:dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 yarn rimraf dist www && yarn run config:dev && yarn run build:dev && yarn ng:dev serve --watch",
+    "start:dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=1024 yarn rimraf dist www && yarn run config:dev && yarn run build:dev && yarn ng:dev serve --watch",
     "start:server:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 yarn run build:prod && node --harmony ./dist/out-tsc/packages/merchant-tablet-ionic/app.js",
     "start:server:pm2": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 yarn run build:prod && cross-env NODE_ENV=production node --harmony ./dist/out-tsc/packages/merchant-tablet-ionic/pm2bootstrap.js",
     "build": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=1024 yarn run config:dev && yarn ng:dev build && yarn tsc",
