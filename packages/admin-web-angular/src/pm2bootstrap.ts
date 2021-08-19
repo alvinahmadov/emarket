@@ -34,7 +34,6 @@ pm2.connect(
 			pm2.start(startOptions,
 			          () =>
 			          {
-				          pm2.dump(console.error);
 				          // Display logs in standard output
 				          pm2.launchBus(function(err, bus)
 				                        {
