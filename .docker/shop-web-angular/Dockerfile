@@ -17,7 +17,7 @@ WORKDIR $APP_HOME
 
 COPY package.json yarn.lock lerna.json package.workspaces.json ./
 COPY packages/shop-web-angular/package.json ./packages/shop-web-angular/package.json
-COPY packages/shop-web-angular/.nginx/default.conf .nginx/default.conf
+COPY packages/shop-web-angular/.nginx ./packages/shop-web-angular/.nginx
 COPY .snyk ./.snyk
 COPY packages/common ./packages/common
 COPY packages/common-angular ./packages/common-angular
@@ -31,7 +31,6 @@ RUN npm install cross-env -g
 ENV APP_HOME=/home/emarket
 
 RUN mkdir $APP_HOME
-RUN mkdir -p $APP_HOME/.nginx
 RUN mkdir -p $APP_HOME/packages/shop-web-angular
 RUN mkdir -p $APP_HOME/packages/common
 RUN mkdir -p $APP_HOME/packages/common-angular
@@ -44,7 +43,7 @@ ENV NODE_ENV production
  
 RUN rm -rf /usr/share/nginx/html
 
-COPY --from=development $APP_HOME/.nginx ./.nginx
+COPY --from=development $APP_HOME/packages/shop-web-angular/.nginx ./packages/shop-web-angular/.nginx
 COPY --from=development $APP_HOME/node_modules ./node_modules
 COPY --from=development $APP_HOME/packages/common/node_modules ./packages/common/node_modules
 COPY --from=development $APP_HOME/packages/common-angular/node_modules ./packages/common-angular/node_modules
@@ -55,5 +54,5 @@ COPY package.json yarn.lock lerna.json package.workspaces.json tsconfig.base.jso
 COPY packages/common ./packages/common
 COPY packages/common-angular ./packages/common-angular
 COPY packages/shop-web-angular ./packages/shop-web-angular
-COPY .nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY packages/shop-web-angular/.nginx/default.conf /etc/nginx/conf.d/default.conf
 RUN nginx -s reload

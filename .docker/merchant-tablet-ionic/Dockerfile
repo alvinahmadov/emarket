@@ -17,7 +17,7 @@ WORKDIR $APP_HOME
 
 COPY package.json yarn.lock lerna.json package.workspaces.json ./
 COPY packages/merchant-tablet-ionic/package.json ./packages/merchant-tablet-ionic/package.json
-COPY packages/merchant-tablet-ionic/.nginx/default.conf .nginx/default.conf
+COPY packages/merchant-tablet-ionic/.nginx ./packages/merchant-tablet-ionic/.nginx
 COPY .snyk ./.snyk
 COPY packages/common ./packages/common
 COPY packages/common-angular ./packages/common-angular
@@ -31,7 +31,6 @@ RUN npm install cross-env -g
 ENV APP_HOME=/home/emarket
 
 RUN mkdir $APP_HOME
-RUN mkdir -p $APP_HOME/.nginx
 RUN mkdir -p $APP_HOME/packages/merchant-tablet-ionic
 RUN mkdir -p $APP_HOME/packages/common
 RUN mkdir -p $APP_HOME/packages/common-angular
@@ -44,10 +43,10 @@ ENV NODE_ENV production
 
 RUN rm -rf /usr/share/nginx/html
 
-COPY --from=development $APP_HOME/.nginx ./.nginx
 COPY --from=development $APP_HOME/node_modules ./node_modules
 COPY --from=development $APP_HOME/packages/common/node_modules ./packages/common/node_modules
 COPY --from=development $APP_HOME/packages/common-angular/node_modules ./packages/common-angular/node_modules
+COPY --from=development $APP_HOME/packages/merchant-tablet-ionic/.nginx ./packages/merchant-tablet-ionic/.nginx
 COPY --from=development $APP_HOME/packages/merchant-tablet-ionic/node_modules ./packages/merchant-tablet-ionic/node_modules
 COPY --from=development $APP_HOME/packages/merchant-tablet-ionic/www /usr/share/nginx/html
 
@@ -55,3 +54,5 @@ COPY package.json yarn.lock lerna.json package.workspaces.json tsconfig.base.jso
 COPY packages/common ./packages/common
 COPY packages/common-angular ./packages/common-angular
 COPY packages/merchant-tablet-ionic ./packages/merchant-tablet-ionic
+COPY packages/merchant-tablet-ionic/.nginx/default.conf /etc/nginx/conf.d/default.conf
+RUN nginx -s reload
