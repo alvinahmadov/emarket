@@ -76,7 +76,3 @@ export const env: Env = cleanEnv(
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );
-
-console.log("Shopweb environment details");
-console.log(env)
-console.warn("Remove upper log in production from scripts/env.ts")
