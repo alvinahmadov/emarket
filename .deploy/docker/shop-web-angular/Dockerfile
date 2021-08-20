@@ -9,18 +9,25 @@ RUN apk update \
 	&& npm config set python /usr/bin/python \
 	&& npm install yarn -g --force
 
-ENV APP_HOME=/home/emarket
+ENV APP_USER=www-data
 
-RUN mkdir $APP_HOME
+ENV APP_HOME=/srv/emarket
+
+RUN set -x ; \
+  addgroup -g 82 -S www-data ; \
+  adduser -u 82 -D -S -G www-data www-data && exit 0 ; exit 1
+
+RUN mkdir $APP_HOME && chown $APP_USER:$APP_USER $APP_HOME
+
+USER $APP_USER
 
 WORKDIR $APP_HOME
 
-COPY package.json yarn.lock lerna.json \
-						package.workspaces.json ./
-COPY packages/shop-web-angular/package.json     ./packages/shop-web-angular/package.json
-COPY packages/shop-web-angular/nginx            ./packages/shop-web-angular/nginx
-COPY packages/common                            ./packages/common
-COPY packages/common-angular                    ./packages/common-angular
+COPY --chown=$APP_USER:$APP_USER package.json yarn.lock lerna.json package.workspaces.json ./
+COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/package.json     ./packages/shop-web-angular/package.json
+COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/nginx            ./packages/shop-web-angular/nginx
+COPY --chown=$APP_USER:$APP_USER packages/common                            ./packages/common
+COPY --chown=$APP_USER:$APP_USER packages/common-angular                    ./packages/common-angular
 
 ## Install packages
 RUN yarn install && yarn cache clean
@@ -29,12 +36,14 @@ FROM node:lts-alpine3.14 AS production
 
 RUN npm install cross-env -g
 
-ENV APP_HOME=/home/emarket
+ENV APP_HOME=/srv/emarket
 
-RUN mkdir $APP_HOME
-RUN mkdir -p $APP_HOME/packages/shop-web-angular
-RUN mkdir -p $APP_HOME/packages/common
-RUN mkdir -p $APP_HOME/packages/common-angular
+RUN mkdir $APP_HOME 								&& chown $APP_USER:$APP_USER $APP_HOME
+RUN mkdir -p $APP_HOME/packages/shop-web-angular 	&& chown $APP_USER:$APP_USER $APP_HOME/packages/shop-web-angular
+RUN mkdir -p $APP_HOME/packages/common 				&& chown $APP_USER:$APP_USER $APP_HOME/packages/common
+RUN mkdir -p $APP_HOME/packages/common-angular 		&& chown $APP_USER:$APP_USER $APP_HOME/packages/common-angular
+
+USER $APP_USER
 
 WORKDIR $APP_HOME
 
@@ -44,20 +53,17 @@ ENV NODE_OPTIONS $NODE_OPTIONS
 ENV NODE_ENV production
 
 ## Copy installed yarn packages
-COPY --from=development $APP_HOME/node_modules ./node_modules
-COPY --from=development $APP_HOME/packages/common/node_modules              ./packages/common/node_modules
-COPY --from=development $APP_HOME/packages/common-angular/node_modules      ./packages/common-angular/node_modules
-COPY --from=development $APP_HOME/packages/shop-web-angular/nginx           ./packages/shop-web-angular/nginx
-COPY --from=development $APP_HOME/packages/shop-web-angular/node_modules    ./packages/shop-web-angular/node_modules
+COPY --from=development --chown=$APP_USER:$APP_USER $APP_HOME/node_modules ./node_modules
+COPY --from=development --chown=$APP_USER:$APP_USER $APP_HOME/packages/common/node_modules              ./packages/common/node_modules
+COPY --from=development --chown=$APP_USER:$APP_USER $APP_HOME/packages/common-angular/node_modules      ./packages/common-angular/node_modules
+COPY --from=development --chown=$APP_USER:$APP_USER $APP_HOME/packages/shop-web-angular/nginx           ./packages/shop-web-angular/nginx
+COPY --from=development --chown=$APP_USER:$APP_USER $APP_HOME/packages/shop-web-angular/node_modules    ./packages/shop-web-angular/node_modules
 
-COPY package.json yarn.lock lerna.json \
-		 package.workspaces.json tsconfig.base.json ./
-COPY packages/common                                ./packages/common
-COPY packages/common-angular                        ./packages/common-angular
-COPY packages/shop-web-angular                      ./packages/shop-web-angular
-COPY packages/shop-web-angular/nginx/default.conf   /etc/nginx/conf.d/default.conf
+COPY --chown=$APP_USER:$APP_USER package.json yarn.lock lerna.json \
+	package.workspaces.json tsconfig.base.json ./
+COPY --chown=$APP_USER:$APP_USER packages/common                                ./packages/common
+COPY --chown=$APP_USER:$APP_USER packages/common-angular                        ./packages/common-angular
+COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular                      ./packages/shop-web-angular
+COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/nginx/default.conf   /etc/nginx/conf.d/default.conf
 
-## Replace default server files
-RUN rm -rf /usr/share/nginx/html
-RUN yarn run build:common && yarn --cwd ./packages/shop-web-angular run build:prod:webpack
-COPY ./packages/shop-web-angular/www /usr/share/nginx/html
+RUN yarn run build:common
