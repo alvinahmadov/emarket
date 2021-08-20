@@ -65,5 +65,3 @@ COPY --chown=$APP_USER:$APP_USER packages/common                                
 COPY --chown=$APP_USER:$APP_USER packages/common-angular                        ./packages/common-angular
 COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular                      ./packages/shop-web-angular
 COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/nginx/default.conf   /etc/nginx/conf.d/default.conf
-
-RUN yarn run build:common
