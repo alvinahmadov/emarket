@@ -2,7 +2,7 @@ import { Query, Resolver }               from '@nestjs/graphql';
 import { GeoLocationsWarehousesService } from '../../../services/geo-locations';
 import IGeoLocation                      from '@modules/server.common/interfaces/IGeoLocation';
 import Warehouse                         from '@modules/server.common/entities/Warehouse';
-import GeoUtils                          from '@modules/server.common/utilities/geolocation';
+import { GeoUtils }                      from '@modules/server.common/utilities';
 import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
 
 const IN_STORE_DISTANCE = 50;
