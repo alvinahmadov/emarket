@@ -1,4 +1,4 @@
-import { cleanEnv, num, port, str, ValidatorSpec, bool } from 'envalid';
+import { cleanEnv, num, port, url, str, ValidatorSpec, bool } from 'envalid';
 
 export type Environments = 'production' | 'development' | 'test';
 
@@ -14,10 +14,10 @@ export type Env = Readonly<{
 	
 	CONNECTION_TIMEOUT: number;
 	
-	HTTPSPORT: number;
-	HTTPPORT: number;
-	GQLPORT: number;
-	GQLPORT_SUBSCRIPTIONS: number;
+	HTTPS_SERVICES_ENDPOINT: string;
+	HTTP_SERVICES_ENDPOINT: string;
+	GQL_ENDPOINT: string;
+	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
 	HTTPS_CERT_PATH: string;
 	HTTPS_KEY_PATH: string;
@@ -110,10 +110,10 @@ export const env: Env = cleanEnv(
 			
 			CONNECTION_TIMEOUT: num({ default: 30 }),
 			
-			HTTPSPORT: port({ default: 5501 }),
-			HTTPPORT: port({ default: 5500 }),
-			GQLPORT: port({ default: 5555 }),
-			GQLPORT_SUBSCRIPTIONS: port({ default: 5050 }),
+			HTTPS_SERVICES_ENDPOINT: url({ default: 'https://localhost:5501' }),
+			HTTP_SERVICES_ENDPOINT: url({ default: 'http://localhost:5500' }),
+			GQL_ENDPOINT: url({ default: 'http://localhost:5555/graphql' }),
+			GQL_SUBSCRIPTIONS_ENDPOINT: url({ default: 'ws://localhost:5050/subscriptions' }),
 			
 			HTTPS_CERT_PATH: str({ default: 'certificates/https/cert.pem' }),
 			HTTPS_KEY_PATH: str({ default: 'certificates/https/key.pem' }),

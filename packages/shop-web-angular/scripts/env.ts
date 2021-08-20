@@ -7,7 +7,7 @@ import { cleanEnv, num, str, bool } from 'envalid';
 export type Env = Readonly<{
 	production: boolean;
 	
-	SERVICES_ENDPOINT: string;
+	HTTP_SERVICES_ENDPOINT: string;
 	HTTPS_SERVICES_ENDPOINT: string;
 	GQL_ENDPOINT: string;
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
@@ -32,7 +32,6 @@ export type Env = Readonly<{
 	
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
-	HOST: string;
 	PORT: number;
 }>;
 
@@ -41,7 +40,7 @@ export const env: Env = cleanEnv(
 		{
 			production: bool({ default: false }),
 			
-			SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
+			HTTP_SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
 			HTTPS_SERVICES_ENDPOINT: str({ default: 'https://localhost:5501' }),
 			GQL_ENDPOINT: str({ default: 'http://localhost:5555/graphql' }),
 			GQL_SUBSCRIPTIONS_ENDPOINT: str({
@@ -71,8 +70,7 @@ export const env: Env = cleanEnv(
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
 			WEB_MEMORY: num({ default: 4096 }),
-			PORT: num({ default: 3000 }),
-			HOST: str({ default: 'http://localhost' })
+			PORT: num({ default: 3000 })
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );

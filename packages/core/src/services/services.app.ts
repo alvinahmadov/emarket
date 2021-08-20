@@ -493,7 +493,7 @@ export class ServicesApp
 		this.httpServer.setTimeout(timeout);
 		
 		const [httpsHost, httpsPort] = getHostAndPort(env.HTTPS_SERVICES_ENDPOINT);
-		const [httpHost, httpPort] = getHostAndPort(env.SERVICES_ENDPOINT);
+		const [httpHost, httpPort] = getHostAndPort(env.HTTP_SERVICES_ENDPOINT);
 		
 		this.expressApp.set('httpsHost', httpsHost);
 		this.expressApp.set('httpsPort', httpsPort);
