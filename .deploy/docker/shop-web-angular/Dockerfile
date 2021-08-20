@@ -9,13 +9,9 @@ RUN apk update \
 	&& npm config set python /usr/bin/python \
 	&& npm install yarn -g --force
 
-ENV APP_USER=www-data
+ENV APP_USER=node
 
 ENV APP_HOME=/srv/emarket
-
-RUN set -x ; \
-  addgroup -g 82 -S www-data ; \
-  adduser -u 82 -D -S -G www-data www-data && exit 0 ; exit 1
 
 RUN mkdir $APP_HOME && chown $APP_USER:$APP_USER $APP_HOME
 
