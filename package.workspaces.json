@@ -1,10 +1,15 @@
 {
-  "name": "ever",
+  "name": "emarket",
   "version": "0.1.0",
   "repository": "https://github.com/alvinahmadov/emarket.git",
   "private": true,
   "resolutions": {},
   "workspaces": [
-    "packages/*"
+    "packages/admin-web-angular",
+    "packages/shop-web-angular",
+    "packages/merchant-tablet-ionic",
+    "packages/common",
+    "packages/common-angular",
+    "packages/core"
   ]
 }

@@ -24,10 +24,10 @@ USER $APP_USER
 WORKDIR $APP_HOME
 
 COPY --chown=$APP_USER:$APP_USER package.json yarn.lock lerna.json package.workspaces.json ./
-COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/package.json     ./packages/shop-web-angular/package.json
-COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/nginx            ./packages/shop-web-angular/nginx
-COPY --chown=$APP_USER:$APP_USER packages/common                            ./packages/common
-COPY --chown=$APP_USER:$APP_USER packages/common-angular                    ./packages/common-angular
+COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/package.json ./packages/shop-web-angular/package.json
+COPY --chown=$APP_USER:$APP_USER packages/shop-web-angular/nginx ./packages/shop-web-angular/nginx
+COPY --chown=$APP_USER:$APP_USER packages/common ./packages/common
+COPY --chown=$APP_USER:$APP_USER packages/common-angular ./packages/common-angular
 
 ## Install packages
 RUN yarn install && yarn cache clean
@@ -38,10 +38,10 @@ RUN npm install cross-env -g
 
 ENV APP_HOME=/srv/emarket
 
-RUN mkdir $APP_HOME 								&& chown $APP_USER:$APP_USER $APP_HOME
-RUN mkdir -p $APP_HOME/packages/shop-web-angular 	&& chown $APP_USER:$APP_USER $APP_HOME/packages/shop-web-angular
-RUN mkdir -p $APP_HOME/packages/common 				&& chown $APP_USER:$APP_USER $APP_HOME/packages/common
-RUN mkdir -p $APP_HOME/packages/common-angular 		&& chown $APP_USER:$APP_USER $APP_HOME/packages/common-angular
+RUN mkdir $APP_HOME && chown $APP_USER:$APP_USER $APP_HOME
+RUN mkdir -p $APP_HOME/packages/common && chown $APP_USER:$APP_USER $APP_HOME/packages/common
+RUN mkdir -p $APP_HOME/packages/common-angular && chown $APP_USER:$APP_USER $APP_HOME/packages/common-angular
+RUN mkdir -p $APP_HOME/packages/shop-web-angular && chown $APP_USER:$APP_USER $APP_HOME/packages/shop-web-angular
 
 USER $APP_USER
 

@@ -55,3 +55,36 @@ export function randomCoordinatesNear(
 	
 	return [y0 + y1, x0 + x1];
 }
+
+export function getPort(url: string): number
+{
+	const parts = getUrlChunks(url),
+			port = parseInt(parts[parts.length - 1], 10);
+	if(parts[0] === 'http' && (isNaN(port) || parts.length < 3))
+	{
+		return 80;
+	}
+	if(parts[0] === 'https' && (isNaN(port) || parts.length < 3))
+	{
+		return 443;
+	}
+	if(parts.length === 1 || isNaN(port))
+	{
+		return 80;
+	}
+	return port;
+}
+
+export function getHost(url: string): string
+{
+	const parts: string[] = getUrlChunks(url);
+	const scheme: string = parts[0];
+	const addr: string = parts[1].replace(/\//g, "");
+	return `${scheme}:${addr}`;
+}
+
+function getUrlChunks(url: string): string[]
+{
+	url = url.match(/^(([a-z]+:)?(\/\/)?[^\/]+).*$/)[1] || url;
+	return url.split(':');
+}
