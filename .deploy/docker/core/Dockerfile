@@ -19,9 +19,9 @@ USER $APP_USER
 
 WORKDIR $APP_HOME
 
-COPY --chown=$APP_USER:$APP_USER package.json yarn.lock lerna.json package.workspaces.json ./
-COPY --chown=$APP_USER:$APP_USER packages/core/package.json ./packages/core/package.json
 COPY --chown=$APP_USER:$APP_USER .snyk ./.snyk
+COPY --chown=$APP_USER:$APP_USER package.json yarn.lock lerna.json tsconfig.base.json package.workspaces.json ./
+COPY --chown=$APP_USER:$APP_USER packages/core/package.json ./packages/core/package.json
 COPY --chown=$APP_USER:$APP_USER packages/core/.snyk ./packages/core/.snyk
 COPY --chown=$APP_USER:$APP_USER packages/core/nginx ./packages/core/nginx
 COPY --chown=$APP_USER:$APP_USER packages/common ./packages/common
@@ -38,7 +38,7 @@ RUN npm install cross-env -g \
 
 ENV APP_USER=node
 
-ENV APP_HOME=/home/emarket
+ENV APP_HOME=/srv/emarket
 
 RUN mkdir $APP_HOME && chown $APP_USER:$APP_USER $APP_HOME
 RUN mkdir -p $APP_HOME/packages/common && chown $APP_USER:$APP_USER $APP_HOME/packages/common
