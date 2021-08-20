@@ -57,7 +57,3 @@ COPY packages/common-angular                        ./packages/common-angular
 COPY packages/admin-web-angular                     ./packages/admin-web-angular
 COPY packages/admin-web-angular/nginx/default.conf  /etc/nginx/conf.d/default.conf
 
-## Replace default server files
-RUN rm -rf /usr/share/nginx/html
-RUN yarn run build:common && yarn --cwd ./packages/admin-web-angular run build:prod
-COPY ./packages/admin-web-angular/www /usr/share/nginx/html

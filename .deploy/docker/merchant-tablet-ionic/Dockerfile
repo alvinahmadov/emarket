@@ -56,8 +56,3 @@ COPY packages/common                                    ./packages/common
 COPY packages/common-angular                            ./packages/common-angular
 COPY packages/merchant-tablet-ionic                     ./packages/merchant-tablet-ionic
 COPY packages/merchant-tablet-ionic/nginx/default.conf  /etc/nginx/conf.d/default.conf
-
-## Replace default server files
-RUN rm -rf /usr/share/nginx/html
-RUN yarn run build:common && yarn --cwd ./packages/merchant-tablet-ionic run build:prod
-COPY ./packages/merchant-tablet-ionic/www /usr/share/nginx/html

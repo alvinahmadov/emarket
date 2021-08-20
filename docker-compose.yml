@@ -14,46 +14,46 @@ services:
         command: mongod --logpath=/dev/null # --quiet
         networks:
             - overlay
-    
-    #    carrier-mobile:
-    #        container_name: carrier-mobile
-    #        image: emarket-carrier-mobile:latest
-    #        command: yarn run:carrier
-    #        build:
-    #            context: .
-    #            dockerfile: .deploy/docker/carrier-mobile-ionic/Dockerfile
-    #        environment:
-    #            NODE_ENV: production
-    #        restart: on-failure
-    #        depends_on:
-    #            - core
-    #        ports:
-    #            - "4203:4200"
-    #            - "4204:4203"
-    #        networks:
-    #            - overlay
-    
-    #    shop-mobile:
-    #        container_name: shop-mobile
-    #        image: emarket-shop-mobile:latest
-    #        command: yarn run:shopmobile
-    #        build:
-    #            context: .
-    #            dockerfile: .deploy/docker/shop-mobile-ionic/Dockerfile
-    #        environment:
-    #            NODE_ENV: production
-    #        restart: on-failure
-    #        depends_on:
-    #            - core
-    #        ports:
-    #            - "4201:4201"
-    #        networks:
-    #            - overlay
-    
+
+    carrier-mobile:
+        container_name: carrier-mobile
+        image: emarket-carrier-mobile:latest
+        command: yarn build:common && yarn run:carrier
+        build:
+            context: .
+            dockerfile: .deploy/docker/carrier-mobile-ionic/Dockerfile
+        environment:
+            NODE_ENV: production
+        restart: on-failure
+        depends_on:
+            - core
+        ports:
+            - "4203:4200"
+            - "4204:4203"
+        networks:
+            - overlay
+
+    shop-mobile:
+        container_name: shop-mobile
+        image: emarket-shop-mobile:latest
+        command: yarn build:common && yarn run:shopmobile
+        build:
+            context: .
+            dockerfile: .deploy/docker/shop-mobile-ionic/Dockerfile
+        environment:
+            NODE_ENV: production
+        restart: on-failure
+        depends_on:
+            - core
+        ports:
+            - "4201:4201"
+        networks:
+            - overlay
+
     merchant-mobile:
         container_name: merchant-mobile
         image: emarket-merchant-mobile:latest
-        command: yarn run:merchant
+        command: yarn build:common && yarn run:merchant
         build:
             context: .
             dockerfile: .deploy/docker/merchant-tablet-ionic/Dockerfile
@@ -70,7 +70,7 @@ services:
     admin-web:
         container_name: admin-web
         image: emarket-admin-web:latest
-        command: yarn run:admin
+        command: yarn build:common && yarn run:admin
         build:
             context: .
             dockerfile: .deploy/docker/admin-web-angular/Dockerfile
@@ -87,7 +87,7 @@ services:
     shop-web:
         container_name: shop-web
         image: emarket-shop-web:latest
-        command: yarn run:shopweb
+        command: yarn build:common && run:shopweb
         build:
             context: .
             dockerfile: .deploy/docker/shop-web-angular/Dockerfile
@@ -120,9 +120,9 @@ services:
         links:
             - mongo
         volumes:
-            - .:/home/emarket
-            - root_node_modules:/home/emarket/node_modules
-            - core_node_modules:/home/emarket/packages/core/node_modules
+            - .:/srv/emarket
+            - root_node_modules:/srv/emarket/node_modules
+            - core_node_modules:/srv/emarket/packages/core/node_modules
         ports:
             - "5500:5500"
             - "5501:5501"
