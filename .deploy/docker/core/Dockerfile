@@ -36,6 +36,8 @@ RUN npm install cross-env -g \
     && npm install pm2 -g --unsafe-perm \
     && chmod +x /wait
 
+ENV APP_USER=node
+
 ENV APP_HOME=/home/emarket
 
 RUN mkdir $APP_HOME && chown $APP_USER:$APP_USER $APP_HOME

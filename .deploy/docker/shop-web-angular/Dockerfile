@@ -32,6 +32,8 @@ FROM node:lts-alpine3.14 AS production
 
 RUN npm install cross-env -g
 
+ENV APP_USER=node
+
 ENV APP_HOME=/srv/emarket
 
 RUN mkdir $APP_HOME && chown $APP_USER:$APP_USER $APP_HOME
