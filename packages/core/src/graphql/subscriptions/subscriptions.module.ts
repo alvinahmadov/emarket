@@ -8,9 +8,9 @@ import { SubscriptionsService }        from './subscriptions.service';
         })
 export class SubscriptionsModule
 {
-	static forRoot(port: number): DynamicModule
+	static forRoot(port: number, host: string): DynamicModule
 	{
-		const providers = createSubscriptionProviders(port);
+		const providers = createSubscriptionProviders(port, host);
 		return {
 			module: SubscriptionsModule,
 			providers: [...providers],

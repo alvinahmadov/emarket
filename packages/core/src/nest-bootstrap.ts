@@ -4,6 +4,7 @@ import { INestApplication }               from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ApplicationModule }              from './app.module';
 import { env }                            from './env';
+import { getHostAndPort }                 from './utils';
 import { createLogger }                   from './helpers/Log';
 import { NestJSLogger }                   from './helpers/NestJSLogger';
 
@@ -13,7 +14,7 @@ declare const module: any;
 
 export async function bootstrapNest(): Promise<void>
 {
-	const port: number = env.GQLPORT;
+	const [host, port] = getHostAndPort(env.GQL_ENDPOINT);
 	const mode = env.isProd
 	             ? 'production'
 	             : 'development';
@@ -22,7 +23,13 @@ export async function bootstrapNest(): Promise<void>
 		logger: new NestJSLogger()
 	});
 	
-	app.enableCors();
+	const corsOptions = {
+		origin: '*',
+		credentials: true,
+		optionsSuccessStatus: 200
+	}
+	
+	app.enableCors(corsOptions);
 	const options = new DocumentBuilder()
 			.setTitle('REST API')
 			.setVersion('1.0')
@@ -33,7 +40,7 @@ export async function bootstrapNest(): Promise<void>
 	
 	SwaggerModule.setup('api', app, document);
 	
-	await app.listen(port + '');
+	await app.listen(port, host);
 	
 	if(module.hot)
 	{
@@ -42,7 +49,7 @@ export async function bootstrapNest(): Promise<void>
 	}
 	
 	log.info("Starting server in '%s' mode", mode);
-	log.info(`Swagger UI available at http://localhost:${port}/api`);
-	log.info(`GraphQL Playground available at http://localhost:${port}/graphql`);
-	log.info(`GraphQL Subscriptions available at ws://localhost:${port}/subscriptions`);
+	log.info(`Swagger UI available at ${host}:${port}/api`);
+	log.info(`GraphQL Playground available at ${host}:${port}/graphql`);
+	log.info(`GraphQL Subscriptions available at ${host.replace("http", "ws")}:${port}/subscriptions`);
 }

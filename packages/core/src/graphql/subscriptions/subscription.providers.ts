@@ -2,38 +2,46 @@ import { createServer } from 'http';
 
 import { SUBSCRIPTION_SERVER } from './subscription.constants';
 
-export const createSubscriptionProviders = (port: number = 5050) => [
-	{
-		provide: SUBSCRIPTION_SERVER,
-		
-		useFactory: () =>
-		{
-			const server = createServer();
-			
-			const closeServer = () =>
+export const createSubscriptionProviders = (
+		port?: number,
+		host?: string
+) =>
+		[
 			{
-				try
+				provide: SUBSCRIPTION_SERVER,
+				
+				useFactory: () =>
 				{
-					if(server != null)
+					const server = createServer();
+					
+					const closeServer = () =>
 					{
-						server.close(() =>
-						             {
-							             process.exit(0);
-						             });
-					}
-				} catch(err)
-				{
-					process.exit(0);
+						try
+						{
+							if(server != null)
+							{
+								server.close(() =>
+								             {
+									             process.exit(0);
+								             });
+							}
+						} catch(err)
+						{
+							process.exit(0);
+						}
+					};
+					
+					process
+							.on('SIGINT', () => closeServer())
+							.on('SIGTERM', () => closeServer());
+					
+					return new Promise((resolve) =>
+							                   server.listen(
+									                   port ?? 5050,
+									                   host ?? "http://localhost",
+									                   () => resolve(server)
+							                   )
+					);
 				}
-			};
-			
-			process
-					.on('SIGINT', () => closeServer())
-					.on('SIGTERM', () => closeServer());
-			
-			return new Promise((resolve) =>
-					                   server.listen(port, () => resolve(server))
-			);
-		}
-	}
-];
+			}
+		];

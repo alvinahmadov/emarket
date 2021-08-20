@@ -45,6 +45,7 @@ import { ServicesApp }                        from './services/services.app';
 import { CurrencyModule }                     from './graphql/currency/currency.module';
 import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
 import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
+import { getHost, getPort }                   from './utils';
 
 const gqlEndpoint = env.GQL_ENDPOINT;
 const subscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT;
@@ -61,6 +62,8 @@ export const CommandHandlers = [GetAboutUsHandler];
 export const EventHandlers = [];
 
 const entities = ServicesApp.getEntities();
+
+const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 
 @Module({
 	        controllers: [TestController],
@@ -87,7 +90,10 @@ const entities = ServicesApp.getEntities();
 		        // repository). Thanks to that we can inject the XXXXRepository to the NestJS using the
 		        // @InjectRepository() decorator NOTE: this could be used inside NestJS only, not inside our services
 		        TypeOrmModule.forFeature(entities),
-		        SubscriptionsModule.forRoot(env.GQLPORT_SUBSCRIPTIONS),
+		        SubscriptionsModule.forRoot(
+				        getPort(gqlSubscriptionsEndpoint),
+				        getHost(gqlSubscriptionsEndpoint)
+		        ),
 		        GraphQLModule.forRoot({
 			                              typePaths: ['./**/*.graphql'],
 			                              installSubscriptionHandlers: true,

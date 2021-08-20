@@ -56,31 +56,39 @@ export function randomCoordinatesNear(
 	return [y0 + y1, x0 + x1];
 }
 
+export function getHost(url: string): string
+{
+	return getHostAndPort(url)[0];
+}
+
 export function getPort(url: string): number
 {
-	const parts = getUrlChunks(url),
-			port = parseInt(parts[parts.length - 1], 10);
-	if(parts[0] === 'http' && (isNaN(port) || parts.length < 3))
+	return getHostAndPort(url)[1]
+}
+
+export function getHostAndPort(url: string): [string, number]
+{
+	const parts = getUrlChunks(url);
+	
+	const scheme: string = parts[0];
+	const addr: string = parts[1];
+	let host: string = `${scheme}:${addr}`;
+	let port: number = parseInt(parts[parts.length - 1], 10);
+	
+	if(scheme === 'http' && (isNaN(port) || parts.length < 3))
 	{
-		return 80;
+		port = 80;
 	}
-	if(parts[0] === 'https' && (isNaN(port) || parts.length < 3))
+	if(scheme === 'https' && (isNaN(port) || parts.length < 3))
 	{
-		return 443;
+		port = 443;
 	}
 	if(parts.length === 1 || isNaN(port))
 	{
-		return 80;
+		host = `${scheme}://localhost`
+		port = 80;
 	}
-	return port;
-}
-
-export function getHost(url: string): string
-{
-	const parts: string[] = getUrlChunks(url);
-	const scheme: string = parts[0];
-	const addr: string = parts[1].replace(/\//g, "");
-	return `${scheme}:${addr}`;
+	return [host, port];
 }
 
 function getUrlChunks(url: string): string[]

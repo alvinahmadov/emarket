@@ -35,15 +35,16 @@ import CommonUtils                         from '@modules/server.common/utilitie
 import {
 	FakeUsersService,
 	FakeWarehousesService
-}                                          from './fake-data';
-import IService, { ServiceSymbol }         from './IService';
-import { AdminsService }                   from './admins';
-import { UsersAuthService, UsersService }  from './users';
-import { WarehousesAuthService }           from './warehouses';
-import { SocialStrategiesService }         from './users';
-import { createLogger }                    from '../helpers/Log';
-import { ConfigService }                   from '../config/config.service';
-import { env }                             from '../env';
+}                                         from './fake-data';
+import IService, { ServiceSymbol }        from './IService';
+import { AdminsService }                  from './admins';
+import { UsersAuthService, UsersService } from './users';
+import { WarehousesAuthService }          from './warehouses';
+import { SocialStrategiesService }        from './users';
+import { createLogger }                   from '../helpers/Log';
+import { ConfigService }                  from '../config/config.service';
+import { getHostAndPort }                 from '../utils';
+import { env }                            from '../env';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -491,8 +492,14 @@ export class ServicesApp
 		
 		this.httpServer.setTimeout(timeout);
 		
-		this.expressApp.set('httpsPort', env.HTTPSPORT);
-		this.expressApp.set('httpPort', env.HTTPPORT);
+		const [httpsHost, httpsPort] = getHostAndPort(env.HTTPS_SERVICES_ENDPOINT);
+		const [httpHost, httpPort] = getHostAndPort(env.SERVICES_ENDPOINT);
+		
+		this.expressApp.set('httpsHost', httpsHost);
+		this.expressApp.set('httpsPort', httpsPort);
+		this.expressApp.set('httpHost', httpHost);
+		this.expressApp.set('httpPort', httpPort);
+		
 		this.expressApp.set('environment', env.NODE_ENV);
 		
 		// CORS configuration
@@ -575,8 +582,8 @@ export class ServicesApp
 		this._setupAuthRoutes();
 		this._setupStaticRoutes();
 		
-		const httpsPort = this.expressApp.get('httpsPort');
-		const httpPort = this.expressApp.get('httpPort');
+		const httpsUrl = `${httpsHost}:${httpsPort}`;
+		const httpUrl = `${httpHost}:${httpPort}`;
 		
 		const conf = require('dotenv').config();
 		
@@ -584,8 +591,8 @@ export class ServicesApp
 		
 		this.log.info(
 				{
-					httpsPort,
-					httpPort,
+					httpsUrl,
+					httpUrl,
 					environment,
 					dotenv: conf
 				},
@@ -595,10 +602,13 @@ export class ServicesApp
 		if(httpsPort && httpsPort > 0 && this.httpsServer)
 		{
 			// app listen on https
-			this.httpsServer.listen(httpsPort, () =>
+			this.httpsServer.listen(httpsPort, httpsHost, () =>
 			{
 				this.log.info(
-						{ port: httpsPort },
+						{
+							host: httpsHost,
+							port: httpsPort
+						},
 						'Express https server listening'
 				);
 				console.log(
@@ -616,10 +626,13 @@ export class ServicesApp
 		if(httpPort && httpPort > 0)
 		{
 			// app listen on http
-			this.httpServer.listen(httpPort, () =>
+			this.httpServer.listen(httpPort, httpHost, () =>
 			{
 				this.log.info(
-						{ port: httpPort },
+						{
+							host: httpHost,
+							port: httpPort
+						},
 						'Express http server listening'
 				);
 				console.log(
