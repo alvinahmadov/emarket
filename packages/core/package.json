@@ -16,7 +16,7 @@
 		"start:prod": "yarn run build:prod && yarn run prod",
 		"build": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 rimraf build && tsc -p tsconfig.build.json && rimraf dist && yarn webpack",
 		"build:dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 rimraf build && tsc -p tsconfig.build.json && rimraf dist && yarn webpack",
-		"build:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 rimraf build dist && tsc -p tsconfig.build.json && yarn webpack:prod",
+		"build:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 rimraf build && tsc -p tsconfig.build.json && rimraf dist && yarn webpack:prod",
 		"dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 yarn tsc && node ./build/main.js",
 		"test": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 jest",
 		"prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 node ./build/src/pm2bootstrap.js",
