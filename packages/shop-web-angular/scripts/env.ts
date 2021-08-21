@@ -32,6 +32,8 @@ export type Env = Readonly<{
 	
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
+	
+	HOST: string;
 	PORT: number;
 }>;
 
@@ -54,8 +56,8 @@ export const env: Env = cleanEnv(
 			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
 			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			
-			AUTH_LOGO: str({ default: 'assets/img/ever-logo.svg' }),
-			NO_INTERNET_LOGO: str({ default: 'assets/img/ever-logo.svg' }),
+			AUTH_LOGO: str({ default: 'assets/img/logo.svg' }),
+			NO_INTERNET_LOGO: str({ default: 'assets/img/logo.svg' }),
 			
 			DELIVERY_TIME_MIN: num({ default: 30 }),
 			DELIVERY_TIME_MAX: num({ default: 60 }),
@@ -70,6 +72,8 @@ export const env: Env = cleanEnv(
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
 			WEB_MEMORY: num({ default: 4096 }),
+			
+			HOST: str({ default: 'localhost' }),
 			PORT: num({ default: 3000 })
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
