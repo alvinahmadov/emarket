@@ -124,9 +124,9 @@ export class ServicesApp
 		const conn = await createConnection({
 			                                    name: 'typeorm',
 			                                    type: 'mongodb',
-			                                    url: env.DB_URI,
 			                                    username: env.DB_USER,
 			                                    password: env.DB_PWD,
+			                                    host: env.DB_HOST,
 			                                    port: env.DB_PORT,
 			                                    entities: entities,
 			                                    synchronize: true,
@@ -154,19 +154,22 @@ export class ServicesApp
 	{
 		try
 		{
+			const dbUri = `mongodb://${env.DB_USER}:${env.DB_PWD}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}`
+			
 			const connectionOptions: mongoose.ConnectionOptions = {
+				dbName: env.DB_NAME,
+				user: env.DB_USER,
+				pass: env.DB_PWD,
 				useCreateIndex: true,
 				useNewUrlParser: true,
-				// autoReconnect: true,
 				useFindAndModify: false,
-				// reconnectTries: Number.MAX_VALUE,
 				poolSize: env.DB_POOL_SIZE,
 				connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
 				useUnifiedTopology: true
 			};
 			
 			const mongoConnect: mongoose.Mongoose = await mongoose.connect(
-					env.DB_URI,
+					dbUri,
 					connectionOptions
 			);
 			
