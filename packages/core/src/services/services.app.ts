@@ -1,5 +1,3 @@
-// noinspection HttpUrlsUsage
-
 import { inject, injectable, multiInject } from 'inversify';
 import https                               from 'https';
 import http                                from 'http';
@@ -9,28 +7,29 @@ import fs                                  from 'fs';
 import bodyParser                          from 'body-parser';
 import cors                                from 'cors';
 import passport                            from 'passport';
-import methodOverride                      from 'method-override';
-import errorhandler                        from 'errorhandler';
-import socketIO                            from 'socket.io';
-import express                             from 'express';
-import mongoose                            from 'mongoose';
-import morgan                              from 'morgan';
-import Bluebird                            from 'bluebird';
-import exphbs                              from 'express-handlebars';
-import ipstack                             from 'ipstack';
-import requestIp                           from 'request-ip';
-import { createConnection }                from 'typeorm';
-import { IRoutersManager }                 from '@pyro/io';
-import { getModel }                        from '@pyro/db-server';
-import Admin                               from '@modules/server.common/entities/Admin';
-import Device                              from '@modules/server.common/entities/Device';
-import Carrier                             from '@modules/server.common/entities/Carrier';
-import Invite                              from '@modules/server.common/entities/Invite';
-import InviteRequest                       from '@modules/server.common/entities/InviteRequest';
-import Order                               from '@modules/server.common/entities/Order';
-import Product                             from '@modules/server.common/entities/Product';
-import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
-import User                                from '@modules/server.common/entities/User';
+import methodOverride             from 'method-override';
+import errorhandler               from 'errorhandler';
+import socketIO                   from 'socket.io';
+import express                    from 'express';
+import mongoose                   from 'mongoose';
+import morgan                     from 'morgan';
+import Bluebird                   from 'bluebird';
+import exphbs                     from 'express-handlebars';
+import ipstack                    from 'ipstack';
+import requestIp                  from 'request-ip';
+import { createConnection }       from 'typeorm';
+import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOptions";
+import { IRoutersManager }        from '@pyro/io';
+import { getModel }               from '@pyro/db-server';
+import Admin                      from '@modules/server.common/entities/Admin';
+import Device                     from '@modules/server.common/entities/Device';
+import Carrier                    from '@modules/server.common/entities/Carrier';
+import Invite                     from '@modules/server.common/entities/Invite';
+import InviteRequest              from '@modules/server.common/entities/InviteRequest';
+import Order                      from '@modules/server.common/entities/Order';
+import Product                    from '@modules/server.common/entities/Product';
+import ProductsCategory           from '@modules/server.common/entities/ProductsCategory';
+import User                       from '@modules/server.common/entities/User';
 import Warehouse                           from '@modules/server.common/entities/Warehouse';
 import Promotion                           from '@modules/server.common/entities/Promotion';
 import CommonUtils                         from '@modules/server.common/utilities/common';
@@ -121,21 +120,31 @@ export class ServicesApp
 		// list of entities for which Repositories will be greated in TypeORM
 		const entities = ServicesApp.getEntities();
 		
-		const conn = await createConnection({
-			                                    name: 'typeorm',
-			                                    type: 'mongodb',
-			                                    username: env.DB_USER,
-			                                    password: env.DB_PWD,
-			                                    host: env.DB_HOST,
-			                                    port: env.DB_PORT,
-			                                    entities: entities,
-			                                    synchronize: true,
-			                                    useNewUrlParser: true,
-			                                    poolSize: ServicesApp._poolSize,
-			                                    connectTimeoutMS: ServicesApp._connectTimeoutMS,
-			                                    logging: true,
-			                                    useUnifiedTopology: true
-		                                    });
+		let dbPort: string = env.DB_PORT > 0 ? `:${env.DB_PORT}` : "";
+		let dbAuth: string = "";
+		
+		if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
+		{
+			dbAuth = `${env.DB_USER}:${env.DB_PWD}@`;
+		}
+		
+		const dbUrl: string = `mongodb://${dbAuth}${env.DB_HOST}${dbPort}/${env.DB_NAME}`
+		
+		let connectionOptions: MongoConnectionOptions = {
+			name: 'typeorm',
+			type: 'mongodb',
+			url: dbUrl,
+			host: env.DB_HOST,
+			entities: entities,
+			synchronize: true,
+			useNewUrlParser: true,
+			poolSize: ServicesApp._poolSize,
+			connectTimeoutMS: ServicesApp._connectTimeoutMS,
+			logging: true,
+			useUnifiedTopology: true
+		}
+		
+		const conn = await createConnection(connectionOptions);
 		
 		typeORMLog.info(
 				`TypeORM DB connection created. DB connected: ${conn.isConnected}`
