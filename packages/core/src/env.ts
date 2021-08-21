@@ -24,8 +24,6 @@ export type Env = Readonly<{
 	
 	LOGS_PATH: string;
 	
-	DB_URI: string;
-	DB_TESTING_URI: string;
 	DB_USER: string,
 	DB_PWD: string,
 	DB_NAME: string,
@@ -124,8 +122,6 @@ export const env: Env = cleanEnv(
 			
 			LOGS_PATH: str({ default: './tmp/logs' }),
 			
-			DB_URI: str({ default: 'mongodb://localhost/emarketdb' }),
-			DB_TESTING_URI: str({ default: 'mongodb://localhost/emarket_testing' }),
 			DB_NAME: str({ default: 'emarketdb' }),
 			DB_HOST: host({ default: 'localhost' }),
 			DB_USER: str({ default: 'emarket' }),

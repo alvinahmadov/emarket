@@ -152,30 +152,29 @@ export class ServicesApp
 	
 	private async _connectDB()
 	{
+		let dbPort: string = env.DB_PORT > 0 ? `:${env.DB_PORT}` : "";
+		let dbAuth: string = "";
+		
+		let connectionOptions: mongoose.ConnectionOptions = {
+			dbName: env.DB_NAME,
+			useCreateIndex: true,
+			useNewUrlParser: true,
+			useFindAndModify: false,
+			poolSize: env.DB_POOL_SIZE,
+			connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
+			useUnifiedTopology: true
+		};
+		
+		if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
+		{
+			dbAuth = `${env.DB_USER}:${env.DB_PWD}@`;
+			connectionOptions.user = env.DB_USER;
+			connectionOptions.pass = env.DB_PWD;
+		}
+		let dbUri: string = `mongodb://${dbAuth}${env.DB_HOST}${dbPort}/${env.DB_NAME}`
+		
 		try
 		{
-			let dbUri: string = env.DB_URI;
-			let connectionOptions: mongoose.ConnectionOptions = {
-				dbName: env.DB_NAME,
-				useCreateIndex: true,
-				useNewUrlParser: true,
-				useFindAndModify: false,
-				poolSize: env.DB_POOL_SIZE,
-				connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
-				useUnifiedTopology: true
-			};
-			
-			if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
-			{
-				const authPart = `${env.DB_USER}:${env.DB_PWD}`;
-				dbUri = env.DB_PORT > 0
-				        ? `mongodb://${authPart}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}`
-				        : `mongodb://${authPart}@${env.DB_HOST}/${env.DB_NAME}`;
-				
-				connectionOptions.user = env.DB_USER;
-				connectionOptions.pass = env.DB_PWD;
-			}
-			
 			const mongoConnect: mongoose.Mongoose = await mongoose.connect(
 					dbUri,
 					connectionOptions
