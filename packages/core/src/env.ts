@@ -1,4 +1,4 @@
-import { cleanEnv, num, url, host, port, str, ValidatorSpec, bool } from 'envalid';
+import { cleanEnv, num, url, str, ValidatorSpec, bool } from 'envalid';
 
 export type Environments = 'production' | 'development' | 'test';
 
@@ -119,7 +119,6 @@ export const env: Env = cleanEnv(
 			LOGS_PATH: str({ default: './tmp/logs' }),
 			
 			DB_URI: str({ default: 'http://localhost/emarketdb' }),
-			DB_PORT: port({ default: 27017 }),
 			DB_POOL_SIZE: num({ default: 50 }),
 			DB_CONNECT_TIMEOUT: num({ default: 40000 }),
 			
