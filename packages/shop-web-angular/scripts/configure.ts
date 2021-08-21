@@ -66,7 +66,7 @@ export const environment: Environment = {
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}',
 
-  HOST: ${env.HOST},
+  HOST: '${env.HOST}',
   PORT: ${env.PORT},
   ENV_PROVIDERS: [],
 
@@ -128,7 +128,7 @@ export const environment: Environment = {
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}',
 
-  HOST: ${env.HOST},
+  HOST: '${env.HOST}',
   PORT: ${env.PORT},
   ENV_PROVIDERS: [],
 
