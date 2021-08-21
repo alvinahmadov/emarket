@@ -9,7 +9,8 @@ const PUBLIC_KEY = process.env.KEYMETRICS_PUBLIC_KEY;
 const appName = process.env.PM2_APP_NAME || 'ShopWeb';
 const instances = env.WEB_CONCURRENCY;
 const maxMemory = env.WEB_MEMORY;
-const port = env.PORT;
+const host = env.HOST;
+const port = env.PORT.toString();
 
 const startOptions: StartOptions = {
 	script: './dist/out-tsc/packages/shop-web-angular/app.js',
@@ -20,7 +21,9 @@ const startOptions: StartOptions = {
 	env: {
 		// If needed declare some environment variables
 		NODE_ENV: 'production',
-		PORT: `${port}`,
+		HOST: host,
+		PORT: port,
+		KEYMETRICS_MACHINE_NAME: MACHINE_NAME,
 		KEYMETRICS_PUBLIC: PUBLIC_KEY,
 		KEYMETRICS_SECRET: PRIVATE_KEY,
 	},
