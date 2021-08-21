@@ -71,21 +71,20 @@ export function getHostAndPort(url: string): [string, number]
 	const parts = getUrlChunks(url);
 	
 	const scheme: string = parts[0];
-	const addr: string = parts[1];
-	let host: string = `${scheme}:${addr}`;
+	let host: string = parts[1].replace(/\//g, '');
 	let port: number = parseInt(parts[parts.length - 1], 10);
 	
-	if(scheme === 'http' && (isNaN(port) || parts.length < 3))
+	if(scheme === "http" && (isNaN(port) || parts.length < 3))
 	{
 		port = 80;
 	}
-	if(scheme === 'https' && (isNaN(port) || parts.length < 3))
+	if(scheme === "https" && (isNaN(port) || parts.length < 3))
 	{
 		port = 443;
 	}
 	if(parts.length === 1 || isNaN(port))
 	{
-		host = `${scheme}://localhost`
+		host = "localhost"
 		port = 80;
 	}
 	return [host, port];
