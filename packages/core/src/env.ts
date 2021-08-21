@@ -1,4 +1,4 @@
-import { cleanEnv, num, url, host, port, str, ValidatorSpec, bool } from 'envalid';
+import { cleanEnv, num, url, str, ValidatorSpec, bool } from 'envalid';
 
 export type Environments = 'production' | 'development' | 'test';
 
@@ -26,9 +26,10 @@ export type Env = Readonly<{
 	
 	DB_USER: string,
 	DB_PWD: string,
-	DB_NAME: string,
-	DB_HOST: string,
+	DB_TYPE: string;
 	DB_PORT: number,
+	DB_URI: string;
+	DB_TESTING_URI: string;
 	DB_POOL_SIZE: number;
 	DB_CONNECT_TIMEOUT: number;
 	
@@ -122,11 +123,12 @@ export const env: Env = cleanEnv(
 			
 			LOGS_PATH: str({ default: './tmp/logs' }),
 			
-			DB_NAME: str({ default: 'emarketdb' }),
-			DB_HOST: host({ default: 'localhost' }),
-			DB_USER: str({ default: 'emarket' }),
-			DB_PWD: str({ default: '' }),
-			DB_PORT: port({ default: 27017 }),
+			DB_USER: str({ default: 'mongo' }),
+			DB_PWD: str(),
+			DB_TYPE: str({ default: 'mongodb' }),
+			DB_PORT: num({ default: 27017 }),
+			DB_URI: str({ default: 'mongodb://localhost/emarket_development' }),
+			DB_TESTING_URI: str({ default: 'mongodb://localhost/emarket_testing' }),
 			DB_POOL_SIZE: num({ default: 50 }),
 			DB_CONNECT_TIMEOUT: num({ default: 40000 }),
 			
