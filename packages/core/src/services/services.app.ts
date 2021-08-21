@@ -1,3 +1,5 @@
+// noinspection HttpUrlsUsage
+
 import { inject, injectable, multiInject } from 'inversify';
 import https                               from 'https';
 import http                                from 'http';
@@ -35,16 +37,16 @@ import CommonUtils                         from '@modules/server.common/utilitie
 import {
 	FakeUsersService,
 	FakeWarehousesService
-}                                         from './fake-data';
-import IService, { ServiceSymbol }        from './IService';
-import { AdminsService }                  from './admins';
-import { UsersAuthService, UsersService } from './users';
-import { WarehousesAuthService }          from './warehouses';
-import { SocialStrategiesService }        from './users';
-import { createLogger }                   from '../helpers/Log';
-import { ConfigService }                  from '../config/config.service';
-import { getHostAndPort }                 from '../utils';
-import { env }                            from '../env';
+}                                          from './fake-data';
+import IService, { ServiceSymbol }         from './IService';
+import { AdminsService }                   from './admins';
+import { UsersAuthService, UsersService }  from './users';
+import { WarehousesAuthService }           from './warehouses';
+import { SocialStrategiesService }         from './users';
+import { createLogger }                    from '../helpers/Log';
+import { ConfigService }                   from '../config/config.service';
+import { getHostAndPort }                  from '../utils';
+import { env }                             from '../env';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -612,7 +614,7 @@ export class ServicesApp
 						'Express https server listening'
 				);
 				console.log(
-						`Express https server listening on port ${httpsPort}`
+						`Express https server listening on https://${httpsHost}:${httpsPort}`
 				);
 			});
 		}
@@ -636,7 +638,7 @@ export class ServicesApp
 						'Express http server listening'
 				);
 				console.log(
-						`Express http server listening on port ${httpPort}`
+						`Express http server listening on port http://${httpHost}:${httpPort}`
 				);
 			});
 		}
