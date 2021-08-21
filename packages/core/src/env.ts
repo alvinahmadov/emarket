@@ -126,7 +126,7 @@ export const env: Env = cleanEnv(
 			DB_HOST: host({ default: 'localhost' }),
 			DB_USER: str({ default: 'emarket' }),
 			DB_PWD: str({ default: '' }),
-			DB_PORT: port({ default: 0 }),
+			DB_PORT: port({ default: 27017 }),
 			DB_POOL_SIZE: num({ default: 50 }),
 			DB_CONNECT_TIMEOUT: num({ default: 40000 }),
 			
