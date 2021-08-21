@@ -12,33 +12,31 @@ const MACHINE_NAME = process.env.KEYMETRICS_MACHINE_NAME;
 const PRIVATE_KEY = process.env.KEYMETRICS_SECRET_KEY;
 const PUBLIC_KEY = process.env.KEYMETRICS_PUBLIC_KEY;
 const [HOST, PORT] = getHostAndPort(env.HTTP_SERVICES_ENDPOINT)
-const appName = process.env.PM2_APP_NAME || 'Admin';
+const appName = process.env.PM2_APP_NAME || 'EMarket';
 const isProd = env.isProd;
 const instances = env.WEB_CONCURRENCY;
 const maxMemory = env.WEB_MEMORY;
-
 const processName = 'MarketApi'
-const timeout = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const runningApps = util.promisify(pm2.list.bind(pm2));
+
+const startOptions: StartOptions = {
+	script: './build/src/main.js',
+	name: processName,
+	exec_mode: 'fork',
+	instances: instances,
+	max_memory_restart: maxMemory + 'M',
+	watch: env.isDev,
+	env: {
+		NODE_ENV: isProd ? 'production' : 'development',
+		PORT: PORT.toString() || "5500",
+		HOST: HOST || "http://localhost",
+		KEYMETRICS_MACHINE_NAME: MACHINE_NAME,
+		KEYMETRICS_PUBLIC: PUBLIC_KEY,
+		KEYMETRICS_SECRET: PRIVATE_KEY,
+	},
+};
 
 pm2.connect(() =>
             {
-	            const startOptions: StartOptions = {
-		            script: './build/src/main.js',
-		            name: processName,
-		            exec_mode: 'fork',
-		            instances: instances,
-		            max_memory_restart: maxMemory + 'M',
-		            watch: env.isDev,
-		            env: {
-			            NODE_ENV: isProd ? 'production' : 'development',
-			            PORT: PORT.toString() || "5500",
-			            HOST: HOST || "http://localhost",
-			            KEYMETRICS_PUBLIC: PUBLIC_KEY,
-			            KEYMETRICS_SECRET: PRIVATE_KEY,
-		            },
-	            };
-	
 	            pm2.start(startOptions,
 	                      (err, proc) =>
 	                      {
