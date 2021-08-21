@@ -120,21 +120,12 @@ export class ServicesApp
 		// list of entities for which Repositories will be greated in TypeORM
 		const entities = ServicesApp.getEntities();
 		
-		let dbPort: string = env.DB_PORT > 0 ? `:${env.DB_PORT}` : "";
-		let dbAuth: string = "";
-		
-		if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
-		{
-			dbAuth = `${env.DB_USER}:${env.DB_PWD}@`;
-		}
-		
-		const dbUrl: string = `mongodb://${dbAuth}${env.DB_HOST}${dbPort}/${env.DB_NAME}`
-		
 		let connectionOptions: MongoConnectionOptions = {
 			name: 'typeorm',
 			type: 'mongodb',
-			url: dbUrl,
+			database: env.DB_NAME,
 			host: env.DB_HOST,
+			port: env.DB_PORT,
 			entities: entities,
 			synchronize: true,
 			useNewUrlParser: true,
@@ -170,17 +161,13 @@ export class ServicesApp
 			useNewUrlParser: true,
 			useFindAndModify: false,
 			poolSize: env.DB_POOL_SIZE,
+			user: env.DB_USER,
+			pass: env.DB_PWD,
 			connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
 			useUnifiedTopology: true
 		};
 		
-		if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
-		{
-			dbAuth = `${env.DB_USER}:${env.DB_PWD}@`;
-			connectionOptions.user = env.DB_USER;
-			connectionOptions.pass = env.DB_PWD;
-		}
-		let dbUri: string = `mongodb://${dbAuth}${env.DB_HOST}${dbPort}/${env.DB_NAME}`
+		let dbUri: string = `mongodb://${env.DB_USER}:${env.DB_PWD}@${env.DB_HOST}${dbPort}/${env.DB_NAME}`
 		
 		try
 		{
