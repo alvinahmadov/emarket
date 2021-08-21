@@ -150,11 +150,7 @@ export class ServicesApp
 	
 	private async _connectDB()
 	{
-		let dbPort: string = env.DB_PORT > 0 ? `:${env.DB_PORT}` : "";
-		let dbAuth: string = "";
-		
 		let connectionOptions: mongoose.ConnectionOptions = {
-			dbName: env.DB_NAME,
 			useCreateIndex: true,
 			useNewUrlParser: true,
 			useFindAndModify: false,
@@ -163,12 +159,10 @@ export class ServicesApp
 			useUnifiedTopology: true
 		};
 		
-		let dbUri: string = `mongodb://${env.DB_USER}:${env.DB_PWD}@${env.DB_HOST}${dbPort}/${env.DB_NAME}`
-		
 		try
 		{
 			const mongoConnect: mongoose.Mongoose = await mongoose.connect(
-					dbUri,
+					env.DB_URI,
 					connectionOptions
 			);
 			
