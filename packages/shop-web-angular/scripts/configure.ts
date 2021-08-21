@@ -43,7 +43,7 @@ require('zone.js/dist/long-stack-trace-zone');
 export const environment: Environment = {
   production: ${isProd},
 
-  SERVICES_ENDPOINT: '${env.SERVICES_ENDPOINT}',
+  HTTP_SERVICES_ENDPOINT: '${env.HTTP_SERVICES_ENDPOINT}',
   HTTPS_SERVICES_ENDPOINT: '${env.HTTPS_SERVICES_ENDPOINT}',
   GQL_ENDPOINT: '${env.GQL_ENDPOINT}',
   GQL_SUBSCRIPTIONS_ENDPOINT: '${env.GQL_SUBSCRIPTIONS_ENDPOINT}',
@@ -66,6 +66,7 @@ export const environment: Environment = {
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}',
 
+  HOST: ${env.HOST},
   PORT: ${env.PORT},
   ENV_PROVIDERS: [],
 
@@ -104,7 +105,7 @@ enableProdMode();
 export const environment: Environment = {
   production: ${isProd},
 
-  SERVICES_ENDPOINT: '${env.SERVICES_ENDPOINT}',
+  HTTP_SERVICES_ENDPOINT: '${env.HTTP_SERVICES_ENDPOINT}',
   HTTPS_SERVICES_ENDPOINT: '${env.HTTPS_SERVICES_ENDPOINT}',
   GQL_ENDPOINT: '${env.GQL_ENDPOINT}',
   GQL_SUBSCRIPTIONS_ENDPOINT: '${env.GQL_SUBSCRIPTIONS_ENDPOINT}',
@@ -127,6 +128,7 @@ export const environment: Environment = {
   SETTINGS_APP_TYPE: '${env.SETTINGS_APP_TYPE}',
   SETTINGS_MAINTENANCE_API_URL: '${env.SETTINGS_MAINTENANCE_API_URL}',
 
+  HOST: ${env.HOST},
   PORT: ${env.PORT},
   ENV_PROVIDERS: [],
 
