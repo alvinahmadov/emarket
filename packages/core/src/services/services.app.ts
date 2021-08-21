@@ -1,3 +1,5 @@
+// noinspection HttpUrlsUsage
+
 import { inject, injectable, multiInject } from 'inversify';
 import https                               from 'https';
 import http                                from 'http';
@@ -7,29 +9,28 @@ import fs                                  from 'fs';
 import bodyParser                          from 'body-parser';
 import cors                                from 'cors';
 import passport                            from 'passport';
-import methodOverride             from 'method-override';
-import errorhandler               from 'errorhandler';
-import socketIO                   from 'socket.io';
-import express                    from 'express';
-import mongoose                   from 'mongoose';
-import morgan                     from 'morgan';
-import Bluebird                   from 'bluebird';
-import exphbs                     from 'express-handlebars';
-import ipstack                    from 'ipstack';
-import requestIp                  from 'request-ip';
-import { createConnection }       from 'typeorm';
-import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOptions";
-import { IRoutersManager }        from '@pyro/io';
-import { getModel }               from '@pyro/db-server';
-import Admin                      from '@modules/server.common/entities/Admin';
-import Device                     from '@modules/server.common/entities/Device';
-import Carrier                    from '@modules/server.common/entities/Carrier';
-import Invite                     from '@modules/server.common/entities/Invite';
-import InviteRequest              from '@modules/server.common/entities/InviteRequest';
-import Order                      from '@modules/server.common/entities/Order';
-import Product                    from '@modules/server.common/entities/Product';
-import ProductsCategory           from '@modules/server.common/entities/ProductsCategory';
-import User                       from '@modules/server.common/entities/User';
+import methodOverride                      from 'method-override';
+import errorhandler                        from 'errorhandler';
+import socketIO                            from 'socket.io';
+import express                             from 'express';
+import mongoose                            from 'mongoose';
+import morgan                              from 'morgan';
+import Bluebird                            from 'bluebird';
+import exphbs                              from 'express-handlebars';
+import ipstack                             from 'ipstack';
+import requestIp                           from 'request-ip';
+import { createConnection }                from 'typeorm';
+import { IRoutersManager }                 from '@pyro/io';
+import { getModel }                        from '@pyro/db-server';
+import Admin                               from '@modules/server.common/entities/Admin';
+import Device                              from '@modules/server.common/entities/Device';
+import Carrier                             from '@modules/server.common/entities/Carrier';
+import Invite                              from '@modules/server.common/entities/Invite';
+import InviteRequest                       from '@modules/server.common/entities/InviteRequest';
+import Order                               from '@modules/server.common/entities/Order';
+import Product                             from '@modules/server.common/entities/Product';
+import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
+import User                                from '@modules/server.common/entities/User';
 import Warehouse                           from '@modules/server.common/entities/Warehouse';
 import Promotion                           from '@modules/server.common/entities/Promotion';
 import CommonUtils                         from '@modules/server.common/utilities/common';
@@ -120,22 +121,18 @@ export class ServicesApp
 		// list of entities for which Repositories will be greated in TypeORM
 		const entities = ServicesApp.getEntities();
 		
-		let connectionOptions: MongoConnectionOptions = {
-			name: 'typeorm',
-			type: 'mongodb',
-			database: env.DB_NAME,
-			host: env.DB_HOST,
-			port: env.DB_PORT,
-			entities: entities,
-			synchronize: true,
-			useNewUrlParser: true,
-			poolSize: ServicesApp._poolSize,
-			connectTimeoutMS: ServicesApp._connectTimeoutMS,
-			logging: true,
-			useUnifiedTopology: true
-		}
-		
-		const conn = await createConnection(connectionOptions);
+		const conn = await createConnection({
+			                                    name: 'typeorm',
+			                                    type: 'mongodb',
+			                                    url: env.DB_URI,
+			                                    entities: entities,
+			                                    synchronize: true,
+			                                    useNewUrlParser: true,
+			                                    poolSize: ServicesApp._poolSize,
+			                                    connectTimeoutMS: ServicesApp._connectTimeoutMS,
+			                                    logging: true,
+			                                    useUnifiedTopology: true
+		                                    });
 		
 		typeORMLog.info(
 				`TypeORM DB connection created. DB connected: ${conn.isConnected}`
@@ -152,27 +149,19 @@ export class ServicesApp
 	
 	private async _connectDB()
 	{
-		let dbPort: string = env.DB_PORT > 0 ? `:${env.DB_PORT}` : "";
-		let dbAuth: string = "";
-		
-		let connectionOptions: mongoose.ConnectionOptions = {
-			dbName: env.DB_NAME,
-			useCreateIndex: true,
-			useNewUrlParser: true,
-			useFindAndModify: false,
-			poolSize: env.DB_POOL_SIZE,
-			user: env.DB_USER,
-			pass: env.DB_PWD,
-			connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
-			useUnifiedTopology: true
-		};
-		
-		let dbUri: string = `mongodb://${env.DB_USER}:${env.DB_PWD}@${env.DB_HOST}${dbPort}/${env.DB_NAME}`
-		
 		try
 		{
+			const connectionOptions: mongoose.ConnectionOptions = {
+				useCreateIndex: true,
+				useNewUrlParser: true,
+				useFindAndModify: false,
+				poolSize: env.DB_POOL_SIZE,
+				connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
+				useUnifiedTopology: true
+			};
+			
 			const mongoConnect: mongoose.Mongoose = await mongoose.connect(
-					dbUri,
+					env.DB_URI,
 					connectionOptions
 			);
 			
