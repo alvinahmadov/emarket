@@ -60,6 +60,7 @@ node_modules
 public/js
 iisnode/
 .env
+.env.prod
 
 # Elastic Beanstalk Files
 
