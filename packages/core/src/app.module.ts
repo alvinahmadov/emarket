@@ -79,7 +79,7 @@ const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 		        // configure TypeORM Connection which will be possible to use inside NestJS (e.g. resolvers)
 		        TypeOrmModule.forRoot({
 			                              type: 'mongodb',
-			                              url: _generateDbUrl(),
+			                              url: env.DB_URI,
 			                              entities,
 			                              synchronize: true,
 			                              useNewUrlParser: true,
@@ -227,17 +227,4 @@ export class ApplicationModule implements NestModule, OnModuleInit
 		
 		return null;
 	}
-}
-
-function _generateDbUrl()
-{
-	let dbPort: string = env.DB_PORT > 0 ? `:${env.DB_PORT}` : "";
-	let dbAuth: string = "";
-	
-	if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
-	{
-		dbAuth = `${env.DB_USER}:${env.DB_PWD}@`;
-	}
-	
-	return `mongodb://${dbAuth}${env.DB_HOST}${dbPort}/${env.DB_NAME}`
 }
