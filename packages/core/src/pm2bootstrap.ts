@@ -1,4 +1,3 @@
-import util                  from 'util';
 import pm2, { StartOptions } from 'pm2';
 import { createLogger }      from './helpers/Log';
 import { getHostAndPort }    from './utils';
