@@ -124,13 +124,13 @@ export const env: Env = cleanEnv(
 			
 			LOGS_PATH: str({ default: './tmp/logs' }),
 			
-			DB_URI: str({ default: 'mongodb://localhost/emarket_development' }),
+			DB_URI: str({ default: 'mongodb://localhost/emarketdb' }),
 			DB_TESTING_URI: str({ default: 'mongodb://localhost/emarket_testing' }),
 			DB_NAME: str({ default: 'emarketdb' }),
 			DB_HOST: host({ default: 'localhost' }),
 			DB_USER: str({ default: 'emarket' }),
 			DB_PWD: str({ default: '' }),
-			DB_PORT: port({ default: 27017 }),
+			DB_PORT: port({ default: 0 }),
 			DB_POOL_SIZE: num({ default: 50 }),
 			DB_CONNECT_TIMEOUT: num({ default: 40000 }),
 			

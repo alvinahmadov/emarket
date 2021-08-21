@@ -154,12 +154,9 @@ export class ServicesApp
 	{
 		try
 		{
-			const dbUri = `mongodb://${env.DB_USER}:${env.DB_PWD}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}`
-			
-			const connectionOptions: mongoose.ConnectionOptions = {
+			let dbUri: string = env.DB_URI;
+			let connectionOptions: mongoose.ConnectionOptions = {
 				dbName: env.DB_NAME,
-				user: env.DB_USER,
-				pass: env.DB_PWD,
 				useCreateIndex: true,
 				useNewUrlParser: true,
 				useFindAndModify: false,
@@ -167,6 +164,17 @@ export class ServicesApp
 				connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
 				useUnifiedTopology: true
 			};
+			
+			if(env.DB_USER.length > 0 && env.DB_PWD.length > 0)
+			{
+				const authPart = `${env.DB_USER}:${env.DB_PWD}`;
+				dbUri = env.DB_PORT > 0
+				        ? `mongodb://${authPart}@${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}`
+				        : `mongodb://${authPart}@${env.DB_HOST}/${env.DB_NAME}`;
+				
+				connectionOptions.user = env.DB_USER;
+				connectionOptions.pass = env.DB_PWD;
+			}
 			
 			const mongoConnect: mongoose.Mongoose = await mongoose.connect(
 					dbUri,
