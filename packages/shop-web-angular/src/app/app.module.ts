@@ -78,7 +78,7 @@ export function serverConnectionFactory(
 		store: Store
 )
 {
-	return () => provider.load(environment.SERVICES_ENDPOINT, store);
+	return () => provider.load(environment.HTTP_SERVICES_ENDPOINT, store);
 }
 
 const APP_PROVIDERS = [
@@ -159,7 +159,7 @@ const APP_PROVIDERS = [
 		          MatButtonToggleModule,
 		          IconsModule,
 		          CommonModule.forRoot({
-			                               apiUrl: environment.SERVICES_ENDPOINT,
+			                               apiUrl: environment.HTTP_SERVICES_ENDPOINT,
 		                               }),
 		          LocationPopupModalModule,
 	          ],

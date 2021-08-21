@@ -105,7 +105,7 @@ export class GeoLocationService
 	private getLocationByIP(): Subscribable<Coords | null>
 	{
 		return this.http.get(
-				environment.SERVICES_ENDPOINT + '/getLocationByIP',
+				environment.HTTP_SERVICES_ENDPOINT + '/getLocationByIP',
 				{ headers: this.headers }
 		);
 	}

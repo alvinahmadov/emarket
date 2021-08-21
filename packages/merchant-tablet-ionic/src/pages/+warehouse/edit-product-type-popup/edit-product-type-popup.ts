@@ -1,40 +1,37 @@
 import {
-	Component,
-	ViewChild,
-	ElementRef,
-	OnInit,
-	Input,
 	AfterViewInit,
-}                                                      from '@angular/core';
-import { FileUploader, FileUploaderOptions, FileItem } from 'ng2-file-upload';
-
-import { Camera, CameraOptions }                  from '@ionic-native/camera/ngx';
-import WarehouseProduct                           from '@modules/server.common/entities/WarehouseProduct';
-import {
-	IProductDescription,
-	IProductTitle,
-	IProductImage,
-}                                                 from '@modules/server.common/interfaces/IProduct';
-import { ProductRouter }                          from '@modules/client.common.angular2/routers/product-router.service';
-import Product                                    from '@modules/server.common/entities/Product';
-import { WarehouseProductsRouter }                from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { ProductLocalesService }                  from '@modules/client.common.angular2/locale/product-locales.service';
-import { TranslateService }                       from '@ngx-translate/core';
-import { ILocaleMember }                          from '@modules/server.common/interfaces/ILocale';
-import { environment }                            from '../../../environments/environment';
-import ProductsCategory                           from '@modules/server.common/entities/ProductsCategory';
-import { first }                                  from 'rxjs/operators';
-import { ProductsCategoryService }                from '../../../services/products-category.service';
-import DeliveryType                               from '@modules/server.common/enums/DeliveryType';
-import { ModalController, ActionSheetController } from '@ionic/angular';
-import { ProductImagesPopup }                     from '../product-pictures-popup/product-images-popup.component';
+	Component,
+	ElementRef,
+	Input,
+	OnInit,
+	ViewChild
+}                                                             from '@angular/core';
+import { FileItem, FileUploader, FileUploaderOptions }        from 'ng2-file-upload';
+import { Camera, CameraOptions }                              from '@ionic-native/camera/ngx';
+import WarehouseProduct                                       from '@modules/server.common/entities/WarehouseProduct';
+import { IProductDescription, IProductImage, IProductTitle, } from '@modules/server.common/interfaces/IProduct';
+import { ProductRouter }                                      from '@modules/client.common.angular2/routers/product-router.service';
+import Product                                                from '@modules/server.common/entities/Product';
+import { WarehouseProductsRouter }                            from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { ProductLocalesService }                              from '@modules/client.common.angular2/locale/product-locales.service';
+import { TranslateService }                                   from '@ngx-translate/core';
+import { ILocaleMember }                                      from '@modules/server.common/interfaces/ILocale';
+import { environment }                                        from '../../../environments/environment';
+import ProductsCategory                                       from '@modules/server.common/entities/ProductsCategory';
+import { first }                                              from 'rxjs/operators';
+import { ProductsCategoryService }                            from '../../../services/products-category.service';
+import DeliveryType                                           from '@modules/server.common/enums/DeliveryType';
+import { ActionSheetController, ModalController }             from '@ionic/angular';
+import { ProductImagesPopup }                                 from '../product-pictures-popup/product-images-popup.component';
+import ProductTypePopup                                       from '../../../@shared/common/product-type-popup';
 
 @Component({
 	           selector: 'page-edit-product-type-popup',
 	           templateUrl: 'edit-product-type-popup.html',
 	           styleUrls: ['./edit-product-type-popup.scss'],
            })
-export class EditProductTypePopupPage implements OnInit, AfterViewInit
+export class EditProductTypePopupPage extends ProductTypePopup
+		implements OnInit, AfterViewInit
 {
 	OK: string = 'OK';
 	CANCEL: string = 'CANCEL';
@@ -55,6 +52,8 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 	selectedProductCategories: string[] = [];
 	hasImage: boolean = true;
 	
+	private static cssClass = "mutation-product-images-modal";
+	
 	private lastProductTitle: IProductTitle[];
 	private lastProductDescription: IProductDescription[];
 	private lastProductPrice: number;
@@ -66,7 +65,6 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 	
 	constructor(
 			// public navParams: NavParams,
-			private warehouseProductRouter: WarehouseProductsRouter,
 			private productRouter: ProductRouter,
 			private warehouseProductsRouter: WarehouseProductsRouter,
 			private readonly _productsCategorySrvice: ProductsCategoryService,
@@ -77,6 +75,7 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 			private translate: TranslateService
 	)
 	{
+		super(modalController);
 		const uploaderOptions: FileUploaderOptions = {
 			url: environment.API_FILE_UPLOAD_URL,
 			
@@ -100,20 +99,20 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 		): any =>
 		{
 			// Add Cloudinary's unsigned upload preset to the upload form
-			form.append('upload_preset', 'everbie-products-images');
+			form.append('upload_preset', environment.CLOUDINARY_UNSIGNED_UPLOAD_PRESET);
 			// Add built-in and custom tags for displaying the uploaded photo in the list
-			let tags = 'myphotoalbum';
+			let tags: string = "";
 			if(this.product.title)
 			{
 				form.append('context', `photo=${this.product.title}`);
-				tags = `myphotoalbum,${this.product.title}`;
+				tags += `,${this.product.title}`;
 			}
 			// Upload to a custom folder
 			// Note that by default, when uploading via the API, folders are not automatically created in your Media Library.
 			// In order to automatically create the folders based on the API requests,
 			// please go to your account upload settings and set the 'Auto-create folders' option to enabled.
 			// TODO: use settings from .env file
-			form.append('folder', 'angular_sample');
+			form.append('folder', this.warehouseName);
 			// Add custom tags
 			form.append('tags', tags);
 			// Add file to upload
@@ -226,7 +225,7 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 		
 		this.currentLocale =
 				this.localeTranslateService.takeSelectedLang(this.translLang) ||
-				'en-US';
+				environment.DEFAULT_LANGUAGE;
 		
 		this._setupLocaleServiceValidationState();
 		
@@ -240,14 +239,7 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 				this.product.images
 		);
 		
-		if(currentProductImage)
-		{
-			this.hasImage = true;
-		}
-		else
-		{
-			this.hasImage = false;
-		}
+		this.hasImage = !!currentProductImage;
 		
 		this._setImageHolderBackground(currentProductImage);
 	}
@@ -290,14 +282,11 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 			}
 		}
 		
-		const modal = await this.modalController.create({
-			                                                component: ProductImagesPopup,
-			                                                componentProps: {
-				                                                images,
-			                                                },
-			                                                backdropDismiss: false,
-			                                                cssClass: 'mutation-product-images-modal',
-		                                                });
+		const modal = await this.createModal(
+				images,
+				ProductImagesPopup,
+				EditProductTypePopupPage.cssClass
+		);
 		
 		await modal.present();
 		
@@ -327,7 +316,7 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 			                                     const base64Image = 'data:image/jpeg;base64,' + imageData;
 			                                     const file = await this.urltoFile(
 					                                     base64Image,
-					                                     this.createFileName(),
+					                                     EditProductTypePopupPage.createFileName(),
 					                                     'image/jpeg'
 			                                     );
 			                                     const fileItem = new FileItem(this.uploader, file, {});
@@ -537,16 +526,15 @@ export class EditProductTypePopupPage implements OnInit, AfterViewInit
 		                                    .toPromise();
 	}
 	
-	private createFileName()
+	private static createFileName()
 	{
-		const newFileName = new Date().getTime() + '.jpg';
-		return newFileName;
+		return new Date().getTime() + '.jpg';
 	}
 	
 	async clickHandler()
 	{
-		this.isAvailable != this.isAvailable;
-		await this.warehouseProductRouter.changeProductAvailability(
+		this.isAvailable = !this.isAvailable;
+		await this.warehouseProductsRouter.changeProductAvailability(
 				this.warehouseId,
 				this.warehouseProduct.productId,
 				this.isAvailable

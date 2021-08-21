@@ -47,7 +47,7 @@ export class ServerDownPage implements OnDestroy
 		this.interval = setInterval(async() =>
 		                            {
 			                            await this.serverConnectionService.checkServerConnection(
-					                            environment.SERVICES_ENDPOINT,
+					                            environment.HTTP_SERVICES_ENDPOINT,
 					                            this.store
 			                            );
 			
