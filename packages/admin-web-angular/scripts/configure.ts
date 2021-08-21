@@ -33,7 +33,7 @@ import { Environment } from './model';
 export const environment: Environment = {
   production: ${isProd},
 
-  SERVICES_ENDPOINT: '${env.SERVICES_ENDPOINT}',
+  HTTP_SERVICES_ENDPOINT: '${env.HTTP_SERVICES_ENDPOINT}',
   HTTPS_SERVICES_ENDPOINT: '${env.HTTPS_SERVICES_ENDPOINT}',
   GQL_ENDPOINT: '${env.GQL_ENDPOINT}',
   GQL_SUBSCRIPTIONS_ENDPOINT: '${env.GQL_SUBSCRIPTIONS_ENDPOINT}',

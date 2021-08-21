@@ -11,26 +11,28 @@ const isProd = env.production;
 const mode = isProd ? "production" : "development"
 const instances = env.WEB_CONCURRENCY;
 const maxMemory = env.WEB_MEMORY;
-const port = `${env.PORT}`;
+const port = env.PORT.toString();
+const host = env.HOST;
+const startOptions: StartOptions = {
+	script: './dist/out-tsc/packages/admin-web-angular/src/app.js',
+	name: appName,
+	exec_mode: 'fork',
+	instances: instances,
+	max_memory_restart: maxMemory + 'M',
+	watch: !env.production,
+	env: {
+		NODE_ENV: isProd ? 'production' : 'development',
+		HOST: host,
+		PORT: port,
+		KEYMETRICS_MACHINE_NAME: MACHINE_NAME,
+		KEYMETRICS_PUBLIC: PUBLIC_KEY,
+		KEYMETRICS_SECRET: PRIVATE_KEY,
+	}
+}
 
 pm2.connect(
 		function()
 		{
-			const startOptions: StartOptions = {
-				script: './dist/out-tsc/packages/admin-web-angular/src/app.js',
-				name: appName,
-				exec_mode: 'fork',
-				instances: instances,
-				max_memory_restart: maxMemory + 'M',
-				watch: !env.production,
-				env: {
-					NODE_ENV: isProd ? 'production' : 'development',
-					PORT: port,
-					KEYMETRICS_PUBLIC: PUBLIC_KEY,
-					KEYMETRICS_SECRET: PRIVATE_KEY,
-				}
-			}
-			
 			pm2.start(startOptions,
 			          () =>
 			          {

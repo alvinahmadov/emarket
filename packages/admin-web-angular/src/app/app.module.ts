@@ -53,7 +53,7 @@ import { ServerSettingsService }            from './@core/services/server-settin
 				                                  deps: [HttpClient],
 			                                  },
 		                                  }),
-		          CommonModule.forRoot({ apiUrl: environment.SERVICES_ENDPOINT }),
+		          CommonModule.forRoot({ apiUrl: environment.HTTP_SERVICES_ENDPOINT }),
 		          NgbModule,
 		          ThemeModule.forRoot(),
 		          CoreModule.forRoot(),
@@ -177,7 +177,7 @@ export function serverConnectionFactory(
 		store: Store
 )
 {
-	return () => provider.load(environment.SERVICES_ENDPOINT, store);
+	return () => provider.load(environment.HTTP_SERVICES_ENDPOINT, store);
 }
 
 export function maintenanceFactory(provider: MaintenanceService)
