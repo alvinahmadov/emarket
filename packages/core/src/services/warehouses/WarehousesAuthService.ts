@@ -75,10 +75,6 @@ export class WarehousesAuthService extends DBService<Warehouse>
 		const username: string = loginInput.username;
 		const password: string = loginInput.password;
 		const token: string = loginInput.token;
-		let result: IWarehouseLoginResponse = {
-			warehouse: undefined,
-			token: ''
-		};
 		
 		try
 		{
@@ -103,7 +99,10 @@ export class WarehousesAuthService extends DBService<Warehouse>
 		               },
 		               `Neither user nor token specified`);
 		
-		return result;
+		return {
+			warehouse: undefined,
+			token: ''
+		};
 	}
 	
 	@asyncListener()
