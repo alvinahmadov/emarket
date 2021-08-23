@@ -4,8 +4,7 @@ import {
 	ViewChild,
 	Input,
 	EventEmitter,
-	Output,
-	OnInit,
+	Output
 }                                           from '@angular/core';
 import { FormGroup, FormBuilder }           from '@angular/forms';
 import { IPromotion }                       from '@modules/server.common/interfaces/IPromotion';
@@ -73,7 +72,7 @@ export class PromotionMutation implements OnDestroy
 		
 		if(!this.form.valid)
 		{
-			this.presentToast('Please fill in valid data.');
+			this.presentToast('Пожалуйста, заполните действительные данные.');
 			return;
 		}
 		
@@ -85,12 +84,12 @@ export class PromotionMutation implements OnDestroy
 			    .subscribe(
 					    (data) =>
 					    {
-						    this.presentToast('Successfully created promotion!');
+						    this.presentToast('Акция создана успешно!');
 					    },
 					    (err) =>
 					    {
 						    this.presentToast(
-								    err.message || 'Something went wrong!'
+								    err.message || 'Произошла ошибка!'
 						    );
 					    },
 					    () =>
@@ -108,12 +107,12 @@ export class PromotionMutation implements OnDestroy
 			    .subscribe(
 					    (data) =>
 					    {
-						    this.presentToast('Successfully updated promotion!');
+						    this.presentToast('Акция обновлена успешно!');
 					    },
 					    (err) =>
 					    {
 						    this.presentToast(
-								    err.message || 'Something went wrong!'
+								    err.message || 'Произошла ошибка!'
 						    );
 					    },
 					    () =>
