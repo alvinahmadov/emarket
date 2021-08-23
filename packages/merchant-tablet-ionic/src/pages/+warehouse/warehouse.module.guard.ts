@@ -14,9 +14,12 @@ export class WarehouseModuleGuard implements CanLoad
 	async canLoad(route: Route)
 	{
 		const isLogged = await this.store.isLogged();
+		
+		const token = this.store.token;
+		
 		if(!isLogged)
 		{
-			this.router.navigateByUrl('/login');
+			await this.router.navigateByUrl('/auth');
 			return false;
 		}
 		return true;
