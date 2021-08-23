@@ -46,7 +46,7 @@ export class FileUploaderComponent implements OnInit
 	uploader: FileUploader;
 	
 	private PREFIX: string = 'FILE_UPLOADER.';
-	private DRAG_AND_DROB: string = 'DRAG_AND_DROP_FILE_HERE';
+	private DRAG_AND_DROP: string = 'DRAG_AND_DROP_FILE_HERE';
 	private PICTURE_URL: string = 'PICTURE_URL';
 	
 	constructor(
@@ -62,9 +62,14 @@ export class FileUploaderComponent implements OnInit
 		return localStorage.getItem('_platform') === 'browser';
 	}
 	
+	get warehouseId()
+	{
+		return localStorage.getItem('_warehouseId');
+	}
+	
 	get dragAndDrob()
 	{
-		return this._translate(this.PREFIX + this.DRAG_AND_DROB);
+		return this._translate(this.PREFIX + this.DRAG_AND_DROP);
 	}
 	
 	get pictureURL()
@@ -150,7 +155,7 @@ export class FileUploaderComponent implements OnInit
 	private _uploaderConfig()
 	{
 		const uploaderOptions: FileUploaderOptions = {
-			url: environment.API_FILE_UPLOAD_URL,
+			url: environment.CLOUDINARY_UPLOAD_URL,
 			
 			isHTML5: true,
 			removeAfterUpload: true,
@@ -168,15 +173,15 @@ export class FileUploaderComponent implements OnInit
 				form: FormData
 		): any =>
 		{
-			form.append('upload_preset', 'everbie-products-images');
-			let tags = 'myphotoalbum';
+			form.append('upload_preset', environment.CLOUDINARY_UNSIGNED_UPLOAD_PRESET);
+			let tags = 'product';
 			if(this.name)
 			{
 				form.append('context', `photo=${this.name}`);
-				tags = `myphotoalbum,${this.name}`;
+				tags += `,${this.name}`;
 			}
 			
-			form.append('folder', 'angular_sample');
+			form.append('folder', this.warehouseId);
 			form.append('tags', tags);
 			form.append('file', fileItem);
 			
@@ -199,7 +204,7 @@ export class FileUploaderComponent implements OnInit
 	private _takePicture(sourceType: number)
 	{
 		const options: CameraOptions = {
-			quality: 50,
+			quality: 80,
 			destinationType: this.camera.DestinationType.DATA_URL,
 			encodingType: this.camera.EncodingType.JPEG,
 			mediaType: this.camera.MediaType.PICTURE,
@@ -213,7 +218,7 @@ export class FileUploaderComponent implements OnInit
 					const base64Image = 'data:image/jpeg;base64,' + imageData;
 					const file = await this._urltoFile(
 							base64Image,
-							this._createFileName(),
+							FileUploaderComponent._createFileName(),
 							'image/jpeg'
 					);
 					const fileItem = new FileItem(this.uploader, file, {});
@@ -237,7 +242,7 @@ export class FileUploaderComponent implements OnInit
 				      });
 	}
 	
-	private _createFileName()
+	private static _createFileName()
 	{
 		return new Date().getTime() + '.jpg';
 	}
