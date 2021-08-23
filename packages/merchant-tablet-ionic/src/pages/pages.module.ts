@@ -4,7 +4,6 @@ import { AuthModuleGuard }      from './+auth/auth.module.guard';
 import { WarehouseModuleGuard } from './+warehouse/warehouse.module.guard';
 import { InfoModuleGuard }      from './+info/info.module.guard';
 
-// TODO: add all routes!
 const routes: Routes = [
 	{
 		path: 'auth',
@@ -26,6 +25,7 @@ const routes: Routes = [
 				import('./+language/language.module').then(
 						(m) => m.LanguagePageModule
 				),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'customers',
@@ -33,6 +33,7 @@ const routes: Routes = [
 				import('./+customers/customers.module').then(
 						(m) => m.CustomersPageModule
 				),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'carriers',
@@ -40,16 +41,19 @@ const routes: Routes = [
 				import('./+carriers/carriers.module').then(
 						(m) => m.CarrierssPageModule
 				),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'track',
 		loadChildren: () =>
 				import('./+track/track.module').then((m) => m.TrackPageModule),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'track/:id',
 		loadChildren: () =>
 				import('./+track/track.module').then((m) => m.TrackPageModule),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'settings',
@@ -57,6 +61,7 @@ const routes: Routes = [
 				import('./+settings/settings.module').then(
 						(m) => m.SettingsPageModule
 				),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'info',
@@ -70,6 +75,7 @@ const routes: Routes = [
 				import('./+promotions/promotion.module').then(
 						(m) => m.PromotionModule
 				),
+		canLoad: [WarehouseModuleGuard],
 	},
 	{
 		path: 'errors',
@@ -79,7 +85,7 @@ const routes: Routes = [
 	{
 		path: '',
 		pathMatch: 'full',
-		redirectTo: 'auth',
+		redirectTo: 'warehouse',
 	},
 ];
 
