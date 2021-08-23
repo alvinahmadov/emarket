@@ -78,7 +78,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		
 		this._initMerchantProducts();
 		
-		this.promotion = this.promotionData || this._initPromotion();
+		this.promotion = this.promotionData || BasicInfoFormComponent._initPromotion();
 		
 		this._initTranslationValues();
 		
@@ -124,7 +124,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		return basicInfoValue as IPromotionCreateObject;
 	}
 	
-	getLanguageCode(language: LanguagesEnum)
+	getLanguageCode(language: LanguagesEnum | string)
 	{
 		return LanguageCodesEnum[language];
 	}
@@ -167,7 +167,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 			member: ILocaleMember[]
 	): void
 	{
-		const memberValue = this._getLocaleMember(member, this.languageCode);
+		const memberValue = BasicInfoFormComponent._getLocaleMember(member, this.languageCode);
 		
 		if(memberValue)
 		{
@@ -183,7 +183,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 	
 	private _addLocaleMember(member: ILocaleMember[]): void
 	{
-		const memberValue = this._getLocaleMember(member, this.locale.value);
+		const memberValue = BasicInfoFormComponent._getLocaleMember(member, this.locale.value);
 		
 		if(!memberValue)
 		{
@@ -262,7 +262,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		               });
 	}
 	
-	private _initPromotion()
+	private static _initPromotion()
 	{
 		return {
 			title: [],
@@ -278,7 +278,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		this.languageCode = this.language || 'en-US';
 	}
 	
-	private _getLocaleMember(
+	private static _getLocaleMember(
 			promotionMember: ILocaleMember[],
 			languageCode: string
 	): ILocaleMember | boolean
