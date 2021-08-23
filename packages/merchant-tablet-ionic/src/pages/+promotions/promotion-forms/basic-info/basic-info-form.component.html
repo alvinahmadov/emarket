@@ -10,13 +10,14 @@
         <ion-row>
             <ion-col>
                 <ion-item>
-                    <ion-label>Language</ion-label>
+                    <ion-label>{{ 'CARRIERS_VIEW.PROMOTIONS.LANGUAGE' | translate }}</ion-label>
                     <ion-select formControlName="locale" okText="Okay">
-                        <ion-select-option
-                                *ngFor="let lang of languages"
-                                [value]="getLanguageCode(lang)"
-                        >{{ lang | translate }}</ion-select-option
-                        >
+	                    <ion-select-option
+			                    *ngFor="let lang of languages"
+			                    [value]="getLanguageCode(lang)"
+	                    >
+		                    {{ lang | translate }}
+	                    </ion-select-option>
                     </ion-select>
                 </ion-item>
             </ion-col>
@@ -24,7 +25,7 @@
         <ion-row>
             <ion-col>
                 <ion-item>
-                    <ion-label>Select Product</ion-label>
+	                <ion-label>{{ 'CARRIERS_VIEW.PROMOTIONS.SELECT_ITEM' | translate }}</ion-label>
                     <ion-select
                             placeholder="Select One"
                             formControlName="product"
@@ -46,55 +47,53 @@
         </ion-row>
         <ion-row>
             <ion-col text-center>
-                <ion-item>
-                    <ion-label class="labels" position="floating">{{
-                        'CARRIERS_VIEW.PROMOTIONS.TITLE' | translate
-                        }}</ion-label>
-                    <ion-input
-                            [placeholder]="
-							'CARRIERS_VIEW.PROMOTIONS.TITLE' | translate
-						"
-                            formControlName="title"
-                    ></ion-input>
-                </ion-item>
+	            <ion-item>
+		            <ion-label class="labels" position="floating">
+			            {{ 'CARRIERS_VIEW.PROMOTIONS.TITLE' | translate }}
+		            </ion-label>
+		            <ion-input
+				            [placeholder]="'CARRIERS_VIEW.PROMOTIONS.TITLE' | translate"
+				            formControlName="title"
+		            ></ion-input>
+	            </ion-item>
             </ion-col>
         </ion-row>
         <ion-row>
             <ion-col text-center>
-                <ion-item>
-                    <ion-label position="floating">{{
-                        'CARRIERS_VIEW.PROMOTIONS.DESCRIPTION' | translate
-                        }}</ion-label>
-                    <ion-textarea formControlName="description"></ion-textarea>
-                </ion-item>
+	            <ion-item>
+		            <ion-label position="floating">
+			            {{ 'CARRIERS_VIEW.PROMOTIONS.DESCRIPTION' | translate }}
+		            </ion-label>
+		            <ion-textarea formControlName="description">
+		            </ion-textarea>
+	            </ion-item>
             </ion-col>
         </ion-row>
         <ion-row>
             <ion-col text-center>
-                <ion-item>
-                    <ion-label class="labels" position="floating">{{
-                        'CARRIERS_VIEW.PROMOTIONS.ACTIVE_FROM' | translate
-                        }}</ion-label>
-                    <ion-datetime
-                            [placeholder]="
-							'CARRIERS_VIEW.PROMOTIONS.SELECT_DATE' | translate
-						"
-                            formControlName="activeFrom"
-                    ></ion-datetime>
-                </ion-item>
+	            <ion-item>
+		            <ion-label class="labels" position="floating">
+			            {{ 'CARRIERS_VIEW.PROMOTIONS.ACTIVE_FROM' | translate }}
+		            </ion-label>
+		            <ion-datetime
+				            [placeholder]="'CARRIERS_VIEW.PROMOTIONS.SELECT_DATE' | translate"
+				            formControlName="activeFrom"
+		            ></ion-datetime>
+	            </ion-item>
             </ion-col>
             <ion-col text-center>
-                <ion-item>
-                    <ion-label class="labels" position="floating">{{
-                        'CARRIERS_VIEW.PROMOTIONS.ACTIVE_TO' | translate
-                        }}</ion-label>
-                    <ion-datetime
-                            [placeholder]="
-							'CARRIERS_VIEW.PROMOTIONS.SELECT_DATE' | translate
-						"
-                            formControlName="activeTo"
-                    ></ion-datetime>
-                </ion-item>
+	            <ion-item>
+		            <ion-label
+				            class="labels"
+				            position="floating"
+		            >
+			            {{ 'CARRIERS_VIEW.PROMOTIONS.ACTIVE_TO' | translate }}
+		            </ion-label>
+		            <ion-datetime
+				            [placeholder]="'CARRIERS_VIEW.PROMOTIONS.SELECT_DATE' | translate"
+				            formControlName="activeTo"
+		            ></ion-datetime>
+	            </ion-item>
             </ion-col>
         </ion-row>
     </ion-grid>
