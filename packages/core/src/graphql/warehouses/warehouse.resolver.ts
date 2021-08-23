@@ -7,7 +7,10 @@ import { default as IWarehouse }                      from '@modules/server.comm
 import User                                           from '@modules/server.common/entities/User';
 import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
 import Warehouse                                      from '@modules/server.common/entities/Warehouse';
-import { IWarehouseRegistrationInput }                from '@modules/server.common/routers/IWarehouseAuthRouter';
+import {
+	IWarehouseLoginInput,
+	IWarehouseRegistrationInput
+}                                                     from '@modules/server.common/routers/IWarehouseAuthRouter';
 import { GeoUtils }                                   from '@modules/server.common/utilities';
 import {
 	WarehousesCarriersService,
@@ -289,10 +292,22 @@ export class WarehouseResolver
 	@Mutation()
 	async warehouseLogin(
 			_,
-			{ username, password }: { username: string; password: string }
+			{ loginInput }: { loginInput: IWarehouseLoginInput }
 	)
 	{
-		return this._warehousesAuthService.login(username, password);
+		let res = await this._warehousesAuthService.login(loginInput);
+		console.warn("Mutation warehouseLogin")
+		console.warn(res)
+		return res;
+	}
+	
+	@Mutation()
+	async isAuthenticated(
+			_,
+			{ token }: { token: string }
+	)
+	{
+		return await this._warehousesAuthService.isAuthenticated(token);
 	}
 	
 	@Mutation()

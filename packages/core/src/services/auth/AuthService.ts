@@ -114,7 +114,8 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 	
 	async login(
 			findObj: any,
-			password: string
+			password?: string,
+			token?: string
 	): Promise<{ entity: T; token: string } | null>
 	{
 		try
@@ -127,30 +128,43 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 			
 			const entity = this.parse(await query);
 			
-			if(!entity || !(await bcrypt.compare(password, entity.hash)))
+			if(token)
 			{
-				return null;
+				if(await this.isAuthenticated(token))
+				{
+					return { entity, token }
+				}
+			}
+			else if(password)
+			{
+				if(!entity || !(await bcrypt.compare(password, entity.hash)))
+				{
+					return null;
+				}
+				
+				token = jwt.sign(
+						{ id: entity.id, role: this.role },
+						env.JWT_SECRET,
+						{
+							expiresIn: env.JWT_EXPIRES
+						}
+				);
+				delete entity?.hash;
+				return { entity, token }
 			}
 			
-			const token = jwt.sign(
-					{ id: entity.id, role: this.role },
-					env.JWT_SECRET,
-					{}
-			); // Never expires
-			
-			delete entity.hash;
-			
-			return {
-				entity,
-				token
-			};
 		} catch(e)
 		{
-			console.error({
-				              where: 'Auth.login',
-				              error: e
-			              });
+			if(!env.isProd)
+			{
+				console.error({
+					              where: 'Auth.login',
+					              error: e
+				              });
+			}
 		}
+		
+		return null;
 	}
 	
 	/**

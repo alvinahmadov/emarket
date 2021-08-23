@@ -1,22 +1,15 @@
-import Logger                              from "bunyan";
-import { inject, injectable }              from "inversify";
-import { first }                           from "rxjs/operators";
-import {
-	asyncListener,
-	routerName,
-}                                          from '@pyro/io';
-import { DBService }                       from '@pyro/db-server';
-import Warehouse                           from "@modules/server.common/entities/Warehouse";
-import IWarehouseAuthRouter,
-{
-	IWarehouseLoginResponse,
-	IWarehouseRegistrationInput
-}                                          from "@modules/server.common/routers/IWarehouseAuthRouter";
-import { IWarehouseCreateObject }          from "@modules/server.common/interfaces/IWarehouse";
-import IService                            from "../IService";
-import { AuthService, AuthServiceFactory } from "../auth";
-import { createLogger }                    from "../../helpers/Log";
-import { env }                             from "../../env";
+import Logger                                                                                               from "bunyan";
+import { inject, injectable }                                                                               from "inversify";
+import { first }                                                                                            from "rxjs/operators";
+import { asyncListener, routerName, }                                                                       from '@pyro/io';
+import { DBService }                                                                                        from '@pyro/db-server';
+import Warehouse                                                                                            from "@modules/server.common/entities/Warehouse";
+import IWarehouseAuthRouter, { IWarehouseLoginInput, IWarehouseLoginResponse, IWarehouseRegistrationInput } from "@modules/server.common/routers/IWarehouseAuthRouter";
+import { IWarehouseCreateObject }                                                                           from "@modules/server.common/interfaces/IWarehouse";
+import IService                                                                                             from "../IService";
+import { AuthService, AuthServiceFactory }                                                                  from "../auth";
+import { createLogger }                                                                                     from "../../helpers/Log";
+import { env }                                                                                              from "../../env";
 
 @injectable()
 @routerName('warehouse-auth')
@@ -70,51 +63,55 @@ export class WarehousesAuthService extends DBService<Warehouse>
 	/**
 	 * Authenticate user in the Merchant app
 	 *
-	 * @param {string} username
-	 * @param {string} password
 	 * @returns {(Promise<IWarehouseLoginResponse | null>)}
 	 * @memberof WarehousesAuthService
+	 * @param {IWarehouseLoginInput} loginInput Input containing username, password and token
 	 */
 	@asyncListener()
 	async login(
-			username: string,
-			password: string
+			loginInput: IWarehouseLoginInput
 	): Promise<IWarehouseLoginResponse | null>
 	{
+		const username: string = loginInput.username;
+		const password: string = loginInput.password;
+		const token: string = loginInput.token;
+		let result: IWarehouseLoginResponse = {
+			warehouse: undefined,
+			token: ''
+		};
+		
 		try
 		{
-			this.log.info(
-					{
-						username,
-						password
-					},
-					'.login(username, password) called'
-			);
-			
-			const res = await this.authService.login({ username }, password);
-			
-			this.log.warn(
-					{
-						res
-					},
-					'.login(username, password) called'
-			)
-			
-			if(!res || res.entity.isDeleted)
+			if(token)
 			{
-				return null;
+				return await this._loginByToken(username, token);
+			}
+			else if(username && password)
+			{
+				return await this._loginByUser(username, password);
 			}
 			
-			return {
-				warehouse: res.entity,
-				token: res.token
-			};
 		} catch(e)
 		{
 			this.log.debug(e);
 		}
 		
-		return null;
+		this.log.error({
+			               username: username,
+			               password: password,
+			               token: token
+		               },
+		               `Neither user nor token specified`);
+		
+		return result;
+	}
+	
+	@asyncListener()
+	async isAuthenticated(
+			token: string
+	): Promise<boolean>
+	{
+		return await this.authService.isAuthenticated(token);
 	}
 	
 	/**
@@ -151,6 +148,55 @@ export class WarehousesAuthService extends DBService<Warehouse>
 		if(!store || store.isDeleted)
 		{
 			throw Error(`Store with id '${storeId}' does not exists!`);
+		}
+	}
+	
+	private async _loginByToken(username: string, token: string)
+	{
+		this.log.info(
+				{
+					username,
+					token
+				},
+				'.loginByToken(token) called'
+		);
+		
+		const res = await this.authService.login({ username }, null, token);
+		
+		if(!res || res.entity.isDeleted)
+		{
+			return null;
+		}
+		
+		return {
+			warehouse: res.entity,
+			token: res.token
+		}
+	}
+	
+	private async _loginByUser(
+			username: string,
+			password: string
+	)
+	{
+		this.log.info(
+				{
+					username,
+					password
+				},
+				'.loginByUser(username, password) called'
+		);
+		
+		const res = await this.authService.login({ username }, password, null);
+		
+		if(!res || res.entity.isDeleted)
+		{
+			return null;
+		}
+		
+		return {
+			warehouse: res.entity,
+			token: res.token
 		}
 	}
 }
