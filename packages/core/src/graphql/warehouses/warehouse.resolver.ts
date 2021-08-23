@@ -1,8 +1,6 @@
 import { Mutation, Query, ResolveProperty, Resolver } from '@nestjs/graphql';
 import { first }                                      from 'rxjs/operators';
-import IGeoLocation, {
-	IGeoLocationCreateObject
-}                                                     from '@modules/server.common/interfaces/IGeoLocation';
+import IGeoLocation, { IGeoLocationCreateObject }     from '@modules/server.common/interfaces/IGeoLocation';
 import { default as IWarehouse }                      from '@modules/server.common/interfaces/IWarehouse';
 import User                                           from '@modules/server.common/entities/User';
 import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
@@ -13,12 +11,12 @@ import {
 }                                                     from '@modules/server.common/routers/IWarehouseAuthRouter';
 import { GeoUtils }                                   from '@modules/server.common/utilities';
 import {
+	WarehousesAuthService,
 	WarehousesCarriersService,
 	WarehousesOrdersService,
+	WarehousesProductsService,
 	WarehousesService,
-	WarehousesAuthService,
-	WarehousesUsersService,
-	WarehousesProductsService
+	WarehousesUsersService
 }                                                     from '../../services/warehouses';
 import { DevicesService }                             from '../../services/devices';
 import { GeoLocationsWarehousesService }              from '../../services/geo-locations';
@@ -295,10 +293,7 @@ export class WarehouseResolver
 			{ loginInput }: { loginInput: IWarehouseLoginInput }
 	)
 	{
-		let res = await this._warehousesAuthService.login(loginInput);
-		console.warn("Mutation warehouseLogin")
-		console.warn(res)
-		return res;
+		return await this._warehousesAuthService.login(loginInput);
 	}
 	
 	@Mutation()
