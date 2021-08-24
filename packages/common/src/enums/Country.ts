@@ -8,7 +8,6 @@ enum Country
 	AL,
 	AM,
 	AO,
-	AQ,
 	AR,
 	AS,
 	AT,
