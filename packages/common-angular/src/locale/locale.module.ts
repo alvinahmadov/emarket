@@ -1,5 +1,6 @@
 import { NgModule }              from '@angular/core';
 import { ProductLocalesService } from './product-locales.service';
+import { LocaleService }         from './locale.service';
 import {
 	TranslateService,
 	TranslateModule,
@@ -9,10 +10,12 @@ import {
 
 @NgModule({
 	          imports: [
-		          TranslateModule.forRoot({
-			                                  loader: { provide: TranslateLoader, useClass: TranslateFakeLoader },
-		                                  }),
+		          TranslateModule.forRoot(
+				          {
+					          loader: { provide: TranslateLoader, useClass: TranslateFakeLoader },
+				          }
+		          ),
 	          ],
-	          providers: [ProductLocalesService, TranslateService],
+	          providers: [ProductLocalesService, LocaleService, TranslateService],
           })
 export class LocaleModule {}
