@@ -178,12 +178,6 @@ type WarehouseLoginInfo {
     token: String!
 }
 
-input WarehouseLoginInput {
-    username: String!
-    password: String
-    token: String
-}
-
 input WarehouseRegisterInput {
     warehouse: WarehouseCreateInput!
     password: String!
@@ -197,7 +191,7 @@ input WarehousePasswordUpdateInput {
 type Mutation {
     registerWarehouse(registerInput: WarehouseRegisterInput!): Warehouse!
 
-    warehouseLogin(loginInput: WarehouseLoginInput!): WarehouseLoginInfo
+    warehouseLogin(username: String!, password: String!): WarehouseLoginInfo
 
     isAuthenticated(token: String!): Boolean
 
