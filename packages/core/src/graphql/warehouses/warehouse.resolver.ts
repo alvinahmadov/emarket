@@ -290,10 +290,10 @@ export class WarehouseResolver
 	@Mutation()
 	async warehouseLogin(
 			_,
-			{ loginInput }: { loginInput: IWarehouseLoginInput }
+			{ username, password }: { username: string; password: string }
 	)
 	{
-		return await this._warehousesAuthService.login(loginInput);
+		return await this._warehousesAuthService.login(username, password);
 	}
 	
 	@Mutation()
