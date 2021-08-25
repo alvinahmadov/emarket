@@ -65,44 +65,39 @@ export class WarehousesAuthService extends DBService<Warehouse>
 	 *
 	 * @returns {(Promise<IWarehouseLoginResponse | null>)}
 	 * @memberof WarehousesAuthService
-	 * @param {IWarehouseLoginInput} loginInput Input containing username, password and token
+	 * @param {string} username
+	 * @param {string} password
 	 */
 	@asyncListener()
 	async login(
-			loginInput: IWarehouseLoginInput
+			username: string,
+			password: string
 	): Promise<IWarehouseLoginResponse | null>
 	{
-		const username: string = loginInput.username;
-		const password: string = loginInput.password;
-		const token: string = loginInput.token;
-		
 		try
 		{
-			if(token)
+			this.log.info(
+					{
+						username,
+						password
+					},
+					'.login(username, password) called'
+			);
+			const res = await this.authService.login({ username }, password);
+			
+			if(!res || res.entity.isDeleted)
 			{
-				return await this._loginByToken(username, token);
-			}
-			else if(username && password)
-			{
-				return await this._loginByUser(username, password);
+				return null;
 			}
 			
+			return {
+				warehouse: res.entity,
+				token: res.token
+			}
 		} catch(e)
 		{
 			this.log.debug(e);
 		}
-		
-		this.log.error({
-			               username: username,
-			               password: password,
-			               token: token
-		               },
-		               `Neither user nor token specified`);
-		
-		return {
-			warehouse: undefined,
-			token: ''
-		};
 	}
 	
 	@asyncListener()
@@ -147,55 +142,6 @@ export class WarehousesAuthService extends DBService<Warehouse>
 		if(!store || store.isDeleted)
 		{
 			throw Error(`Store with id '${storeId}' does not exists!`);
-		}
-	}
-	
-	private async _loginByToken(username: string, token: string)
-	{
-		this.log.info(
-				{
-					username,
-					token
-				},
-				'.loginByToken(token) called'
-		);
-		
-		const res = await this.authService.login({ username }, null, token);
-		
-		if(!res || res.entity.isDeleted)
-		{
-			return null;
-		}
-		
-		return {
-			warehouse: res.entity,
-			token: res.token
-		}
-	}
-	
-	private async _loginByUser(
-			username: string,
-			password: string
-	)
-	{
-		this.log.info(
-				{
-					username,
-					password
-				},
-				'.loginByUser(username, password) called'
-		);
-		
-		const res = await this.authService.login({ username }, password, null);
-		
-		if(!res || res.entity.isDeleted)
-		{
-			return null;
-		}
-		
-		return {
-			warehouse: res.entity,
-			token: res.token
 		}
 	}
 }
