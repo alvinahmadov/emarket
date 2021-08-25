@@ -1,15 +1,16 @@
-import Logger                                                                                               from "bunyan";
-import { inject, injectable }                                                                               from "inversify";
-import { first }                                                                                            from "rxjs/operators";
-import { asyncListener, routerName, }                                                                       from '@pyro/io';
-import { DBService }                                                                                        from '@pyro/db-server';
-import Warehouse                                                                                            from "@modules/server.common/entities/Warehouse";
-import IWarehouseAuthRouter, { IWarehouseLoginInput, IWarehouseLoginResponse, IWarehouseRegistrationInput } from "@modules/server.common/routers/IWarehouseAuthRouter";
-import { IWarehouseCreateObject }                                                                           from "@modules/server.common/interfaces/IWarehouse";
-import IService                                                                                             from "../IService";
-import { AuthService, AuthServiceFactory }                                                                  from "../auth";
-import { createLogger }                                                                                     from "../../helpers/Log";
-import { env }                                                                                              from "../../env";
+import Logger                                            from "bunyan";
+import { inject, injectable }                            from "inversify";
+import { first }                                         from "rxjs/operators";
+import { asyncListener, routerName, }                    from '@pyro/io';
+import { DBService }                                     from '@pyro/db-server';
+import Warehouse                                         from "@modules/server.common/entities/Warehouse";
+import IWarehouseAuthRouter,
+{ IWarehouseLoginResponse, IWarehouseRegistrationInput } from "@modules/server.common/routers/IWarehouseAuthRouter";
+import { IWarehouseCreateObject }                        from "@modules/server.common/interfaces/IWarehouse";
+import IService                                          from "../IService";
+import { AuthService, AuthServiceFactory }               from "../auth";
+import { createLogger }                                  from "../../helpers/Log";
+import { env }                                           from "../../env";
 
 @injectable()
 @routerName('warehouse-auth')
