@@ -56,6 +56,11 @@ export class WarehouseAuthRouter implements IWarehouseAuthRouter
 		await this.router.run('updatePassword', id, password);
 	}
 	
+	async isAuthenticated(token: string): Promise<boolean>
+	{
+		return await this.router.run('isAuthenticated', token);
+	}
+	
 	protected _warehouseFactory(warehouse: IWarehouse)
 	{
 		return warehouse == null ? null : new Warehouse(warehouse);
