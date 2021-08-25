@@ -2,8 +2,10 @@ import { Component, OnInit, OnDestroy, Input, ElementRef } from '@angular/core';
 import { WarehouseProductsService }                        from '../../../services/warehouse-products.service';
 import { Subscription }                                    from 'rxjs';
 import WarehouseProduct                                    from '@modules/server.common/entities/WarehouseProduct';
+import { ILocaleMember }                                   from "@modules/server.common/interfaces/ILocale";
 import { ProductLocalesService }                           from '@modules/client.common.angular2/locale/product-locales.service';
 import { WarehouseProductsRouter }                         from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import Product                                             from '@modules/server.common/entities/Product';
 import { NgxMasonryOptions }                               from 'ngx-masonry';
 import { ModalController }                                 from '@ionic/angular';
 
@@ -24,16 +26,19 @@ export class AllProductsComponent implements OnInit, OnDestroy
 	addProduct: (string) => void;
 	
 	@Input()
-	getWarehouseProductImageUrl: () => void;
+	removeProduct: (string) => void;
 	
 	@Input()
-	openEditProductModal: () => void;
+	getWarehouseProductImageUrl: (p: Product) => string;
 	
 	@Input()
-	truncateTitle: () => void;
+	openEditProductModal: (p: any) => Promise<void>;
 	
 	@Input()
-	localeTranslate: () => void;
+	truncateTitle: (title: string) => string;
+	
+	@Input()
+	localeTranslate: (locale: ILocaleMember[]) => string;
 	
 	private products$: Subscription;
 	
@@ -51,6 +56,7 @@ export class AllProductsComponent implements OnInit, OnDestroy
 	
 	page: number = 1;
 	productsCount: number;
+	paginationCount: number = 10;
 	
 	updateMasonryLayout: boolean = false;
 	showNoProductsIcon: boolean = false;

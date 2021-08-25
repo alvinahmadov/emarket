@@ -1,103 +1,157 @@
 @import '~@ever-platform/common-angular/src/scss/everbie.common';
 
+$fade-amount: 1;
+
 .product-card-container {
-  border: 0;
-  padding-bottom: 0;
-
-  .product-card {
-    margin: 0;
-    padding: 0;
-    text-align: center;
-
-    .product-image-container {
-      cursor: pointer;
-    }
-
-    .product-image-container:active {
-      background: #000;
-
-      .product-image {
-        opacity: 0.8;
-      }
-    }
-
-    .product-buttons {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-
-      .add-button {
-        padding: 0;
-        font-size: 30px;
-        color: #fff;
-      }
-    }
-
-    .product-image {
-      width: 100%;
-    }
-
-    .product-mini-bar {
-      font-size: 17px;
-      background-color: $brand;
-      color: white;
-      text-align: center;
-      margin-bottom: 0;
-      padding-top: 11px;
-      padding-bottom: 11px;
-      margin-top: -4px;
-
-      .edit-button {
-        margin-top: -4px;
-        border-radius: 3px;
-        color: $brand;
-        float: left;
-        border-color: #ccc;
-        margin-left: 10px;
-        min-width: 10px;
-        padding: 4px;
-        font-size: 16px;
-        line-height: 0;
-        min-height: 10px;
-      }
-
-      .count {
-        background: #fff;
-        margin-top: -2px;
-        padding: 2px;
-        border-radius: 3px;
-        color: $brand;
-        float: right;
-        margin-right: 10px;
-      }
-    }
-  }
+	border: 0;
+	padding-bottom: 0;
+	
+	.product-card {
+		margin: 0;
+		padding: 0;
+		text-align: center;
+		
+		.product-image-container {
+			cursor: pointer;
+		}
+		
+		.product-image-container:active {
+			background: #000;
+			
+			.product-image {
+				opacity: 0.8;
+			}
+		}
+		
+		.product-buttons {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+			
+			.add-button {
+				padding: 0;
+				font-size: 30px;
+				color: #fff;
+			}
+		}
+		
+		.product-image {
+			width: 100%;
+		}
+		
+		.product-mini-bar {
+			font-size: 17px;
+			background-color: $brand;
+			box-shadow: $brand-lighted;
+			color: white;
+			text-align: center;
+			margin-bottom: 0;
+			padding-top: 11px;
+			padding-bottom: 11px;
+			margin-top: -4px;
+			
+			.count {
+				background: $brand-lighted;
+				margin-top: 0;
+				min-width: 20%;
+				padding: 0;
+				border-radius: 1px;
+				color: white;
+				-moz-user-focus: ignore;
+				float: right;
+				margin-right: 10px;
+			}
+		}
+		
+		.product-edit-bar {
+			background-color: $brand-lighted;
+			color: white; /* White text */
+			cursor: pointer; /* Pointer/hand icon */
+			position: relative;
+			display: inline-flex;
+			vertical-align: middle;
+		}
+		
+		.edit-button {
+			margin-top: 0;
+			border-radius: 0;
+			margin-left: 10px;
+			min-width: 20px;
+			min-height: 20px;
+			font-size: 16px;
+			line-height: 0;
+			border-color: transparent;
+		}
+		
+		.edit-button.float-left {
+			background-color: fade-out($primary, $fade-amount);
+			color: white;
+			margin: 0;
+			width: 100%;
+			padding: 10px 0;
+		}
+		
+		.edit-button.float-right {
+			background-color: fade-out($danger, $fade-amount);
+			color: white;
+			margin: 0;
+			width: 100%;
+			padding: 10px 0;
+		}
+		
+		.edit-button.float-left:hover {
+			background-color: fade-in($primary, $fade-amount);
+		}
+		
+		.edit-button.float-right:hover {
+			background-color: fade-in($danger, $fade-amount);
+		}
+	}
+	
+	.item-native {
+		padding-left: 0 !important;
+		--inner-padding-end: 0 !important;
+		--inner-padding-start: 0 !important;
+		--ion-safe-area-right: 0 !important;
+	}
+	
+	.item-inner {
+		border-bottom: none;
+		padding-left: 0 !important;
+		--inner-padding-end: 0 !important;
+		--inner-padding-start: 0 !important;
+		--ion-safe-area-right: 0 !important;
+	}
 }
 
 .masonry-container {
-  text-align: center;
-  width: 80%;
-  margin: 0 auto;
-  padding-top: 20px;
+	text-align: center;
+	width: 100%;
+	padding-top: 20px;
+	margin: 0 auto;
 }
 
 ngx-masonry {
-  margin: 0 auto;
+	margin: 0 auto;
 }
 
 .masonry-item {
-  width: 234px;
-  margin-bottom: 10px;
+	width: 234px;
+	margin-bottom: 10px;
 }
 
 .item-inner {
-  border-bottom: none;
+	border-bottom: none;
+	padding-left: unset;
+	padding-right: unset;
+	padding-inline-start: 0 !important;
+	padding-inline-end: 0 !important;
 }
 
 .pagination {
-  text-align: center;
-  padding-bottom: 10px;
-  padding-left: 0 !important;
-  font-size: 1em;
-  display: block !important;
+	text-align: center;
+	padding-bottom: 10px;
+	padding-left: 0 !important;
+	font-size: 1em;
+	display: block !important;
 }
