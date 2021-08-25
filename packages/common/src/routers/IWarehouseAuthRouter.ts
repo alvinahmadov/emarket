@@ -22,6 +22,8 @@ interface IWarehouseAuthRouter
 			password: string
 	): Promise<IWarehouseLoginResponse | null>;
 	
+	isAuthenticated(token: string): Promise<boolean>;
+	
 	updatePassword(
 			id: Warehouse['id'],
 			password: { current?: string; new: string }
