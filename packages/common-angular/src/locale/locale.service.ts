@@ -1,10 +1,14 @@
-import { Injectable }              from '@angular/core';
-import { TranslateService }        from '@ngx-translate/core';
-import { Country, getCountryName } from '@modules/server.common/entities/GeoLocation';
-import { env }                     from '../env';
+import { Injectable, OnInit } from '@angular/core';
+import { TranslateService }   from '@ngx-translate/core';
+import {
+	getCountryName,
+	countriesIdsToNamesArrayFn
+}                             from '@modules/server.common/entities/GeoLocation';
+import Country                from '@modules/server.common/enums/Country';
+import { env }                from '../env';
 
 @Injectable()
-export class LocaleService
+export class LocaleService implements OnInit
 {
 	private readonly _defaultLang: string = env.DEFAULT_LANGUAGE.split('-')[0];
 	private readonly _defaultLocale: string = env.DEFAULT_LANGUAGE;
@@ -13,18 +17,13 @@ export class LocaleService
 	private _currentLocale: string;
 	
 	constructor(private readonly _translateService: TranslateService)
+	{}
+	
+	ngOnInit()
 	{
-		this._currentLocale = _translateService.currentLang;
-		if(!this._translateService.getLangs())
-		{
-			this._translateService.addLangs(this._availableLocales);
-		}
-		
-		if(!this._currentLocale)
-		{
-			this._currentLocale = this._defaultLocale;
-			this._translateService.use(this._currentLocale);
-		}
+		this._currentLocale = localStorage.getItem('_language') ?? this._defaultLocale;
+		this._translateService.addLangs(this._availableLocales);
+		this._translateService.use(this._currentLocale);
 	}
 	
 	get defaultLang()
@@ -44,10 +43,31 @@ export class LocaleService
 	
 	set currentLocale(locale: string)
 	{
-		if(!locale)
+		if(locale)
 		{
 			this._currentLocale = locale;
 		}
+	}
+	
+	get countries()
+	{
+		return countriesIdsToNamesArrayFn(this._currentLocale)
+	}
+	
+	get languages()
+	{
+		return []
+	}
+	
+	translate(key: string): string
+	{
+		let translationResult = '';
+		
+		this._translateService
+		    .get(key)
+		    .subscribe((res) => translationResult = res);
+		
+		return translationResult;
 	}
 	
 	getCountryName(countryId: Country): string
