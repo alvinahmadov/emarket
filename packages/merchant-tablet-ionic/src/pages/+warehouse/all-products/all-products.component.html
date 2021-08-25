@@ -28,7 +28,7 @@
 				let warehouseProduct of allProducts
 					| paginate
 						: {
-								itemsPerPage: 10,
+								itemsPerPage: paginationCount,
 								currentPage: page,
 								totalItems: productsCount
 						  }
@@ -37,39 +37,51 @@
             <ion-item class="product-card-container" type="card">
                 <div class="card product-card">
                     <div class="product-image-container">
-                        <img
-                                class="product-image"
-                                (load)="masonry.layout()"
-                                (click)="addProduct(warehouseProduct.product.id)"
-                                src="{{
+	                    <img
+			                    class="product-image"
+			                    (load)="masonry.layout()"
+			                    (click)="openEditProductModal(warehouseProduct)"
+			                    src="{{
 								localeTranslate(
 									warehouseProduct?.product?.images
 								)
 							}}"
-                        />
+			                    alt="{{warehouseProduct?.product?.title}}"/>
                     </div>
-
-                    <div class="product-mini-bar">
-                        <a
-                                class="edit-button button"
-                                (click)="openEditProductModal(warehouseProduct)"
-                        >
-                            <ion-icon
-                                    ios="ios-settings"
-                                    md="md-settings"
-                            ></ion-icon>
-                        </a>
-                        <span class="name"
-                        >{{
-                            truncateTitle(
-                                localeTranslate(
-                                    warehouseProduct.product.title
-                                )
-                            )
-                            }}
+	
+	                <div class="product-mini-bar">
+                        <span class="name">
+	                        {{
+	                        truncateTitle(
+			                        localeTranslate(
+					                        warehouseProduct.product.title
+			                        )
+	                        )
+	                        }}
 						</span>
-                        <span class="count">{{ warehouseProduct?.count }}</span>
-                    </div>
+		                <span class="count">{{ warehouseProduct?.count }}</span>
+	
+	                </div>
+	                <div class="product-edit-bar">
+		                <a
+				                class="edit-button button float-left"
+				                (click)="addProduct(warehouseProduct.product.id)"
+		                >
+			                <ion-icon
+					                ios="add-outline"
+					                md="md-add"
+			                ></ion-icon>
+		                </a>
+		                <a
+				                class="edit-button button float-right"
+				                (click)="removeProduct(warehouseProduct.product.id)"
+		                >
+			                <ion-icon
+					                ios="remove-outline"
+					                md="md-remove"
+			                ></ion-icon>
+		                </a>
+	                </div>
                 </div>
             </ion-item>
         </ngxMasonryItem>
