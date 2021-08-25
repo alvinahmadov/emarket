@@ -463,8 +463,19 @@ namespace GQLMutations
 			removeUsersByIds(ids: $ids)
 		}
 	`;
-
-    // #Warehouses
+	
+	// #Warehouses
+	
+	export const WarehouseAuthenticated = gql`
+		mutation WarehouseAuthenticated(
+			$token: Boolean!
+		)
+		{
+			isAuthenticated(
+				token: $token
+			)
+		}
+	`;
 	
 	export const WarehouseLogin = gql`
 		mutation WarehouseLogin(
