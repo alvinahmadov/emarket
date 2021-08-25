@@ -9,8 +9,9 @@
   },
   "private": false,
   "scripts": {
-    "watch": "tsc -p ./tsconfig.build.json -w",
-    "build": "rimraf build && tsc -p ./tsconfig.build.json",
+    "config": "yarn ts-node ./scripts/configure.ts",
+    "watch": "yarn run config &&tsc -p ./tsconfig.build.json -w",
+    "build": "yarn run config && rimraf build && tsc -p ./tsconfig.build.json",
     "lint": "tslint --fix --project ./",
     "test": "jest --config ./jest.config.js"
   },
