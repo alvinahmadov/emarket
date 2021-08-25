@@ -30,6 +30,33 @@ export class AuthService
 {
 	constructor(private readonly apollo: Apollo) {}
 	
+	public isAuthenticated(
+			token: string
+	): Observable<boolean>
+	{
+		try
+		{
+			return this.apollo
+			           .mutate(
+					           {
+						           mutation: GQLMutations.WarehouseAuthenticated,
+						           variables: {
+							           token
+						           },
+					           })
+			           .pipe(
+					           map(result => result.data),
+					           share<boolean>()
+			           );
+		} catch(e)
+		{
+			if(!environment.production)
+			{
+				console.error(e)
+			}
+		}
+	}
+	
 	public login(
 			username: string,
 			password: string
