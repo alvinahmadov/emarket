@@ -5,10 +5,7 @@ import { default as IWarehouse }                      from '@modules/server.comm
 import User                                           from '@modules/server.common/entities/User';
 import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
 import Warehouse                                      from '@modules/server.common/entities/Warehouse';
-import {
-	IWarehouseLoginInput,
-	IWarehouseRegistrationInput
-}                                                     from '@modules/server.common/routers/IWarehouseAuthRouter';
+import { IWarehouseRegistrationInput }                from '@modules/server.common/routers/IWarehouseAuthRouter';
 import { GeoUtils }                                   from '@modules/server.common/utilities';
 import {
 	WarehousesAuthService,
