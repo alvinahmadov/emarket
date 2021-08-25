@@ -778,10 +778,7 @@ export class WarehousesProductsService
 			isTakeaway: boolean
 	): Promise<WarehouseProduct>
 	{
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
+		const warehouse = await this._getWarehouse(warehouseId);
 		if(warehouse)
 		{
 			const existedProduct = _.find(
