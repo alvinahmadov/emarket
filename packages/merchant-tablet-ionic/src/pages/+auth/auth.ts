@@ -1,14 +1,11 @@
-// noinspection DuplicatedCode
-
-import { Component, Inject }        from '@angular/core';
+import { Component }                from '@angular/core';
 import { AuthService }              from '../../services/auth.service';
 import { Store }                    from '../../services/store.service';
-// @ts-ignore
 import { environment }              from '../../environments/environment';
 import { Router }                   from '@angular/router';
 import { first }                    from 'rxjs/operators';
 import { IGeoLocationCreateObject } from "@modules/server.common/interfaces/IGeoLocation";
-import { ToastrService }            from 'ngx-toastr';
+import { ToastController }          from "@ionic/angular";
 
 export interface WarehouseRegistrationInput
 {
@@ -52,17 +49,17 @@ export class AuthPage
 	
 	constructor(
 			private authService: AuthService,
-			private toastr: ToastrService,
+			private readonly toastController: ToastController,
 			private store: Store,
 			private router: Router
 	)
 	{
-		localStorage.removeItem('_warehouseId');
-		localStorage.removeItem('_language');
-		localStorage.removeItem('token');
-		this.username = environment.DEFAULT_LOGIN_USERNAME;
-		this.password = environment.DEFAULT_LOGIN_PASSWORD;
-		this.loginLogo = environment.LOGIN_LOGO;
+		if(!environment.production)
+		{
+			this.username = environment.DEFAULT_LOGIN_USERNAME;
+			this.password = environment.DEFAULT_LOGIN_PASSWORD;
+			this.loginLogo = environment.LOGIN_LOGO;
+		}
 	}
 	
 	async login()
@@ -76,12 +73,8 @@ export class AuthPage
 			
 			if(!res)
 			{
-				this.toastr.warning("Merchant not found!");
+				await this.presentToast("Merchant not found!");
 				return;
-			}
-			else
-			{
-				this.toastr.success(`Merchant logged in with id ${res.warehouse.id}`);
 			}
 			
 			this.store.warehouseId = res.warehouse.id;
@@ -90,7 +83,7 @@ export class AuthPage
 			await this.router.navigate(['warehouse']);
 		} catch(e)
 		{
-			this.toastr.error(e.message)
+			console.error(e.message)
 		}
 	}
 	
@@ -126,7 +119,7 @@ export class AuthPage
 			
 			if(!res)
 			{
-				this.toastr.warning("Merchant can not be registered!");
+				await this.presentToast("Пользователь не найден!");
 				return;
 			}
 			this.store.warehouseId = res.warehouse.id;
@@ -135,8 +128,17 @@ export class AuthPage
 			alert(e.message);
 		}
 		
-		this.toastr.success("Успещная регистрация");
+		await this.presentToast("Успещная регистрация");
 		
 		await this.router.navigate(['warehouse']);
+	}
+	
+	private async presentToast(message: string)
+	{
+		const toast = await this.toastController.create({
+			                                                message,
+			                                                duration: 2000,
+		                                                });
+		await toast.present();
 	}
 }
