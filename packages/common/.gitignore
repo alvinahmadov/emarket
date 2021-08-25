@@ -5,3 +5,8 @@
 node_modules
 dist
 build
+
+src/data/countries.ts
+
+.env
+.env.prod
