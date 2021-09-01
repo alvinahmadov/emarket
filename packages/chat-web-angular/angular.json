@@ -63,18 +63,18 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "chat-web-angular:build"
+						"browserTarget": "chat-web:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "chat-web-angular:build:production"
+							"browserTarget": "chat-web:build:production"
 						}
 					}
 				},
 				"extract-i18n": {
 					"builder": "@angular-devkit/build-angular:extract-i18n",
 					"options": {
-						"browserTarget": "chat-web-angular:build"
+						"browserTarget": "chat-web:build"
 					}
 				},
 				"test": {
@@ -113,11 +113,11 @@
 					"builder": "@angular-devkit/build-angular:protractor",
 					"options": {
 						"protractorConfig": "e2e/protractor.conf.js",
-						"devServerTarget": "chat-web-angular:serve"
+						"devServerTarget": "chat-web:serve"
 					},
 					"configurations": {
 						"production": {
-							"devServerTarget": "chat-web-angular:serve:production"
+							"devServerTarget": "chat-web:serve:production"
 						}
 					}
 				},
@@ -133,7 +133,7 @@
 			}
 		}
 	},
-	"defaultProject": "chat-web-angular",
+	"defaultProject": "chat-web",
 	"cli": {
 		"analytics": false
 	},
