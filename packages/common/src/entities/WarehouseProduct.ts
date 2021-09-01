@@ -3,6 +3,7 @@ import { DBObject, ModelName, Schema, Types } from '@pyro/db';
 import IProduct                               from '../interfaces/IProduct';
 import IWarehouseProduct,
 { IWarehouseProductCreateObject }             from '../interfaces/IWarehouseProduct';
+import Comment                                from './Comment';
 import Product                                from './Product';
 
 /**
@@ -67,6 +68,26 @@ class WarehouseProduct
 	soldCount: number;
 	
 	/**
+	 * How many views product have
+	 *
+	 * @type {number}
+	 * @memberof WarehouseProduct
+	 */
+	@Types.Number(0)
+	@Column()
+	viewsCount: number;
+	
+	/**
+	 * How many views product have
+	 *
+	 * @type {number}
+	 * @memberof WarehouseProduct
+	 */
+	@Types.Number(0)
+	@Column()
+	likesCount: number;
+	
+	/**
 	 * Ref to Product
 	 *
 	 * @type {(Product | string)}
@@ -74,6 +95,12 @@ class WarehouseProduct
 	 */
 	@Types.Ref(Product)
 	product: Product | string;
+	
+	/**
+	 * Comments
+	 * */
+	@Schema({ type: Array })
+	comments?: Comment[];
 	
 	/**
 	 * Is product(s) require manufacturing
