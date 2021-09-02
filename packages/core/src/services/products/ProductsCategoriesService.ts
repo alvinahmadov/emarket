@@ -91,7 +91,9 @@ export class ProductsCategoriesService extends DBService<ProductsCategory>
 	
 	async throwIfNotExists(categoryId: string): Promise<void>
 	{
-		const category = await super.get(categoryId).pipe(first()).toPromise();
+		const category = await super.get(categoryId)
+		                            .pipe(first())
+		                            .toPromise();
 		
 		if(!category || category.isDeleted)
 		{
