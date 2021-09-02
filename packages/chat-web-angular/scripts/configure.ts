@@ -25,24 +25,24 @@ Error.stackTraceLimit = Infinity;
 require('zone.js/dist/long-stack-trace-zone');
 
 export const environment: Environment = {
-  production: ${isProd},
+	production: ${isProd},
 
-  SERVICES_ENDPOINT: '${env.SERVICES_ENDPOINT}',
-  HTTPS_SERVICES_ENDPOINT: '${env.HTTPS_SERVICES_ENDPOINT}',
-  SERVER_URL: '${env.SERVER_URL}',
+	HTTP_SERVICES_ENDPOINT:     '${env.HTTP_SERVICES_ENDPOINT}',
+	HTTPS_SERVICES_ENDPOINT:    '${env.HTTPS_SERVICES_ENDPOINT}',
+	GQL_ENDPOINT:               '${env.GQL_ENDPOINT}',
+	GQL_SUBSCRIPTIONS_ENDPOINT: '${env.GQL_SUBSCRIPTIONS_ENDPOINT}',
   
-  HOST: '${env.HOST}',
-  PORT: ${env.PORT},
+	HOST: '${env.HOST}',
+	PORT: ${env.PORT},
 
-  DEFAULT_LANGUAGE: '${env.DEFAULT_LANGUAGE}',
-  ENV_PROVIDERS: [],
+	ENV_PROVIDERS: [],
 
-  /**
-	* Angular debug tools in the dev console
-	* https://github.com/angular/angular/blob/86405345b781a9dc2438c0fbe3e9409245647019/TOOLS_JS.md
-	* @param modRef
-	* @return {any}
-	*/
+	/**
+	 * Angular debug tools in the dev console
+	 * https://github.com/angular/angular/blob/86405345b781a9dc2438c0fbe3e9409245647019/TOOLS_JS.md
+	 * @param modRef
+	 * @return {any}
+	 */
 	decorateModuleRef(modRef: NgModuleRef<any>) {
 		const appRef = modRef.injector.get(ApplicationRef);
 		const cmpRef = appRef.components[0];
@@ -53,7 +53,6 @@ export const environment: Environment = {
 		(window as any).ng.coreTokens = _ng.coreTokens;
 		return modRef;
 	}
-
 };
 `;
 
@@ -70,29 +69,28 @@ import { Environment } from './model';
 enableProdMode();
 
 export const environment: Environment = {
-  production: ${isProd},
+	production: ${isProd},
 
-  SERVICES_ENDPOINT: '${env.SERVICES_ENDPOINT}',
-  HTTPS_SERVICES_ENDPOINT: '${env.HTTPS_SERVICES_ENDPOINT}',
-  SERVER_URL: '${env.SERVER_URL}',
+	HTTP_SERVICES_ENDPOINT:     '${env.HTTP_SERVICES_ENDPOINT}',
+	HTTPS_SERVICES_ENDPOINT:    '${env.HTTPS_SERVICES_ENDPOINT}',
+	GQL_ENDPOINT:               '${env.GQL_ENDPOINT}',
+	GQL_SUBSCRIPTIONS_ENDPOINT: '${env.GQL_SUBSCRIPTIONS_ENDPOINT}',
   
-  HOST: '${env.HOST}',
-  PORT: ${env.PORT},
+	HOST: '${env.HOST}',
+	PORT: ${env.PORT},
+  
+	ENV_PROVIDERS: [],
 
-  DEFAULT_LANGUAGE: '${env.DEFAULT_LANGUAGE}',
-  ENV_PROVIDERS: [],
-
-  /**
-	* Angular debug tools in the dev console
-	* https://github.com/angular/angular/blob/86405345b781a9dc2438c0fbe3e9409245647019/TOOLS_JS.md
-	* @param modRef
-	* @return {any}
-	*/
+	/**
+	 * Angular debug tools in the dev console
+	 * https://github.com/angular/angular/blob/86405345b781a9dc2438c0fbe3e9409245647019/TOOLS_JS.md
+	 * @param modRef
+	 * @return {any}
+	 */
 	decorateModuleRef(modRef: NgModuleRef<any>) {
 		disableDebugTools();
 		return modRef;
 	}
-
 };
 `;
 
