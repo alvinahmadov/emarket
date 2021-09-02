@@ -11,7 +11,7 @@ import { DBService, ExistenceEventType }                 from '@pyro/db-server';
 import { IInviteRequestCreateObject }                    from '@modules/server.common/interfaces/IInviteRequest';
 import ILanguage                                         from '@modules/server.common/interfaces/ILanguage';
 import Device                                            from '@modules/server.common/entities/Device';
-import { Country }                                       from '@modules/server.common/entities/GeoLocation';
+import Country                                           from "@modules/server.common/enums/Country";
 import InviteRequest                                     from '@modules/server.common/entities/InviteRequest';
 import Invite                                            from '@modules/server.common/entities/Invite';
 import { IGeoLocationCreateObject }                      from '@modules/server.common/interfaces/IGeoLocation';
