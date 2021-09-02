@@ -7,13 +7,14 @@ import { cleanEnv, num, str, bool } from 'envalid';
 export type Env = Readonly<{
 	production: boolean;
 	
-	DEFAULT_LANGUAGE: string;
-	
-	SERVICES_ENDPOINT: string;
 	HTTPS_SERVICES_ENDPOINT: string;
-	SERVER_URL: string;
+	HTTP_SERVICES_ENDPOINT: string;
+	GQL_ENDPOINT: string;
+	GQL_SUBSCRIPTIONS_ENDPOINT: string;
+	
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
+	
 	HOST: string;
 	PORT: number;
 }>;
@@ -23,13 +24,14 @@ export const env: Env = cleanEnv(
 		{
 			production: bool({ default: false }),
 			
-			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
+			HTTPS_SERVICES_ENDPOINT:    str({ default: 'https://localhost:5501' }),
+			HTTP_SERVICES_ENDPOINT:     str({ default: 'http://localhost:5500' }),
+			GQL_ENDPOINT:               str({ default: 'http://localhost:5555/graphql' }),
+			GQL_SUBSCRIPTIONS_ENDPOINT: str({ default: 'ws://localhost:5050/subscriptions' }),
 			
-			SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
-			HTTPS_SERVICES_ENDPOINT: str({ default: 'https://localhost:5501' }),
-			SERVER_URL: str({ default: 'http://localhost:9595' }),
 			WEB_CONCURRENCY: num({ default: 1 }),
-			WEB_MEMORY: num({ default: 2048 }),
+			WEB_MEMORY:      num({ default: 2048 }),
+			
 			HOST: str({ default: 'localhost' }),
 			PORT: num({ default: 4205 }),
 		},
