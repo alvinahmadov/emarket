@@ -101,8 +101,40 @@ namespace GQLMutations
 			}
 		}
 	`;
+	
+	// #Conversations/Chats
+	
+	export const ConversationCreate = gql`
+		mutation CreateConversation($conversationInput: ConversationCreateInput!)
+		{
+			createConversation(createInput: $conversationInput)
+			{
+				success
+				message
+				data {
+					messages
+					attachments
 
-    // #Currencies
+				}
+			}
+		}
+	`
+	
+	export const ConversationRemoveByIds = gql`
+		mutation RemoveConversationsByIds($ids: [String!]!)
+		{
+			removeConversationsByIds(ids: $ids)
+			{
+				n
+			}
+		}
+	`;
+	
+	export const ConversationCreateMessage = gql`
+	
+	`;
+	
+	// #Currencies
 	
 	export const CurrencyCreate = gql`
 		mutation CreateCurrency($createInput: CurrencyCreateInput!)
