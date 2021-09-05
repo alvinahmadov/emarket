@@ -44,7 +44,7 @@ export function getCountries()
 
 export function getLanguages()
 {
-	const relPath = '../src/i18n/languages/languages.json';
+	const relPath = '../src/i18n/languages.json';
 	let languages = readFileContent(relPath);
 	
 	if(languages.endsWith("\n"))
