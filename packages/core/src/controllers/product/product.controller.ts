@@ -9,11 +9,10 @@ import {
 	Put,
 	Req,
 	UseGuards
-} from '@nestjs/common';
-
+}                                             from '@nestjs/common';
 import { ApiBearerAuth, ApiTags }             from '@nestjs/swagger';
-import { CreateProductDto, UpdateProductDto } from './ProductsDto';
 import { AuthGuard }                          from '@nestjs/passport';
+import { CreateProductDto, UpdateProductDto } from './ProductsDto';
 import { ProductsService }                    from '../../services/products';
 
 @ApiTags('product')
@@ -34,8 +33,7 @@ export class ProductController
 	@Get(':id')
 	async findOne(@Param('id') id: string)
 	{
-		const prod = await this.productsService.getCurrent(id);
-		return prod;
+		return await this.productsService.getCurrent(id);
 	}
 	
 	@Post(':id')
@@ -45,7 +43,10 @@ export class ProductController
 	}
 	
 	@Put(':id')
-	update(@Param('id') id: string, @Body() updateInfo: UpdateProductDto)
+	update(
+			@Param('id') id: string,
+			@Body() updateInfo: UpdateProductDto
+	)
 	{
 		return `Here updates a #${id} product`;
 	}
