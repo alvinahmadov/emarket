@@ -1,13 +1,14 @@
 import _                                                 from 'lodash';
 import { Entity, Column }                                from 'typeorm';
 import { DBObject, getSchema, ModelName, Schema, Types } from '../@pyro/db';
+import Customer                                          from './Customer';
 import GeoLocation                                       from './GeoLocation';
+import PaymentGateway                                    from './PaymentGateway';
 import WarehouseProduct, { WithPopulatedProduct }        from './WarehouseProduct';
 import IWarehouse, { IWarehouseCreateObject }            from '../interfaces/IWarehouse';
-import ForwardOrdersMethod                               from '../enums/ForwardOrdersMethod';
 import IWarehouseProduct                                 from '../interfaces/IWarehouseProduct';
+import ForwardOrdersMethod                               from '../enums/ForwardOrdersMethod';
 import OrderBarcodeTypes                                 from '../enums/OrderBarcodeTypes';
-import PaymentGateway                                    from './PaymentGateway';
 
 /**
  * Warehouse / Merchant / Store
@@ -25,6 +26,46 @@ import PaymentGateway                                    from './PaymentGateway'
 class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 		implements IWarehouse
 {
+	/**
+	 * The name of Store/Merchant
+	 *
+	 * @type {string}
+	 * @memberof Warehouse
+	 */
+	@Types.String()
+	@Column()
+	name: string;
+	
+	/**
+	 * The URL of store brand logo
+	 *
+	 * @type {string}
+	 * @memberof Warehouse
+	 */
+	@Schema({ type: String, required: false })
+	@Column()
+	logo: string;
+	
+	/**
+	 * Default administrator user for the store
+	 * (used for authentication during login into Merchant app together with hashed password)
+	 *
+	 * @type {string}
+	 * @memberof Warehouse
+	 */
+	@Schema({ type: String, unique: true })
+	@Column()
+	username: string;
+	
+	/**
+	 * Merchant admin user
+	 *
+	 * @type {IUser}
+	 * @memberof IWarehouseCreateObject
+	 */
+	@Schema(getSchema(Customer))
+	merchant?: Customer;
+	
 	/**
 	 * Is Warehouse working right now
 	 *
@@ -93,37 +134,6 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	 */
 	@Schema([getSchema(WarehouseProduct)])
 	products: WarehouseProduct[];
-	
-	/**
-	 * The name of Store/Merchant
-	 *
-	 * @type {string}
-	 * @memberof Warehouse
-	 */
-	@Types.String()
-	@Column()
-	name: string;
-	
-	/**
-	 * The URL of store brand logo
-	 *
-	 * @type {string}
-	 * @memberof Warehouse
-	 */
-	@Schema({ type: String, required: false })
-	@Column()
-	logo: string;
-	
-	/**
-	 * Default administrator user for the store
-	 * (used for authentication during login into Merchant app together with hashed password)
-	 *
-	 * @type {string}
-	 * @memberof Warehouse
-	 */
-	@Schema({ type: String, unique: true })
-	@Column()
-	username: string;
 	
 	/**
 	 * Hashed password of default store administrator
