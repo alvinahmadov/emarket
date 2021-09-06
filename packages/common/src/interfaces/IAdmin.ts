@@ -20,9 +20,7 @@ export interface IAdminCreateObject extends DBCreateObject
 	 */
 	hash: string;
 	
-	pictureUrl: string;
-	firstName?: string;
-	lastName?: string;
+	avatar: string;
 }
 
 export interface IAdminUpdateObject extends DBCreateObject
@@ -36,7 +34,7 @@ export interface IAdminUpdateObject extends DBCreateObject
 	name?: string;
 	
 	email?: string;
-	pictureUrl?: string;
+	avatar?: string;
 	firstName?: string;
 	lastName?: string;
 }
@@ -44,6 +42,7 @@ export interface IAdminUpdateObject extends DBCreateObject
 interface IAdmin extends DBRawObject, IAdminCreateObject
 {
 	_id: PyroObjectId;
+	readonly fullName: string;
 }
 
 export default IAdmin;
