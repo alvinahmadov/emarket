@@ -1,21 +1,45 @@
+import { Column }                                 from 'typeorm';
 import GeoLocation                                from './GeoLocation';
 import { DBObject, getSchema, ModelName, Schema } from '../@pyro/db';
-import IUserOrder, { IUserOrderCreateObject }     from '../interfaces/IUserOrder';
-import { Column }                                 from 'typeorm';
+import ICustomerOrder,
+{ ICustomerOrderCreateObject }                    from '../interfaces/ICustomerOrder';
 
 /**
  * Store information about Customer inside (embeded into) Order
  * The data is usually copied from the Customer record in DB right after order created
- * TODO: rename to CustomerOrder
  *
- * @class UserOrder
- * @extends {DBObject<IUserOrder, IUserOrderCreateObject>}
- * @implements {IUserOrder}
+ * @class CustomerOrder
+ * @extends {DBObject<ICustomerOrder, ICustomerOrderCreateObject>}
+ * @implements {ICustomerOrder}
  */
-@ModelName('UserOrder')
-class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
-		implements IUserOrder
+@ModelName('CustomerOrder')
+class CustomerOrder extends DBObject<ICustomerOrder, ICustomerOrderCreateObject>
+		implements ICustomerOrder
 {
+	/**
+	 * Username
+	 *
+	 * @type {string}
+	 * @memberof UserOrder
+	 */
+	@Schema({ type: String, required: false })
+	@Column()
+	name: string;
+	
+	/**
+	 * Primary Email Address
+	 *
+	 * @type {string}
+	 * @memberof UserOrder
+	 */
+	@Schema({
+		        type:     String,
+		        required: false,
+		        sparse:   true
+	        })
+	@Column()
+	email: string;
+	
 	/**
 	 * First Name
 	 *
@@ -25,6 +49,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	firstName?: string;
+	
 	/**
 	 * Last Name
 	 *
@@ -34,6 +59,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	lastName?: string;
+	
 	/**
 	 * Customer Image (Photo/Avatar) URL
 	 * (optional)
@@ -43,20 +69,8 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	 */
 	@Schema({ type: String, required: false })
 	@Column()
-	image: string;
-	/**
-	 * Primary Email Address
-	 *
-	 * @type {string}
-	 * @memberof UserOrder
-	 */
-	@Schema({
-		        type: String,
-		        required: false,
-		        sparse: true
-	        })
-	@Column()
-	email?: string;
+	avatar: string;
+	
 	/**
 	 * Password Hash
 	 *
@@ -66,6 +80,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Schema({ type: String, required: false, select: false })
 	@Column()
 	hash?: string;
+	
 	/**
 	 * Current customer location (customer address, last known location of the customer)
 	 *
@@ -74,6 +89,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	 */
 	@Schema(getSchema(GeoLocation))
 	geoLocation: GeoLocation;
+	
 	/**
 	 * Apartment (stored separately from geolocation/address for efficiency)
 	 *
@@ -83,6 +99,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Schema(String)
 	@Column()
 	apartment: string;
+	
 	/**
 	 * CustomerId in the Stripe payment gateway (if customer added to Stripe, optional)
 	 *
@@ -92,6 +109,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Schema({ type: String, required: false })
 	@Column()
 	stripeCustomerId?: string;
+	
 	/**
 	 * IDs of customer mobile devices / browser
 	 *
@@ -100,6 +118,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	 */
 	@Schema([String])
 	devicesIds: string[];
+	
 	/**
 	 * IDs of customer in social networks / OAuth providers
 	 *
@@ -108,6 +127,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	 */
 	@Schema([String])
 	socialIds: string[];
+	
 	/**
 	 * Customer Primary Phone Number
 	 *
@@ -117,6 +137,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Schema(String)
 	@Column()
 	phone?: string;
+	
 	/**
 	 * Is customer completed registration
 	 *
@@ -127,7 +148,7 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 	@Column()
 	isRegistrationCompleted: boolean;
 	
-	constructor(userOrder: IUserOrder)
+	constructor(userOrder: ICustomerOrder)
 	{
 		super(userOrder);
 		
@@ -151,6 +172,17 @@ class UserOrder extends DBObject<IUserOrder, IUserOrderCreateObject>
 				`${this.apartment}/${this.geoLocation.house}`
 		);
 	}
+	
+	/**
+	 * Get full name of customer
+	 *
+	 * @readonly
+	 * @memberof UserOrder
+	 */
+	get fullName(): string
+	{
+		return `${this.firstName} ${this.lastName}`;
+	}
 }
 
-export default UserOrder;
+export default CustomerOrder;
