@@ -13,6 +13,7 @@ import { CreateObject }                                from '@pyro/db/db-create-
 import { FindObject }                                  from '@pyro/db/db-find-object';
 import { UpdateObject }                                from '@pyro/db/db-update-object';
 import { EntityService }                               from '@pyro/db-server/entity-service';
+import { env }                                         from '../../env'
 
 @injectable()
 export abstract class DBService<T extends DBObject<any, any>>
@@ -49,28 +50,28 @@ export abstract class DBService<T extends DBObject<any, any>>
 						)
 				),
 				tap({
-					    next: (obj) =>
-					    {
-						    this.log.debug(
-								    {
-									    objectId: id,
-									    object: obj,
-									    callId
-								    },
-								    '.get(id) emitted next value'
-						    );
-					    },
+					    next:  (obj) =>
+					           {
+						           this.log.debug(
+								           {
+									           objectId: id,
+									           object:   obj,
+									           callId
+								           },
+								           '.get(id) emitted next value'
+						           );
+					           },
 					    error: (err) =>
-					    {
-						    this.log.error(
-								    {
-									    objectId: id,
-									    err,
-									    callId
-								    },
-								    '.get(id), emitted error!'
-						    );
-					    }
+					           {
+						           this.log.error(
+								           {
+									           objectId: id,
+									           err,
+									           callId
+								           },
+								           '.get(id), emitted error!'
+						           );
+					           }
 				    })
 		);
 	}
@@ -104,20 +105,20 @@ export abstract class DBService<T extends DBObject<any, any>>
 				),
 				exhaustMap(() => this.getCurrentMultiple(ids)),
 				tap({
-					    next: (objects) =>
-					    {
-						    this.log.debug(
-								    { objectIds: ids, objects, callId },
-								    '.getMultiple(ids) emitted next value'
-						    );
-					    },
+					    next:  (objects) =>
+					           {
+						           this.log.debug(
+								           { objectIds: ids, objects, callId },
+								           '.getMultiple(ids) emitted next value'
+						           );
+					           },
 					    error: (err) =>
-					    {
-						    this.log.error(
-								    { objectIds: ids, err, callId },
-								    '.getMultiple(ids), emitted error!'
-						    );
-					    }
+					           {
+						           this.log.error(
+								           { objectIds: ids, err, callId },
+								           '.getMultiple(ids), emitted error!'
+						           );
+					           }
 				    })
 		);
 	}
@@ -149,13 +150,13 @@ export abstract class DBService<T extends DBObject<any, any>>
 		
 		this.log.debug({ callId, createObject }, '.create(createObject) called');
 		
-		let object;
+		let obj;
 		
 		try
 		{
 			const document = await this.Model.create(createObject);
 			
-			object = this.parse(document.toObject() as RawObject<T>);
+			obj = this.parse(document.toObject() as RawObject<T>);
 		} catch(error)
 		{
 			this.log.error(
@@ -166,29 +167,33 @@ export abstract class DBService<T extends DBObject<any, any>>
 		}
 		
 		this.existence.next({
-			                    id: object.id,
-			                    value: object,
+			                    id:        obj.id,
+			                    value:     obj,
 			                    lastValue: null,
-			                    type: ExistenceEventType.Created
+			                    type:      ExistenceEventType.Created
 		                    });
 		
 		this.log.debug(
-				{ callId, createObject, object },
+				{ callId, createObject, object: obj },
 				'.create(createObject) created object'
 		);
 		
-		return object;
+		return obj;
 	}
 	
 	/**
 	 * Removes all records from the DB
-	 * TODO: add Guards to avoid run on production
 	 *
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
 	async removeAll(): Promise<void>
 	{
+		if(env.isProd)
+		{
+			return;
+		}
+		
 		const callId = uuid();
 		
 		this.log.debug({ callId }, '.removeAll() called!');
@@ -248,10 +253,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 		else
 		{
 			this.existence.next({
-				                    id: objectId,
+				                    id:    objectId,
 				                    value: null,
 				                    lastValue,
-				                    type: ExistenceEventType.Removed
+				                    type:  ExistenceEventType.Removed
 			                    });
 			
 			this.log.debug(
@@ -300,10 +305,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 		_.each(lastValues, (lastValue) =>
 		{
 			this.existence.next({
-				                    id: lastValue.id,
+				                    id:    lastValue.id,
 				                    lastValue,
 				                    value: null,
-				                    type: ExistenceEventType.Removed
+				                    type:  ExistenceEventType.Removed
 			                    });
 		});
 		
@@ -452,10 +457,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 		}
 		
 		this.existence.next({
-			                    id: objectId,
-			                    value: updatedObject,
+			                    id:        objectId,
+			                    value:     updatedObject,
 			                    lastValue: beforeUpdateObject,
-			                    type: ExistenceEventType.Updated
+			                    type:      ExistenceEventType.Updated
 		                    });
 		
 		this.log.debug(
@@ -514,10 +519,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 			) as T;
 			
 			this.existence.next({
-				                    id: lastValue.id,
+				                    id:    lastValue.id,
 				                    lastValue,
 				                    value: newValue,
-				                    type: ExistenceEventType.Updated
+				                    type:  ExistenceEventType.Updated
 			                    });
 		});
 		
@@ -556,11 +561,11 @@ export abstract class DBService<T extends DBObject<any, any>>
 						// TODO: rewrite below
 						// tslint:disable-next-line:no-object-literal-type-assertion
 						_id: {
-							$in: _.map(
-									ids,
-									(id) => new mongoose.Types.ObjectId(id)
-							)
-						} as FindObject<T>
+							     $in: _.map(
+									     ids,
+									     (id) => new mongoose.Types.ObjectId(id)
+							     )
+						     } as FindObject<T>
 					},
 					updateObj
 			);
