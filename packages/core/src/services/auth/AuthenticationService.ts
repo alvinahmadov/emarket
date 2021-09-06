@@ -3,9 +3,10 @@ import jwt                                          from 'jsonwebtoken';
 import { first }                                    from 'rxjs/operators';
 import { inject, injectable, LazyServiceIdentifer } from 'inversify';
 import { routerName }                               from '@pyro/io';
-import JwtAppType                                   from "@modules/server.common/enums/JwtAppType"
+import JwtAppType                                   from '@modules/server.common/enums/JwtAppType'
 import { WarehousesService }                        from '../warehouses';
 import { CarriersService }                          from '../carriers';
+import { CustomersService }                         from '../customers';
 import { env }                                      from '../../env';
 
 const jwtSecret = env.JWT_SECRET;
@@ -25,9 +26,9 @@ export const createJwtData = {
 
 export interface JwtPayload
 {
-	// id of carrier or warehouse
+	// id of carrier or warehouse or user
 	id: string;
-	// name of app, e.g. 'carrier' or 'warehouse'.
+	// name of app, e.g. 'carrier' or 'warehouse' or 'shopweb'.
 	appName: JwtAppType;
 }
 
@@ -47,22 +48,31 @@ export class AuthenticationService
 			@inject(new LazyServiceIdentifer(() => WarehousesService))
 			protected warehousesService: WarehousesService,
 			@inject(new LazyServiceIdentifer(() => CarriersService))
-			protected carriersService: CarriersService
+			protected carriersService: CarriersService,
+			@inject(new LazyServiceIdentifer(() => CustomersService))
+			protected usersService: CustomersService
 	)
 	{}
 	
 	async validateUser(payload: JwtPayload): Promise<any>
 	{
-		if(payload.appName === 'carrier')
+		if(payload.appName === JwtAppType.CARRIER)
 		{
 			return this.carriersService
 			           .get(payload.id)
 			           .pipe(first())
 			           .toPromise();
 		}
-		else if(payload.appName === 'warehouse')
+		else if(payload.appName === JwtAppType.WAREHOUSE)
 		{
 			return this.warehousesService
+			           .get(payload.id)
+			           .pipe(first())
+			           .toPromise();
+		}
+		else if(payload.appName === JwtAppType.SHOPWEB)
+		{
+			return this.usersService
 			           .get(payload.id)
 			           .pipe(first())
 			           .toPromise();
