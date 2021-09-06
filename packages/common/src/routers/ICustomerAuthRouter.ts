@@ -1,4 +1,4 @@
-import User             from '../entities/User';
+import Customer         from '../entities/Customer';
 import { CreateObject } from '@pyro/db/db-create-object';
 
 export interface AddableRegistrationInfo
@@ -11,42 +11,42 @@ export interface AddableRegistrationInfo
 	phone?: string;
 }
 
-export interface IUserRegistrationInput
+export interface ICustomerRegistrationInput
 {
-	user: CreateObject<User>;
+	user: CreateObject<Customer>;
 	password?: string;
 }
 
-export interface IUserLoginResponse
+export interface ICustomerLoginResponse
 {
-	user: User;
+	user: Customer;
 	token: string;
 }
 
-interface IUserAuthRouter
+interface ICustomerAuthRouter
 {
 	/**
 	 * Register Customer with given details
 	 * Note: if invites system is on, it throws NotInvited if customer not invited
 	 *
-	 * @param {IUserRegistrationInput} input
-	 * @returns {Promise<User>}
+	 * @param {ICustomerRegistrationInput} input
+	 * @returns {Promise<Customer>}
 	 * @memberof IUserAuthRouter
 	 */
-	register(input: IUserRegistrationInput): Promise<User>;
+	register(input: ICustomerRegistrationInput): Promise<Customer>;
 	
 	login(
 			username: string,
 			password: string
-	): Promise<IUserLoginResponse | null>;
+	): Promise<ICustomerLoginResponse | null>;
 	
 	addRegistrationInfo(
-			id: User['id'],
+			id: Customer['id'],
 			info: AddableRegistrationInfo
 	): Promise<void>;
 	
 	updatePassword(
-			id: User['id'],
+			id: Customer['id'],
 			password: { current: string; new: string }
 	): Promise<void>;
 	
@@ -55,4 +55,4 @@ interface IUserAuthRouter
 	}>;
 }
 
-export default IUserAuthRouter;
+export default ICustomerAuthRouter;
