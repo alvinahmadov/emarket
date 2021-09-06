@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import _              from 'lodash';
 import Product        from '@modules/server.common/entities/Product';
-import User           from '@modules/server.common/entities/User';
+import Customer       from '@modules/server.common/entities/Customer';
 
 @injectable()
 export class FakeOrdersService
@@ -16,7 +16,7 @@ export class FakeOrdersService
 			storeId: string,
 			storeCreatedAt: Date,
 			carrierId: string,
-			customers: User[],
+			customers: Customer[],
 			products: Product[]
 	)
 	{
@@ -156,173 +156,173 @@ export class FakeOrdersService
 			const orderPrice = this.getRandomOrderProductPrice();
 			
 			orderProducts.push({
-				                   count: this.getRandomOrderProductCount(),
-				                   product: this.getRandomProduct(productNumber, products),
+				                   count:           this.getRandomOrderProductCount(),
+				                   product:         this.getRandomProduct(productNumber, products),
 				                   isManufacturing: true,
-				                   price: orderPrice,
-				                   initialPrice: orderPrice
+				                   price:           orderPrice,
+				                   initialPrice:    orderPrice
 			                   });
 		}
 		
 		return orderProducts;
 	}
 	
-	getRandomOrderCustomer(customers: User[]): User
+	getRandomOrderCustomer(customers: Customer[]): Customer
 	{
 		return customers[this._orderNumber % customers.length];
 	}
 	
-	private _getOrderDeliveryCompleted(customers: User[], products: Product[])
+	private _getOrderDeliveryCompleted(customers: Customer[], products: Product[])
 	{
 		const startDeliveryTime = this.getOrderNextTime(this._orderCreatedAt);
 		const deliveryTime = this.getOrderNextTime(startDeliveryTime);
 		
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: true,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               true,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 5,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			carrier: this._carrierId,
+			warehouseStatus:      6,
+			carrierStatus:        5,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			carrier:              this._carrierId,
 			startDeliveryTime,
 			deliveryTime,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
 	private _getOrderCarrierArriveToCustomer(
-			customers: User[],
+			customers: Customer[],
 			products: Product[]
 	)
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 4,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			carrier: this._carrierId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			startDeliveryTime: this.getOrderNextTime(this._orderCreatedAt),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      6,
+			carrierStatus:        4,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			carrier:              this._carrierId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			startDeliveryTime:    this.getOrderNextTime(this._orderCreatedAt),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderCarrierPickup(customers: User[], products: Product[])
+	private _getOrderCarrierPickup(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 2,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			carrier: this._carrierId,
-			startDeliveryTime: this.getOrderNextTime(this._orderCreatedAt),
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      6,
+			carrierStatus:        2,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			carrier:              this._carrierId,
+			startDeliveryTime:    this.getOrderNextTime(this._orderCreatedAt),
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderCarrierSelected(customers: User[], products: Product[])
+	private _getOrderCarrierSelected(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 1,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			carrier: this._carrierId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      6,
+			carrierStatus:        1,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			carrier:              this._carrierId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderPackagingFinished(customers: User[], products: Product[])
+	private _getOrderPackagingFinished(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      6,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
 	private _getOrderAllocationFinished(
-			customers: User[],
+			customers: Customer[],
 			products: Product[]
 	)
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 4,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      4,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderClientRefuseOrder(customers: User[], products: Product[])
+	private _getOrderClientRefuseOrder(customers: Customer[], products: Product[])
 	{
 		const startDeliveryTime = this.getOrderNextTime(this._orderCreatedAt);
 		const finishedProcessingTime = this.getOrderNextTime(startDeliveryTime);
 		
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 205,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			carrier: this._carrierId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
+			warehouseStatus:      6,
+			carrierStatus:        205,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			carrier:              this._carrierId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
 			startDeliveryTime,
 			finishedProcessingTime,
-			_createdAt: this._orderCreatedAt
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
 	private _getOrderIssuesDuringDelivery(
-			customers: User[],
+			customers: Customer[],
 			products: Product[]
 	)
 	{
@@ -330,204 +330,204 @@ export class FakeOrdersService
 		const finishedProcessingTime = this.getOrderNextTime(startDeliveryTime);
 		
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 6,
-			carrierStatus: 204,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			carrier: this._carrierId,
+			warehouseStatus:      6,
+			carrierStatus:        204,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			carrier:              this._carrierId,
 			startDeliveryTime,
 			finishedProcessingTime,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderPackagingFails(customers: User[], products: Product[])
+	private _getOrderPackagingFails(customers: Customer[], products: Product[])
 	{
 		const finishedProcessingTime = this.getOrderNextTime(
 				this._orderCreatedAt
 		);
 		
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 201,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
+			warehouseStatus:      201,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
 			finishedProcessingTime,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderAllocationFails(customers: User[], products: Product[])
+	private _getOrderAllocationFails(customers: Customer[], products: Product[])
 	{
 		const finishedProcessingTime = this.getOrderNextTime(
 				this._orderCreatedAt
 		);
 		
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 200,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
+			warehouseStatus:      200,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
 			finishedProcessingTime,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderPackagingStarted(customers: User[], products: Product[])
+	private _getOrderPackagingStarted(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 5,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      5,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderStartAllocation(customers: User[], products: Product[])
+	private _getOrderStartAllocation(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 3,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      3,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
 	private _getOrderStoreStartProcessing(
-			customers: User[],
+			customers: Customer[],
 			products: Product[]
 	)
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 2,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      2,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
 	private _getOrderReadyForProcessing(
-			customers: User[],
+			customers: Customer[],
 			products: Product[]
 	)
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 1,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      1,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderCancelled(customers: User[], products: Product[])
+	private _getOrderCancelled(customers: Customer[], products: Product[])
 	{
 		const finishedProcessingTime = this.getOrderNextTime(
 				this._orderCreatedAt
 		);
 		
 		return {
-			isConfirmed: true,
-			isCancelled: true,
-			isPaid: false,
+			isConfirmed:          true,
+			isCancelled:          true,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 0,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: 1,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
+			warehouseStatus:      0,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          1,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
 			finishedProcessingTime,
-			_createdAt: this._orderCreatedAt
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderConfirmed(customers: User[], products: Product[])
+	private _getOrderConfirmed(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: true,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          true,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 0,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: 1,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      0,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          1,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 	
-	private _getOrderJustCreated(customers: User[], products: Product[])
+	private _getOrderJustCreated(customers: Customer[], products: Product[])
 	{
 		return {
-			isConfirmed: false,
-			isCancelled: false,
-			isPaid: false,
+			isConfirmed:          false,
+			isCancelled:          false,
+			isPaid:               false,
 			deliveryTimeEstimate: 0,
-			warehouseStatus: 0,
-			carrierStatus: 0,
-			isDeleted: false,
-			orderNumber: this._orderNumber,
-			warehouse: this._storeId,
-			user: this.getRandomOrderCustomer(customers),
-			products: this.generateRandomOrderProducts(products),
-			_createdAt: this._orderCreatedAt
+			warehouseStatus:      0,
+			carrierStatus:        0,
+			isDeleted:            false,
+			orderNumber:          this._orderNumber,
+			warehouse:            this._storeId,
+			user:                 this.getRandomOrderCustomer(customers),
+			products:             this.generateRandomOrderProducts(products),
+			_createdAt:           this._orderCreatedAt
 		};
 	}
 }
