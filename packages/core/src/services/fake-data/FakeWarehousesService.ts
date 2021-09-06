@@ -1,90 +1,107 @@
-import { injectable }               from "inversify";
-import faker                        from "faker";
-import bcrypt                       from "bcryptjs";
-import { IWarehouseCreateObject }   from "@modules/server.common/interfaces/IWarehouse";
-import { IGeoLocationCreateObject } from "@modules/server.common/interfaces/IGeoLocation";
-import ForwardOrdersMethod          from "@modules/server.common/enums/ForwardOrdersMethod";
-import Warehouse                    from "@modules/server.common/entities/Warehouse";
-import { Country }                  from "@modules/server.common/entities/GeoLocation";
-import { WarehousesAuthService }    from "../warehouses";
-import { env }                      from "../../env";
-import { Inject }                   from "@nestjs/common";
+import { injectable }               from 'inversify';
+import faker                        from 'faker';
+import UserRole                     from '@modules/server.common/consts/role';
+import { IWarehouseCreateObject }   from '@modules/server.common/interfaces/IWarehouse';
+import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
+import ForwardOrdersMethod          from '@modules/server.common/enums/ForwardOrdersMethod';
+import Country                      from '@modules/server.common/enums/Country';
+import Warehouse                    from '@modules/server.common/entities/Warehouse';
+import Customer                     from '@modules/server.common/entities/Customer';
+import { CustomersService }         from '../customers';
+import {
+	WarehousesService,
+	WarehousesAuthService
+}                                   from '../warehouses';
 
-type FakeUserInput = {
-	username: string;
-	password: string;
-	email: string;
-	phone?: string
+export declare type TestWarehouseUserGenerationInput = {
+	username?: string;
+	email?: string;
+	password?: string;
+	coordinates?: [number, number];
+	role?: UserRole | string;
 }
 
 @injectable()
 export class FakeWarehousesService
 {
 	constructor(
-			@Inject(WarehousesAuthService)
+			private readonly usersService: CustomersService,
+			private readonly warehousesService: WarehousesService,
 			private readonly warehousesAuthService: WarehousesAuthService
 	)
 	{}
 	
-	async generateWarehouse(userInput: FakeUserInput): Promise<Warehouse>
+	async generateWarehouse(merchant: Customer, password: string): Promise<Warehouse | null>
 	{
-		const username = userInput.username;
-		const password = userInput.password;
-		const email = userInput.email;
-		const phone = userInput.phone ?? faker.phone.phoneNumber("+7##########");
-		const defaultLng = 55.7522;
-		const defaultLat = 37.6156;
-		const warehouseName = faker.company.companyName();
-		const geoLocation: IGeoLocationCreateObject = {
-			countryId: Country.RU,
-			city: faker.address.city(Country.RU),
-			house: `0`,
-			loc: {
-				type: 'Point',
-				coordinates: [defaultLng, defaultLat]
-			},
-			postcode: faker.address.zipCode(),
-			streetAddress: faker.address.streetAddress()
-		};
-		
-		const existingWarehouse = await this.warehousesAuthService
-		                                    .Model
-		                                    .findOne({ username: username });
-		
-		const salt = await bcrypt.genSalt(
-				env.WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS
-		);
-		
-		const hash = await bcrypt.hash(password, salt);
-		
-		if(!existingWarehouse)
+		if(merchant)
 		{
-			let warehouseCreateObj: IWarehouseCreateObject = {
-				username: username,
-				name: warehouseName,
-				isActive: true,
-				hash: hash,
-				inStoreMode: true,
-				contactEmail: email,
-				contactPhone: phone,
-				geoLocation: geoLocation,
-				logo: faker.image.business(300, 300),
-				ordersEmail: null,
-				ordersPhone: null,
+			const warehouse = await this.getWarehouse({ 'merchant._id': merchant.id });
+			if(warehouse)
+			{
+				return warehouse;
+			}
+			
+			console.log('Creating new warehouse');
+			let warehouseCreateObj: IWarehouseCreateObject;
+			
+			const warehouseName = faker.company.companyName();
+			const phone = faker.phone.phoneNumber("+7##########");
+			const ordersEmail = faker.internet.email();
+			const ordersPhone = faker.phone.phoneNumber("+7##########");
+			const logo = faker.image.business(300, 300);
+			const geoLocation = FakeWarehousesService.generateGeolocation(37.6156, 55.7522);
+			const isActive = true;
+			const inStoreMode = true;
+			
+			console.log('Creating warehouse from merchant object', merchant);
+			
+			warehouseCreateObj = {
+				username:           merchant.name,
+				merchant:           merchant,
+				name:               warehouseName,
+				logo:               logo,
+				geoLocation:        geoLocation,
+				contactEmail:       merchant.email,
+				contactPhone:       merchant.phone ?? phone,
+				isActive:           isActive,
+				inStoreMode:        inStoreMode,
+				ordersEmail:        ordersEmail,
+				ordersPhone:        ordersPhone,
 				forwardOrdersUsing: [
 					ForwardOrdersMethod.Email,
 					ForwardOrdersMethod.Phone
 				]
 			};
 			
-			// init
-			let warehouse = await this.warehousesAuthService.create(warehouseCreateObj);
+			// Make customer as a new merchant
+			await this.usersService.updateRole(merchant.id, 'merchant');
 			
-			// register
 			return this.warehousesAuthService.register({
-				                                           warehouse: warehouse,
-				                                           password: password
+				                                           warehouse: warehouseCreateObj,
+				                                           password:  password
 			                                           });
 		}
+		
+		return null;
+	}
+	
+	private static generateGeolocation(lat: number, lng: number): IGeoLocationCreateObject
+	{
+		return {
+			countryId:     Country.RU,
+			city:          faker.address.city(),
+			house:         `0`,
+			loc:           {
+				type:        'Point',
+				coordinates: [lng, lat]
+			},
+			postcode:      faker.address.zipCode(),
+			streetAddress: faker.address.streetAddress()
+		};
+	}
+	
+	private async getWarehouse(findObj)
+	{
+		return await this.warehousesService.findOne(findObj);
 	}
 }
