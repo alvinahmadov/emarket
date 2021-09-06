@@ -1,26 +1,77 @@
-import { Entity, Column }           from 'typeorm';
-import GeoLocation                  from './GeoLocation';
+import { Entity, Column }                   from 'typeorm';
+import GeoLocation                          from './GeoLocation';
 import {
 	DBObject,
 	getSchema,
 	ModelName,
 	Schema,
 	Types
-}                                   from '../@pyro/db';
-import IUser, { IUserCreateObject } from '../interfaces/IUser';
+}                                           from '../@pyro/db';
+import ICustomer, { ICustomerCreateObject } from '../interfaces/ICustomer';
+import UserRole                             from '../consts/role';
 
 /**
  * Customer who make orders
  * TODO: historically called 'User', but we will rename to 'Customer'
  *
- * @class User
- * @extends {DBObject<IUser, IUserCreateObject>}
- * @implements {IUser}
+ * @class Customer
+ * @extends {DBObject<ICustomer, ICustomerCreateObject>}
+ * @implements {ICustomer}
  */
-@ModelName('User')
-@Entity({ name: 'users' })
-class User extends DBObject<IUser, IUserCreateObject> implements IUser
+@ModelName('Customer')
+@Entity({ name: 'customers' })
+class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICustomer
 {
+	/**
+	 * User Name
+	 *
+	 * @type {string}
+	 * @memberof User
+	 */
+	@Schema({ type: String, required: true })
+	@Column()
+	name: string;
+	
+	/**
+	 * Primary Email Address
+	 *
+	 * @type {string}
+	 * @memberof UserOrder
+	 */
+	@Schema({
+		        type:     String,
+		        required: true,
+		        sparse:   true,
+		        unique:   true
+	        })
+	@Column()
+	email: string;
+	
+	/**
+	 * Password hash
+	 *
+	 * @type {string}
+	 * @memberof User
+	 */
+	@Schema({
+		        type:     String,
+		        required: false,
+		        select:   false
+	        })
+	@Column()
+	hash?: string;
+	
+	/**
+	 * Customer Image (Photo/Avatar) URL
+	 * (optional)
+	 *
+	 * @type {string}
+	 * @memberof User
+	 */
+	@Schema({ type: String, required: false })
+	@Column()
+	avatar: string;
+	
 	/**
 	 * First Name
 	 *
@@ -41,45 +92,13 @@ class User extends DBObject<IUser, IUserCreateObject> implements IUser
 	@Column()
 	lastName?: string;
 	
-	/**
-	 * Customer Image (Photo/Avatar) URL
-	 * (optional)
-	 *
-	 * @type {string}
-	 * @memberof User
-	 */
-	@Schema({ type: String, required: false })
-	@Column()
-	image: string;
-	
-	/**
-	 * Primary Email Address
-	 *
-	 * @type {string}
-	 * @memberof UserOrder
-	 */
 	@Schema({
-		        type: String,
-		        required: false,
-		        sparse: true,
-		        unique: true
+		        type:     String,
+		        default:  'customer',
+		        required: false
 	        })
 	@Column()
-	email?: string;
-	
-	/**
-	 * Password hash
-	 *
-	 * @type {string}
-	 * @memberof User
-	 */
-	@Schema({
-		        type: String,
-		        required: false,
-		        select: false
-	        })
-	@Column()
-	hash?: string;
+	role?: UserRole;
 	
 	/**
 	 * Current customer location (customer address, last known location of the customer)
@@ -162,14 +181,25 @@ class User extends DBObject<IUser, IUserCreateObject> implements IUser
 	@Column()
 	isDeleted: boolean;
 	
-	constructor(user: IUser)
+	constructor(customer: ICustomer)
 	{
-		super(user);
+		super(customer);
 		
-		if(user && user.geoLocation)
+		if(customer && customer.geoLocation)
 		{
-			this.geoLocation = new GeoLocation(user.geoLocation);
+			this.geoLocation = new GeoLocation(customer.geoLocation);
 		}
+	}
+	
+	/**
+	 * Get full name of customer
+	 *
+	 * @readonly
+	 * @memberof User
+	 */
+	get fullName(): string
+	{
+		return `${this.firstName} ${this.lastName}`;
 	}
 	
 	/**
@@ -188,4 +218,4 @@ class User extends DBObject<IUser, IUserCreateObject> implements IUser
 	}
 }
 
-export default User;
+export default Customer;
