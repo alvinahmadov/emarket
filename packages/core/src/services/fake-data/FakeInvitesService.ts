@@ -1,9 +1,9 @@
-import { injectable }                 from "inversify";
-import faker                          from "faker";
+import { injectable }                 from 'inversify';
+import faker                          from 'faker';
 import { IGeoLocationCreateObject }   from '@modules/server.common/interfaces/IGeoLocation';
-import { IInviteRequestCreateObject } from "@modules/server.common/interfaces/IInviteRequest";
-import { IInviteCreateObject }        from "@modules/server.common/interfaces/IInvite";
-import { Country }                    from "@modules/server.common/entities/GeoLocation";
+import { IInviteRequestCreateObject } from '@modules/server.common/interfaces/IInviteRequest';
+import { IInviteCreateObject }        from '@modules/server.common/interfaces/IInvite';
+import Country                        from '@modules/server.common/enums/Country';
 
 type InviteCreateObject = {
 	invitesRequestsToCreate: IInviteRequestCreateObject[];
@@ -37,16 +37,16 @@ export class FakeInvitesService
 			const apartment: string = `${inviteCount}`;
 			const houseNumber = `${inviteCount}`;
 			const geoLocation: IGeoLocationCreateObject =
-					FakeInvitesService._getInviteGeoLocationCreateObj(
-							houseNumber,
-							defaultLng,
-							defaultLat
-					);
+					      FakeInvitesService._getInviteGeoLocationCreateObj(
+							      houseNumber,
+							      defaultLng,
+							      defaultLat
+					      );
 			
 			invitesRequestsToCreate.push({
 				                             apartment,
 				                             geoLocation,
-				                             isInvited: true,
+				                             isInvited:   true,
 				                             invitedDate: new Date()
 			                             });
 			
@@ -72,11 +72,11 @@ export class FakeInvitesService
 	): IGeoLocationCreateObject
 	{
 		return {
-			countryId: faker.random.number(Country.ZW) as Country,
-			city: faker.address.city(),
-			house: houseNumber,
-			loc: {
-				type: 'Point',
+			countryId:     faker.random.number(Country.ZW) as Country,
+			city:          faker.address.city(),
+			house:         houseNumber,
+			loc:           {
+				type:        'Point',
 				coordinates: [defaultLng, defaultLat]
 			},
 			streetAddress: faker.address.streetAddress()
