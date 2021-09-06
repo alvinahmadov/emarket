@@ -1,19 +1,20 @@
-import { EntityService }          from '@pyro/db-server/entity-service';
+import bcrypt                     from 'bcryptjs';
+import { injectable, interfaces } from 'inversify';
+import {
+	JsonWebTokenError,
+	sign,
+	verify
+}                                 from 'jsonwebtoken';
 import {
 	DBCreateObject,
 	DBObject,
 	DBRawObject,
 	PyroObjectId
 }                                 from '@pyro/db';
-import { env }                    from '../../env';
-import { WrongPasswordError }     from '@modules/server.common/errors/WrongPasswordError';
-import bcrypt                     from 'bcryptjs';
-import { injectable, interfaces } from 'inversify';
 import { RawObject }              from '@pyro/db/db-raw-object';
-
-// have to combine the two imports
-import jwt                   from 'jsonwebtoken';
-import { JsonWebTokenError } from 'jsonwebtoken';
+import { EntityService }          from '@pyro/db-server/entity-service';
+import { WrongPasswordError }     from '@modules/server.common/errors/WrongPasswordError';
+import { env }                    from '../../env';
 
 interface IAuthableCreateObject extends DBCreateObject
 {
@@ -132,7 +133,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 				return null;
 			}
 			
-			const token = jwt.sign(
+			const token = sign(
 					{ id: entity.id, role: this.role },
 					env.JWT_SECRET,
 					{
@@ -168,7 +169,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 	{
 		try
 		{
-			const { id, role } = jwt.verify(token, env.JWT_SECRET) as {
+			const { id, role } = verify(token, env.JWT_SECRET) as {
 				id: T['id'];
 				role: string;
 			};
