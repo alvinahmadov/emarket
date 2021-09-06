@@ -2,6 +2,7 @@ import { DBObject, ModelName }        from '../@pyro/db';
 import IAdmin, { IAdminCreateObject } from '../interfaces/IAdmin';
 import { Schema, Types }              from '@pyro/db';
 import { Entity, Column }             from 'typeorm';
+import UserRole                       from '../consts/role';
 
 /**
  * Registered Admin Users (e.g. Administrators)
@@ -32,6 +33,7 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	 * @type {string}
 	 * @memberof Admin
 	 */
+	@Schema({ type: String, unique: true })
 	@Types.String()
 	@Column()
 	name: string;
@@ -55,17 +57,11 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	 */
 	@Types.String()
 	@Column()
-	pictureUrl: string;
+	avatar: string;
 	
-	/**
-	 * Is User Removed (Deleted)
-	 *
-	 * @type {boolean}
-	 * @memberof Admin
-	 */
-	@Types.Boolean(false)
+	@Types.String('admin')
 	@Column()
-	isDeleted: boolean;
+	role: UserRole;
 	
 	/**
 	 * User First Name
@@ -74,7 +70,7 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	 * @memberof Admin
 	 */
 	@Schema({
-		        type: String,
+		        type:     String,
 		        required: false,
 		        validate: new RegExp(`^[a-z ,.'-]+$`, 'i')
 	        })
@@ -88,12 +84,27 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	 * @memberof Admin
 	 */
 	@Schema({
-		        type: String,
+		        type:     String,
 		        required: false,
 		        validate: new RegExp(`^[a-z ,.'-]+$`, 'i')
 	        })
 	@Column()
 	lastName?: string;
+	
+	/**
+	 * Is User Removed (Deleted)
+	 *
+	 * @type {boolean}
+	 * @memberof Admin
+	 */
+	@Types.Boolean(false)
+	@Column()
+	isDeleted: boolean;
+	
+	get fullName()
+	{
+		return `${this.firstName} ${this.lastName}`;
+	}
 }
 
 export default Admin;
