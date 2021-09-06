@@ -1,6 +1,7 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
+import IUser                                         from '../interfaces/IUser';
 
-export interface IAdminCreateObject extends DBCreateObject
+export interface IAdminCreateObject extends DBCreateObject, IUser
 {
 	/**
 	 * Full name (First Name plus Last Name)
@@ -23,7 +24,7 @@ export interface IAdminCreateObject extends DBCreateObject
 	avatar: string;
 }
 
-export interface IAdminUpdateObject extends DBCreateObject
+export interface IAdminUpdateObject extends DBCreateObject, IUser
 {
 	/**
 	 * Full name (First Name plus Last Name)
