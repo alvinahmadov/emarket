@@ -1,15 +1,14 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
 import IGeoLocation, { IGeoLocationCreateObject }    from './IGeoLocation';
 import IUser                                         from './IUser';
-import { UserRole }                                  from '../consts/role'
 
 export interface ICustomerInitializeObject extends DBCreateObject, IUser
 {
-	
+	name: string;
+	email: string;
 	phone?: string;
 	socialIds?: string[];
 	isRegistrationCompleted?: boolean;
-	role?: UserRole;
 	isBanned?: boolean;
 }
 
@@ -22,6 +21,18 @@ export interface ICustomerCreateObject extends ICustomerInitializeObject
 	stripeCustomerId?: string;
 }
 
+export interface ICustomerUpdateObject extends DBCreateObject, IUser
+{
+	email?: string;
+	avatar?: string;
+	firstName?: string;
+	lastName?: string;
+	socialIds?: string[];
+	isRegistrationCompleted?: boolean;
+	apartment?: string;
+	geoLocation?: IGeoLocationCreateObject;
+}
+
 export interface IResponseGenerateCustomers
 {
 	success: boolean;
@@ -31,6 +42,8 @@ export interface IResponseGenerateCustomers
 interface ICustomer extends ICustomerCreateObject, ICustomerInitializeObject, DBRawObject
 {
 	_id: PyroObjectId;
+	name: string;
+	email: string;
 	geoLocation: IGeoLocation;
 	devicesIds: string[];
 	readonly fullAddress: string;
