@@ -2,16 +2,16 @@ import { inject, injectable }              from 'inversify';
 import Logger                              from 'bunyan';
 import { asyncListener, routerName }       from '@pyro/io';
 import { EntityService }                   from '@pyro/db-server/entity-service';
-import { IUserCreateObject }               from '@modules/server.common/interfaces/IUser';
-import User                                from '@modules/server.common/entities/User';
-import IUserAuthRouter, {
+import { ICustomerCreateObject }           from '@modules/server.common/interfaces/ICustomer';
+import Customer                            from '@modules/server.common/entities/Customer';
+import ICustomerAuthRouter, {
 	AddableRegistrationInfo,
-	IUserLoginResponse,
-	IUserRegistrationInput
-}                                          from '@modules/server.common/routers/IUserAuthRouter';
+	ICustomerLoginResponse,
+	ICustomerRegistrationInput
+}                                          from '@modules/server.common/routers/ICustomerAuthRouter';
 import { NotInvitedError }                 from '@modules/server.common/errors/NotInvitedError';
-import { UsersService }                    from './UsersService';
 import IService                            from '../IService';
+import { CustomersService }                from '../customers';
 import { AuthService, AuthServiceFactory } from '../auth';
 import { InvitesService }                  from '../invites';
 import { createLogger }                    from '../../helpers/Log';
@@ -22,26 +22,26 @@ import { env }                             from '../../env';
  * TODO: rename "Users" to "Customers"
  *
  * @export
- * @class UsersAuthService
+ * @class CustomersAuthService
  * @extends {EntityService<User>}
  * @implements {IUserAuthRouter}
  * @implements {IService}
  */
 @injectable()
 @routerName('user-auth')
-export class UsersAuthService extends EntityService<User>
-		implements IUserAuthRouter, IService
+export class CustomersAuthService extends EntityService<Customer>
+		implements ICustomerAuthRouter, IService
 {
 	private static IS_INVITES_SYSTEM_ON: boolean = env.SETTING_INVITES_ENABLED;
-	readonly DBObject: any = User;
+	readonly DBObject: any = Customer;
 	protected readonly log: Logger = createLogger({
 		                                              name: 'userAuthService'
 	                                              });
 	
-	private readonly authService: AuthService<User>;
+	private readonly authService: AuthService<Customer>;
 	
 	constructor(
-			private readonly usersService: UsersService,
+			private readonly usersService: CustomersService,
 			private readonly invitesService: InvitesService,
 			@inject('Factory<AuthService>')
 			private readonly authServiceFactory: AuthServiceFactory
@@ -50,8 +50,8 @@ export class UsersAuthService extends EntityService<User>
 		super();
 		
 		this.authService = this.authServiceFactory({
-			                                           role: 'user',
-			                                           Entity: User,
+			                                           role:       'user',
+			                                           Entity:     Customer,
 			                                           saltRounds: env.USER_PASSWORD_BCRYPT_SALT_ROUNDS
 		                                           });
 	}
@@ -66,10 +66,10 @@ export class UsersAuthService extends EntityService<User>
 	 * @memberof UsersAuthService
 	 */
 	@asyncListener()
-	async register(input: IUserRegistrationInput): Promise<User>
+	async register(input: ICustomerRegistrationInput): Promise<Customer>
 	{
 		if(
-				UsersAuthService.IS_INVITES_SYSTEM_ON &&
+				CustomersAuthService.IS_INVITES_SYSTEM_ON &&
 				!(await this._isInvited(input.user))
 		)
 		{
@@ -113,7 +113,7 @@ export class UsersAuthService extends EntityService<User>
 	 */
 	@asyncListener()
 	async updatePassword(
-			id: User['id'],
+			id: Customer['id'],
 			password: { current: string; new: string }
 	): Promise<void>
 	{
@@ -137,7 +137,7 @@ export class UsersAuthService extends EntityService<User>
 	 */
 	@asyncListener()
 	async addRegistrationInfo(
-			id: User['id'],
+			id: Customer['id'],
 			{ email, password, firstName, lastName, phone }: AddableRegistrationInfo
 	): Promise<void>
 	{
@@ -162,19 +162,20 @@ export class UsersAuthService extends EntityService<User>
 	
 	/**
 	 * Login Customer (returns user record and Auth token)
+	 * TODO: Make possible to login by email or username
 	 *
-	 * @param {string} email
+	 * @param {string} emailOrUsername
 	 * @param {string} password
 	 * @returns {(Promise<IUserLoginResponse | null>)}
 	 * @memberof UsersAuthService
 	 */
 	@asyncListener()
 	async login(
-			email: string,
+			emailOrUsername: string,
 			password: string
-	): Promise<IUserLoginResponse | null>
+	): Promise<ICustomerLoginResponse | null>
 	{
-		const res = await this.authService.login({ email }, password);
+		const res = await this.authService.login({ emailOrUsername }, password);
 		
 		if(!res || res.entity.isDeleted)
 		{
@@ -182,7 +183,7 @@ export class UsersAuthService extends EntityService<User>
 		}
 		
 		return {
-			user: res.entity,
+			user:  res.entity,
 			token: res.token
 		};
 	}
@@ -209,16 +210,16 @@ export class UsersAuthService extends EntityService<User>
 	}
 	
 	private async _isInvited(
-			userCreateObject: IUserCreateObject
+			userCreateObject: ICustomerCreateObject
 	): Promise<boolean>
 	{
 		const inviteFindObject = {
 			'geoLocation.countryId': userCreateObject.geoLocation.countryId,
-			'geoLocation.city': userCreateObject.geoLocation.city,
+			'geoLocation.city':      userCreateObject.geoLocation.city,
 			'geoLocation.streetAddress':
-			userCreateObject.geoLocation.streetAddress,
-			'geoLocation.house': userCreateObject.geoLocation.house,
-			apartment: userCreateObject.apartment
+			                         userCreateObject.geoLocation.streetAddress,
+			'geoLocation.house':     userCreateObject.geoLocation.house,
+			apartment:               userCreateObject.apartment
 		};
 		
 		if(userCreateObject.geoLocation.postcode)
