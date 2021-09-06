@@ -1,7 +1,9 @@
-import UserOrder    from './UserOrder';
-import Warehouse    from './Warehouse';
-import OrderProduct from './OrderProduct';
-import Carrier      from './Carrier';
+import _                              from 'lodash';
+import { Entity, Column }             from 'typeorm';
+import CustomerOrder                  from './CustomerOrder';
+import Warehouse                      from './Warehouse';
+import OrderProduct                   from './OrderProduct';
+import Carrier                        from './Carrier';
 import {
 	DBObject,
 	Schema,
@@ -9,23 +11,20 @@ import {
 	ModelName,
 	Types,
 	getSchema
-}                   from '../@pyro/db';
-import _            from 'lodash';
-
-import OrderWarehouseStatus, {
-	warehouseStatusToString
-}                                     from '../enums/OrderWarehouseStatus';
+}                                     from '../@pyro/db';
+import ICarrier                       from '../interfaces/ICarrier';
+import ILanguage                      from '../interfaces/ILanguage';
+import IOrder, { IOrderCreateObject } from '../interfaces/IOrder';
+import IOrderProduct                  from '../interfaces/IOrderProduct';
+import IWarehouse                     from '../interfaces/IWarehouse';
+import DeliveryType                   from '../enums/DeliveryType';
 import OrderCarrierStatus, {
 	carrierStatusToString
 }                                     from '../enums/OrderCarrierStatus';
-import IOrder, { IOrderCreateObject } from '../interfaces/IOrder';
-import IWarehouse                     from '../interfaces/IWarehouse';
-import ICarrier                       from '../interfaces/ICarrier';
 import OrderStatus                    from '../enums/OrderStatus';
-import ILanguage                      from '../interfaces/ILanguage';
-import { Entity, Column }             from 'typeorm';
-import IOrderProduct                  from '../interfaces/IOrderProduct';
-import DeliveryType                   from '../enums/DeliveryType';
+import OrderWarehouseStatus, {
+	warehouseStatusToString
+}                                     from '../enums/OrderWarehouseStatus';
 
 /**
  * Customer Order (for some products or services)
@@ -44,12 +43,12 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	 * This is needed because we want to not allow user to change
 	 * this data in his profile later so it effects his orders
 	 *
-	 * @type {UserOrder}
+	 * @type {CustomerOrder}
 	 * @memberof Order
 	 */
 	@Index(1)
-	@Schema(getSchema(UserOrder))
-	user: UserOrder;
+	@Schema(getSchema(CustomerOrder))
+	customer: CustomerOrder;
 	/**
 	 * Every order go to single merchant only.
 	 * Currently, it is not possible to include items in the order from different merchants!
@@ -209,9 +208,9 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 		
 		if(order)
 		{
-			if(order.user)
+			if(order.customer)
 			{
-				this.user = new UserOrder(order.user);
+				this.customer = new CustomerOrder(order.customer);
 			}
 			
 			if(
@@ -380,14 +379,8 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 		{
 			case 'en-US':
 				return this._getStatusTextEnglish();
-			case 'he-IL':
-				return this._getStatusTextHebrew();
 			case 'ru-RU':
 				return this._getStatusTextRussian();
-			case 'bg-BG':
-				return this._getStatusTextBulgarian();
-			case 'es-ES':
-				return this._getStatusTextSpanish();
 			default:
 				return 'BAD_STATUS';
 		}
@@ -415,50 +408,6 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 		}
 	}
 	
-	private _getStatusTextBulgarian(): string
-	{
-		switch(this.status)
-		{
-			case OrderStatus.WarehousePreparation:
-				return 'Подготовка';
-			case OrderStatus.InDelivery:
-				return 'Доставя се';
-			case OrderStatus.Delivered:
-				return 'Доставено';
-			case OrderStatus.CanceledWhileWarehousePreparation:
-			case OrderStatus.CanceledWhileInDelivery:
-				return 'Отказана';
-			case OrderStatus.WarehouseIssue:
-				return 'Проблем при подготовката';
-			case OrderStatus.CarrierIssue:
-				return 'Проблем при доставката';
-			default:
-				return 'Проблем с поръчката';
-		}
-	}
-	
-	private _getStatusTextHebrew(): string
-	{
-		switch(this.status)
-		{
-			case OrderStatus.WarehousePreparation:
-				return 'בהכנה';
-			case OrderStatus.InDelivery:
-				return 'במשלוח';
-			case OrderStatus.Delivered:
-				return 'הסתיים בצלחה';
-			case OrderStatus.CanceledWhileWarehousePreparation:
-			case OrderStatus.CanceledWhileInDelivery:
-				return 'התבטל';
-			case OrderStatus.WarehouseIssue:
-				return 'בעייה בהכנה';
-			case OrderStatus.CarrierIssue:
-				return 'בעייה במשלוח';
-			default:
-				return 'BAD_STATUS';
-		}
-	}
-	
 	private _getStatusTextRussian(): string
 	{
 		switch(this.status)
@@ -476,28 +425,6 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 				return 'Проблема с подготовкой';
 			case OrderStatus.CarrierIssue:
 				return 'Проблема с доставкой';
-			default:
-				return 'BAD_STATUS';
-		}
-	}
-	
-	private _getStatusTextSpanish()
-	{
-		switch(this.status)
-		{
-			case OrderStatus.WarehousePreparation:
-				return 'Preparación';
-			case OrderStatus.InDelivery:
-				return 'En la entrega';
-			case OrderStatus.Delivered:
-				return 'Entregado';
-			case OrderStatus.CanceledWhileWarehousePreparation:
-			case OrderStatus.CanceledWhileInDelivery:
-				return 'Cancelado';
-			case OrderStatus.WarehouseIssue:
-				return 'Problema de preparación';
-			case OrderStatus.CarrierIssue:
-				return 'Problema de envio';
 			default:
 				return 'BAD_STATUS';
 		}
