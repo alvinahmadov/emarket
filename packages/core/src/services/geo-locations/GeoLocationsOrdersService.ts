@@ -41,7 +41,8 @@ export class GeoLocationsOrdersService
 	                                              });
 	
 	constructor(
-			@inject(OrdersService) protected ordersService: OrdersService,
+			@inject(OrdersService)
+			protected ordersService: OrdersService,
 			@inject(WarehousesService)
 			protected warehousesService: WarehousesService,
 			@inject(GeoLocationsWarehousesService)
