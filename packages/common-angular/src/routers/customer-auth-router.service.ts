@@ -1,15 +1,15 @@
-import { Router, RouterFactory } from '../lib/router';
 import { Injectable }            from '@angular/core';
-import IUserAuthRouter, {
+import ICustomer                 from '@modules/server.common/interfaces/ICustomer';
+import Customer                  from '@modules/server.common/entities/Customer';
+import ICustomerAuthRouter, {
 	AddableRegistrationInfo,
-	IUserRegistrationInput,
-	IUserLoginResponse,
-}                                from '@modules/server.common/routers/IUserAuthRouter';
-import User                      from '@modules/server.common/entities/User';
-import IUser                     from '@modules/server.common/interfaces/IUser';
+	ICustomerRegistrationInput,
+	ICustomerLoginResponse,
+}                                from '@modules/server.common/routers/ICustomerAuthRouter';
+import { Router, RouterFactory } from '../lib/router';
 
 @Injectable()
-export class UserAuthRouter implements IUserAuthRouter
+export class CustomerAuthRouter implements ICustomerAuthRouter
 {
 	private readonly router: Router;
 	
@@ -26,14 +26,14 @@ export class UserAuthRouter implements IUserAuthRouter
 	 * @returns {Promise<User>}
 	 * @memberof UserAuthRouter
 	 */
-	async register(input: IUserRegistrationInput): Promise<User>
+	async register(input: ICustomerRegistrationInput): Promise<Customer>
 	{
-		const u = await this.router.run<IUser>('register', input);
+		const u = await this.router.run<ICustomer>('register', input);
 		return this._userFactory(u);
 	}
 	
 	async addRegistrationInfo(
-			id: User['id'],
+			id: Customer['id'],
 			info: AddableRegistrationInfo
 	): Promise<void>
 	{
@@ -43,9 +43,9 @@ export class UserAuthRouter implements IUserAuthRouter
 	async login(
 			username: string,
 			password: string
-	): Promise<IUserLoginResponse | null>
+	): Promise<ICustomerLoginResponse | null>
 	{
-		const res = await this.router.run<IUserLoginResponse>(
+		const res = await this.router.run<ICustomerLoginResponse>(
 				'login',
 				username,
 				password
@@ -59,7 +59,7 @@ export class UserAuthRouter implements IUserAuthRouter
 		{
 			return {
 				token: res.token,
-				user: this._userFactory(res.user),
+				user:  this._userFactory(res.user),
 			};
 		}
 	}
@@ -72,9 +72,9 @@ export class UserAuthRouter implements IUserAuthRouter
 		await this.router.run('updatePassword', id, password);
 	}
 	
-	protected _userFactory(user: IUser)
+	protected _userFactory(user: ICustomer)
 	{
-		return user == null ? null : new User(user);
+		return user == null ? null : new Customer(user);
 	}
 	
 	getRegistrationsSettings(): Promise<{
