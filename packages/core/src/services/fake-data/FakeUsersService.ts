@@ -1,25 +1,27 @@
-import _                          from "lodash";
-import { injectable }             from "inversify";
-import faker                      from "faker";
-import { IUserCreateObject }      from "@modules/server.common/interfaces/IUser";
+import _                         from "lodash";
+import { injectable }            from "inversify";
+import faker                     from "faker";
+import { ICustomerCreateObject } from "@modules/server.common/interfaces/ICustomer";
 import {
 	IGeoLocationCreateObject,
 	IGeolocationUpdateObject
-}                                 from "@modules/server.common/interfaces/IGeoLocation";
-import User                       from '@modules/server.common/entities/User';
-import GeoLocation, { Country }   from "@modules/server.common/entities/GeoLocation";
-import { IUserRegistrationInput } from '@modules/server.common/routers/IUserAuthRouter';
-import CommonUtils                from "@modules/server.common/utilities/common";
-import { env }                    from "../../env";
+}                                from "@modules/server.common/interfaces/IGeoLocation";
+import UserRole                  from '@modules/server.common/consts/role';
+import Country                   from '@modules/server.common/enums/Country';
+import Customer                  from '@modules/server.common/entities/Customer';
+import GeoLocation               from "@modules/server.common/entities/GeoLocation";
+import CommonUtils               from "@modules/server.common/utilities/common";
 import {
-	UsersAuthService,
-	UsersService
-}                                 from "../users";
+	CustomersAuthService,
+	CustomersService
+}                                from "../customers";
 
-type UserGenerationInput = {
-	email?: string;
-	password?: string;
+export declare type TestUserGenerationInput = {
+	username: string;
+	email: string;
+	password: string;
 	coordinates?: [number, number];
+	role?: string;
 	firstName?: string;
 	lastName?: string;
 }
@@ -28,23 +30,34 @@ type UserGenerationInput = {
 export class FakeUsersService
 {
 	constructor(
-			private readonly _usersService: UsersService,
-			private readonly _usersAuthService: UsersAuthService
+			private readonly _usersService: CustomersService,
+			private readonly _usersAuthService: CustomersAuthService
 	)
 	{}
 	
 	/**
 	 * Generates user record, predefined in config
 	 *
-	 * @returns {Promise<User>}
+	 * @returns {Promise<Customer>}
 	 * @memberof FakeUsersService
 	 */
-	async generatePredefinedUser(): Promise<User>
+	async generateMerchant(input: TestUserGenerationInput): Promise<Customer>
 	{
+		const existingUser = await this._usersService.findOne({ email: input.email });
+		
+		if(existingUser && existingUser.role === 'merchant')
+		{
+			console.log('Returning existing merchant')
+			return existingUser;
+		}
+		
+		console.log('Creating new merchant')
 		return this._generateUser({
-			                          email: env.FAKE_EMAIL,
-			                          password: env.FAKE_PASSWORD,
-			                          coordinates: [55.7522, 37.6156]
+			                          username:    input.username,
+			                          email:       input.email,
+			                          password:    input.password,
+			                          coordinates: input.coordinates,
+			                          role:        'merchant',
 		                          });
 	}
 	
@@ -54,9 +67,29 @@ export class FakeUsersService
 	 * @returns {Promise<User>}
 	 * @memberof FakeUsersService
 	 */
-	async generateRandomUser(): Promise<User>
+	async generateRandomUser(): Promise<Customer>
 	{
-		return this._generateUser({ password: env.FAKE_PASSWORD });
+		const firstName = faker.name.firstName();
+		const lastName = faker.name.lastName();
+		const username = faker.internet.userName(firstName, lastName);
+		const password = '123456';
+		const coordinates: [number, number] = [
+			parseFloat(faker.address.longitude()),
+			parseFloat(faker.address.latitude())
+		];
+		const email = faker.internet.email(firstName, lastName);
+		
+		const input: TestUserGenerationInput = {
+			username:    faker.internet.userName(firstName, lastName),
+			email:       email,
+			password:    password,
+			role:        'customer',
+			coordinates: coordinates,
+			firstName:   firstName,
+			lastName:    lastName,
+		}
+		
+		return this._generateUser(input);
 	}
 	
 	/**
@@ -72,7 +105,7 @@ export class FakeUsersService
 			qty: number,
 			defaultLng: number,
 			defaultLat: number
-	): Promise<IUserCreateObject[]>
+	): Promise<ICustomerCreateObject[]>
 	{
 		const existingEmails = _.map(
 				await this._usersService
@@ -84,7 +117,7 @@ export class FakeUsersService
 				u => u.email
 		);
 		
-		const customersToCreate: IUserCreateObject[] = [];
+		const customersToCreate: ICustomerCreateObject[] = [];
 		const customerCreatedFrom = new Date(2015, 1);
 		const customerCreatedTo = new Date();
 		
@@ -98,11 +131,11 @@ export class FakeUsersService
 			const isBanned = Math.random() < 0.02;
 			
 			const geoLocation: IGeoLocationCreateObject = {
-				countryId: faker.random.number(Country.ZW) as Country,
-				city: faker.address.city(),
-				house: `${customerCount}`,
-				loc: {
-					type: 'Point',
+				countryId:     faker.random.number(Country.ZW) as Country,
+				city:          faker.address.city(),
+				house:         `${customerCount}`,
+				loc:           {
+					type:        'Point',
 					coordinates: [defaultLng, defaultLat]
 				},
 				streetAddress: faker.address.streetAddress()
@@ -113,14 +146,14 @@ export class FakeUsersService
 				existingEmails.push(email);
 				
 				customersToCreate.push({
-					                       firstName: faker.name.firstName(),
-					                       lastName: faker.name.lastName(),
+					                       firstName:  faker.name.firstName(),
+					                       lastName:   faker.name.lastName(),
 					                       geoLocation,
-					                       apartment: `${customerCount}`,
+					                       apartment:  `${customerCount}`,
 					                       email,
 					                       isBanned,
-					                       image: faker.image.avatar(),
-					                       phone: faker.phone.phoneNumber(),
+					                       image:      faker.image.avatar(),
+					                       phone:      faker.phone.phoneNumber(),
 					                       _createdAt: faker.date.between(
 							                       customerCreatedFrom,
 							                       customerCreatedTo
@@ -136,66 +169,62 @@ export class FakeUsersService
 		           .insertMany(customersToCreate);
 	}
 	
-	private async _generateUser(input: UserGenerationInput)
+	private async _generateUser(input: TestUserGenerationInput): Promise<Customer | null>
 	{
-		const firstName = input.firstName ?? faker.name.firstName();
-		const lastName = input.firstName ?? faker.name.lastName();
-		const password = input.password ?? faker.internet.password(8);
-		const coordinates = input.coordinates ?? [
-			parseFloat(faker.address.longitude()),
-			parseFloat(faker.address.latitude())
-		];
-		const email = input.email ?? faker.internet.email(firstName, lastName);
+		let role: UserRole = input.role === 'merchant'
+		                     ? 'merchant'
+		                     : 'customer';
+		
+		const coordinates = input.coordinates
+		                    ?? [
+					parseFloat(faker.address.longitude()),
+					parseFloat(faker.address.latitude())
+				];
+		const firstName = input.firstName ?? faker.name.firstName(1);
+		const lastName = input.lastName ?? faker.name.lastName(1);
+		
 		const phone = faker.phone.phoneNumber("+7##########");
 		const geoLocation: IGeolocationUpdateObject = {
-			countryId: Country.RU,
-			city: faker.address.city(),
-			house: `0`,
-			loc: {
-				type: 'Point',
+			countryId:     Country.RU,
+			city:          faker.address.city(),
+			house:         `0`,
+			loc:           {
+				type:        'Point',
 				coordinates: coordinates
 			},
-			postcode: faker.address.zipCode(),
+			postcode:      faker.address.zipCode(),
 			streetAddress: faker.address.streetAddress()
 		};
 		
-		const existingUser = await this._usersService
-		                               .Model
-		                               .findOne({ email: email });
+		const avatar = CommonUtils.getDummyImage(300, 300, `${firstName[0]}${lastName[0]}`);
 		
-		if(!existingUser)
+		const user = await this._usersService
+		                       .initCustomer(
+				                       {
+					                       name:                    input.username,
+					                       email:                   input.email,
+					                       firstName:               firstName,
+					                       lastName:                lastName,
+					                       phone:                   phone,
+					                       avatar:                  avatar,
+					                       role:                    role,
+					                       isRegistrationCompleted: true,
+					                       isBanned:                false
+				                       }
+		                       );
+		
+		if(!user)
 		{
-			let user = await this._usersService
-			                     .initUser({
-				                               firstName: firstName,
-				                               lastName: lastName,
-				                               email: email,
-				                               phone: phone,
-				                               image: CommonUtils.getDummyImage(
-						                               300, 300,
-						                               firstName.slice(0, 2)
-				                               ),
-				                               isRegistrationCompleted: true,
-				                               isBanned: false
-			                               });
-			
-			await this._usersService
-			          .updateGeoLocation(
-					          user.id,
-					          geoLocation as GeoLocation
-			          );
-			
-			if(!user)
-			{
-				console.warn("Test user cannot be created");
-			}
-			
-			let input: IUserRegistrationInput = {
-				user: user,
-				password: password
-			}
-			
-			return this._usersAuthService.register(input);
+			console.log(user)
+			return null;
 		}
+		
+		await this._usersService
+		          .updateGeoLocation(user.id, geoLocation as GeoLocation);
+		
+		return this._usersAuthService.register({
+			                                       user:     user,
+			                                       password: input.password
+		                                       });
 	}
 }
