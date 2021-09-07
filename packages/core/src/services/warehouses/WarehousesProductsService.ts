@@ -63,24 +63,26 @@ export class WarehousesProductsService
 			fullProducts: boolean = true
 	): Observable<WarehouseProduct[]>
 	{
-		return this.warehousesService.get(warehouseId, fullProducts).pipe(
-				exhaustMap((warehouse) =>
-				           {
-					           if(warehouse === null)
-					           {
-						           return _throw(
-								           new Error(
-										           `Warehouse with the id ${warehouseId} doesn't exist`
-								           )
-						           );
-					           }
-					           else
-					           {
-						           return of(warehouse);
-					           }
-				           }),
-				map((warehouse) => warehouse.products)
-		);
+		return this.warehousesService
+		           .get(warehouseId, fullProducts)
+		           .pipe(
+				           exhaustMap((warehouse) =>
+				                      {
+					                      if(warehouse === null)
+					                      {
+						                      return _throw(
+								                      new Error(
+										                      `Warehouse with the id ${warehouseId} doesn't exist`
+								                      )
+						                      );
+					                      }
+					                      else
+					                      {
+						                      return of(warehouse);
+					                      }
+				                      }),
+				           map((warehouse) => warehouse.products)
+		           );
 	}
 	
 	@asyncListener()
@@ -89,7 +91,9 @@ export class WarehousesProductsService
 			pagingOptions: IPagingOptions
 	): Promise<WarehouseProduct[]>
 	{
-		const allProducts = await this.get(id).pipe(first()).toPromise();
+		const allProducts = await this.get(id)
+		                              .pipe(first())
+		                              .toPromise();
 		
 		const products = [...allProducts];
 		
@@ -119,7 +123,9 @@ export class WarehousesProductsService
 	@asyncListener()
 	async getProductsCount(id: string)
 	{
-		const allProducts = await this.get(id).pipe(first()).toPromise();
+		const allProducts = await this.get(id)
+		                              .pipe(first())
+		                              .toPromise();
 		
 		return allProducts.length;
 	}
@@ -134,16 +140,17 @@ export class WarehousesProductsService
 	@observableListener()
 	getAvailable(warehouseId: string): Observable<WarehouseProduct[]>
 	{
-		return this.get(warehouseId).pipe(
-				map((warehouseProducts) =>
-						    _.filter(
-								    warehouseProducts,
-								    (warehouseProduct) =>
-										    warehouseProduct.count > 0 &&
-										    warehouseProduct.isProductAvailable === true
-						    )
-				)
-		);
+		return this.get(warehouseId)
+		           .pipe(
+				           map((warehouseProducts) =>
+						               _.filter(
+								               warehouseProducts,
+								               (warehouseProduct) =>
+										               warehouseProduct.count > 0 &&
+										               warehouseProduct.isProductAvailable === true
+						               )
+				           )
+		           );
 	}
 	
 	/**
@@ -301,10 +308,10 @@ export class WarehousesProductsService
 		if(triggerChange)
 		{
 			this.warehousesService.existence.next({
-				                                      id: warehouse.id,
-				                                      value: warehouse,
+				                                      id:        warehouse.id,
+				                                      value:     warehouse,
 				                                      lastValue: notUpdatedWarehouse,
-				                                      type: ExistenceEventType.Updated
+				                                      type:      ExistenceEventType.Updated
 			                                      });
 		}
 		
@@ -455,7 +462,7 @@ export class WarehousesProductsService
 		const updatedWarehouse = (
 				await this.warehousesService.updateMultiple(
 						{
-							_id: new mongoose.Types.ObjectId(warehouseId),
+							_id:            new mongoose.Types.ObjectId(warehouseId),
 							'products._id': updatedWarehouseProduct._id
 						},
 						{
@@ -586,7 +593,7 @@ export class WarehousesProductsService
 			else
 			{
 				const errorMsg =
-						'Request to remove more products than available';
+						      'Request to remove more products than available';
 				
 				this.log.error({
 					               err: new Error(errorMsg),
@@ -659,7 +666,7 @@ export class WarehousesProductsService
 			else
 			{
 				const errorMsg =
-						'Request to decrease count of more products than available';
+						      'Request to decrease count of more products than available';
 				
 				this.log.error({
 					               err: new Error(errorMsg),
@@ -713,26 +720,27 @@ export class WarehousesProductsService
 			warehouseProductId: string
 	): Observable<WarehouseProduct>
 	{
-		return this.warehousesService.get(warehouseId, true).pipe(
-				exhaustMap((warehouse) =>
-				           {
-					           if(warehouse === null)
-					           {
-						           return _throw(
-								           new Error(
-										           `Warehouse with the id ${warehouseId} doesn't exist`
-								           )
-						           );
-					           }
-					           else
-					           {
-						           return of(warehouse);
-					           }
-				           }),
-				map((warehouse) =>
-						    warehouse.products.find((p) => p.id === warehouseProductId)
-				)
-		);
+		return this.warehousesService.get(warehouseId, true)
+		           .pipe(
+				           exhaustMap((warehouse) =>
+				                      {
+					                      if(warehouse === null)
+					                      {
+						                      return _throw(
+								                      new Error(
+										                      `Warehouse with the id ${warehouseId} doesn't exist`
+								                      )
+						                      );
+					                      }
+					                      else
+					                      {
+						                      return of(warehouse);
+					                      }
+				                      }),
+				           map((warehouse) =>
+						               warehouse.products.find((p) => p.id === warehouseProductId)
+				           )
+		           );
 	}
 	
 	@asyncListener()
@@ -843,11 +851,11 @@ export class WarehousesProductsService
 		}
 	}
 	
-	private _getWarehouse(warehouseId: string): Promise<Warehouse>
+	private async _getWarehouse(warehouseId: string): Promise<Warehouse>
 	{
-		return this.warehousesService
-		           .get(warehouseId)
-		           .pipe(first())
-		           .toPromise();
+		return await this.warehousesService
+		                 .get(warehouseId)
+		                 .pipe(first())
+		                 .toPromise();
 	}
 }
