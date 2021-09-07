@@ -1,34 +1,37 @@
-import Bluebird                                     from 'bluebird';
-import { ObjectId }                                 from 'bson';
-import Logger                                       from 'bunyan';
 import { inject, injectable }                       from 'inversify';
+import { OrdersService }                            from '../orders';
+import Warehouse                                    from '@modules/server.common/entities/Warehouse';
+import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
 import _                                            from 'lodash';
-import { of, from }                                 from 'rxjs';
-import { concat, exhaustMap, filter, first, share } from 'rxjs/operators';
+import Logger                                       from 'bunyan';
+import Order                                        from '@modules/server.common/entities/Order';
+import { createLogger }                             from '../../helpers/Log';
+import { GeoLocationsWarehousesService }            from './GeoLocationsWarehousesService';
+import Bluebird                                     from 'bluebird';
+import {
+	WarehousesProductsService,
+	WarehousesOrdersService,
+	WarehousesService
+}                                                   from '../warehouses';
 import {
 	observableListener,
 	routerName,
 	serialization,
 	asyncListener
 }                                                   from '@pyro/io';
-import { ExistenceEventType }                       from '@pyro/db-server';
-import Warehouse                                    from '@modules/server.common/entities/Warehouse';
-import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
-import Order                                        from '@modules/server.common/entities/Order';
 import IGeoLocationOrdersRouter                     from '@modules/server.common/routers/IGeoLocationOrdersRouter';
 import IGeoLocation                                 from '@modules/server.common/interfaces/IGeoLocation';
+import IService                                     from '../IService';
+import { ExistenceEventType }                       from '@pyro/db-server';
+import { concat, exhaustMap, filter, first, share } from 'rxjs/operators';
+import { of }                                       from 'rxjs/observable/of';
+import { from }                                     from 'rxjs/observable/from';
 import OrderWarehouseStatus                         from '@modules/server.common/enums/OrderWarehouseStatus';
 import OrderCarrierStatus                           from '@modules/server.common/enums/OrderCarrierStatus';
 import { GeoLocationOrdersOptions }                 from './GeoLocationOrdersOptions';
-import { GeoLocationsWarehousesService }            from './GeoLocationsWarehousesService';
-import IService                                     from '../IService';
-import { OrdersService }                            from '../orders';
-import {
-	WarehousesProductsService,
-	WarehousesOrdersService,
-	WarehousesService
-}                                                   from '../warehouses';
-import { createLogger }                             from '../../helpers/Log';
+import { ObjectId }                                 from 'bson';
+
+/// Don't change import order. There's a strange bug in inversify, that throws circular dependency error
 
 @injectable()
 @routerName('geo-location-orders')
@@ -144,8 +147,8 @@ export class GeoLocationsOrdersService
 		const count = await this.ordersService.Model.aggregate([
 			                                                       {
 				                                                       $lookup: {
-					                                                       from:     'warehouses',
-					                                                       let:      {
+					                                                       from: 'warehouses',
+					                                                       let: {
 						                                                       wh: '$warehouse'
 					                                                       },
 					                                                       pipeline: [
@@ -165,21 +168,21 @@ export class GeoLocationsOrdersService
 							                                                       $project: {
 								                                                       carrierCompetition: {
 									                                                       $cond: {
-										                                                       if:   {
+										                                                       if: {
 											                                                       $eq: [
 												                                                       '$carrierCompetition',
 												                                                       true
 											                                                       ]
 										                                                       },
 										                                                       then:
-										                                                             OrderCarrierStatus.CarrierSelectedOrder,
+										                                                       OrderCarrierStatus.CarrierSelectedOrder,
 										                                                       else: OrderCarrierStatus.NoCarrier
 									                                                       }
 								                                                       }
 							                                                       }
 						                                                       }
 					                                                       ],
-					                                                       as:       'fromWH'
+					                                                       as: 'fromWH'
 				                                                       }
 			                                                       },
 			                                                       {
@@ -190,17 +193,17 @@ export class GeoLocationsOrdersService
 			                                                       {
 				                                                       $match: _.assign(
 						                                                       {
-							                                                       warehouse:       { $in: merchantsIds },
+							                                                       warehouse: { $in: merchantsIds },
 							                                                       warehouseStatus: {
 								                                                       $eq: OrderWarehouseStatus.PackagingFinished
 							                                                       },
-							                                                       $expr:           {
+							                                                       $expr: {
 								                                                       $lte: [
 									                                                       '$carrierStatus',
 									                                                       '$fromWH.carrierCompetition'
 								                                                       ]
 							                                                       },
-							                                                       _id:             { $nin: skippedOrderIds }
+							                                                       _id: { $nin: skippedOrderIds }
 						                                                       },
 						                                                       ...searchByRegex
 				                                                       )
@@ -253,8 +256,8 @@ export class GeoLocationsOrdersService
 		const orders = await this.ordersService.Model.aggregate([
 			                                                        {
 				                                                        $lookup: {
-					                                                        from:     'warehouses',
-					                                                        let:      {
+					                                                        from: 'warehouses',
+					                                                        let: {
 						                                                        wh: '$warehouse'
 					                                                        },
 					                                                        pipeline: [
@@ -274,21 +277,21 @@ export class GeoLocationsOrdersService
 							                                                        $project: {
 								                                                        carrierCompetition: {
 									                                                        $cond: {
-										                                                        if:   {
+										                                                        if: {
 											                                                        $eq: [
 												                                                        '$carrierCompetition',
 												                                                        true
 											                                                        ]
 										                                                        },
 										                                                        then:
-										                                                              OrderCarrierStatus.CarrierSelectedOrder,
+										                                                        OrderCarrierStatus.CarrierSelectedOrder,
 										                                                        else: OrderCarrierStatus.NoCarrier
 									                                                        }
 								                                                        }
 							                                                        }
 						                                                        }
 					                                                        ],
-					                                                        as:       'fromWH'
+					                                                        as: 'fromWH'
 				                                                        }
 			                                                        },
 			                                                        {
@@ -299,17 +302,17 @@ export class GeoLocationsOrdersService
 			                                                        {
 				                                                        $match: _.assign(
 						                                                        {
-							                                                        warehouse:       { $in: merchantsIds },
+							                                                        warehouse: { $in: merchantsIds },
 							                                                        warehouseStatus: {
 								                                                        $eq: OrderWarehouseStatus.PackagingFinished
 							                                                        },
-							                                                        $expr:           {
+							                                                        $expr: {
 								                                                        $lte: [
 									                                                        '$carrierStatus',
 									                                                        '$fromWH.carrierCompetition'
 								                                                        ]
 							                                                        },
-							                                                        _id:             {
+							                                                        _id: {
 								                                                        $nin: skippedOrderIds.map((id) => new ObjectId(id))
 							                                                        }
 						                                                        },
