@@ -32,14 +32,12 @@ namespace GeoUtils
 		lat2 = GeoUtils._toRad(lat2);
 		
 		const a =
-				Math.pow(Math.sin(dLat / 2), 2) +
-				Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+				      Math.pow(Math.sin(dLat / 2), 2) +
+				      Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
 		
 		const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		
-		const d = R * c;
-		
-		return d;
+		return R * c;
 	}
 	
 	// tslint:disable-next-line:no-shadowed-variable
