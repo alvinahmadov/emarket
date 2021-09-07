@@ -9,7 +9,8 @@ export class RouterFactory
 	constructor(
 			private readonly socketFactory: SocketFactory,
 			private readonly routersService: RoutersService,
-			@Inject(API_URL) private readonly apiUrl: string
+			@Inject(API_URL)
+			private readonly apiUrl: string
 	)
 	{}
 	
