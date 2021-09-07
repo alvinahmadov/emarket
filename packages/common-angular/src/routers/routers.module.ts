@@ -1,9 +1,8 @@
 import { NgModule }                    from '@angular/core';
-import { CommonLibModule }             from '../lib';
 import { CarrierRouter }               from './carrier-router.service';
 import { CarrierOrdersRouter }         from './carrier-orders-router.service';
-import { ConversationsRouter }         from './conversation-router.service';
-import { ConversationMessagesRouter }  from './conversation-messages-router.service';
+// import { ConversationsRouter }         from './conversation-router.service';
+// import { ConversationMessagesRouter }  from './conversation-messages-router.service';
 import { CustomerRouter }              from './customer-router.service';
 import { CustomerAuthRouter }          from './customer-auth-router.service';
 import { CustomerOrdersRouter }        from './customer-orders-router.service';
@@ -22,6 +21,7 @@ import { WarehouseProductsRouter }     from './warehouse-products-router.service
 import { WarehouseRouter }             from './warehouse-router.service';
 import { WarehouseAuthRouter }         from './warehouse-auth-router.service';
 import { WarehouseOrdersRouter }       from './warehouse-orders-router.service';
+import { CommonLibModule }             from '../lib';
 
 @NgModule({
 	          imports:      [CommonLibModule],
@@ -30,8 +30,12 @@ import { WarehouseOrdersRouter }       from './warehouse-orders-router.service';
 	          providers:    [
 		          CarrierOrdersRouter,
 		          CarrierRouter,
-		          ConversationsRouter,
-		          ConversationMessagesRouter,
+		          CustomerAuthRouter,
+		          CustomerOrdersRouter,
+		          CustomerProductsRouter,
+		          CustomerRouter,
+		          // ConversationsRouter,
+		          // ConversationMessagesRouter,
 		          DeviceRouter,
 		          GeoLocationOrdersRouter,
 		          GeoLocationProductsRouter,
@@ -41,15 +45,11 @@ import { WarehouseOrdersRouter }       from './warehouse-orders-router.service';
 		          InviteRouter,
 		          OrderRouter,
 		          ProductRouter,
-		          CustomerOrdersRouter,
-		          CustomerRouter,
-		          CustomerAuthRouter,
 		          WarehouseCarriersRouter,
 		          WarehouseRouter,
 		          WarehouseAuthRouter,
 		          WarehouseProductsRouter,
-		          WarehouseOrdersRouter,
-		          CustomerProductsRouter,
+		          WarehouseOrdersRouter
 	          ],
           })
 export class RoutersModule {}
