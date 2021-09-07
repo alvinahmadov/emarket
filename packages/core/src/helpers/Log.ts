@@ -1,16 +1,17 @@
 import Logger         from 'bunyan';
-import { existsSync } from 'fs';
-import mkdirp         from 'mkdirp';
-import { env }        from '../env';
-import _ = require('lodash');
 import createCWStream from 'bunyan-cloudwatch';
-import os             from 'os';
 import PrettyStream   from 'bunyan-prettystream';
+import { existsSync } from 'fs';
+import _              from 'lodash';
+import mkdirp         from 'mkdirp';
+import os             from 'os';
+import { env }        from '../env';
 
 export interface LogArgs
 {
 	// which file used to store logs
 	name: string;
+	ns?: string;
 }
 
 let isLogsFolderExists = env.LOGS_PATH ? existsSync(env.LOGS_PATH) : false;
@@ -31,8 +32,8 @@ const getAdditionalLoggerStreams = ({ name }: LogArgs): Logger.Stream[] =>
 			try
 			{
 				stream = createCWStream({
-					                        logGroupName: 'ever/api',
-					                        logStreamName: `${type}_${name}_${hostname}`,
+					                        logGroupName:          'ever/api',
+					                        logStreamName:         `${type}_${name}_${hostname}`,
 					                        cloudWatchLogsOptions: {
 						                        region: 'us-east-1'
 					                        }
@@ -44,7 +45,7 @@ const getAdditionalLoggerStreams = ({ name }: LogArgs): Logger.Stream[] =>
 			
 			return {
 				stream,
-				type: 'raw',
+				type:  'raw',
 				level: type
 			};
 		});
@@ -59,7 +60,7 @@ const prettyStdOut = new PrettyStream();
 
 prettyStdOut.pipe(process.stdout);
 
-export function createLogger({ name }: LogArgs): Logger
+export function createLogger({ name, ns = 'emarket' }: LogArgs): Logger
 {
 	if(!isLogsFolderExists)
 	{
@@ -68,24 +69,24 @@ export function createLogger({ name }: LogArgs): Logger
 	}
 	
 	const logger = Logger.createLogger({
-		                                   name: `everbie.${name}`,
+		                                   name:        `${ns}.${name}`,
 		                                   serializers: Logger.stdSerializers,
-		                                   streams: [
+		                                   streams:     [
 			                                   {
 				                                   level: 'info',
-				                                   path: `${env.LOGS_PATH}/info_${name}.log`
+				                                   path:  `${env.LOGS_PATH}/info_${name}.log`
 			                                   },
 			                                   {
 				                                   level: 'error',
-				                                   path: `${env.LOGS_PATH}/error_${name}.log`
+				                                   path:  `${env.LOGS_PATH}/error_${name}.log`
 			                                   },
 			                                   {
 				                                   level: 'debug',
-				                                   path: `${env.LOGS_PATH}/debug_${name}.log`
+				                                   path:  `${env.LOGS_PATH}/debug_${name}.log`
 			                                   },
 			                                   {
-				                                   level: 'debug',
-				                                   type: 'raw',
+				                                   level:  'debug',
+				                                   type:   'raw',
 				                                   stream: prettyStdOut
 			                                   },
 			                                   ...getAdditionalLoggerStreams({ name })
