@@ -5,13 +5,23 @@ import { getConnection, Repository }                              from 'typeorm'
 import { IRoutersManager, RoutersManager, RouterSymbol }          from '@pyro/io';
 import Admin                                                      from '@modules/server.common/entities/Admin';
 import Device                                                     from '@modules/server.common/entities/Device';
+import IService, { ServiceSymbol }                                from './IService';
+import { AuthenticationService, AuthService, authServiceFactory } from './auth';
 import { AdminsService }                                          from './admins';
 import { AppsSettingsService }                                    from './apps-settings';
-import { AuthenticationService, AuthService, authServiceFactory } from './auth';
-import { DevicesService }                                         from './devices';
-import { FakeOrdersService }                                      from './fake-data/FakeOrdersService';
 import { CarriersOrdersService, CarriersService }                 from './carriers';
 import { CurrenciesService }                                      from './currency/CurrencyService';
+import {
+	SocialRegisterService,
+	SocialStrategiesService,
+	CustomersOrdersService,
+	CustomersProductsService,
+	CustomersAuthService,
+	CustomersService,
+	UserCommandService
+}                                                                 from './customers';
+import { DevicesService }                                         from './devices';
+import { FakeOrdersService }                                      from './fake-data/FakeOrdersService';
 import {
 	GeoLocationsOrdersService,
 	GeoLocationsProductsService,
@@ -24,23 +34,13 @@ import { ProductsCategoriesService, ProductsService }             from './produc
 import { PromotionService }                                       from './products/PromotionService';
 import { ServicesApp }                                            from './services.app';
 import {
-	SocialRegisterService,
-	SocialStrategiesService,
-	UsersOrdersService,
-	UsersProductsService,
-	UsersService,
-	UserCommandService
-}                                                                 from './users';
-import { UsersAuthService }                                       from './users/UsersAuthService';
-import {
+	WarehousesService,
 	WarehousesAuthService,
 	WarehousesCarriersService,
 	WarehousesOrdersService,
 	WarehousesProductsService,
-	WarehousesService,
-	WarehousesUsersService
+	WarehousesCustomersService
 }                                                                 from './warehouses';
-import { ServiceSymbol }                                          from './IService';
 import { ConfigService }                                          from '../config/config.service';
 
 function getRepository(t: any): any
@@ -82,49 +82,56 @@ const bindings = new ContainerModule((bind: interfaces.Bind) =>
 				                                     OrdersService,
 				                                     ProductsService,
 				                                     ProductsCategoriesService,
-				                                     UsersOrdersService,
-				                                     UsersService,
-				                                     UsersAuthService,
+				                                     CustomersOrdersService,
+				                                     CustomersService,
+				                                     CustomersAuthService,
 				                                     SocialStrategiesService,
 				                                     SocialRegisterService,
 				                                     WarehousesOrdersService,
 				                                     WarehousesProductsService,
-				                                     WarehousesUsersService,
+				                                     WarehousesCustomersService,
 				                                     WarehousesCarriersService,
 				                                     WarehousesAuthService,
 				                                     WarehousesService,
-				                                     UsersProductsService,
+				                                     CustomersProductsService,
 				                                     AuthenticationService,
 				                                     FakeOrdersService,
 				                                     CurrenciesService,
 				                                     PromotionService,
 				                                     AppsSettingsService
 			                                     ],
-			                                     (Service: any) =>
+			                                     (serviceIdentifier) =>
 			                                     {
-				                                     bind(Service).to(Service).inSingletonScope();
+				                                     bind<IService>(serviceIdentifier)
+						                                     .to(serviceIdentifier)
+						                                     .inSingletonScope();
 				
-				                                     bind<any>(ServiceSymbol).toFactory<any>((context) =>
-				                                                                             {
-					                                                                             return context.container.get<any>(Service);
-				                                                                             });
+				                                     bind<any>(ServiceSymbol)
+						                                     .toFactory<any>((context) =>
+						                                                     {
+							                                                     return context.container.get<any>(serviceIdentifier);
+						                                                     });
 				
-				                                     bind<any>(RouterSymbol).toFactory<any>((context) =>
-				                                                                            {
-					                                                                            return context.container.get<any>(Service);
-				                                                                            });
+				                                     bind<any>(RouterSymbol)
+						                                     .toFactory<any>((context) =>
+						                                                     {
+							                                                     return context.container.get<any>(serviceIdentifier);
+						                                                     });
 			                                     }
 	                                     );
 	
 	                                     bind(AuthService).toSelf();
 	
-	                                     bind('Factory<AuthService>').toFactory(authServiceFactory);
+	                                     bind('Factory<AuthService>')
+			                                     .toFactory(authServiceFactory);
 	
 	                                     bind<IRoutersManager>('RoutersManager')
 			                                     .to(RoutersManager)
 			                                     .inSingletonScope();
 	
-	                                     bind<ServicesApp>(ServicesApp).toSelf().inSingletonScope();
+	                                     bind<ServicesApp>(ServicesApp)
+			                                     .toSelf()
+			                                     .inSingletonScope();
                                      });
 
 const container = new Container();
