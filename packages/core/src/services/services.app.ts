@@ -18,7 +18,6 @@ import exphbs                                       from 'express-handlebars';
 import ipstack                                      from 'ipstack';
 import requestIp                                    from 'request-ip';
 import { createConnection }                         from 'typeorm';
-import { MongoConnectionOptions }                   from "typeorm/driver/mongodb/MongoConnectionOptions";
 import { IRoutersManager }                          from '@pyro/io';
 import { getModel }                                 from '@pyro/db-server';
 import OAuthStrategy                                from '@modules/server.common/enums/OAuthStrategy';
@@ -39,12 +38,10 @@ import { FakeUsersService }                         from './fake-data/FakeUsersS
 import { FakeWarehousesService }                    from './fake-data/FakeWarehousesService';
 import IService, { ServiceSymbol }                  from './IService';
 import { AdminsService }                            from './admins';
-import {
-	CustomersAuthService,
-	CustomersService
-}                                                   from './customers';
-import { WarehousesAuthService, WarehousesService } from './warehouses';
 import { SocialStrategiesService }                  from './customers';
+import { CustomersService }                         from './customers';
+import { CustomersAuthService }                     from './customers/CustomersAuthService';
+import { WarehousesAuthService, WarehousesService } from './warehouses';
 import { createLogger }                             from '../helpers/Log';
 import { ConfigService }                            from '../config/config.service';
 import { getHostAndPort }                           from '../utils';
@@ -127,20 +124,18 @@ export class ServicesApp
 		// list of entities for which Repositories will be greated in TypeORM
 		const entities = ServicesApp.getEntities();
 		
-		let connectionOptions: MongoConnectionOptions = {
-			name:               'typeorm',
-			type:               'mongodb',
-			url:                env.DB_URI,
-			entities:           entities,
-			synchronize:        true,
-			useNewUrlParser:    true,
-			poolSize:           ServicesApp._poolSize,
-			connectTimeoutMS:   ServicesApp._connectTimeoutMS,
-			logging:            true,
-			useUnifiedTopology: true
-		}
-		
-		const conn = await createConnection(connectionOptions);
+		const conn = await createConnection({
+			                                    name: 'typeorm',
+			                                    type: 'mongodb',
+			                                    url: env.DB_URI,
+			                                    entities: entities,
+			                                    synchronize: true,
+			                                    useNewUrlParser: true,
+			                                    poolSize: ServicesApp._poolSize,
+			                                    connectTimeoutMS: ServicesApp._connectTimeoutMS,
+			                                    logging: true,
+			                                    useUnifiedTopology: true
+		                                    });
 		
 		typeORMLog.info(
 				`TypeORM DB connection created. DB connected: ${conn.isConnected}`
@@ -158,11 +153,11 @@ export class ServicesApp
 	private async _connectDB()
 	{
 		let connectionOptions: mongoose.ConnectionOptions = {
-			useCreateIndex:     true,
-			useNewUrlParser:    true,
-			useFindAndModify:   false,
-			poolSize:           env.DB_POOL_SIZE,
-			connectTimeoutMS:   env.DB_CONNECT_TIMEOUT,
+			useCreateIndex: true,
+			useNewUrlParser: true,
+			useFindAndModify: false,
+			poolSize: env.DB_POOL_SIZE,
+			connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
 			useUnifiedTopology: true
 		};
 		
@@ -292,9 +287,9 @@ export class ServicesApp
 			await this._adminsService
 			          .register({
 				                    admin: {
-					                    email:  adminEmail,
-					                    name:   adminName,
-					                    hash:   null,
+					                    email: adminEmail,
+					                    name: adminName,
+					                    hash: null,
 					                    avatar: CommonUtils.getDummyImage(300, 300, adminName.slice(0, 2))
 				                    },
 				                    password: adminPassword
@@ -310,8 +305,8 @@ export class ServicesApp
 			const userInput = {
 				username: env.FAKE_MERCHANT_NAME,
 				password: env.FAKE_MERCHANT_PASSWORD,
-				email:    env.FAKE_MERCHANT_EMAIL,
-				role:     'merchant'
+				email: env.FAKE_MERCHANT_EMAIL,
+				role: 'merchant'
 			};
 			
 			const password = env.FAKE_MERCHANT_PASSWORD;
@@ -418,10 +413,10 @@ export class ServicesApp
 		this.expressApp = express();
 		
 		const hbs = exphbs.create({
-			                          extname:       '.hbs',
+			                          extname: '.hbs',
 			                          defaultLayout: 'main',
-			                          layoutsDir:    path.join('res', 'views', 'layouts'),
-			                          partialsDir:   path.join('res', 'templates')
+			                          layoutsDir: path.join('res', 'views', 'layouts'),
+			                          partialsDir: path.join('res', 'templates')
 		                          });
 		
 		// configure Handlebars templates
@@ -489,7 +484,7 @@ export class ServicesApp
 		const methods: string[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 		
 		const corsOptions = {
-			origin:      '*',
+			origin: '*',
 			credentials: true
 		};
 		
@@ -540,7 +535,7 @@ export class ServicesApp
 					                    ipstack(clientIp, ipStackKey, (err, response) =>
 					                    {
 						                    res.json({
-							                             latitude:  response.latitude,
+							                             latitude: response.latitude,
 							                             longitude: response.longitude
 						                             });
 					                    });
@@ -660,7 +655,7 @@ export class ServicesApp
 			                   {
 				                   pem.createCertificate(
 						                   {
-							                   days:       365,
+							                   days: 365,
 							                   selfSigned: true
 						                   },
 						                   (err, keys) =>
@@ -736,29 +731,29 @@ export class ServicesApp
 	{
 		// Facebook route auth
 		this._authRoutesHelper({
-			                       name:             'facebook',
-			                       auth_url:         '/auth/facebook',
-			                       callback_url:     '/auth/facebook',
+			                       name: 'facebook',
+			                       auth_url: '/auth/facebook',
+			                       callback_url: '/auth/facebook',
 			                       failure_redirect: '/login',
-			                       scope:            ['email', 'public_profile']
+			                       scope: ['email', 'public_profile']
 		                       })
 		
 		// Yandex route auth
 		this._authRoutesHelper({
-			                       name:             'yandex',
-			                       auth_url:         '/auth/yandex',
-			                       callback_url:     '/auth/yandex/callback',
+			                       name: 'yandex',
+			                       auth_url: '/auth/yandex',
+			                       callback_url: '/auth/yandex/callback',
 			                       failure_redirect: '/login',
-			                       scope:            ['profile', 'email']
+			                       scope: ['profile', 'email']
 		                       })
 		
 		// Google route auth
 		this._authRoutesHelper({
-			                       name:             'google',
-			                       auth_url:         '/auth/google',
-			                       callback_url:     '/auth/google/callback',
+			                       name: 'google',
+			                       auth_url: '/auth/google',
+			                       callback_url: '/auth/google/callback',
 			                       failure_redirect: '/login',
-			                       scope:            ['profile', 'email']
+			                       scope: ['profile', 'email']
 		                       })
 	}
 	
