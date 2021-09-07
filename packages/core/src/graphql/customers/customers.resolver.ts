@@ -3,29 +3,29 @@ import {
 	Query,
 	ResolveField,
 	Resolver
-}                           from '@nestjs/graphql';
-import { UseGuards }        from '@nestjs/common';
-import { Types }            from 'mongoose';
-import { first }            from 'rxjs/operators';
+}                               from '@nestjs/graphql';
+import { UseGuards }            from '@nestjs/common';
+import { Types }                from 'mongoose';
+import { first }                from 'rxjs/operators';
 import {
 	default as ICustomer,
 	IResponseGenerateCustomers,
 	ICustomerUpdateObject
-}                           from '@modules/server.common/interfaces/ICustomer';
-import Customer             from '@modules/server.common/entities/Customer';
+}                               from '@modules/server.common/interfaces/ICustomer';
+import Customer                 from '@modules/server.common/entities/Customer';
 import {
 	AddableRegistrationInfo,
 	ICustomerRegistrationInput
-}                           from '@modules/server.common/routers/ICustomerAuthRouter';
-import { DevicesService }   from '../../services/devices';
+}                               from '@modules/server.common/routers/ICustomerAuthRouter';
+import { DevicesService }       from '../../services/devices';
 import {
 	CustomersOrdersService,
-	CustomersService,
-	CustomersAuthService
-}                           from '../../services/customers';
-import { OrdersService }    from '../../services/orders';
-import { FakeUsersService } from '../../services/fake-data';
-import { FakeDataGuard }    from '../../auth/guards/fake-data.guard';
+	CustomersService
+}                               from '../../services/customers';
+import { CustomersAuthService } from '../../services/customers/CustomersAuthService';
+import { OrdersService }        from '../../services/orders';
+import { FakeUsersService }     from '../../services/fake-data';
+import { FakeDataGuard }        from '../../auth/guards/fake-data.guard';
 
 @Resolver('Customer')
 export class CustomerResolver
@@ -60,8 +60,8 @@ export class CustomerResolver
 		
 		return (
 				(await this._customersService.count({
-					                                    _id:         { $nin: [new Types.ObjectId(userId)] },
-					                                    isDeleted:   { $eq: false },
+					                                    _id: { $nin: [new Types.ObjectId(userId)] },
+					                                    isDeleted: { $eq: false },
 					                                    [memberKey]: memberValue
 				                                    })) > 0
 		);
@@ -193,7 +193,7 @@ export class CustomerResolver
 	{
 		const users = await this._customersService
 		                        .find({
-			                              _id:       { $in: ids },
+			                              _id: { $in: ids },
 			                              isDeleted: { $eq: false }
 		                              });
 		
