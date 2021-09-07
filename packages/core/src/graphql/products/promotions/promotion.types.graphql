@@ -4,7 +4,7 @@ type Promotion {
     description: [TranslateType]
     promoPrice: Float
     warehouse: Warehouse
-    product: Product
+    product: ProductObject
     warehouseId: String
     productId: String
     active: Boolean
@@ -14,12 +14,7 @@ type Promotion {
     purchasesCount: Int
 }
 
-type TranslateType {
-    locale: String!
-    value: String!
-}
-
-type Product {
+type ProductObject {
     _id: String!
 }
 
@@ -42,11 +37,6 @@ input PromotionsFindInput {
 
 input WarehouseInput {
     _id: String
-}
-
-input TranslateInput {
-    locale: String!
-    value: String!
 }
 
 type Query {
