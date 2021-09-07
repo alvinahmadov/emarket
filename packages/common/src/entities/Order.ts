@@ -49,6 +49,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Index(1)
 	@Schema(getSchema(CustomerOrder))
 	customer: CustomerOrder;
+	
 	/**
 	 * Every order go to single merchant only.
 	 * Currently, it is not possible to include items in the order from different merchants!
@@ -59,6 +60,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Index(1)
 	@Types.Ref(Warehouse)
 	warehouse: Warehouse | string;
+	
 	/**
 	 * Same as for customer, it's not a reference but copy of data about products
 	 *
@@ -67,6 +69,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	 */
 	@Schema([getSchema(OrderProduct)])
 	products: OrderProduct[];
+	
 	/**
 	 * Client can confirm order or order can be auto-confirmed
 	 * For example, client make an order from mobile app (press button "Buy").
@@ -85,6 +88,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Boolean(false)
 	@Column()
 	isConfirmed: boolean;
+	
 	/**
 	 * Is Order Cancelled
 	 *
@@ -94,6 +98,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Boolean(false)
 	@Column()
 	isCancelled: boolean;
+	
 	/**
 	 * Is Order wait for completion by user
 	 *
@@ -103,6 +108,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Boolean(false)
 	@Column()
 	waitForCompletion: boolean;
+	
 	/**
 	 * Is Order Paid by Customer
 	 *
@@ -112,6 +118,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Boolean(false)
 	@Column()
 	isPaid: boolean;
+	
 	/**
 	 * Deliver time for order (DateTime when order was actually delivered to customer)
 	 *
@@ -121,6 +128,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Schema({ type: Date, required: false })
 	@Column()
 	deliveryTime?: Date;
+	
 	/**
 	 * Time when order processing is finished
 	 * i.e order become canceled from customer or get failed during Store preparing etc.
@@ -131,6 +139,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Schema({ type: Date, required: false })
 	@Column()
 	finishedProcessingTime?: Date;
+	
 	/**
 	 * The time when some carrier start delivery the order
 	 *
@@ -140,6 +149,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Schema({ type: Date, required: false })
 	@Column()
 	startDeliveryTime?: Date;
+	
 	/**
 	 * How many seconds more it should take to delivery order to customer
 	 * (reset to 0 when order is delivered or when carrier is not deliver any order to the customer)
@@ -150,6 +160,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Number(0)
 	@Column()
 	deliveryTimeEstimate: number;
+	
 	/**
 	 * Current Warehouse status of the order
 	 *
@@ -159,6 +170,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Number(OrderWarehouseStatus.NoStatus)
 	@Column()
 	warehouseStatus: OrderWarehouseStatus;
+	
 	/**
 	 * Current Carrier status of the order
 	 *
@@ -168,6 +180,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Number(OrderCarrierStatus.NoCarrier)
 	@Column()
 	carrierStatus: OrderCarrierStatus;
+	
 	/**
 	 * Some carrier which responsible to deliver order to the client
 	 * (can be empty if order is not planed for delivery yet)
@@ -177,12 +190,15 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	 */
 	@Types.Ref(Carrier, { required: false })
 	carrier?: Carrier | string | null;
+	
 	@Types.Boolean(false)
 	@Column()
 	isDeleted: boolean;
+	
 	@Schema({ type: String, required: false })
 	@Column()
 	stripeChargeId?: string;
+	
 	/**
 	 * Human readable Order Number in the Store (short id of order, unique in the given store only)
 	 *
@@ -192,6 +208,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Number()
 	@Column()
 	orderNumber: number;
+	
 	/**
 	 * Type of the order: Delivery or Takeaway
 	 *
@@ -213,33 +230,21 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 				this.customer = new CustomerOrder(order.customer);
 			}
 			
-			if(
-					order.warehouse &&
-					order.warehouse != null &&
-					typeof order.warehouse !== 'string'
-			)
+			if(order.warehouse && typeof order.warehouse !== 'string')
 			{
 				this.warehouse = new Warehouse(order.warehouse as IWarehouse);
 			}
 			
-			if(
-					order.carrier &&
-					order.carrier != null &&
-					typeof order.carrier !== 'string'
-			)
+			if(order.carrier && typeof order.carrier !== 'string')
 			{
 				this.carrier = new Carrier(order.carrier as ICarrier);
 			}
 			
-			if(order.products && order.products != null)
+			if(order.products)
 			{
-				this.products = _.map(
-						order.products,
-						(orderProduct: IOrderProduct) =>
-						{
-							return new OrderProduct(orderProduct);
-						}
-				);
+				this.products = _.map(order.products,
+				                      (orderProduct: IOrderProduct) =>
+						                      new OrderProduct(orderProduct));
 			}
 		}
 	}
