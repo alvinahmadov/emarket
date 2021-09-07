@@ -15,8 +15,8 @@ export class GeoLocationMerchantsResolver
 	)
 	{}
 	
-	@Query('getCoseMerchants')
-	async getCoseMerchants(_, { geoLocation }: { geoLocation: IGeoLocation })
+	@Query('getCloseMerchants')
+	async getCloseMerchants(_, { geoLocation }: { geoLocation: IGeoLocation })
 	{
 		let merchants = await this.geoLocationsWarehousesService.getMerchants(
 				geoLocation,
