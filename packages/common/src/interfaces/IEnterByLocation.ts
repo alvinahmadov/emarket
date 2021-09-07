@@ -1,4 +1,4 @@
-import { Country }  from '../entities/GeoLocation';
+import Country      from '../enums/Country';
 import { IAddress } from './IGeoLocation';
 
 interface IEnterByLocation
