@@ -1,4 +1,4 @@
-import { Country } from '../entities/GeoLocation';
+import Country from '../enums/Country';
 
 interface IStreetLocation
 {
