@@ -6,7 +6,7 @@ import { Socket }                       from '../socket.service';
 
 export class ObservableRequest<T>
 {
-	private callId: string;
+	private readonly callId: string;
 	
 	constructor(
 			private readonly socket: Socket,
