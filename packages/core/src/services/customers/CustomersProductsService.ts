@@ -1,10 +1,6 @@
-import { injectable }                                from 'inversify';
-import { observableListener, routerName }            from '@pyro/io';
-import IUserProductsRouter                           from '@modules/server.common/routers/IUserProductsRouter';
 import Handlebars                                    from 'handlebars';
-import { observeFile }                               from '../../utils';
-import { DevicesService }                            from '../devices/DevicesService';
-import IService                                      from '../IService';
+import { injectable }                                from 'inversify';
+import { combineLatest, of, throwError, Observable } from 'rxjs';
 import {
 	distinctUntilChanged,
 	exhaustMap,
@@ -13,20 +9,24 @@ import {
 	share,
 	switchMap
 }                                                    from 'rxjs/operators';
-import { combineLatest, of, throwError, Observable } from 'rxjs';
+import { observableListener, routerName }            from '@pyro/io';
+import ICustomerProductsRouter                       from '@modules/server.common/routers/ICustomerProductsRouter';
+import { DevicesService }                            from '../devices/DevicesService';
+import IService                                      from '../IService';
+import { observeFile }                               from '../../utils';
 
 @injectable()
 @routerName('user-products')
-export class UsersProductsService implements IUserProductsRouter, IService
+export class CustomersProductsService implements ICustomerProductsRouter, IService
 {
 	private static templatesDirPath: string = `${__dirname}/../../../../res/templates/`;
 	
 	protected _placeholderTemplateFileName: string =
-			UsersProductsService.templatesDirPath + `user_products_placeholder.hbs`;
+			          CustomersProductsService.templatesDirPath + `user_products_placeholder.hbs`;
 	
 	protected _placeholderTranslationsFileName: string =
-			UsersProductsService.templatesDirPath +
-			`user_products_placeholder.json`;
+			          CustomersProductsService.templatesDirPath +
+			          `user_products_placeholder.json`;
 	
 	private readonly _placeholderTemplateString: Observable<string>;
 	private readonly _placeholderTranslationsJSON: Observable<string>;
@@ -48,7 +48,7 @@ export class UsersProductsService implements IUserProductsRouter, IService
 	 * @param {string} userId
 	 * @param {string} deviceId
 	 * @returns {Observable<string>}
-	 * @memberof UsersProductsService
+	 * @memberof CustomersProductsService
 	 */
 	@observableListener()
 	getPlaceholder(userId: string, deviceId: string): Observable<string>
@@ -59,7 +59,7 @@ export class UsersProductsService implements IUserProductsRouter, IService
 					           if(device === null)
 					           {
 						           return throwError(
-								           new Error(`User with the id ${userId} doesn't exist`)
+								           new Error(`Customer with the id ${userId} doesn't exist`)
 						           );
 					           }
 					           else
