@@ -62,7 +62,12 @@ export const COUNTRIES = ${getCountries()};
 
 const languagesFileContent = `${headerComment}
 
-export const LANGUAGES = ${getLanguages()};
+const LANGUAGES = ${getLanguages()};
+
+export function getLanguage(lang: string = 'en-US'): string
+{
+\treturn LANGUAGES[lang];
+}
 `;
 
 const countriesDest: string = './src/data/countries.ts';
