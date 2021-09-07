@@ -1,13 +1,13 @@
 import { Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ExtractJwt }                from 'passport-jwt';
 import { first }                     from 'rxjs/operators';
-import { AdminsService }             from '../../services/admins';
 import {
 	IAdminRegistrationInput,
 	IAdminLoginResponse
 }                                    from '@modules/server.common/routers/IAdminRouter';
-import { ExtractJwt }                from 'passport-jwt';
 import Admin                         from '@modules/server.common/entities/Admin';
 import { env }                       from '../../env';
+import { AdminsService }             from '../../services/admins';
 
 @Resolver('Admin')
 export class AdminResolver
@@ -17,7 +17,10 @@ export class AdminResolver
 	@Query('admin')
 	async getAdmin(_, { id }: { id: string }): Promise<Admin>
 	{
-		return this._adminsService.get(id).pipe(first()).toPromise();
+		return this._adminsService
+		           .get(id)
+		           .pipe(first())
+		           .toPromise();
 	}
 	
 	@Query('adminByEmail')
