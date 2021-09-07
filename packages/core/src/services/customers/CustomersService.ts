@@ -13,33 +13,34 @@ import {
 	map
 }                                                   from 'rxjs/operators';
 import { of }                                       from 'rxjs/observable/of';
-import { _throw }                                   from 'rxjs/observable/throw';
-import Stripe                                       from 'stripe';
-import { v1 as uuid }                               from 'uuid';
+import { _throw }            from 'rxjs/observable/throw';
+import Stripe                from 'stripe';
+import { v1 as uuid }        from 'uuid';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
-}                                                   from '@pyro/io';
-import { DBService }                                from '@pyro/db-server';
-import ILanguage                                    from '@modules/server.common/interfaces/ILanguage';
+}                            from '@pyro/io';
+import { DBService }         from '@pyro/db-server';
+import ILanguage             from '@modules/server.common/interfaces/ILanguage';
 import {
-	IUserCreateObject,
-	IUserInitializeObject
-}                                                   from '@modules/server.common/interfaces/IUser';
-import IPagingOptions                               from '@modules/server.common/interfaces/IPagingOptions';
-import IGeoLocation                                 from '@modules/server.common/interfaces/IGeoLocation';
-import User                                         from '@modules/server.common/entities/User';
-import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
-import IUserRouter                                  from '@modules/server.common/routers/IUserRouter';
-import { InvitesService }                           from '../invites';
-import { DevicesService }                           from '../devices';
-import IService                                     from '../IService';
-import { WarehousesService }                        from '../../services/warehouses';
-import { createLogger }                             from '../../helpers/Log';
-import { observeFile }                              from '../../utils';
-import { env }                                      from '../../env';
+	ICustomerCreateObject,
+	ICustomerUpdateObject,
+	ICustomerInitializeObject
+}                            from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions        from '@modules/server.common/interfaces/IPagingOptions';
+import IGeoLocation          from '@modules/server.common/interfaces/IGeoLocation';
+import Customer              from '@modules/server.common/entities/Customer';
+import GeoLocation           from '@modules/server.common/entities/GeoLocation';
+import ICustomerRouter       from '@modules/server.common/routers/ICustomerRouter';
+import { InvitesService }    from '../invites';
+import { DevicesService }    from '../devices';
+import IService              from '../IService';
+import { WarehousesService } from '../../services/warehouses';
+import { createLogger }      from '../../helpers/Log';
+import { observeFile }       from '../../utils';
+import { env }               from '../../env';
 
 interface IWatchedFiles
 {
@@ -53,17 +54,17 @@ interface IWatchedFiles
  * Customers Service
  *
  * @export
- * @class UsersService
+ * @class CustomersService
  * @extends {DBService<User>}
  * @implements {IUserRouter}
  * @implements {IService}
  */
 @injectable()
-@routerName('user')
-export class UsersService extends DBService<User>
-		implements IUserRouter, IService
+@routerName('customer')
+export class CustomersService extends DBService<Customer>
+		implements ICustomerRouter, IService
 {
-	public readonly DBObject: any = User;
+	public readonly DBObject: any = Customer;
 	public watchedFiles: IWatchedFiles;
 	protected readonly log: Logger = createLogger({
 		                                              name: 'usersService'
@@ -121,10 +122,10 @@ export class UsersService extends DBService<User>
 	 * Get Customer by given social Id
 	 *
 	 * @param {string} socialId
-	 * @returns {Promise<User>}
+	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
-	async getSocial(socialId: string): Promise<User>
+	async getSocial(socialId: string): Promise<Customer>
 	{
 		return super.findOne({
 			                     socialIds: { $in: [socialId] },
@@ -135,13 +136,13 @@ export class UsersService extends DBService<User>
 	/**
 	 * Create new customer (intialize record)
 	 *
-	 * @param {IUserInitializeObject} userInitializeObject
-	 * @returns {Promise<User>}
+	 * @param {ICustomerInitializeObject} customerInitializeObject
+	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
-	async initUser(userInitializeObject: IUserInitializeObject): Promise<User>
+	async initCustomer(customerInitializeObject: ICustomerInitializeObject): Promise<Customer>
 	{
-		return super.create(userInitializeObject as any);
+		return super.create(customerInitializeObject as any);
 	}
 	
 	/**
@@ -152,7 +153,7 @@ export class UsersService extends DBService<User>
 	 * @returns
 	 * @memberof UsersService
 	 */
-	async getUsers(findInput: any, pagingOptions: IPagingOptions)
+	async getCustomers(findInput: any, pagingOptions: IPagingOptions)
 	{
 		const sortObj = {};
 		if(pagingOptions.sort)
@@ -173,18 +174,18 @@ export class UsersService extends DBService<User>
 	
 	/**
 	 * Updates Customer details
-	 * // TODO function actually returns User | null we should fix that.
+	 * // TODO function actually returns Customer | null we should fix that.
 	 *
 	 * @param {string} id
-	 * @param {IUserCreateObject} userCreateObject
-	 * @returns {Promise<User>}
+	 * @param {ICustomerCreateObject} userCreateObject
+	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async updateUser(
+	async updateCustomer(
 			id: string,
-			userCreateObject: IUserCreateObject
-	): Promise<User>
+			userCreateObject: ICustomerUpdateObject
+	): Promise<Customer>
 	{
 		await this.throwIfNotExists(id);
 		return super.update(id, userCreateObject);
@@ -194,11 +195,11 @@ export class UsersService extends DBService<User>
 	 * Get Customer by Id
 	 *
 	 * @param {string} customerId
-	 * @returns {Observable<User>}
+	 * @returns {Observable<Customer>}
 	 * @memberof UsersService
 	 */
 	@observableListener()
-	get(customerId: string): Observable<User>
+	get(customerId: string): Observable<Customer>
 	{
 		return super.get(customerId)
 		            .pipe(
@@ -215,16 +216,16 @@ export class UsersService extends DBService<User>
 	 * Get Stripe Cards for given customer
 	 * TODO: move to separate Stripe (Payments) Service
 	 *
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @returns {Promise<Stripe.cards.ICard[]>}
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async getCards(userId: string): Promise<Stripe.cards.ICard[]>
+	async getCards(customerId: string): Promise<Stripe.cards.ICard[]>
 	{
-		await this.throwIfNotExists(userId);
+		await this.throwIfNotExists(customerId);
 		
-		const user = await this.get(userId)
+		const user = await this.get(customerId)
 		                       .pipe(first())
 		                       .toPromise();
 		
@@ -250,7 +251,7 @@ export class UsersService extends DBService<User>
 		}
 		else
 		{
-			throw new Error(`User with the id ${userId} doesn't exist`);
+			throw new Error(`Customer with the id ${customerId} doesn't exist`);
 		}
 	}
 	
@@ -261,20 +262,20 @@ export class UsersService extends DBService<User>
 	 *
 	 * TODO: move to separate Stripe (Payments) Service
 	 *
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @param {string} tokenId
 	 * @returns {Promise<string>}
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async addPaymentMethod(userId: string, tokenId: string): Promise<string>
+	async addPaymentMethod(customerId: string, tokenId: string): Promise<string>
 	{
-		await this.throwIfNotExists(userId);
+		await this.throwIfNotExists(customerId);
 		
 		const callId = uuid();
 		
 		this.log.info(
-				{ callId, userId, tokenId },
+				{ callId, userId: customerId, tokenId },
 				'.addPaymentMethod(userId, tokenId) called'
 		);
 		
@@ -282,7 +283,7 @@ export class UsersService extends DBService<User>
 		
 		try
 		{
-			let user = await this.get(userId)
+			let user = await this.get(customerId)
 			                     .pipe(first())
 			                     .toPromise();
 			
@@ -293,14 +294,14 @@ export class UsersService extends DBService<User>
 					const customer = await this.stripe
 					                           .customers
 					                           .create({
-						                                   email: user.email,
-						                                   description: 'User id: ' + user.id,
-						                                   metadata: {
+						                                   email:       user.email,
+						                                   description: 'Customer id: ' + user.id,
+						                                   metadata:    {
 							                                   userId: user.id
 						                                   }
 					                                   });
 					
-					user = await this.update(userId, {
+					user = await this.update(customerId, {
 						stripeCustomerId: customer.id
 					});
 				}
@@ -318,19 +319,19 @@ export class UsersService extends DBService<User>
 			}
 			else
 			{
-				throw new Error(`User with the id ${userId} doesn't exist`);
+				throw new Error(`Customer with the id ${customerId} doesn't exist`);
 			}
 		} catch(err)
 		{
 			this.log.error(
-					{ callId, userId, tokenId, err },
+					{ callId, userId: customerId, tokenId, err },
 					'.addPaymentMethod(userId, tokenId) thrown error!'
 			);
 			throw err;
 		}
 		
 		this.log.info(
-				{ callId, userId, tokenId, card },
+				{ callId, userId: customerId, tokenId, card },
 				'.addPaymentMethod(userId, tokenId) added payment method'
 		);
 		
@@ -340,49 +341,64 @@ export class UsersService extends DBService<User>
 	/**
 	 * Update email for given Customer (by customer Id)
 	 *
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @param {string} email
-	 * @returns {Promise<User>}
+	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async updateEmail(userId: string, email: string): Promise<User>
+	async updateEmail(customerId: string, email: string): Promise<Customer>
 	{
-		await this.throwIfNotExists(userId);
-		return this.update(userId, { email });
+		await this.throwIfNotExists(customerId);
+		return this.update(customerId, { email });
+	}
+	
+	/**
+	 * Update role for given Customer (by customer Id)
+	 *
+	 * @param {string} customerId
+	 * @param {UserRole} role
+	 * @returns {Promise<Customer>}
+	 * @memberof UsersService
+	 */
+	@asyncListener()
+	async updateRole(customerId: string, role: string): Promise<Customer>
+	{
+		await this.throwIfNotExists(customerId);
+		return this.update(customerId, { role });
 	}
 	
 	/**
 	 * Update current location (address) for given Customer
 	 *
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @param {GeoLocation} geoLocation
-	 * @returns {Promise<User>}
+	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
 	@asyncListener()
 	async updateGeoLocation(
-			userId: string,
+			customerId: string,
 			@serialization((g: IGeoLocation) => new GeoLocation(g))
 					geoLocation: GeoLocation
-	): Promise<User>
+	): Promise<Customer>
 	{
-		await this.throwIfNotExists(userId);
-		return this.update(userId, { geoLocation });
+		await this.throwIfNotExists(customerId);
+		return this.update(customerId, { geoLocation });
 	}
 	
 	/**
 	 * Get About Us Content (HTML)
 	 * Note: Depending on user country, language and other settings, we may want later to show different About Us page
 	 * (e.g. show different contact details or branch location etc)
-	 * @param userId
+	 * @param customerId
 	 * @param deviceId
 	 * @param selectedLanguage
 	 * @returns HTML representation of About Us
 	 */
 	@observableListener()
 	getAboutUs(
-			userId: string,
+			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
 	): Observable<string> /*returns html*/
@@ -395,7 +411,7 @@ export class UsersService extends DBService<User>
 					                      if(device === null)
 					                      {
 						                      return _throw(
-								                      new Error(`User with the id ${userId} doesn't exist`)
+								                      new Error(`Customer with the id ${customerId} doesn't exist`)
 						                      );
 					                      }
 					                      else
@@ -414,14 +430,14 @@ export class UsersService extends DBService<User>
 	/**
 	 * Get Terms Of Use Content (HTML)
 	 * Note: Depending on user country, language and other settings, we may want later to show different Terms
-	 * @param userId
+	 * @param customerId
 	 * @param deviceId
 	 * @param selectedLanguage
 	 * @returns HTML representation of Terms Of Use
 	 */
 	@observableListener()
 	getTermsOfUse(
-			userId: string,
+			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
 	): Observable<string>
@@ -455,14 +471,14 @@ export class UsersService extends DBService<User>
 	/**
 	 * Get Privacy Policy Content (HTML)
 	 * Note: Depending on user country, language and other settings, we may want later to show different Policy
-	 * @param userId
+	 * @param customerId
 	 * @param deviceId
 	 * @param selectedLanguage
 	 * @returns HTML representation of privacy policy
 	 */
 	@observableListener()
 	getPrivacy(
-			userId: string,
+			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
 	): Observable<string>
@@ -475,7 +491,7 @@ export class UsersService extends DBService<User>
 					                      if(device === null)
 					                      {
 						                      return _throw(
-								                      new Error(`User with the id ${userId} doesn't exist`)
+								                      new Error(`Customer with the id ${customerId} doesn't exist`)
 						                      );
 					                      }
 					                      else
@@ -494,14 +510,14 @@ export class UsersService extends DBService<User>
 	/**
 	 * Get Help Content (HTML)
 	 * Note: Depending on user country, language and other settings, we may want later to show different Help
-	 * @param userId
+	 * @param customerId
 	 * @param deviceId
 	 * @param selectedLanguage
 	 * @returns HTML representation of privacy policy
 	 */
 	@observableListener()
 	getHelp(
-			userId: string,
+			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
 	): Observable<string>
@@ -514,7 +530,7 @@ export class UsersService extends DBService<User>
 					                      if(device === null)
 					                      {
 						                      return _throw(
-								                      new Error(`User with the id ${userId} doesn't exist`)
+								                      new Error(`Customer with the id ${customerId} doesn't exist`)
 						                      );
 					                      }
 					                      else
@@ -530,13 +546,13 @@ export class UsersService extends DBService<User>
 		           );
 	}
 	
-	async banUser(id: string): Promise<User>
+	async banUser(id: string): Promise<Customer>
 	{
 		await this.throwIfNotExists(id);
 		return this.update(id, { isBanned: true });
 	}
 	
-	async unbanUser(id: string): Promise<User>
+	async unbanUser(id: string): Promise<Customer>
 	{
 		await this.throwIfNotExists(id);
 		return this.update(id, { isBanned: false });
@@ -545,18 +561,18 @@ export class UsersService extends DBService<User>
 	/**
 	 * Check if not deleted customer with given Id exists in DB and throw exception if it's not exists or deleted
 	 *
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @memberof UsersService
 	 */
-	async throwIfNotExists(userId: string)
+	async throwIfNotExists(customerId: string)
 	{
-		const user = await super.get(userId)
+		const user = await super.get(customerId)
 		                        .pipe(first())
 		                        .toPromise();
 		
 		if(!user || user.isDeleted)
 		{
-			throw Error(`Customer with id '${userId}' does not exists!`);
+			throw Error(`Customer with id '${customerId}' does not exists!`);
 		}
 	}
 }
