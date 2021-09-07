@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
-import User           from '../entities/User';
+import Customer       from '../entities/Customer';
 import Device         from '../entities/Device';
 
-interface IUserProductsRouter
+interface ICustomerProductsRouter
 {
 	getPlaceholder(
-			userId: User['id'],
+			userId: Customer['id'],
 			deviceId: Device['id']
 	): Observable<string>;
 }
 
-export default IUserProductsRouter;
+export default ICustomerProductsRouter;
