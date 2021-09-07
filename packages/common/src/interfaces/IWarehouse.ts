@@ -1,16 +1,49 @@
-import IWarehouseProduct, {
-	IWarehouseProductCreateObject
-}                                                    from './IWarehouseProduct';
+import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
+import { ICustomerCreateObject }                     from './ICustomer';
 import IGeoLocation, { IGeoLocationCreateObject }    from './IGeoLocation';
-import { DBCreateObject, DBRawObject, PyroObjectId } from '../@pyro/db';
-import ForwardOrdersMethod                           from '../enums/ForwardOrdersMethod';
-import OrderBarcodeTypes                             from '../enums/OrderBarcodeTypes';
 import IPaymentGatewayCreateObject, {
 	IPaymentGateway
 }                                                    from './IPaymentGateway';
+import IWarehouseProduct, {
+	IWarehouseProductCreateObject
+}                                                    from './IWarehouseProduct';
+import ForwardOrdersMethod                           from '../enums/ForwardOrdersMethod';
+import OrderBarcodeTypes                             from '../enums/OrderBarcodeTypes';
 
 export interface IWarehouseCreateObject extends DBCreateObject
 {
+	/**
+	 * Warehouse name
+	 *
+	 * @type {string}
+	 * @memberof IWarehouseCreateObject
+	 */
+	name: string;
+	
+	/**
+	 * Merchant admin user name
+	 *
+	 * @type {string}
+	 * @memberof IWarehouseCreateObject
+	 */
+	username: string;
+	
+	/**
+	 * Merchant admin user
+	 *
+	 * @type {ICustomerCreateObject}
+	 * @memberof IWarehouseCreateObject
+	 */
+	merchant?: ICustomerCreateObject;
+	
+	/**
+	 * URL of Merchant/Warehouse brand logo
+	 *
+	 * @type {string}
+	 * @memberof IWarehouseCreateObject
+	 */
+	logo: string;
+	
 	/**
 	 * Is Warehouse working now
 	 *
@@ -58,24 +91,6 @@ export interface IWarehouseCreateObject extends DBCreateObject
 	 * @memberof IWarehouseCreateObject
 	 */
 	products?: IWarehouseProductCreateObject[];
-	
-	name: string;
-	
-	/**
-	 * URL of Merchant/Warehouse brand logo
-	 *
-	 * @type {string}
-	 * @memberof IWarehouseCreateObject
-	 */
-	logo: string;
-	
-	/**
-	 * Merchant admin user name
-	 *
-	 * @type {string}
-	 * @memberof IWarehouseCreateObject
-	 */
-	username: string;
 	
 	contactEmail: string | null;
 	contactPhone: string | null;
