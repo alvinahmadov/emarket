@@ -1,26 +1,32 @@
-import Logger                                from 'bunyan';
-import { inject, injectable }                from 'inversify';
-import { Observable }                        from 'rxjs';
-import { first, map, switchMap }             from 'rxjs/operators';
-import { Repository }                        from 'typeorm';
-import { asyncListener, observableListener } from '@pyro/io';
-import { DBService }                         from '@pyro/db-server';
-import Admin                                 from '@modules/server.common/entities/Admin';
+import Logger                              from 'bunyan';
+import { inject, injectable }              from 'inversify';
+import { Observable }                      from 'rxjs';
+import { first, map, switchMap }           from 'rxjs/operators';
+import { Repository }                      from 'typeorm';
+import {
+	asyncListener,
+	observableListener,
+	routerName
+}                                          from '@pyro/io';
+import { DBService }                       from '@pyro/db-server';
 import IAdminRouter,
 {
 	IAdminLoginResponse,
 	IAdminRegistrationInput
-}                                            from '@modules/server.common/routers/IAdminRouter';
-import { AuthService, AuthServiceFactory }   from '../auth';
-import { createLogger }                      from '../../helpers/Log';
-import { env }                               from '../../env';
+}                                          from '@modules/server.common/routers/IAdminRouter';
+import Admin                               from '@modules/server.common/entities/Admin';
+import IService                            from '../IService';
+import { AuthService, AuthServiceFactory } from '../auth';
+import { createLogger }                    from '../../helpers/Log';
+import { env }                             from '../../env';
 
 /**
  * Users (not customers!) management service
  * In most cases such users are Administrators, which need to get access into Admin or Mechant app
  */
 @injectable()
-export class AdminsService extends DBService<Admin> implements IAdminRouter
+@routerName('admin')
+export class AdminsService extends DBService<Admin> implements IAdminRouter, IService
 {
 	readonly DBObject: any = Admin;
 	
@@ -50,8 +56,8 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter
 				       });
 		
 		this.authService = authServiceFactory({
-			                                      role: 'admin',
-			                                      Entity: Admin,
+			                                      role:       'admin',
+			                                      Entity:     Admin,
 			                                      saltRounds: env.ADMIN_PASSWORD_BCRYPT_SALT_ROUNDS
 		                                      });
 	}
