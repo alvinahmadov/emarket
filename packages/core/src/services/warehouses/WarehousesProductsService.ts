@@ -1,32 +1,29 @@
-// noinspection DuplicatedCode
-
-import { injectable }                    from 'inversify';
-import { createLogger }                  from '../../helpers/Log';
-import Logger                            from 'bunyan';
-import WarehouseProduct                  from '@modules/server.common/entities/WarehouseProduct';
-import { WarehousesService }             from './WarehousesService';
-import IWarehouseProduct, {
-	IWarehouseProductCreateObject
-}                                        from '@modules/server.common/interfaces/IWarehouseProduct';
-import _                                 from 'lodash';
-import Warehouse                         from '@modules/server.common/entities/Warehouse';
-import IWarehouse                        from '@modules/server.common/interfaces/IWarehouse';
-import { ExistenceEventType, DBService } from '@pyro/db-server';
-import { Observable }                    from 'rxjs';
-import IWarehouseProductsRouter          from '@modules/server.common/routers/IWarehouseProductsRouter';
+import Logger                     from 'bunyan';
+import { injectable }             from 'inversify';
+import _                          from 'lodash';
+import { Types }                  from 'mongoose'
+import { Observable, of }         from 'rxjs';
+import { exhaustMap, first, map } from 'rxjs/operators';
+import { _throw }                 from 'rxjs/observable/throw';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
-}                                        from '@pyro/io';
-import IProduct                          from '@modules/server.common/interfaces/IProduct';
-import IService                          from '../IService';
-import { exhaustMap, first, map }        from 'rxjs/operators';
-import { of }                            from 'rxjs/observable/of';
-import { _throw }                        from 'rxjs/observable/throw';
-import mongoose = require('mongoose');
-import IPagingOptions                    from '@modules/server.common/interfaces/IPagingOptions';
+}                                 from '@pyro/io';
+import { ExistenceEventType }     from '@pyro/db-server';
+import IWarehouseProduct, {
+	IWarehouseProductCreateObject
+}                                 from '@modules/server.common/interfaces/IWarehouseProduct';
+import IProduct                   from '@modules/server.common/interfaces/IProduct';
+import IPagingOptions             from '@modules/server.common/interfaces/IPagingOptions';
+import IWarehouse                 from '@modules/server.common/interfaces/IWarehouse';
+import IWarehouseProductsRouter   from '@modules/server.common/routers/IWarehouseProductsRouter';
+import WarehouseProduct           from '@modules/server.common/entities/WarehouseProduct';
+import Warehouse                  from '@modules/server.common/entities/Warehouse';
+import { WarehousesService }      from './WarehousesService';
+import IService                   from '../IService';
+import { createLogger }           from '../../helpers/Log';
 
 const noGetProductTypeMessage = `There should be true at least one of the two - "isCarrierRequired" or "isTakeaway"!`;
 
@@ -462,7 +459,7 @@ export class WarehousesProductsService
 		const updatedWarehouse = (
 				await this.warehousesService.updateMultiple(
 						{
-							_id:            new mongoose.Types.ObjectId(warehouseId),
+							_id:            new Types.ObjectId(warehouseId),
 							'products._id': updatedWarehouseProduct._id
 						},
 						{
