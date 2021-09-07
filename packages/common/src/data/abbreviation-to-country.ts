@@ -252,7 +252,9 @@ export enum CountryAbbreviations
 	ZW = 'ZW'
 }
 
-export function getCountries(lang: string): object
+export function getCountries(lang: string = 'en-US'): object
 {
 	return COUNTRIES[lang];
 }
+
+export const countries = getCountries();
