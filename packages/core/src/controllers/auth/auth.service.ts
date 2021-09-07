@@ -1,10 +1,11 @@
-import jwt              from 'jsonwebtoken';
-import { Injectable }   from '@nestjs/common';
-import User             from '@modules/server.common/entities/User';
-import { createLogger } from '../../helpers/Log';
-import { first }        from 'rxjs/operators';
-import { UsersService } from '../../services/users';
-import Logger           from 'bunyan';
+import { Injectable }       from '@nestjs/common';
+import jwt                  from 'jsonwebtoken';
+import { first }            from 'rxjs/operators';
+import Logger               from 'bunyan';
+import Customer             from '@modules/server.common/entities/Customer';
+import { CustomersService } from '../../services/customers';
+import { createLogger }     from '../../helpers/Log';
+import { env }              from '../../env';
 
 export interface JwtPayload
 {
@@ -14,19 +15,22 @@ export interface JwtPayload
 @Injectable()
 export class AuthService
 {
-	public readonly DBObject = User;
+	public readonly DBObject = Customer;
 	protected readonly log: Logger = createLogger({ name: 'authService' });
 	
-	constructor(private readonly _usersService: UsersService) {}
+	constructor(private readonly _customersService: CustomersService) {}
 	
 	async createToken(id: string)
 	{
 		const user: JwtPayload = { id };
-		return jwt.sign(user, 'secretKey', { expiresIn: 3600 });
+		return jwt.sign(user, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES });
 	}
 	
-	async validateUser(payload: JwtPayload): Promise<User | null>
+	async validateUser(payload: JwtPayload): Promise<Customer | null>
 	{
-		return this._usersService.get(payload.id).pipe(first()).toPromise();
+		return this._customersService
+		           .get(payload.id)
+		           .pipe(first())
+		           .toPromise();
 	}
 }
