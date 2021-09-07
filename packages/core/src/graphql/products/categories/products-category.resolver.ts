@@ -1,7 +1,7 @@
 import { Mutation, Query, Resolver }     from '@nestjs/graphql';
-import { ProductsCategoriesService }     from '../../../services/products';
-import { IProductsCategoryCreateObject } from '@modules/server.common/interfaces/IProductsCategory';
 import { first }                         from 'rxjs/operators';
+import { IProductsCategoryCreateObject } from '@modules/server.common/interfaces/IProductsCategory';
+import { ProductsCategoriesService }     from '../../../services/products';
 
 @Resolver('ProductsCategory')
 export class ProductsCategoryResolver
@@ -54,15 +54,15 @@ export class ProductsCategoryResolver
 	@Mutation()
 	async removeProductsCategoriesByIds(_, { ids }: { ids: string[] })
 	{
-		const categories = await this._productsCategoriesService.find({
-			                                                              _id: { $in: ids },
-			                                                              isDeleted: { $eq: false }
-		                                                              });
+		const categories = await this._productsCategoriesService
+		                             .find({
+			                                   _id:       { $in: ids },
+			                                   isDeleted: { $eq: false }
+		                                   });
 		
 		const categoriesIds = categories.map((c) => c.id);
 		
-		return this._productsCategoriesService.removeMultipleByIds(
-				categoriesIds
-		);
+		return this._productsCategoriesService
+		           .removeMultipleByIds(categoriesIds);
 	}
 }
