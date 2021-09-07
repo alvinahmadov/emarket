@@ -1,15 +1,15 @@
+import _                         from 'lodash';
 import { Observable }            from 'rxjs';
 import { map }                   from 'rxjs/operators';
-import { Router, RouterFactory } from '../lib/router';
 import { Injectable }            from '@angular/core';
-import IUserOrdersRouter         from '@modules/server.common/routers/IUserOrdersRouter';
 import IOrder                    from '@modules/server.common/interfaces/IOrder';
-import Order                     from '@modules/server.common/entities/Order';
 import IOrderProductInfo         from '@modules/server.common/interfaces/IOrderProductInfo';
-import _                         from 'lodash';
+import ICustomerOrdersRouter     from '@modules/server.common/routers/ICustomerOrdersRouter';
+import Order                     from '@modules/server.common/entities/Order';
+import { Router, RouterFactory } from '../lib/router';
 
 @Injectable()
-export class UserOrdersRouter implements IUserOrdersRouter
+export class CustomerOrdersRouter implements ICustomerOrdersRouter
 {
 	private readonly router: Router;
 	
