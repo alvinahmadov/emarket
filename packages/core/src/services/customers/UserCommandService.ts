@@ -1,13 +1,8 @@
-import {
-	CommandBus,
-	CommandHandler,
-	ICommand,
-	ICommandHandler
-}                               from '@nestjs/cqrs';
-import { routerName }           from '@pyro/io';
-import { injectable, optional } from 'inversify';
-import { UsersService }         from './UsersService';
-import IService                 from 'services/IService';
+import { CommandBus, CommandHandler, ICommand, ICommandHandler } from '@nestjs/cqrs';
+import { routerName }                                            from '@pyro/io';
+import { injectable, optional }                                  from 'inversify';
+import { CustomersService }                                      from './CustomersService';
+import IService                                                  from '../IService';
 
 /**
  * AboutUs Command
@@ -68,7 +63,7 @@ export class UserCommandService implements IService
 @CommandHandler(GetAboutUsCommand)
 export class GetAboutUsHandler implements ICommandHandler<GetAboutUsCommand>
 {
-	constructor(private readonly _userService: UsersService) {}
+	constructor(private readonly _userService: CustomersService) {}
 	
 	async execute(command: GetAboutUsCommand)
 	{
@@ -78,12 +73,10 @@ export class GetAboutUsHandler implements ICommandHandler<GetAboutUsCommand>
 		console.log('COMMAND PARAM 2:', deviceId);
 		console.log('COMMAND PARAM 2:', selectedLanguage);
 		
-		const result = this._userService.getAboutUs(
+		return this._userService.getAboutUs(
 				userId,
 				deviceId,
 				selectedLanguage
 		);
-		
-		return result;
 	}
 }
