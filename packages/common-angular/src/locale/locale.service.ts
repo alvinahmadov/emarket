@@ -5,25 +5,42 @@ import {
 	countriesIdsToNamesArrayFn
 }                             from '@modules/server.common/entities/GeoLocation';
 import Country                from '@modules/server.common/enums/Country';
-import { env }                from '../env';
+import { environment as env } from '../environments/environment';
 
 @Injectable()
-export class LocaleService implements OnInit
+export class LocaleService
 {
 	private readonly _defaultLang: string = env.DEFAULT_LANGUAGE.split('-')[0];
 	private readonly _defaultLocale: string = env.DEFAULT_LANGUAGE;
-	private readonly _availableLocales: string[] = env.AVAILABLE_LOCALES.split('|');
+	private readonly _availableLocales: string[];
 	
 	private _currentLocale: string;
 	
 	constructor(private readonly _translateService: TranslateService)
-	{}
-	
-	ngOnInit()
 	{
-		this._currentLocale = localStorage.getItem('_language') ?? this._defaultLocale;
-		this._translateService.addLangs(this._availableLocales);
-		this._translateService.use(this._currentLocale);
+		if(env.AVAILABLE_LOCALES.indexOf('|') > 0)
+		{
+			this._availableLocales = env.AVAILABLE_LOCALES.split('|');
+		}
+		else
+		{
+			this._availableLocales = ['ru-RU'];
+		}
+		
+		if(!this._translateService.currentLang)
+		{
+			this._translateService.addLangs(this._availableLocales);
+			this._translateService.setDefaultLang(env.DEFAULT_LANGUAGE);
+			const browserLang = this._translateService.getBrowserLang();
+			this._translateService.use(
+					browserLang.match(env.AVAILABLE_LOCALES)
+					? browserLang
+					: 'ru-RU'
+			);
+		}
+		
+		this._currentLocale = this._translateService.currentLang;
+		this._translateService.setDefaultLang(this._currentLocale);
 	}
 	
 	get defaultLang()
@@ -65,7 +82,13 @@ export class LocaleService implements OnInit
 		
 		this._translateService
 		    .get(key)
-		    .subscribe((res) => translationResult = res);
+		    .subscribe((res) =>
+		               {
+			               console.log("Inside LocaleService:")
+			               console.log(res)
+			               console.log(translationResult)
+			               translationResult = res
+		               });
 		
 		return translationResult;
 	}
@@ -83,7 +106,9 @@ export class LocaleService implements OnInit
 		this._availableLocales.forEach((locale) =>
 		                               {
 			                               if(lang === locale)
+			                               {
 				                               translateLang = locale;
+			                               }
 		                               })
 		return translateLang;
 	}
