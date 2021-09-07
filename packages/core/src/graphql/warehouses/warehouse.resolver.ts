@@ -1,24 +1,25 @@
-import { Mutation, Query, ResolveProperty, Resolver } from '@nestjs/graphql';
-import { first }                                      from 'rxjs/operators';
-import IGeoLocation, { IGeoLocationCreateObject }     from '@modules/server.common/interfaces/IGeoLocation';
-import { default as IWarehouse }                      from '@modules/server.common/interfaces/IWarehouse';
-import User                                           from '@modules/server.common/entities/User';
-import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
-import Warehouse                                      from '@modules/server.common/entities/Warehouse';
-import { IWarehouseRegistrationInput }                from '@modules/server.common/routers/IWarehouseAuthRouter';
-import { GeoUtils }                                   from '@modules/server.common/utilities';
+import { Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { first }                                   from 'rxjs/operators';
+import IGeoLocation, { IGeoLocationCreateObject }  from '@modules/server.common/interfaces/IGeoLocation';
+import { default as IWarehouse }                   from '@modules/server.common/interfaces/IWarehouse';
+import Customer                                    from '@modules/server.common/entities/Customer';
+import GeoLocation                                 from '@modules/server.common/entities/GeoLocation';
+import Order                                       from '@modules/server.common/entities/Order';
+import Warehouse                                   from '@modules/server.common/entities/Warehouse';
+import { IWarehouseRegistrationInput }             from '@modules/server.common/routers/IWarehouseAuthRouter';
+import { GeoUtils }                                from '@modules/server.common/utilities';
 import {
 	WarehousesAuthService,
 	WarehousesCarriersService,
 	WarehousesOrdersService,
 	WarehousesProductsService,
-	WarehousesService,
-	WarehousesUsersService
-}                                                     from '../../services/warehouses';
-import { DevicesService }                             from '../../services/devices';
-import { GeoLocationsWarehousesService }              from '../../services/geo-locations';
-import { UsersService }                               from '../../services/users';
-import { OrdersService }                              from '../../services/orders';
+	WarehousesCustomersService,
+	WarehousesService
+}                                                  from '../../services/warehouses';
+import { DevicesService }                          from '../../services/devices';
+import { GeoLocationsWarehousesService }           from '../../services/geo-locations';
+import { CustomersService }                        from '../../services/customers';
+import { OrdersService }                           from '../../services/orders';
 
 @Resolver('Warehouse')
 export class WarehouseResolver
@@ -28,12 +29,12 @@ export class WarehouseResolver
 			private readonly _warehousesService: WarehousesService,
 			private readonly _warehousesAuthService: WarehousesAuthService,
 			private readonly _warehousesOrdersService: WarehousesOrdersService,
-			private readonly _warehousesUsersService: WarehousesUsersService,
+			private readonly _warehousesCustomersService: WarehousesCustomersService,
 			private readonly _warehousesCarriersService: WarehousesCarriersService,
 			private readonly _warehouseProductsService: WarehousesProductsService,
 			private readonly _devicesService: DevicesService,
 			private readonly _ordersService: OrdersService,
-			private readonly _usersService: UsersService
+			private readonly _customersService: CustomersService
 	)
 	{}
 	
@@ -76,13 +77,13 @@ export class WarehouseResolver
 	@Query()
 	async countStoreCustomers(_, { storeId }: { storeId: string })
 	{
-		const storeOrders = await this._warehousesOrdersService
-		                              .get(storeId)
-		                              .pipe(first())
-		                              .toPromise();
+		const storeOrders: Order[] = await this._warehousesOrdersService
+		                                       .get(storeId)
+		                                       .pipe(first())
+		                                       .toPromise();
 		
-		const storeCustomerIds = storeOrders.map((order) =>
-				                                         order.user._id.toString()
+		const storeCustomerIds = storeOrders.map((order: Order) =>
+				                                         order.customer._id.toString()
 		);
 		
 		return new Set(storeCustomerIds).size;
@@ -92,11 +93,11 @@ export class WarehouseResolver
 	async getCountExistingCustomers()
 	{
 		const isDeletedFlag = { isDeleted: { $eq: false } };
-		const users: string[] = await this._ordersService.Model.find(
-				                                  isDeletedFlag
-		                                  )
-		                                  .distinct('user._id')
-		                                  .lean();
+		const customers: string[] = await this._ordersService
+		                                      .Model
+		                                      .find(isDeletedFlag)
+		                                      .distinct('customer._id')
+		                                      .lean();
 		
 		const storesIds: string[] = await this._ordersService.Model.find(
 				                                      isDeletedFlag
@@ -105,18 +106,21 @@ export class WarehouseResolver
 		                                      .lean();
 		
 		return {
-			total: users.length,
+			total:    customers.length,
 			perStore: storesIds.map(async(storeId) =>
 			                        {
-				                        const usersIds: string[] = await this._ordersService.Model.find(
-						                        {
-							                        ...isDeletedFlag,
-							                        warehouse: storeId
-						                        }
-				                        ).distinct('user._id');
+				                        const customerIds: string[] =
+						                              await this._ordersService
+						                                        .Model
+						                                        .find(
+								                                        {
+									                                        ...isDeletedFlag,
+									                                        warehouse: storeId
+								                                        }
+						                                        ).distinct('customer._id');
 				                        return {
 					                        storeId,
-					                        customersCount: usersIds.length
+					                        customersCount: customerIds.length
 				                        };
 			                        })
 		};
@@ -153,20 +157,20 @@ export class WarehouseResolver
 		                                      .exec();
 		
 		return {
-			total: users.length,
+			total:    users.length,
 			perStore: storesIds.map(async(storeId) =>
 			                        {
 				                        const usersIds: string[] =
-						                        await this._ordersService
-						                                  .Model
-						                                  .find(
-								                                  {
-									                                  ...isDeletedFlag,
-									                                  'user._id':
-											                                  { $in: users.map((u) => u._id) },
-									                                  warehouse: storeId
-								                                  }
-						                                  ).distinct('user._id');
+						                              await this._ordersService
+						                                        .Model
+						                                        .find(
+								                                        {
+									                                        ...isDeletedFlag,
+									                                        'user._id':
+											                                        { $in: users.map((u) => u._id) },
+									                                        warehouse: storeId
+								                                        }
+						                                        ).distinct('user._id');
 				                        return {
 					                        storeId,
 					                        customersCount: usersIds.length
@@ -220,9 +224,9 @@ export class WarehouseResolver
 	async getStoreCustomers(
 			_,
 			{ storeId }: { storeId: string }
-	): Promise<User[]>
+	): Promise<Customer[]>
 	{
-		return this._warehousesUsersService.getPromise(storeId);
+		return this._warehousesCustomersService.getPromise(storeId);
 	}
 	
 	@Query()
@@ -236,7 +240,7 @@ export class WarehouseResolver
 	}
 	
 	@Query()
-	async getMerchantsBuyName(
+	async getMerchantsByName(
 			_,
 			{
 				searchName,
@@ -323,7 +327,7 @@ export class WarehouseResolver
 		return this._warehousesService.removeMultipleByIds(ids);
 	}
 	
-	@ResolveProperty('devices')
+	@ResolveField('devices')
 	async getDevices(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
@@ -333,7 +337,7 @@ export class WarehouseResolver
 		           .toPromise();
 	}
 	
-	@ResolveProperty('orders')
+	@ResolveField('orders')
 	async getOrders(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
@@ -343,18 +347,18 @@ export class WarehouseResolver
 		           .toPromise();
 	}
 	
-	@ResolveProperty('users')
-	async getUsers(_warehouse: IWarehouse)
+	@ResolveField('customers')
+	async getCustomers(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
 		
-		return this._warehousesUsersService
+		return this._warehousesCustomersService
 		           .get(warehouse.id)
 		           .pipe(first())
 		           .toPromise();
 	}
 	
-	@ResolveProperty('carriers')
+	@ResolveField('carriers')
 	async getCarriers(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
