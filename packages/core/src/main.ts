@@ -21,9 +21,9 @@ try
 	sourceMapSupport.install();
 	
 	moduleAlias.addAliases({
-		                       '@pyro/db-server': __dirname + '/@pyro/db-server',
-		                       '@pyro/io': __dirname + '/@pyro/io',
-		                       '@pyro/db': '@ever-platform/common/build/@pyro/db',
+		                       '@pyro/db-server':        __dirname + '/@pyro/db-server',
+		                       '@pyro/io':               __dirname + '/@pyro/io',
+		                       '@pyro/db':               '@ever-platform/common/build/@pyro/db',
 		                       '@modules/server.common': '@ever-platform/common/build/'
 	                       });
 } catch(err)
