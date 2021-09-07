@@ -1,52 +1,54 @@
-import { inject, injectable, multiInject } from 'inversify';
-import https                               from 'https';
-import http                                from 'http';
-import path                                from 'path';
-import pem                                 from 'pem';
-import fs                                  from 'fs';
-import bodyParser                          from 'body-parser';
-import cors                                from 'cors';
-import passport                            from 'passport';
-import methodOverride                      from 'method-override';
-import errorhandler                        from 'errorhandler';
-import socketIO                            from 'socket.io';
-import express                             from 'express';
-import mongoose                            from 'mongoose';
-import morgan                              from 'morgan';
-import Bluebird                            from 'bluebird';
-import exphbs                              from 'express-handlebars';
-import ipstack                             from 'ipstack';
-import requestIp                           from 'request-ip';
-import { createConnection }                from 'typeorm';
-import { MongoConnectionOptions }          from "typeorm/driver/mongodb/MongoConnectionOptions";
-import { IRoutersManager }                 from '@pyro/io';
-import { getModel }                        from '@pyro/db-server';
-import Admin                               from '@modules/server.common/entities/Admin';
-import Device                              from '@modules/server.common/entities/Device';
-import Carrier                             from '@modules/server.common/entities/Carrier';
-import Conversation                        from '@modules/server.common/entities/Conversation';
-import Invite                              from '@modules/server.common/entities/Invite';
-import InviteRequest                       from '@modules/server.common/entities/InviteRequest';
-import Order                               from '@modules/server.common/entities/Order';
-import Product                             from '@modules/server.common/entities/Product';
-import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
-import User                                from '@modules/server.common/entities/User';
-import Warehouse                           from '@modules/server.common/entities/Warehouse';
-import Promotion                           from '@modules/server.common/entities/Promotion';
-import CommonUtils                         from '@modules/server.common/utilities/common';
+import { inject, injectable, multiInject }          from 'inversify';
+import https                                        from 'https';
+import http                                         from 'http';
+import path                                         from 'path';
+import pem                                          from 'pem';
+import fs                                           from 'fs';
+import bodyParser                                   from 'body-parser';
+import cors                                         from 'cors';
+import passport                                     from 'passport';
+import methodOverride                               from 'method-override';
+import errorhandler                                 from 'errorhandler';
+import socketIO                                     from 'socket.io';
+import express                                      from 'express';
+import mongoose                                     from 'mongoose';
+import morgan                                       from 'morgan';
+import Bluebird                                     from 'bluebird';
+import exphbs                                       from 'express-handlebars';
+import ipstack                                      from 'ipstack';
+import requestIp                                    from 'request-ip';
+import { createConnection }                         from 'typeorm';
+import { MongoConnectionOptions }                   from "typeorm/driver/mongodb/MongoConnectionOptions";
+import { IRoutersManager }                          from '@pyro/io';
+import { getModel }                                 from '@pyro/db-server';
+import OAuthStrategy                                from '@modules/server.common/enums/OAuthStrategy';
+import Admin                                        from '@modules/server.common/entities/Admin';
+import Device                                       from '@modules/server.common/entities/Device';
+import Carrier                                      from '@modules/server.common/entities/Carrier';
+// import Conversation                                 from '@modules/server.common/entities/Conversation';
+import Invite                                       from '@modules/server.common/entities/Invite';
+import InviteRequest                                from '@modules/server.common/entities/InviteRequest';
+import Order                                        from '@modules/server.common/entities/Order';
+import Product                                      from '@modules/server.common/entities/Product';
+import ProductsCategory                             from '@modules/server.common/entities/ProductsCategory';
+import Customer                                     from '@modules/server.common/entities/Customer';
+import Warehouse                                    from '@modules/server.common/entities/Warehouse';
+import Promotion                                    from '@modules/server.common/entities/Promotion';
+import CommonUtils                                  from '@modules/server.common/utilities/common';
+import { FakeUsersService }                         from './fake-data/FakeUsersService';
+import { FakeWarehousesService }                    from './fake-data/FakeWarehousesService';
+import IService, { ServiceSymbol }                  from './IService';
+import { AdminsService }                            from './admins';
 import {
-	FakeUsersService,
-	FakeWarehousesService
-}                                          from './fake-data';
-import IService, { ServiceSymbol }         from './IService';
-import { AdminsService }                   from './admins';
-import { UsersAuthService, UsersService }  from './users';
-import { WarehousesAuthService }           from './warehouses';
-import { SocialStrategiesService }         from './users';
-import { createLogger }                    from '../helpers/Log';
-import { ConfigService }                   from '../config/config.service';
-import { getHostAndPort }                  from '../utils';
-import { env }                             from '../env';
+	CustomersAuthService,
+	CustomersService
+}                                                   from './customers';
+import { WarehousesAuthService, WarehousesService } from './warehouses';
+import { SocialStrategiesService }                  from './customers';
+import { createLogger }                             from '../helpers/Log';
+import { ConfigService }                            from '../config/config.service';
+import { getHostAndPort }                           from '../utils';
+import { env }                                      from '../env';
 
 // local IPs
 const INTERNAL_IPS = ['127.0.0.1', '::1'];
@@ -69,20 +71,23 @@ export class ServicesApp
 			protected services: IService[],
 			@inject('RoutersManager')
 			protected routersManager: IRoutersManager,
+			@inject(WarehousesService)
+			protected warehousesService: WarehousesService,
 			@inject(WarehousesAuthService)
 			protected warehousesAuthService: WarehousesAuthService,
 			@inject(SocialStrategiesService)
 			protected socialStrategiesService: SocialStrategiesService,
 			@inject(AdminsService)
 			private readonly _adminsService: AdminsService,
-			@inject(UsersService)
-			private readonly _usersService: UsersService,
-			@inject(UsersAuthService)
-			private readonly _usersAuthService: UsersAuthService,
+			@inject(CustomersService)
+			private readonly _usersService: CustomersService,
+			@inject(CustomersAuthService)
+			private readonly _usersAuthService: CustomersAuthService,
 			@inject(ConfigService)
 					_configService: ConfigService
 	)
 	{
+		console.log('Starting app')
 		ServicesApp._poolSize = _configService.Env.DB_POOL_SIZE;
 		ServicesApp._connectTimeoutMS = _configService.Env.DB_CONNECT_TIMEOUT;
 		const maxSockets = _configService.Env.MAX_SOCKETS;
@@ -102,14 +107,14 @@ export class ServicesApp
 		return [
 			Admin,
 			Carrier,
-			Conversation,
+			// Conversation,
+			Customer,
 			Device,
 			Invite,
 			InviteRequest,
 			Order,
 			Product,
 			ProductsCategory,
-			User,
 			Warehouse,
 			Promotion
 		];
@@ -245,11 +250,7 @@ export class ServicesApp
 		
 		await this._registerModels();
 		await this._registerEntityAdministrator();
-		if(env.isDev)
-		{
-			await this._registerPredefinedWarehouseUser();
-			await this._registerPredefinedWarehouse();
-		}
+		await this._registerTestMerchantAndWarehouse();
 		this._passportSetup();
 		await this._startExpress();
 		await this._startSocketIO();
@@ -290,72 +291,69 @@ export class ServicesApp
 		{
 			await this._adminsService
 			          .register({
-				                    admin:    {
-					                    email:      adminEmail,
-					                    name:       adminName,
-					                    hash:       null,
-					                    pictureUrl: CommonUtils.getDummyImage(300, 300, adminName.slice(0, 2))
+				                    admin: {
+					                    email:  adminEmail,
+					                    name:   adminName,
+					                    hash:   null,
+					                    avatar: CommonUtils.getDummyImage(300, 300, adminName.slice(0, 2))
 				                    },
 				                    password: adminPassword
 			                    });
 		}
 	}
 	
-	private async _registerPredefinedWarehouseUser()
+	private async _registerTestMerchantAndWarehouse(): Promise<void>
 	{
-		try
+		if(!env.isProd)
 		{
-			const fakeUsersService =
-					      new FakeUsersService(
-							      this._usersService,
-							      this._usersAuthService
-					      );
+			let warehouse;
+			const userInput = {
+				username: env.FAKE_MERCHANT_NAME,
+				password: env.FAKE_MERCHANT_PASSWORD,
+				email:    env.FAKE_MERCHANT_EMAIL,
+				role:     'merchant'
+			};
 			
-			const predefinedUser = await fakeUsersService.generatePredefinedUser();
-			
-			if(!predefinedUser)
+			const password = env.FAKE_MERCHANT_PASSWORD;
+			try
 			{
-				this.log.warn("Test user wasn't created");
-			}
-			else
+				const fakeUsersService =
+						      new FakeUsersService(
+								      this._usersService,
+								      this._usersAuthService
+						      );
+				const fakeWarehousesService =
+						      new FakeWarehousesService(
+								      this._usersService,
+								      this.warehousesService,
+								      this.warehousesAuthService
+						      );
+				
+				const merchant = await fakeUsersService.generateMerchant(userInput);
+				if(merchant)
+				{
+					this.log.info(
+							`Created test merchant`,
+							{ merchantId: merchant.id }
+					);
+					
+					warehouse = await fakeWarehousesService
+							.generateWarehouse(merchant, password);
+					
+					this.log.info(
+							`Created test warehouse`,
+							{ warehouseId: warehouse.id }
+					);
+				}
+				else
+				{
+					this.log.warn("Merchant doesn't exist");
+				}
+				
+			} catch(err)
 			{
-				this.log.warn(`Test user created: ${predefinedUser}`);
+				this.log.warn("Couldn't create test merchant and/or warehouse", err);
 			}
-		} catch(e)
-		{
-			this.log.debug(e);
-		}
-	}
-	
-	private async _registerPredefinedWarehouse()
-	{
-		try
-		{
-			const fakeWarehousesService =
-					      new FakeWarehousesService(
-							      this._usersAuthService,
-							      this.warehousesAuthService
-					      );
-			
-			const warehouse = await fakeWarehousesService.generateWarehouse(
-					{
-						username: env.FAKE_USERNAME,
-						password: env.FAKE_PASSWORD,
-						email:    env.FAKE_EMAIL
-					}
-			);
-			
-			if(!warehouse)
-			{
-				this.log.warn("Test warehouse wasn't created")
-			}
-			else
-			{
-				this.log.warn(`Test warehouse created: ${warehouse}`);
-			}
-		} catch(e)
-		{
-			this.log.warn(e)
 		}
 	}
 	
@@ -379,55 +377,33 @@ export class ServicesApp
 			                         // TODO ?
 		                         });
 		
-		// Google Strategy
-		const googleStrategy = this.socialStrategiesService.getGoogleStrategy();
-		if(googleStrategy != null)
+		this._registerPassportStrategy(OAuthStrategy.YANDEX);
+		this._registerPassportStrategy(OAuthStrategy.GOOGLE);
+		this._registerPassportStrategy(OAuthStrategy.FACEBOOK);
+		this._registerPassportStrategy(OAuthStrategy.VKONTAKTE);
+	}
+	
+	private _registerPassportStrategy(oauth: OAuthStrategy)
+	{
+		const strategy = this.socialStrategiesService
+		                     .getStrategy(oauth);
+		if(strategy != null)
 		{
-			passport.use(googleStrategy);
-			this.log.info("Found GoogleStrategy config!");
+			passport.use(strategy);
+			this.log.info(`Found ${oauth} config!`);
 		}
 		else
 		{
 			if(env.isDev || env.isTest)
 			{
-				this.log.warn("GoogleStrategy is not enabled");
-			}
-		}
-		
-		// Yandex Strategy
-		const yandexStrategy = this.socialStrategiesService.getYandexStrategy();
-		if(yandexStrategy != null)
-		{
-			passport.use(yandexStrategy);
-			this.log.info("Found YandexStrategy config!");
-		}
-		else
-		{
-			if(env.isDev || env.isTest)
-			{
-				this.log.warn("YandexStrategy is not enabled");
-			}
-		}
-		
-		// Facebook Strategy
-		const facebookStrategy = this.socialStrategiesService.getFacebookStrategy();
-		if(facebookStrategy != null)
-		{
-			passport.use(facebookStrategy);
-			this.log.info("Found FacebookStrategy config!");
-		}
-		else
-		{
-			if(env.isDev || env.isTest)
-			{
-				this.log.warn("FacebookStrategy is not enabled");
+				this.log.warn(`${oauth} is not enabled`);
 			}
 		}
 	}
 	
 	private async _registerModels()
 	{
-		await (<any>Bluebird).map(this.services, async(service) =>
+		await (<any>Bluebird).map(this.services, async(service: IService[]) =>
 		{
 			if((service as any).DBObject != null)
 			{
@@ -497,7 +473,7 @@ export class ServicesApp
 		this.httpServer.setTimeout(timeout);
 		
 		const [httpsHost, httpsPort] = getHostAndPort(env.HTTPS_SERVICES_ENDPOINT);
-		const [httpHost, httpPort] = getHostAndPort(env.HTTP_SERVICES_ENDPOINT);
+		const [httpHost, httpPort] = getHostAndPort(env.SERVICES_ENDPOINT);
 		
 		this.expressApp.set('httpsHost', httpsHost);
 		this.expressApp.set('httpsPort', httpsPort);
