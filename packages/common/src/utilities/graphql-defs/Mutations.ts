@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 namespace GQLMutations
 {
-    // #Admin
+	// #Admin
 	export const AdminLogin = gql`
 		mutation Login($email: String!, $password: String!)
 		{
@@ -27,7 +27,7 @@ namespace GQLMutations
 		mutation Register(
 			$email: String!
 			$fullName: String!
-			$pictureUrl: String!
+			$avatar: String!
 			$password: String!
 		)
 		{
@@ -38,7 +38,7 @@ namespace GQLMutations
 					{
 						email: $email
 						name: $fullName
-						pictureUrl: $pictureUrl
+						avatar: $avatar
 					}
 					password: $password
 				}
@@ -86,7 +86,7 @@ namespace GQLMutations
 			removeCarriersByIds(ids: $ids)
 		}
 	`;
-
+	
 	// #Carriers
 	
 	export const CarrierUpdate = gql`
@@ -102,38 +102,6 @@ namespace GQLMutations
 		}
 	`;
 	
-	// #Conversations/Chats
-	
-	export const ConversationCreate = gql`
-		mutation CreateConversation($conversationInput: ConversationCreateInput!)
-		{
-			createConversation(createInput: $conversationInput)
-			{
-				success
-				message
-				data {
-					messages
-					attachments
-
-				}
-			}
-		}
-	`
-	
-	export const ConversationRemoveByIds = gql`
-		mutation RemoveConversationsByIds($ids: [String!]!)
-		{
-			removeConversationsByIds(ids: $ids)
-			{
-				n
-			}
-		}
-	`;
-	
-	export const ConversationCreateMessage = gql`
-	
-	`;
-	
 	// #Currencies
 	
 	export const CurrencyCreate = gql`
@@ -146,13 +114,16 @@ namespace GQLMutations
 					currencyCode
 				}
 			}
-		}`;
-
-    // #Devices
+		}
+	`;
+	
+	// #Devices
 	
 	export const DeviceCreate = gql`
-		mutation CreateDevice($createInput: DeviceCreateInput!) {
-			createDevice(createInput: $createInput) {
+		mutation CreateDevice($createInput: DeviceCreateInput!)
+		{
+			createDevice(createInput: $createInput)
+			{
 				id
 			}
 		}
@@ -180,8 +151,8 @@ namespace GQLMutations
 			}
 		}
 	`;
-
-    // Geolocationn
+	
+	// Geolocationn
 	
 	export const GeoLocationMakeOrder = gql`
 		mutation MakeOrder($createInput: OrderCreateInput!)
@@ -195,7 +166,7 @@ namespace GQLMutations
 				isConfirmed
 				warehouseId
 				warehouseStatus
-				user
+				customer
 				{
 					_id
 				}
@@ -206,8 +177,8 @@ namespace GQLMutations
 			}
 		}
 	`;
-
-    // #Invites
+	
+	// #Invites
 	
 	export const InviteCreate = gql`
 		mutation CreateInvite($createInput: InviteCreateInput!)
@@ -282,8 +253,8 @@ namespace GQLMutations
 			}
 		}
 	`
-
-    // #Order
+	
+	// #Order
 	
 	export const OrderCreate = gql`
 		mutation MakeOrder($createInput: OrderCreateInput!)
@@ -297,7 +268,7 @@ namespace GQLMutations
 				isConfirmed
 				warehouseId
 				warehouseStatus
-				user
+				customer
 				{
 					_id
 				}
@@ -308,8 +279,8 @@ namespace GQLMutations
 			}
 		}
 	`;
-
-    // #Product
+	
+	// #Product
 	
 	export const ProductCreate = gql`
 		mutation CreateProduct($product: ProductCreateInput!)
@@ -361,8 +332,8 @@ namespace GQLMutations
 			}
 		}
 	`;
-
-    // #ProductCategory
+	
+	// #ProductCategory
 	
 	export const ProductCategoryCreate = gql`
 		mutation CreateProductsCategory(
@@ -414,8 +385,8 @@ namespace GQLMutations
 			}
 		}
 	`;
-
-    // #Promotion
+	
+	// #Promotion
 	
 	export const PromotionCreate = gql`
 		mutation CreatePromotion($promotion: PromotionInput)
@@ -450,13 +421,13 @@ namespace GQLMutations
 			}
 		}
 	`;
-
-    // #User
 	
-	export const UserRegister = gql`
-		mutation RegisterUser($registerInput: UserRegisterInput!)
+	// #User
+	
+	export const CustomerRegister = gql`
+		mutation RegisterCustomer($registerInput: CustomerRegisterInput!)
 		{
-			registerUser(registerInput: $registerInput)
+			registerCustomer(registerInput: $registerInput)
 			{
 				id
 				firstName
@@ -465,10 +436,10 @@ namespace GQLMutations
 		}
 	`;
 	
-	export const UserBan = gql`
-		mutation BanUser($id: String!)
+	export const CustomerBan = gql`
+		mutation BanCustomer($id: String!)
 		{
-			banUser(id: $id)
+			banCustomer(id: $id)
 			{
 				id
 				firstName
@@ -477,10 +448,10 @@ namespace GQLMutations
 		}
 	`;
 	
-	export const UserUnban = gql`
-		mutation UnbanUser($id: String!)
+	export const CustomerUnban = gql`
+		mutation UnbanCustomer($id: String!)
 		{
-			unbanUser(id: $id)
+			unbanCustomer(id: $id)
 			{
 				id
 				firstName
@@ -489,10 +460,10 @@ namespace GQLMutations
 		}
 	`;
 	
-	export const UserRemoveById = gql`
-		mutation RemoveUsersByIds($ids: [String!]!)
+	export const CustomerRemoveByIds = gql`
+		mutation RemoveCustomersByIds($ids: [String!]!)
 		{
-			removeUsersByIds(ids: $ids)
+			removeCustomersByIds(ids: $ids)
 		}
 	`;
 	
@@ -596,8 +567,8 @@ namespace GQLMutations
 			)
 		}
 	`;
-
-    // #WarehouseOrders
+	
+	// #WarehouseOrders
 	
 	export const StoreOrdersMakeOrder = gql`
 		mutation MakeOrder($createInput: OrderCreateInput!)
@@ -611,7 +582,7 @@ namespace GQLMutations
 				isConfirmed
 				warehouseId
 				warehouseStatus
-				user
+				customer
 				{
 					_id
 				}

@@ -60,6 +60,7 @@ namespace GQLQueries
 		}
 	`;
 	
+	// noinspection JSUnusedGlobalSymbols
 	export const CarrierCarriers = gql`
 		query getCarriers
 		{
@@ -192,7 +193,7 @@ namespace GQLQueries
 				status
 				deliveryTime
 				finishedProcessingTime
-				user
+				customer
 				{
 					id
 					phone
@@ -200,7 +201,7 @@ namespace GQLQueries
 					apartment
 					firstName
 					lastName
-					image
+					avatar
 					geoLocation
 					{
 						house
@@ -257,11 +258,11 @@ namespace GQLQueries
 				status
 				deliveryTime
 				finishedProcessingTime
-				user {
+				customer {
 					id
 					firstName
 					lastName
-					image
+					avatar
 					geoLocation {
 						streetAddress
 						house
@@ -306,6 +307,7 @@ namespace GQLQueries
 
     // #Data
 	
+	// noinspection JSUnusedGlobalSymbols
 	export const DataClearAll = gql`
 		query ClearAll {
 			clearAll
@@ -503,11 +505,11 @@ namespace GQLQueries
 				carrierStatusText
 				warehouseStatusText
 				createdAt
-				user {
+				customer {
 					id
 					firstName
 					lastName
-					image
+					avatar
 					geoLocation {
 						streetAddress
 						house
@@ -705,7 +707,7 @@ namespace GQLQueries
 		{
 			orders
 			{
-				user
+				customer
 				{
 					_id
 				}
@@ -775,7 +777,7 @@ namespace GQLQueries
 					orderType
 					orderNumber
 					_createdAt
-					user
+					customer
 					{
 						id
 						firstName
@@ -870,10 +872,10 @@ namespace GQLQueries
 		{
 			getOrderedUsersInfo(storeId: $storeId)
 			{
-				user {
+				customer {
 					_id
 					id
-					image
+					avatar
 					firstName
 					lastName
 					email
@@ -1033,7 +1035,7 @@ namespace GQLQueries
 		{
 			getDashboardCompletedOrdersToday
 			{
-				user
+				customer
 				{
 					_id
 				}
@@ -1190,7 +1192,7 @@ namespace GQLQueries
 	export const UserAll = gql`
 		query AllUsers
 		{
-			users {
+			customers {
 				_id
 				firstName
 				lastName
@@ -1215,12 +1217,12 @@ namespace GQLQueries
 	export const UserAllBy = gql`
 		query AllUsers($pagingOptions: PagingOptionsInput)
 		{
-			users(pagingOptions: $pagingOptions)
+			customers(pagingOptions: $pagingOptions)
 			{
 				_id
 				firstName
 				lastName
-				image
+				avatar
 				email
 				apartment
 				phone
@@ -1241,15 +1243,15 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const UserById = gql`
-		query GetUserById($id: String!)
+	export const CustomerById = gql`
+		query GetCustomerById($id: String!)
 		{
-			user(id: $id)
+			customer(id: $id)
 			{
 				_id
 				firstName
 				lastName
-				image
+				avatar
 				email
 				apartment
 				phone
@@ -1270,24 +1272,24 @@ namespace GQLQueries
 		}
 	`;
 	
-	export const UserCount = gql`
-		query GetCountOfUsers
+	export const CustomersCount = gql`
+		query GetCountOfCustomers
 		{
-			getCountOfUsers
+			getCountOfCustomers
 		}
 	`;
 	
-	export const UserEmailExists = gql`
-		query IsUserEmailExists($email: String!)
+	export const CustomerEmailExists = gql`
+		query IsCustomerEmailExists($email: String!)
 		{
-			isUserEmailExists(email: $email)
+			isCustomerEmailExists(email: $email)
 		}
 	`;
 	
-	export const UserExists = gql`
-		query IsUserExists($conditions: UserMemberInput!)
+	export const CustomerExists = gql`
+		query IsCustomerExists($conditions: CustomerMemberInput!)
 		{
-			isUserExists(conditions: $conditions)
+			isCustomerExists(conditions: $conditions)
 		}
 	`;
 	
@@ -1650,7 +1652,7 @@ namespace GQLQueries
 					orderNumber
 					_createdAt
 					warehouseId
-					user
+					customer
 					{
 						id
 						_id
@@ -1759,10 +1761,10 @@ namespace GQLQueries
 	export const StoreOrdersRemoveOrders = gql`
 		query RemoveUserOrders(
 			$storeId: String!
-			$userId: String!
+			$customerId: String!
 		)
 		{
-			removeUserOrders(storeId: $storeId, userId: $userId)
+			removeCustomerOrders(storeId: $storeId, customerId: $customerId)
 			{
 				number
 				modified
@@ -1786,7 +1788,7 @@ namespace GQLQueries
 						}
 					}
 				}
-				user
+				customer
 				{
 					geoLocation
 					{
