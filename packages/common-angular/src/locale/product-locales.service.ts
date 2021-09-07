@@ -1,6 +1,7 @@
-import { Injectable }       from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { ILocaleMember }    from '@modules/server.common/interfaces/ILocale';
+import { Injectable }         from '@angular/core';
+import { TranslateService }   from '@ngx-translate/core';
+import { ILocaleMember }      from '@modules/server.common/interfaces/ILocale';
+import { environment as env } from '../environments/environment';
 
 class ProductTransientViewModel
 {
@@ -17,9 +18,8 @@ class ProductTransientViewModel
 @Injectable()
 export class ProductLocalesService
 {
-	// TODO: Set default lang and locale from config
-	private readonly _defaultLang: string = 'ru-RU';
-	private readonly _defaultLocale: string = 'ru-RU';
+	private readonly _defaultLang: string = env.DEFAULT_LANGUAGE;
+	private readonly _defaultLocale: string = env.DEFAULT_LANGUAGE;
 	private _productTransientProperties = new ProductTransientViewModel();
 	
 	public currentLocale: string;
