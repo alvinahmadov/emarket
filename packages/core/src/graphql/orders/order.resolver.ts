@@ -1,22 +1,22 @@
-import { Query, ResolveProperty, Resolver, Mutation } from '@nestjs/graphql';
-import IOrder                                         from '@modules/server.common/interfaces/IOrder';
-import CarriersService                                from '../../services/carriers/CarriersService';
-import Order                                          from '@modules/server.common/entities/Order';
-import { first }                                      from 'rxjs/operators';
-import OrderCarrierStatus                             from '@modules/server.common/enums/OrderCarrierStatus';
-import OrderWarehouseStatus                           from '@modules/server.common/enums/OrderWarehouseStatus';
-import Warehouse                                      from '@modules/server.common/entities/Warehouse';
-import User                                           from '@modules/server.common/entities/User';
-import Carrier                                        from '@modules/server.common/entities/Carrier';
-import { WarehousesService }                          from '../../services/warehouses';
-import { OrdersService }                              from '../../services/orders';
-import { UsersService }                               from '../../services/users';
-import IProduct                                       from '@modules/server.common/interfaces/IProduct';
-import { ProductsService }                            from '../../services/products';
-import Product                                        from '@modules/server.common/entities/Product';
-import _                                              from 'lodash';
-import { ObjectId }                                   from 'bson';
-import { FakeOrdersService }                          from '../../services/fake-data/FakeOrdersService';
+import _                                           from 'lodash';
+import { ObjectId }                                from 'bson';
+import { Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { first }                                   from 'rxjs/operators';
+import IOrder                                      from '@modules/server.common/interfaces/IOrder';
+import Order                                       from '@modules/server.common/entities/Order';
+import IProduct                                    from '@modules/server.common/interfaces/IProduct';
+import OrderCarrierStatus                          from '@modules/server.common/enums/OrderCarrierStatus';
+import OrderWarehouseStatus                        from '@modules/server.common/enums/OrderWarehouseStatus';
+import Carrier                                     from '@modules/server.common/entities/Carrier';
+import Customer                                    from '@modules/server.common/entities/Customer';
+import Product                                     from '@modules/server.common/entities/Product';
+import Warehouse                                   from '@modules/server.common/entities/Warehouse';
+import CarriersService                             from '../../services/carriers/CarriersService';
+import { WarehousesService }                       from '../../services/warehouses';
+import { OrdersService }                           from '../../services/orders';
+import { CustomersService }                        from '../../services/customers';
+import { ProductsService }                         from '../../services/products';
+import { FakeOrdersService }                       from '../../services/fake-data/FakeOrdersService';
 
 @Resolver('Order')
 export class OrderResolver
@@ -25,7 +25,7 @@ export class OrderResolver
 			private readonly _ordersService: OrdersService,
 			private readonly _carriersService: CarriersService,
 			private readonly _warehousesService: WarehousesService,
-			private readonly _usersService: UsersService,
+			private readonly _customersService: CustomersService,
 			private readonly _productsService: ProductsService,
 			private readonly _fakeOrdersService: FakeOrdersService
 	)
@@ -36,23 +36,23 @@ export class OrderResolver
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
-		const users: User[] = await this._usersService.Model.find(
-				                                commonOptionsFlag
-		                                )
-		                                .select({ __v: 0 })
-		                                .lean()
-		                                .exec();
+		const users: Customer[] = await this._customersService
+		                                    .Model
+		                                    .find(commonOptionsFlag)
+		                                    .select({ __v: 0 })
+		                                    .lean()
+		                                    .exec();
 		
-		const stores: Warehouse[] = await this._warehousesService.Model.find(
-				                                      commonOptionsFlag
-		                                      )
+		const stores: Warehouse[] = await this._warehousesService
+		                                      .Model
+		                                      .find(commonOptionsFlag)
 		                                      .select({ _id: 1 })
 		                                      .lean()
 		                                      .exec();
 		
-		const products: Product[] = await this._productsService.Model.find(
-				                                      commonOptionsFlag
-		                                      )
+		const products: Product[] = await this._productsService
+		                                      .Model
+		                                      .find(commonOptionsFlag)
 		                                      .select({ __v: 0 })
 		                                      .lean()
 		                                      .exec();
@@ -71,30 +71,30 @@ export class OrderResolver
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
-		const users: User[] = await this._usersService.Model.find(
-				                                commonOptionsFlag
-		                                )
-		                                .select({ __v: 0 })
-		                                .lean()
-		                                .exec();
+		const users: Customer[] = await this._customersService
+		                                    .Model
+		                                    .find(commonOptionsFlag)
+		                                    .select({ __v: 0 })
+		                                    .lean()
+		                                    .exec();
 		
-		const stores: Warehouse[] = await this._warehousesService.Model.find(
-				                                      commonOptionsFlag
-		                                      )
+		const stores: Warehouse[] = await this._warehousesService
+		                                      .Model
+		                                      .find(commonOptionsFlag)
 		                                      .select({ _id: 1 })
 		                                      .lean()
 		                                      .exec();
 		
-		const carrierIds: Carrier[] = await this._carriersService.Model.find(
-				                                        commonOptionsFlag
-		                                        )
+		const carrierIds: Carrier[] = await this._carriersService
+		                                        .Model
+		                                        .find(commonOptionsFlag)
 		                                        .select({ _id: 1 })
 		                                        .lean()
 		                                        .exec();
 		
-		const products: Product[] = await this._productsService.Model.find(
-				                                      commonOptionsFlag
-		                                      )
+		const products: Product[] = await this._productsService
+		                                      .Model
+		                                      .find(commonOptionsFlag)
 		                                      .select({ __v: 0 })
 		                                      .lean()
 		                                      .exec();
@@ -104,21 +104,22 @@ export class OrderResolver
 		carrierIds.forEach((objectId, index) =>
 		                   {
 			                   const carrierId = objectId._id.toString();
-			                   const orderNumber = index;
 			                   const ordersRaw = this._setupHistoryOrdersToCreate(
 					                   stores,
 					                   products,
 					                   users,
 					                   carrierId,
-					                   orderNumber
+					                   index
 			                   );
 			
 			                   totalOrdersToCreate.push(ordersRaw);
 		                   });
 		
-		await this._ordersService.Model.insertMany(
-				_.flatten(totalOrdersToCreate)
-		);
+		await this._ordersService
+		          .Model
+		          .insertMany(
+				          _.flatten(totalOrdersToCreate)
+		          );
 	}
 	
 	@Query()
@@ -130,13 +131,11 @@ export class OrderResolver
 				commonOptionsFlag
 		);
 		
-		const customers: User[] = await this._usersService.find(
-				commonOptionsFlag
-		);
+		const customers: Customer[] = await this._customersService
+		                                        .find(commonOptionsFlag);
 		
-		const products: Product[] = await this._productsService.find(
-				commonOptionsFlag
-		);
+		const products: Product[] = await this._productsService
+		                                      .find(commonOptionsFlag);
 		
 		const ordersToCreate = [];
 		
@@ -152,13 +151,13 @@ export class OrderResolver
 					                   const orderPrice = (orderNumber + i) % 110 || 1;
 					
 					                   orderProducts.push({
-						                                      count: (orderNumber + i) % 12 || 1,
-						                                      isManufacturing: true,
-						                                      isCarrierRequired: true,
+						                                      count:              (orderNumber + i) % 12 || 1,
+						                                      isManufacturing:    true,
+						                                      isCarrierRequired:  true,
 						                                      isDeliveryRequired: true,
-						                                      price: orderPrice,
-						                                      initialPrice: orderPrice,
-						                                      product: this._getRandomProduct(
+						                                      price:              orderPrice,
+						                                      initialPrice:       orderPrice,
+						                                      product:            this._getRandomProduct(
 								                                      orderNumber + i,
 								                                      products
 						                                      )
@@ -167,32 +166,34 @@ export class OrderResolver
 				
 				                   const orderIsPaid = Math.random() > 0.5;
 				                   const createdAt = this._getRandomOrderDate(orderNumber);
-				                   const startDeliveryTime = this.getFinishedTime(createdAt);
+				                   const startDeliveryTime = OrderResolver.getFinishedTime(createdAt);
 				
 				                   ordersToCreate.push({
-					                                       isCancelled: !orderIsPaid,
-					                                       isPaid: orderIsPaid,
-					                                       deliveryTimeEstimate: 0,
+					                                       isCancelled:            !orderIsPaid,
+					                                       isPaid:                 orderIsPaid,
+					                                       deliveryTimeEstimate:   0,
 					                                       startDeliveryTime,
-					                                       deliveryTime: orderIsPaid
-					                                                     ? this.getFinishedTime(startDeliveryTime)
-					                                                     : null,
-					                                       finishedProcessingTime: !orderIsPaid
-					                                                               ? this.getFinishedTime(startDeliveryTime)
+					                                       deliveryTime:           orderIsPaid
+					                                                               ? OrderResolver.getFinishedTime(startDeliveryTime)
 					                                                               : null,
-					                                       warehouseStatus: OrderWarehouseStatus.PackagingFinished,
-					                                       carrierStatus: OrderCarrierStatus.DeliveryCompleted,
+					                                       finishedProcessingTime: !orderIsPaid
+					                                                               ? OrderResolver.getFinishedTime(startDeliveryTime)
+					                                                               : null,
+					                                       warehouseStatus:        OrderWarehouseStatus.PackagingFinished,
+					                                       carrierStatus:          OrderCarrierStatus.DeliveryCompleted,
 					                                       orderNumber,
-					                                       user: this._getRandomCustomer(orderNumber, customers),
-					                                       warehouse: stores[orderNumber % stores.length].id,
-					                                       products: orderProducts,
-					                                       _createdAt: createdAt,
-					                                       carrier: id
+					                                       user:                   this._getRandomCustomer(orderNumber, customers),
+					                                       warehouse:              stores[orderNumber % stores.length].id,
+					                                       products:               orderProducts,
+					                                       _createdAt:             createdAt,
+					                                       carrier:                id
 				                                       });
 			                   }
 		                   });
 		
-		await this._ordersService.Model.insertMany(ordersToCreate);
+		await this._ordersService
+		          .Model
+		          .insertMany(ordersToCreate);
 	}
 	
 	@Query()
@@ -200,17 +201,14 @@ export class OrderResolver
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
-		const stores: Warehouse[] = await this._warehousesService.find(
-				commonOptionsFlag
-		);
+		const stores: Warehouse[] = await this._warehousesService
+		                                      .find(commonOptionsFlag);
 		
-		const customers: User[] = await this._usersService.find(
-				commonOptionsFlag
-		);
+		const customers: Customer[] = await this._customersService
+		                                        .find(commonOptionsFlag);
 		
-		const products: Product[] = await this._productsService.find(
-				commonOptionsFlag
-		);
+		const products: Product[] = await this._productsService
+		                                      .find(commonOptionsFlag);
 		
 		const ordersToCreate = [];
 		
@@ -227,38 +225,40 @@ export class OrderResolver
 					const orderPrice = (orderNumber + j) % 110 || 1;
 					
 					orderProducts.push({
-						                   count: (orderNumber + j) % 6 || 1,
-						                   isManufacturing: true,
-						                   isCarrierRequired: true,
+						                   count:              (orderNumber + j) % 6 || 1,
+						                   isManufacturing:    true,
+						                   isCarrierRequired:  true,
 						                   isDeliveryRequired: true,
-						                   price: orderPrice,
-						                   initialPrice: orderPrice,
-						                   product: this._getRandomProduct(
+						                   price:              orderPrice,
+						                   initialPrice:       orderPrice,
+						                   product:            this._getRandomProduct(
 								                   orderNumber + j,
 								                   products
 						                   )
 					                   });
 				}
 				
-				const createdAt = this.getCloseDate(new Date());
+				const createdAt = OrderResolver.getCloseDate(new Date());
 				
 				ordersToCreate.push({
-					                    isConfirmed: false,
-					                    isCancelled: false,
-					                    isPaid: false,
+					                    isConfirmed:          false,
+					                    isCancelled:          false,
+					                    isPaid:               false,
 					                    deliveryTimeEstimate: 0,
-					                    warehouseStatus: OrderWarehouseStatus.PackagingFinished,
-					                    carrierStatus: OrderCarrierStatus.NoCarrier,
+					                    warehouseStatus:      OrderWarehouseStatus.PackagingFinished,
+					                    carrierStatus:        OrderCarrierStatus.NoCarrier,
 					                    orderNumber,
-					                    user: this._getRandomCustomer(orderNumber, customers),
-					                    warehouse: stores[orderNumber % stores.length].id,
-					                    products: orderProducts,
-					                    _createdAt: createdAt
+					                    user:                 this._getRandomCustomer(orderNumber, customers),
+					                    warehouse:            stores[orderNumber % stores.length].id,
+					                    products:             orderProducts,
+					                    _createdAt:           createdAt
 				                    });
 			}
 		}
 		
-		await this._ordersService.Model.insertMany(ordersToCreate);
+		await this._ordersService
+		          .Model
+		          .insertMany(ordersToCreate);
 	}
 	
 	@Query()
@@ -273,7 +273,7 @@ export class OrderResolver
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
-		const customers: User[] = await this._usersService.find(
+		const customers: Customer[] = await this._customersService.find(
 				commonOptionsFlag
 		);
 		const carriers: Carrier[] = await this._carriersService.find(
@@ -334,7 +334,8 @@ export class OrderResolver
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
 		const stores: Warehouse[] = (
-				await this._warehousesService.find(commonOptionsFlag)
+				await this._warehousesService
+				          .find(commonOptionsFlag)
 		).filter((__, index) => index <= 20);
 		
 		const carriers: Carrier[] = await this._carriersService.find(
@@ -345,7 +346,7 @@ export class OrderResolver
 				commonOptionsFlag
 		);
 		
-		const user = await this._usersService
+		const user = await this._customersService
 		                       .get(customerId)
 		                       .pipe(first())
 		                       .toPromise();
@@ -360,10 +361,10 @@ export class OrderResolver
 			)
 			{
 				const {
-					numberOfProductsToOrder,
-					hasCarrier,
-					orderIsPaid
-				} = this._prepareOrderFieldsValues(orderNumber);
+					      numberOfProductsToOrder,
+					      hasCarrier,
+					      orderIsPaid
+				      } = this._prepareOrderFieldsValues(orderNumber);
 				
 				const orderProducts = [];
 				
@@ -371,13 +372,13 @@ export class OrderResolver
 				{
 					const orderPrice = (orderNumber + i) % 110 || 1;
 					orderProducts.push({
-						                   count: (orderNumber + i) % 6 || 1,
-						                   isManufacturing: true,
-						                   isCarrierRequired: hasCarrier,
+						                   count:              (orderNumber + i) % 6 || 1,
+						                   isManufacturing:    true,
+						                   isCarrierRequired:  hasCarrier,
 						                   isDeliveryRequired: hasCarrier,
-						                   price: orderPrice,
-						                   initialPrice: orderPrice,
-						                   product: this._getRandomProduct(
+						                   price:              orderPrice,
+						                   initialPrice:       orderPrice,
+						                   product:            this._getRandomProduct(
 								                   orderNumber + i,
 								                   products
 						                   )
@@ -393,26 +394,26 @@ export class OrderResolver
 						Math.round(Math.random() * 90)
 				);
 				
-				const startDeliveryTime = this.getFinishedTime(orderDate);
+				const startDeliveryTime = OrderResolver.getFinishedTime(orderDate);
 				
 				rawOrders.push({
-					               isCancelled: !orderIsPaid,
-					               isPaid: orderIsPaid,
-					               deliveryTimeEstimate: 0,
+					               isCancelled:            !orderIsPaid,
+					               isPaid:                 orderIsPaid,
+					               deliveryTimeEstimate:   0,
 					               startDeliveryTime,
-					               deliveryTime: orderIsPaid
-					                             ? this.getFinishedTime(startDeliveryTime)
-					                             : null,
-					               finishedProcessingTime: !orderIsPaid
-					                                       ? this.getFinishedTime(startDeliveryTime)
+					               deliveryTime:           orderIsPaid
+					                                       ? OrderResolver.getFinishedTime(startDeliveryTime)
 					                                       : null,
-					               warehouseStatus: OrderWarehouseStatus.PackagingFinished,
-					               carrierStatus: OrderCarrierStatus.DeliveryCompleted,
+					               finishedProcessingTime: !orderIsPaid
+					                                       ? OrderResolver.getFinishedTime(startDeliveryTime)
+					                                       : null,
+					               warehouseStatus:        OrderWarehouseStatus.PackagingFinished,
+					               carrierStatus:          OrderCarrierStatus.DeliveryCompleted,
 					               orderNumber,
 					               user,
-					               warehouse: stores[orderNumber % stores.length].id,
-					               products: orderProducts,
-					               _createdAt: orderDate,
+					               warehouse:              stores[orderNumber % stores.length].id,
+					               products:               orderProducts,
+					               _createdAt:             orderDate,
 					               ...(hasCarrier && {
 						               carrier: this._getRandomCarrierId(
 								               orderNumber,
@@ -422,7 +423,9 @@ export class OrderResolver
 				               });
 			}
 			
-			await this._ordersService.Model.insertMany(rawOrders);
+			await this._ordersService
+			          .Model
+			          .insertMany(rawOrders);
 		}
 	}
 	
@@ -439,10 +442,9 @@ export class OrderResolver
 				storeId
 		);
 		return {
-			totalOrders: orders.length,
-			totalRevenue: orders
-					.map((order) => order.totalPrice)
-					.reduce((prevPrice, nextPrice) => prevPrice + nextPrice, 0)
+			totalOrders:  orders.length,
+			totalRevenue: orders.map((order) => order.totalPrice)
+			                    .reduce((prevPrice, nextPrice) => prevPrice + nextPrice, 0)
 		};
 	}
 	
@@ -485,33 +487,35 @@ export class OrderResolver
 			{ usersIds }: { usersIds: string[] }
 	)
 	{
-		const ordersInfo = await this._ordersService.Model.aggregate([
-			                                                             {
-				                                                             $match: {
-					                                                             $and: [
-						                                                             { 'user._id': { $ne: null } },
-						                                                             usersIds
-						                                                             ? {
-									                                                             'user._id': {
-										                                                             $in: usersIds.map(
-												                                                             (i) => new ObjectId(i)
-										                                                             )
-									                                                             }
-								                                                             }
-						                                                             : {}
-					                                                             ]
-				                                                             }
-			                                                             },
-			                                                             {
-				                                                             $group: {
-					                                                             _id: '$user._id',
-					                                                             ordersCount: { $sum: 1 }
-				                                                             }
-			                                                             }
-		                                                             ]);
+		const ordersInfo = await this._ordersService
+		                             .Model
+		                             .aggregate([
+			                                        {
+				                                        $match: {
+					                                        $and: [
+						                                        { 'user._id': { $ne: null } },
+						                                        usersIds
+						                                        ? {
+									                                        'user._id': {
+										                                        $in: usersIds.map(
+												                                        (i) => new ObjectId(i)
+										                                        )
+									                                        }
+								                                        }
+						                                        : {}
+					                                        ]
+				                                        }
+			                                        },
+			                                        {
+				                                        $group: {
+					                                        _id:         '$user._id',
+					                                        ordersCount: { $sum: 1 }
+				                                        }
+			                                        }
+		                                        ]);
 		
 		return ordersInfo.map((o) => ({
-			id: o._id,
+			id:          o._id,
 			ordersCount: o.ordersCount
 		}));
 	}
@@ -535,14 +539,14 @@ export class OrderResolver
 			                                                             },
 			                                                             {
 				                                                             $group: {
-					                                                             _id: '$warehouse',
+					                                                             _id:         '$warehouse',
 					                                                             ordersCount: { $sum: 1 }
 				                                                             }
 			                                                             }
 		                                                             ]);
 		
 		return ordersInfo.map((o) => ({
-			id: o._id,
+			id:          o._id,
 			ordersCount: o.ordersCount
 		}));
 	}
@@ -598,7 +602,7 @@ export class OrderResolver
 		return this._ordersService.payWithStripe(orderId, cardId);
 	}
 	
-	@ResolveProperty('carrier')
+	@ResolveField('carrier')
 	async getCarrier(_order: IOrder): Promise<Carrier>
 	{
 		const order = new Order(_order);
@@ -611,7 +615,7 @@ export class OrderResolver
 		             .toPromise();
 	}
 	
-	@ResolveProperty('warehouse')
+	@ResolveField('warehouse')
 	async getWarehouse(_order: IOrder): Promise<Warehouse>
 	{
 		const order = new Order(_order);
@@ -632,8 +636,8 @@ export class OrderResolver
 	
 	private _getRandomCustomer = (
 			orderCount: number,
-			customers: User[]
-	): User =>
+			customers: Customer[]
+	): Customer =>
 	{
 		if(orderCount < customers.length)
 		{
@@ -679,16 +683,16 @@ export class OrderResolver
 		orderDate.setMonth(months > 0 ? orderCount % months : 0);
 		
 		const isCurrentMonth =
-				orderDate.getMonth() === dateNow.getMonth() && isCurrentYear;
+				      orderDate.getMonth() === dateNow.getMonth() && isCurrentYear;
 		
 		const days = isCurrentMonth ? Number(dateNow.getDate()) : 31;
 		
 		orderDate.setDate(orderCount % days);
 		
 		const isCurrentDay =
-				orderDate.getDate() === dateNow.getDate() &&
-				isCurrentYear &&
-				isCurrentMonth;
+				      orderDate.getDate() === dateNow.getDate() &&
+				      isCurrentYear &&
+				      isCurrentMonth;
 		
 		const hours = isCurrentDay ? Number(dateNow.getHours()) : 24;
 		
@@ -707,13 +711,13 @@ export class OrderResolver
 			const productPrice = Math.round(Math.random() * 15);
 			
 			orderProducts.push({
-				                   count: 2,
-				                   isManufacturing: true,
-				                   isCarrierRequired: true,
+				                   count:              2,
+				                   isManufacturing:    true,
+				                   isCarrierRequired:  true,
 				                   isDeliveryRequired: true,
-				                   price: productPrice,
-				                   initialPrice: productPrice,
-				                   product: p
+				                   price:              productPrice,
+				                   initialPrice:       productPrice,
+				                   product:            p
 			                   });
 			
 			if(productCount >= 3)
@@ -729,7 +733,7 @@ export class OrderResolver
 	private _setupAvailableOrdersToCreate = (
 			stores: Warehouse[],
 			products: Product[],
-			users: User[]
+			users: Customer[]
 	) =>
 	{
 		const orders = [];
@@ -740,19 +744,19 @@ export class OrderResolver
 			
 			const orderProducts = this._setupOrderProducts(products);
 			
-			const createdAt = this.getCloseDate(new Date());
+			const createdAt = OrderResolver.getCloseDate(new Date());
 			
 			orders.push({
-				            user: users[_.random(users.length - 1)],
-				            warehouse: orderStore._id.toString(),
-				            products: orderProducts,
-				            isConfirmed: true,
-				            isCancelled: false,
-				            isPaid: false,
+				            user:            users[_.random(users.length - 1)],
+				            warehouse:       orderStore._id.toString(),
+				            products:        orderProducts,
+				            isConfirmed:     true,
+				            isCancelled:     false,
+				            isPaid:          false,
 				            warehouseStatus: OrderWarehouseStatus.PackagingFinished,
-				            carrierStatus: OrderCarrierStatus.NoCarrier,
+				            carrierStatus:   OrderCarrierStatus.NoCarrier,
 				            orderNumber,
-				            _createdAt: createdAt
+				            _createdAt:      createdAt
 			            });
 		}
 		return orders;
@@ -761,7 +765,7 @@ export class OrderResolver
 	private _setupHistoryOrdersToCreate = (
 			stores: Warehouse[],
 			products: Product[],
-			users: User[],
+			users: Customer[],
 			carrierId: string,
 			orderNumber: number
 	) =>
@@ -781,40 +785,40 @@ export class OrderResolver
 			const orderProducts = this._setupOrderProducts(products);
 			
 			const carrierStatus =
-					availableStatuses[_.random(availableStatuses.length - 1)];
+					      availableStatuses[_.random(availableStatuses.length - 1)];
 			
-			const createdAt = this.getCloseDate(new Date());
+			const createdAt = OrderResolver.getCloseDate(new Date());
 			
-			const startDeliveryTime = this.getFinishedTime(createdAt);
+			const startDeliveryTime = OrderResolver.getFinishedTime(createdAt);
 			
 			orders.push({
-				            user: users[_.random(users.length - 1)],
-				            warehouse: orderStore._id.toString(),
-				            products: orderProducts,
-				            isConfirmed: true,
-				            isCancelled: false,
-				            carrier: carrierId,
+				            user:            users[_.random(users.length - 1)],
+				            warehouse:       orderStore._id.toString(),
+				            products:        orderProducts,
+				            isConfirmed:     true,
+				            isCancelled:     false,
+				            carrier:         carrierId,
 				            startDeliveryTime,
 				            deliveryTime:
-						            carrierStatus === OrderCarrierStatus.DeliveryCompleted
-						            ? this.getFinishedTime(startDeliveryTime)
-						            : null,
+				                             carrierStatus === OrderCarrierStatus.DeliveryCompleted
+				                             ? OrderResolver.getFinishedTime(startDeliveryTime)
+				                             : null,
 				            finishedProcessingTime:
-						            carrierStatus !== OrderCarrierStatus.DeliveryCompleted
-						            ? this.getFinishedTime(startDeliveryTime)
-						            : null,
-				            isPaid: true,
+				                             carrierStatus !== OrderCarrierStatus.DeliveryCompleted
+				                             ? OrderResolver.getFinishedTime(startDeliveryTime)
+				                             : null,
+				            isPaid:          true,
 				            warehouseStatus: OrderWarehouseStatus.GivenToCarrier,
 				            carrierStatus,
 				            orderNumber,
-				            _createdAt: createdAt
+				            _createdAt:      createdAt
 			            });
 		}
 		
 		return orders;
 	};
 	
-	private getFinishedTime(date: Date): Date
+	private static getFinishedTime(date: Date): Date
 	{
 		const randomMinutes = _.random(1, 30);
 		const randomSec = _.random(1, 60);
@@ -825,7 +829,7 @@ export class OrderResolver
 		return new Date(oldDate.setMinutes(date.getMinutes() + randomMinutes));
 	}
 	
-	private getCloseDate(date: Date): Date
+	private static getCloseDate(date: Date): Date
 	{
 		const randomMinutes = _.random(1, 10);
 		const randomSec = _.random(1, 60);
