@@ -1,28 +1,28 @@
 import Logger                                            from 'bunyan';
 import { inject, injectable, LazyServiceIdentifer }      from 'inversify';
-import { createLogger }                                  from '../../helpers/Log';
-import { observableListener, routerName, asyncListener } from '@pyro/io';
-import IService                                          from '../IService';
 import { concat, Observable }                            from 'rxjs';
-import User                                              from '@modules/server.common/entities/User';
-import { OrdersService }                                 from '../orders';
+import { exhaustMap, map, first }                        from 'rxjs/operators';
+import { observableListener, routerName, asyncListener } from '@pyro/io';
+import Customer                                          from '@modules/server.common/entities/Customer';
 import Warehouse                                         from '@modules/server.common/entities/Warehouse';
+import IWarehouseCustomersRouter                         from '@modules/server.common/routers/IWarehouseCustomersRouter';
 import { WarehousesOrdersService }                       from './WarehousesOrdersService';
-import { exhaustMap, map, switchMap, tap, first }        from 'rxjs/operators';
-import IWarehouseUsersRouter                             from '@modules/server.common/routers/IWarehouseUsersRouter';
 import { WarehousesService }                             from './WarehousesService';
+import IService                                          from '../IService';
+import { OrdersService }                                 from '../orders';
+import { createLogger }                                  from '../../helpers/Log';
 
 /**
  * Warehouses Customers Service
  *
  * @export
- * @class WarehousesUsersService
+ * @class WarehousesCustomersService
  * @implements {IService}
- * @implements {IWarehouseUsersRouter}
+ * @implements {IWarehouseCustomersRouter}
  */
 @injectable()
 @routerName('warehouse-users')
-export class WarehousesUsersService implements IService, IWarehouseUsersRouter
+export class WarehousesCustomersService implements IService, IWarehouseCustomersRouter
 {
 	protected log: Logger = createLogger({
 		                                     name: 'warehousesUsersService'
@@ -44,26 +44,25 @@ export class WarehousesUsersService implements IService, IWarehouseUsersRouter
 	 * @returns {Observable<User[]>}
 	 */
 	@observableListener()
-	get(warehouseId: Warehouse['id']): Observable<User[]>
+	get(warehouseId: Warehouse['id']): Observable<Customer[]>
 	{
 		return concat(
 				null,
 				this.warehousesOrdersService.getExistence(warehouseId)
-		).pipe(
-				exhaustMap(() =>
-				           {
-					           return this.ordersService.Model.distinct('user._id', {
-						                      warehouse: warehouseId,
-						                      isDeleted: { $eq: false }
-					                      })
-					                      .lean()
-					                      .exec();
-				           }),
-				map((users: User[]) =>
-				    {
-					    return users.map((u) => new User(u));
-				    })
-		);
+		)
+				.pipe(
+						exhaustMap(() =>
+						           {
+							           return this.ordersService.Model
+							                      .distinct('user._id', {
+								                      warehouse: warehouseId,
+								                      isDeleted: { $eq: false }
+							                      })
+							                      .lean()
+							                      .exec();
+						           }),
+						map((users: Customer[]) => users.map((u) => new Customer(u)))
+				);
 	}
 	
 	/**
@@ -74,9 +73,11 @@ export class WarehousesUsersService implements IService, IWarehouseUsersRouter
 	 * @memberof WarehousesUsersService
 	 */
 	@asyncListener()
-	async getPromise(warehouseId: Warehouse['id']): Promise<User[]>
+	async getPromise(warehouseId: Warehouse['id']): Promise<Customer[]>
 	{
 		await this._warehousesService.throwIfNotExists(warehouseId);
-		return this.get(warehouseId).pipe(first()).toPromise();
+		return this.get(warehouseId)
+		           .pipe(first())
+		           .toPromise();
 	}
 }
