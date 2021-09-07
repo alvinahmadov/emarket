@@ -1,19 +1,19 @@
+import Logger                                       from 'bunyan';
 import { inject, injectable, LazyServiceIdentifer } from 'inversify';
 import _                                            from 'lodash';
-import { OrdersService }                            from '../orders';
-import Order                                        from '@modules/server.common/entities/Order';
-import { UsersService }                             from './UsersService';
-import { createLogger }                             from '../../helpers/Log';
-import IUserOrdersRouter                            from '@modules/server.common/routers/IUserOrdersRouter';
-import { observableListener, routerName }           from '@pyro/io';
-import IService                                     from '../IService';
-import { ExistenceEventType }                       from '@pyro/db-server';
 import { Observable, of, concat }                   from 'rxjs';
 import { exhaustMap, filter, share }                from 'rxjs/operators';
-import User                                         from '@modules/server.common/entities/User';
+import { observableListener, routerName }           from '@pyro/io';
+import { ExistenceEventType, ExistenceEvent }       from '@pyro/db-server';
 import OrderCarrierStatus                           from '@modules/server.common/enums/OrderCarrierStatus';
 import OrderWarehouseStatus                         from '@modules/server.common/enums/OrderWarehouseStatus';
-import Logger                                       from 'bunyan';
+import Order                                        from '@modules/server.common/entities/Order';
+import Customer                                     from '@modules/server.common/entities/Customer';
+import ICustomerOrdersRouter                        from '@modules/server.common/routers/ICustomerOrdersRouter';
+import { CustomersService }                         from './CustomersService';
+import IService                                     from '../IService';
+import { OrdersService }                            from '../orders';
+import { createLogger }                             from '../../helpers/Log';
 import mongoose = require('mongoose');
 
 /**
@@ -21,13 +21,13 @@ import mongoose = require('mongoose');
  * TODO: rename Users to Customers
  *
  * @export
- * @class UsersOrdersService
+ * @class CustomersOrdersService
  * @implements {IUserOrdersRouter}
  * @implements {IService}
  */
 @injectable()
-@routerName('user-orders')
-export class UsersOrdersService implements IUserOrdersRouter, IService
+@routerName('customer-orders')
+export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 {
 	protected readonly log: Logger = createLogger({
 		                                              name: 'usersOrdersService'
@@ -36,8 +36,8 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	constructor(
 			@inject(new LazyServiceIdentifer(() => OrdersService))
 			protected ordersService: OrdersService,
-			@inject(new LazyServiceIdentifer(() => UsersService))
-			protected usersService: UsersService
+			@inject(new LazyServiceIdentifer(() => CustomersService))
+			protected usersService: CustomersService
 	)
 	{}
 	
@@ -45,19 +45,20 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	 * Get Orders for given Customers
 	 * TODO: add paging
 	 *
-	 * @param {User['id']} userId
+	 * @param {Customer['id']} userId
 	 * @returns {Observable<Order[]>}
 	 * @memberof UsersOrdersService
 	 */
 	@observableListener()
-	get(userId: User['id']): Observable<Order[]>
+	get(userId: Customer['id']): Observable<Order[]>
 	{
 		return concat(
 				of(null),
 				this.ordersService
 				    .existence
 				    .pipe(
-						    filter((e) => UsersOrdersService._shouldPull(userId, e)),
+						    filter((e: ExistenceEvent<Order>) =>
+								           CustomersOrdersService._shouldPull(userId, e)),
 						    share()
 				    )
 		).pipe(exhaustMap(() => this.getCurrent(userId)));
@@ -75,8 +76,8 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	{
 		const orders = await this.ordersService
 		                         .find({
-			                               'user._id': new mongoose.Types.ObjectId(userId),
-			                               isDeleted: { $eq: false }
+			                               'customer._id': new mongoose.Types.ObjectId(userId),
+			                               isDeleted:      { $eq: false }
 		                               });
 		
 		return _.orderBy(
@@ -89,32 +90,29 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 	async getCustomerMetrics(id: string)
 	{
 		const completedUserOrders =
-				await this.ordersService
-				          .Model
-				          .find({
-					                $and: [
-						                { 'user._id': id },
-						                {
-							                $or: [
-								                { carrierStatus: OrderCarrierStatus.DeliveryCompleted },
-								                {
-									                warehouseStatus:
-									                OrderWarehouseStatus.GivenToCustomer
-								                }
-							                ]
-						                },
-						                { isCancelled: false }
-					                ]
-				                }).select({ products: 1 });
+				      await this.ordersService
+				                .Model
+				                .find({
+					                      $and: [
+						                      { 'customer._id': id },
+						                      {
+							                      $or: [
+								                      { carrierStatus: OrderCarrierStatus.DeliveryCompleted },
+								                      {
+									                      warehouseStatus:
+									                      OrderWarehouseStatus.GivenToCustomer
+								                      }
+							                      ]
+						                      },
+						                      { isCancelled: false }
+					                      ]
+				                      }).select({ products: 1 });
 		
 		const completedOrdersTotalSum = completedUserOrders
 				.map((o) =>
 				     {
 					     return o.products
-					             .map((p) =>
-					                  {
-						                  return p.price * p.count;
-					                  })
+					             .map((p) => p.price * p.count)
 					             .reduce((a, b) => a + b, 0);
 				     })
 				.reduce((a, b) => a + b, 0);
@@ -122,7 +120,7 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 		const totalOrders = await this.ordersService
 		                              .Model
 		                              .find({
-			                                    'user._id': id
+			                                    'customer._id': id
 		                                    })
 		                              .countDocuments()
 		                              .exec();
@@ -131,7 +129,7 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 		                                 .Model
 		                                 .find({
 			                                       $and: [
-				                                       { 'user._id': id }, { isCancelled: true }
+				                                       { 'customer._id': id }, { isCancelled: true }
 			                                       ]
 		                                       })
 		                                 .countDocuments()
@@ -144,24 +142,24 @@ export class UsersOrdersService implements IUserOrdersRouter, IService
 		};
 	}
 	
-	private static _shouldPull(userId: User['id'], event)
+	private static _shouldPull(customerId: Customer['id'], event: ExistenceEvent<Order>)
 	{
 		switch(event.type as ExistenceEventType)
 		{
 			case ExistenceEventType.Created:
-				return event.value != null && event.value.user.id === userId;
+				return event.value != null && event.value.customer.id === customerId;
 			
 			case ExistenceEventType.Updated:
 				return (
-						(event.value != null && event.value.user.id === userId) ||
+						(event.value != null && event.value.customer.id === customerId) ||
 						(event.lastValue != null &&
-						 event.lastValue.user.id === userId)
+						 event.lastValue.customer.id === customerId)
 				);
 			
 			case ExistenceEventType.Removed:
 				return (
 						event.lastValue != null &&
-						event.lastValue.user.id === userId
+						event.lastValue.customer.id === customerId
 				);
 		}
 	}
