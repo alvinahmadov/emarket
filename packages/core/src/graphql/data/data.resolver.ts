@@ -4,7 +4,7 @@ import { AdminsService }          from '../../services/admins';
 import { CarriersService }        from '../../services/carriers';
 import { InvitesRequestsService } from '../../services/invites';
 import { OrdersService }          from '../../services/orders';
-import { UsersService }           from '../../services/users';
+import { CustomersService }       from '../../services/customers';
 import { WarehousesService }      from '../../services/warehouses';
 import { DevicesService }         from '../../services/devices';
 import {
@@ -22,7 +22,7 @@ export class DataResolver
 			private readonly _inviteRequestsService: InvitesRequestsService,
 			private readonly _invitesService: InvitesService,
 			private readonly _ordersService: OrdersService,
-			private readonly _usersService: UsersService,
+			private readonly _customersService: CustomersService,
 			private readonly _storesService: WarehousesService,
 			private readonly _devicesService: DevicesService,
 			private readonly _productsService: ProductsService,
@@ -42,7 +42,7 @@ export class DataResolver
 			this._ordersService,
 			this._productsService,
 			this._productsCategoriesService,
-			this._usersService,
+			this._customersService,
 			this._storesService
 		].forEach((service) =>
 		          {
