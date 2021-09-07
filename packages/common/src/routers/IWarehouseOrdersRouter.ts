@@ -23,7 +23,7 @@ export interface IOrderCreateInputProduct
 
 export interface IOrderCreateInput
 {
-	userId: string;
+	customerId: string;
 	warehouseId: string;
 	products: IOrderCreateInputProduct[];
 	
