@@ -1,10 +1,10 @@
+import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
 import { ICarrierCreateObject }                      from './ICarrier';
+import ICustomer, { ICustomerCreateObject }          from './ICustomer';
 import IOrderProduct, { IOrderProductCreateObject }  from './IOrderProduct';
-import IUser, { IUserCreateObject }                  from './IUser';
 import IWarehouse, { IWarehouseCreateObject }        from './IWarehouse';
 import OrderCarrierStatus                            from '../enums/OrderCarrierStatus';
 import OrderWarehouseStatus                          from '../enums/OrderWarehouseStatus';
-import { DBCreateObject, DBRawObject, PyroObjectId } from '../@pyro/db';
 import Carrier                                       from '../entities/Carrier';
 import DeliveryType                                  from '../enums/DeliveryType';
 
@@ -16,10 +16,10 @@ export interface IOrderCreateObject extends DBCreateObject
 	 * This is needed because we don't want to allow user to
 	 * change this data in his profile later so it effects user orders
 	 *
-	 * @type {IUserCreateObject}
+	 * @type {ICustomerCreateObject}
 	 * @memberof IOrderCreateObject
 	 */
-	user: IUserCreateObject;
+	customer: ICustomerCreateObject;
 	
 	/**
 	 * Every order go to single warehouse only.
@@ -152,7 +152,7 @@ export interface IOrderCreateObject extends DBCreateObject
 interface IOrder extends IOrderCreateObject, DBRawObject
 {
 	_id: PyroObjectId;
-	user: IUser;
+	customer: ICustomer;
 	warehouse: IWarehouse | string;
 	products: IOrderProduct[];
 	carrier?: Carrier | string | null;
