@@ -1,10 +1,10 @@
 import { Observable }            from 'rxjs';
-import { Router, RouterFactory } from '../lib/router';
 import { Injectable }            from '@angular/core';
-import IUserProductsRouter       from '@modules/server.common/routers/IUserProductsRouter';
+import ICustomerProductsRouter   from '@modules/server.common/routers/ICustomerProductsRouter';
+import { Router, RouterFactory } from '../lib/router';
 
 @Injectable()
-export class UserProductsRouter implements IUserProductsRouter
+export class CustomerProductsRouter implements ICustomerProductsRouter
 {
 	private readonly router: Router;
 	
