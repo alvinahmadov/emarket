@@ -1,26 +1,26 @@
-import { Component, NgZone } from '@angular/core';
-import { UserOrdersRouter }  from '@modules/client.common.angular2/routers/user-orders-router.service';
-import Order                 from '@modules/server.common/entities/Order';
-import { Store }             from 'app/services/store';
+import { Component, NgZone }    from '@angular/core';
+import { CustomerOrdersRouter } from '@modules/client.common.angular2/routers/customer-orders-router.service';
+import Order                    from '@modules/server.common/entities/Order';
+import { Store }                from 'app/services/store';
 
 @Component({
 	           selector: 'orders-container',
 	           template: `
-		           <orders *ngIf="orders" [orders]="orders"></orders>
-		           <div
-				           *ngIf="!orders.length"
-				           style="text-align:center; font-size:28px;margin:20px 0"
-		           >
-			           {{ 'ORDER_VIEW.NO_ORDERS' | translate }}  ...
-		           </div>
-	           `,
+		                     <orders *ngIf="orders" [orders]="orders"></orders>
+		                     <div
+				                     *ngIf="!orders.length"
+				                     style="text-align:center; font-size:28px;margin:20px 0"
+		                     >
+			                     {{ 'ORDER_VIEW.NO_ORDERS' | translate }}  ...
+		                     </div>
+	                     `,
            })
 export class OrdersContainerComponent
 {
 	public orders: Order[] = [];
 	
 	constructor(
-			private readonly userOrdersRouter: UserOrdersRouter,
+			private readonly userOrdersRouter: CustomerOrdersRouter,
 			private readonly ngZone: NgZone,
 			private readonly store: Store
 	)
