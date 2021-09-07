@@ -1,7 +1,7 @@
 type Order {
     _id: String!
     id: String!
-    user: User!
+    customer: Customer!
     warehouse: Warehouse!
     warehouseId: String!
 
@@ -60,7 +60,7 @@ type OrderProduct {
 }
 
 input OrdersFindInput {
-    user: String
+    customer: String
 
     # Warehouse id
     warehouse: String
@@ -96,7 +96,7 @@ type CompletedOrderInfo {
 }
 
 type OrderedUserInfo {
-    user: User!
+    customer: Customer!
     ordersCount: Int!
     totalPrice: Float!
 }
