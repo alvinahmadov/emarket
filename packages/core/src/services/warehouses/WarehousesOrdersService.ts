@@ -1,5 +1,5 @@
-import Logger                                               from 'bunyan';
 import Bluebird                                             from 'bluebird';
+import Logger                                               from 'bunyan';
 import { inject, injectable, LazyServiceIdentifer }         from 'inversify';
 import _                                                    from 'lodash';
 import moment                                               from 'moment';
@@ -7,26 +7,26 @@ import { concat, Observable, of }                           from 'rxjs';
 import { exhaustMap, filter, first, map, share, switchMap } from 'rxjs/operators';
 import { asyncListener, observableListener, routerName }    from '@pyro/io';
 import { ExistenceEvent, ExistenceEventType }               from '@pyro/db-server';
-import IOrder                                   from '@modules/server.common/interfaces/IOrder';
-import { IOrderProductCreateObject }            from '@modules/server.common/interfaces/IOrderProduct';
-import IPagingOptions                           from '@modules/server.common/interfaces/IPagingOptions';
-import DeliveryType                             from '@modules/server.common/enums/DeliveryType';
-import OrderWarehouseStatus                     from '@modules/server.common/enums/OrderWarehouseStatus';
-import OrderCarrierStatus                       from '@modules/server.common/enums/OrderCarrierStatus';
-import Order                                    from '@modules/server.common/entities/Order';
-import OrderProduct                             from '@modules/server.common/entities/OrderProduct';
-import Product                                  from '@modules/server.common/entities/Product';
-import Warehouse, { WithFullProducts }          from '@modules/server.common/entities/Warehouse';
-import User                                     from '@modules/server.common/entities/User';
+import IOrder                                               from '@modules/server.common/interfaces/IOrder';
+import { IOrderProductCreateObject }                        from '@modules/server.common/interfaces/IOrderProduct';
+import IPagingOptions                                       from '@modules/server.common/interfaces/IPagingOptions';
+import DeliveryType                                         from '@modules/server.common/enums/DeliveryType';
+import OrderWarehouseStatus                                 from '@modules/server.common/enums/OrderWarehouseStatus';
+import OrderCarrierStatus                                   from '@modules/server.common/enums/OrderCarrierStatus';
+import Customer                                             from '@modules/server.common/entities/Customer';
+import Order                                                from '@modules/server.common/entities/Order';
+import OrderProduct                                         from '@modules/server.common/entities/OrderProduct';
+import Product                                              from '@modules/server.common/entities/Product';
+import Warehouse, { WithFullProducts }                      from '@modules/server.common/entities/Warehouse';
 import IWarehouseOrdersRouter,
-{ IOrderCreateInput, IOrderCreateInputProduct } from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import { WarehousesService }                    from './WarehousesService';
-import { WarehousesProductsService }            from './WarehousesProductsService';
-import IService                                 from '../IService';
-import { OrdersService }                        from '../orders';
-import { ProductsService }                      from '../products';
-import { UsersService }                         from '../users';
-import { createLogger }                         from '../../helpers/Log';
+{ IOrderCreateInput, IOrderCreateInputProduct }             from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import { WarehousesService }                                from './WarehousesService';
+import { WarehousesProductsService }                        from './WarehousesProductsService';
+import IService                                             from '../IService';
+import { OrdersService }                                    from '../orders';
+import { ProductsService }                                  from '../products';
+import { CustomersService }                                 from '../customers';
+import { createLogger }                                     from '../../helpers/Log';
 
 /**
  * Warehouses Orders Service
@@ -54,8 +54,8 @@ export class WarehousesOrdersService
 			protected warehousesProductsService: WarehousesProductsService,
 			@inject(new LazyServiceIdentifer(() => OrdersService))
 			protected ordersService: OrdersService,
-			@inject(new LazyServiceIdentifer(() => UsersService))
-			protected usersService: UsersService
+			@inject(new LazyServiceIdentifer(() => CustomersService))
+			protected customersService: CustomersService
 	)
 	{}
 	
@@ -132,8 +132,8 @@ export class WarehousesOrdersService
 						switchMap((res) => res),
 						exhaustMap(() =>
 								           this._get(warehouseId, {
-									           populateWarehouse: !!options.populateWarehouse,
-									           populateCarrier: !!options.populateCarrier,
+									           populateWarehouse:      !!options.populateWarehouse,
+									           populateCarrier:        !!options.populateCarrier,
 									           onlyAvailableToCarrier: false
 								           })
 						)
@@ -159,20 +159,20 @@ export class WarehousesOrdersService
 		await this.warehousesService.throwIfNotExists(warehouseId);
 		
 		const orderDocument =
-				(await this.ordersService
-				           .Model
-				           .findOne({
-					                    warehouse: warehouseId,
-					                    isDeleted: { $eq: false },
-					                    _createdAt: {
-						                    $gte: (<any>moment)()
-								                    .startOf('day')
-								                    .toDate()
-					                    }
-				                    })
-				           .select('orderNumber')
-				           .sort({ orderNumber: -1 })
-				           .exec()) as any;
+				      (await this.ordersService
+				                 .Model
+				                 .findOne({
+					                          warehouse:  warehouseId,
+					                          isDeleted:  { $eq: false },
+					                          _createdAt: {
+						                          $gte: (<any>moment)()
+								                                .startOf('day')
+								                                .toDate()
+					                          }
+				                          })
+				                 .select('orderNumber')
+				                 .sort({ orderNumber: -1 })
+				                 .exec()) as any;
 		
 		if(orderDocument == null)
 		{
@@ -194,7 +194,7 @@ export class WarehousesOrdersService
 	 *
 	 * @param {IOrderCreateInput} {
 	 * 		warehouseId,
-	 * 		userId,
+	 * 		customerId,
 	 * 		products,
 	 * 		options
 	 * 	}
@@ -204,7 +204,7 @@ export class WarehousesOrdersService
 	@asyncListener()
 	async create({
 		             warehouseId,
-		             userId,
+		             customerId,
 		             products,
 		             orderType,
 		             waitForCompletion,
@@ -220,14 +220,14 @@ export class WarehousesOrdersService
 			autoConfirm: !!options.autoConfirm
 		};
 		
-		const user = await this._getUser(userId);
+		const customer = await this._getCustomer(customerId);
 		const warehouse = await this._getWarehouse(warehouseId);
 		
 		const warehouseProducts = _.keyBy(warehouse.products, 'productId');
 		
 		this.log.info(
 				{
-					user,
+					customer,
 					warehouseId,
 					products
 				},
@@ -247,10 +247,10 @@ export class WarehousesOrdersService
 		
 		const order = await this.ordersService
 		                        .create({
-			                                user,
-			                                products: orderProducts,
-			                                warehouse: warehouseId,
-			                                orderNumber: await this.getNextOrderNumber(warehouseId),
+			                                customer,
+			                                products:          orderProducts,
+			                                warehouse:         warehouseId,
+			                                orderNumber:       await this.getNextOrderNumber(warehouseId),
 			                                orderType,
 			                                waitForCompletion: !!waitForCompletion,
 			                                ...(options.autoConfirm ? { isConfirmed: true } : {})
@@ -283,7 +283,7 @@ export class WarehousesOrdersService
 	 * Add product to existed order
 	 *
 	 * @param {string} warehouseId
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @param {string} orderId
 	 * @param {IOrderCreateInputProduct[]} products
 	 * @returns {Promise<Order>}
@@ -292,16 +292,16 @@ export class WarehousesOrdersService
 	@asyncListener()
 	async addMore(
 			warehouseId: string,
-			userId: string,
+			customerId: string,
 			orderId: string,
 			products: IOrderCreateInputProduct[]
 	): Promise<Order>
 	{
 		const existedOrder =
-				await this.ordersService
-				          .get(orderId)
-				          .pipe(first())
-				          .toPromise();
+				      await this.ordersService
+				                .get(orderId)
+				                .pipe(first())
+				                .toPromise();
 		
 		if(existedOrder.warehouseId !== warehouseId)
 		{
@@ -310,12 +310,12 @@ export class WarehousesOrdersService
 			);
 		}
 		
-		if(existedOrder.user.id !== userId)
+		if(existedOrder.customer.id !== customerId)
 		{
-			throw new Error(`The order is not used by user with Id ${userId}`);
+			throw new Error(`The order is not used by user with Id ${customerId}`);
 		}
 		
-		const user = await this._getUser(userId);
+		const user = await this._getCustomer(customerId);
 		const warehouse = await this._getWarehouse(warehouseId);
 		
 		const warehouseProducts = _.keyBy(warehouse.products, 'productId');
@@ -348,7 +348,7 @@ export class WarehousesOrdersService
 	 * Create Order by given customer in the given Store for 1 specific product
 	 * (optimized for single product purchases)
 	 *
-	 * @param {string} userId
+	 * @param {string} customerId
 	 * @param {string} warehouseId
 	 * @param {string} productId
 	 * @param orderType
@@ -357,18 +357,18 @@ export class WarehousesOrdersService
 	 */
 	@asyncListener()
 	async createByProductType(
-			userId: string,
+			customerId: string,
 			warehouseId: string,
 			productId: string,
 			orderType?: DeliveryType
 	): Promise<Order>
 	{
-		await this.usersService.throwIfNotExists(userId);
+		await this.customersService.throwIfNotExists(customerId);
 		await this.warehousesService.throwIfNotExists(warehouseId);
 		await this.productsService.throwIfNotExists(productId);
 		
 		const orderCreateInput: IOrderCreateInput = {
-			userId,
+			customerId,
 			warehouseId,
 			orderType,
 			products: [
@@ -424,7 +424,7 @@ export class WarehousesOrdersService
 		this.log.info(
 				{
 					warehouseId: order.warehouseId,
-					products: order.products
+					products:    order.products
 				},
 				'Order cancel add products back call'
 		);
@@ -435,10 +435,10 @@ export class WarehousesOrdersService
 		               _.map(order.products, (orderProduct) =>
 		               {
 			               return {
-				               product: orderProduct.product.id,
-				               count: orderProduct.count,
-				               price: orderProduct.price,
-				               initialPrice: orderProduct.initialPrice,
+				               product:         orderProduct.product.id,
+				               count:           orderProduct.count,
+				               price:           orderProduct.price,
+				               initialPrice:    orderProduct.initialPrice,
 				               deliveryTimeMin: orderProduct.deliveryTimeMin,
 				               deliveryTimeMax: orderProduct.deliveryTimeMax
 			               };
@@ -463,7 +463,7 @@ export class WarehousesOrdersService
 		this.log.info(
 				{
 					warehouseId: order.warehouseId,
-					products: order.products
+					products:    order.products
 				},
 				'Order cancel add products back call succeed'
 		);
@@ -523,8 +523,8 @@ export class WarehousesOrdersService
 			_.extend(
 					findObj,
 					{
-						carrierStatus: 0,
-						$or: [
+						carrierStatus:   0,
+						$or:             [
 							{
 								carrier: { $exists: false }
 							},
@@ -577,19 +577,19 @@ export class WarehousesOrdersService
 		return orders;
 	}
 	
-	private async _getUser(userId: string): Promise<User>
+	private async _getCustomer(customerId: string): Promise<Customer>
 	{
-		const user = await this.usersService
-		                       .get(userId)
-		                       .pipe(first())
-		                       .toPromise();
+		const customer = await this.customersService
+		                           .get(customerId)
+		                           .pipe(first())
+		                           .toPromise();
 		
-		if(user == null)
+		if(customer == null)
 		{
-			throw new Error(`There is no user with the id ${userId}`);
+			throw new Error(`There is no customer with the id ${customerId}`);
 		}
 		
-		return user;
+		return customer;
 	}
 	
 	private async _getWarehouse(
@@ -624,20 +624,20 @@ export class WarehousesOrdersService
 					if(!wProduct)
 					{
 						throw new Error(
-								`WarehouseOrdersService got call to create(userId, orderProducts) - But there is no product with the id ${args.productId}!`
+								`WarehouseOrdersService got call to create(customerId, orderProducts) - But there is no product with the id ${args.productId}!`
 						);
 					}
 					return {
-						count: args.count,
-						price: wProduct.price,
-						initialPrice: wProduct.initialPrice,
-						deliveryTimeMin: wProduct.deliveryTimeMin,
-						deliveryTimeMax: wProduct.deliveryTimeMax,
-						product: wProduct.product as Product,
-						isManufacturing: wProduct.isManufacturing,
-						isCarrierRequired: wProduct.isCarrierRequired,
+						count:              args.count,
+						price:              wProduct.price,
+						initialPrice:       wProduct.initialPrice,
+						deliveryTimeMin:    wProduct.deliveryTimeMin,
+						deliveryTimeMax:    wProduct.deliveryTimeMax,
+						product:            wProduct.product as Product,
+						isManufacturing:    wProduct.isManufacturing,
+						isCarrierRequired:  wProduct.isCarrierRequired,
 						isDeliveryRequired: wProduct.isDeliveryRequired,
-						isTakeaway: wProduct.isTakeaway
+						isTakeaway:         wProduct.isTakeaway
 					};
 				}
 		);
@@ -688,9 +688,9 @@ export class WarehousesOrdersService
 export function getStoreOrdersFingObj(storeId: string, status: string)
 {
 	const findObj = {
-		isDeleted: { $eq: false },
+		isDeleted:         { $eq: false },
 		waitForCompletion: { $eq: false },
-		warehouse: storeId
+		warehouse:         storeId
 	};
 	
 	switch(status)
