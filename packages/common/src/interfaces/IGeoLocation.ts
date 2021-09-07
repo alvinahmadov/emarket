@@ -1,5 +1,5 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '../@pyro/db';
-import { Country }                                   from '../entities/GeoLocation';
+import Country                                       from '../enums/Country';
 
 export interface ILocation
 {
