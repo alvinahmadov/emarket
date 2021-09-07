@@ -1,5 +1,5 @@
-import Order      from "../entities/Order";
-import { sample } from "lodash";
+import { sample } from 'lodash';
+import Order      from '../entities/Order';
 
 namespace CommonUtils
 {
@@ -63,6 +63,12 @@ namespace CommonUtils
 		m = m.substr(-2);
 		
 		return `${d}${m}${year}-${order.orderNumber}`;
+	}
+	
+	export function validateEmail(email: string): boolean
+	{
+		const re = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i;
+		return re.test(String(email).toLowerCase());
 	}
 }
 
