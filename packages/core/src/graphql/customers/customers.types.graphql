@@ -1,0 +1,162 @@
+type Customer {
+	_id: String!
+	id: String!
+	name: String!
+	email: String!
+	geoLocation: GeoLocation!
+	apartment: String!
+	role: String
+	firstName: String
+	lastName: String
+	phone: String
+	devicesIds: [String!]!
+
+	# Resolved
+	devices: [Device!]!
+
+    # URL of the image
+	avatar: String
+
+	fullAddress: String
+	fullName: String
+
+    createdAt: Date
+
+    isBanned: Boolean!
+}
+
+input CustomerCreateInput {
+	name: String!
+	email: String!
+	firstName: String
+	lastName: String
+	phone: String
+
+	# URL of the image
+	avatar: String
+	geoLocation: GeoLocationCreateInput!
+	apartment: String!
+}
+
+input CustomerFindInput {
+	firstName: String
+	lastName: String
+	name: String
+	email: String
+	phone: String
+	apartment: String
+
+	# URL of the image
+	image: String
+
+    # TODO geoLocation
+}
+
+type Query {
+	customer(id: String!): Customer
+
+	customers(findInput: CustomerFindInput, pagingOptions: PagingOptionsInput): [Customer]!
+
+	getOrders(customerId: String!): [Order!]!
+
+	isCustomerExists(conditions: CustomerMemberInput!): Boolean!
+
+	getSocial(socialId: String!): Customer
+
+	isCustomerEmailExists(email: String!): Boolean!
+
+    generateCustomers(
+        qty: Int
+        defaultLng: Float!
+        defaultLat: Float!
+    ): ResponseGenerateCustomers
+
+	getCountOfCustomers: Int!
+
+    getCustomerMetrics(id: String!): CustomerMetrics
+}
+
+type ResponseGenerateCustomers {
+    success: Boolean!
+    message: String
+}
+
+type CustomerLoginInfo {
+	user: Customer!
+	token: String!
+}
+
+type CustomerMetrics {
+    totalOrders: Int
+    canceledOrders: Int
+    completedOrdersTotalSum: Float
+}
+
+input CustomerMemberInput {
+	exceptCustomerId: String
+	memberKey: String!
+	memberValue: String!
+}
+
+input CustomerRegisterInput {
+	user: CustomerCreateInput!
+	password: String
+}
+
+input CustomerPasswordUpdateInput {
+	current: String!
+	new: String!
+}
+
+input AdditionalCustomerRegistrationInfo {
+	email: String!
+	password: String!
+	firstName: String
+	lastName: String
+	phone: String
+}
+
+input GeoLocationUpdateObjectInput {
+    loc: Location!
+}
+
+input CustomerUpdateObjectInput {
+	geoLocation: GeoLocationUpdateObjectInput!
+	devicesIds: [String!]
+	apartment: String
+	stripeCustomerId: String
+}
+
+input PagingOptionsInput {
+    sort: PagingSortInput
+    limit: Int
+    skip: Int
+}
+
+input PagingSortInput {
+    field: String!
+    sortBy: String!
+}
+
+type Mutation {
+	updateCustomer(id: String!, updateObject: CustomerUpdateObjectInput!): Customer!
+
+	updateCustomerEmail(customerId: String!, email: String!): Customer!
+
+	registerCustomer(registerInput: CustomerRegisterInput!): Customer!
+
+	customerLogin(email: String!, password: String!): CustomerLoginInfo
+
+	removeCustomersByIds(ids: [String]!): String!
+
+	updateCustomerPassword(id: String!, password: CustomerPasswordUpdateInput!): Void
+
+	addCustomerRegistrationInfo(
+		id: String!
+		registrationInfo: AdditionalCustomerRegistrationInfo!
+	): Void
+
+	banCustomer(id: String!): Customer
+
+	unbanCustomer(id: String!): Customer
+}
