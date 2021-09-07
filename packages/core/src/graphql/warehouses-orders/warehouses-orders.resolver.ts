@@ -1,16 +1,10 @@
-import { Mutation, Resolver, Query } from '@nestjs/graphql';
-import {
-	WarehousesOrdersService,
-	getStoreOrdersFingObj
-}                                    from '../../services/warehouses';
-import Order                         from '@modules/server.common/entities/Order';
-import { IOrderCreateInput }         from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import { first, map }                from 'rxjs/operators';
-import { OrdersService }             from '../../services/orders';
-import OrderStatus                   from '@modules/server.common/enums/OrderStatus';
-import OrderWarehouseStatus          from '@modules/server.common/enums/OrderWarehouseStatus';
-import OrderCarrierStatus            from '@modules/server.common/enums/OrderCarrierStatus';
-import { ObjectId }                  from 'bson';
+import { ObjectId }                                       from 'bson';
+import { first }                                          from 'rxjs/operators';
+import { Mutation, Query, Resolver }                      from '@nestjs/graphql';
+import Order                                              from '@modules/server.common/entities/Order';
+import { IOrderCreateInput }                              from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import { getStoreOrdersFingObj, WarehousesOrdersService } from '../../services/warehouses';
+import { OrdersService }                                  from '../../services/orders';
 
 export type OrdersFilterModes =
 		| 'ready'
@@ -40,11 +34,8 @@ export class WarehouseOrdersResolver
 	@Query()
 	async getDashboardOrdersChartOrders(_, { storeId }: { storeId: string })
 	{
-		const resOrders = this._ordersService.getStoreOrdersChartTotalOrders(
-				storeId
-		);
-		
-		return resOrders;
+		return this._ordersService
+		           .getStoreOrdersChartTotalOrders(storeId);
 	}
 	
 	@Query()
@@ -60,7 +51,7 @@ export class WarehouseOrdersResolver
 			                                           { $match: { warehouse: { $ne: null } } },
 			                                           {
 				                                           $group: {
-					                                           _id: '$warehouse',
+					                                           _id:         '$warehouse',
 					                                           ordersCount: { $sum: 1 }
 				                                           }
 			                                           }
@@ -105,23 +96,23 @@ export class WarehouseOrdersResolver
 	}
 	
 	@Query()
-	async removeUserOrders(
+	async removeCustomerOrders(
 			_,
-			{ storeId, userId }: { storeId: string; userId: string }
+			{ storeId, customerId }: { storeId: string; customerId: string }
 	)
 	{
 		const res = await this._ordersService.Model.update(
 				{
-					'user._id': new ObjectId(userId),
-					warehouse: storeId,
-					isDeleted: false
+					'customer._id': new ObjectId(customerId),
+					warehouse:      storeId,
+					isDeleted:      false
 				},
 				{ isDeleted: true },
 				{ multi: true }
 		).exec();
 		
 		return {
-			number: res.n,
+			number:   res.n,
 			modified: res.nModified
 		};
 	}

@@ -4,7 +4,7 @@ input OrderProductCreateInput {
 }
 
 input OrderCreateInput {
-    userId: String!
+    customerId: String!
     warehouseId: String!
     products: [OrderProductCreateInput!]!
     options: WarehouseOrdersRouterCreateOptions
@@ -53,5 +53,5 @@ type Query {
 
     getOrdersInDelivery(storeId: String!): [Order]!
 
-    removeUserOrders(storeId: String!, userId: String!): RemovedUserOrdersObj
+    removeCustomerOrders(storeId: String!, customerId: String!): RemovedUserOrdersObj
 }
