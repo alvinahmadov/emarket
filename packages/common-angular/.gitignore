@@ -9,3 +9,4 @@ routers/**/*.js.map
 node_modules
 build
 dist
+src/environments/*.ts
