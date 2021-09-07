@@ -15,7 +15,7 @@ import Order                                             from '@modules/server.c
 import OrderProduct                                      from '@modules/server.common/entities/OrderProduct';
 import Product                                           from '@modules/server.common/entities/Product';
 import Warehouse, { WithFullProducts }                   from '@modules/server.common/entities/Warehouse';
-import User                                              from '@modules/server.common/entities/User';
+import Customer                                          from '@modules/server.common/entities/Customer';
 import IOrderRouter                                      from '@modules/server.common/routers/IOrderRouter';
 import CarriersService                                   from '../carriers/CarriersService';
 import IService                                          from '../IService';
@@ -23,7 +23,7 @@ import { ProductsService }                               from '../../services/pr
 import { env }                                           from '../../env';
 import { WarehousesProductsService, WarehousesService }  from '../warehouses';
 import { createLogger }                                  from '../../helpers/Log';
-import { UsersService }                                  from '../users';
+import { CustomersService }                              from '../customers';
 import _ = require('lodash');
 import Stripe = require('stripe');
 
@@ -68,8 +68,8 @@ export class OrdersService extends DBService<Order>
 	constructor(
 			@inject(new LazyServiceIdentifer(() => WarehousesService))
 			protected warehousesService: WarehousesService,
-			@inject(new LazyServiceIdentifer(() => UsersService))
-			protected usersService: UsersService,
+			@inject(new LazyServiceIdentifer(() => CustomersService))
+			protected usersService: CustomersService,
 			@inject(new LazyServiceIdentifer(() => CarriersService))
 			protected carriersService: CarriersService,
 			@inject(new LazyServiceIdentifer(() => WarehousesProductsService))
@@ -121,7 +121,7 @@ export class OrdersService extends DBService<Order>
 						                              product:            products[(index + 1) % products.length]
 					                              }
 				                              ],
-				                              user:        customer,
+				                              customer:    customer,
 				                              warehouse:   storeId,
 				                              orderNumber: index
 			                              });
@@ -282,7 +282,7 @@ export class OrdersService extends DBService<Order>
 				order = _order;
 				
 				const user = await this.usersService
-				                       .get(order.user.id)
+				                       .get(order.customer.id)
 				                       .pipe(first())
 				                       .toPromise();
 				
@@ -858,11 +858,7 @@ export class OrdersService extends DBService<Order>
 			);
 		};
 		
-		const oUsers = orders.filter(unique).map((o) =>
-		                                         {
-			                                         const user: User = new User(o.user);
-			                                         return user;
-		                                         });
+		const oUsers = orders.filter(unique).map((o) => new Customer(o.user));
 		
 		const oUserIds = oUsers.map((u) => u.id);
 		const realUsers = await this.usersService.find({
