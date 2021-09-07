@@ -1,15 +1,15 @@
-import { Mutation, Query, ResolveProperty, Resolver } from '@nestjs/graphql';
-import { CarriersService }                            from '../../services/carriers';
-import { default as ICarrier }                        from '@modules/server.common/interfaces/ICarrier';
-import Carrier                                        from '@modules/server.common/entities/Carrier';
-import { first, map }                                 from 'rxjs/operators';
-import { DevicesService }                             from '../../services/devices';
+import { Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { CarriersService }                         from '../../services/carriers';
+import { default as ICarrier }                     from '@modules/server.common/interfaces/ICarrier';
+import Carrier                                     from '@modules/server.common/entities/Carrier';
+import { first, map }                              from 'rxjs/operators';
+import { DevicesService }                          from '../../services/devices';
 import {
 	ICarrierRegistrationInput,
 	ICarrierLoginResponse
-}                                                     from '@modules/server.common/routers/ICarrierRouter';
-import CarrierStatus                                  from '@modules/server.common/enums/CarrierStatus';
-import Device                                         from '@modules/server.common/entities/Device';
+}                                                  from '@modules/server.common/routers/ICarrierRouter';
+import CarrierStatus                               from '@modules/server.common/enums/CarrierStatus';
+import Device                                      from '@modules/server.common/entities/Device';
 
 @Resolver('Carrier')
 export class CarrierResolver
@@ -138,7 +138,7 @@ export class CarrierResolver
 		return this._carriersService.removeMultipleByIds(carriersIds);
 	}
 	
-	@ResolveProperty('devices')
+	@ResolveField('devices')
 	async getDevices(_carrier: ICarrier): Promise<Device[]>
 	{
 		const carrier = new Carrier(_carrier);
