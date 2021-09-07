@@ -1,50 +1,50 @@
+import Logger                                 from 'bunyan';
+import { ModuleRef }                          from '@nestjs/core';
 import {
 	MiddlewareConsumer,
 	Module,
 	NestModule,
 	OnModuleInit
 }                                             from '@nestjs/common';
-import mongoose                               from 'mongoose';
-import { GraphQLSchema }                      from 'graphql';
+import { CommandBus, EventBus, CqrsModule }   from '@nestjs/cqrs';
+import { TypeOrmModule }                      from '@nestjs/typeorm';
 import { GraphQLModule }                      from '@nestjs/graphql';
+import { GraphQLSchema }                      from 'graphql';
+import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
+import { fileLoader, mergeTypes }             from 'merge-graphql-schemas';
+import mongoose                               from 'mongoose';
+import { ConfigModule }                       from './config/config.module';
+import { TestController }                     from './controllers/test.controller';
+import { ProductModule }                      from './controllers/product/product.module';
 import { SubscriptionsModule }                from './graphql/subscriptions/subscriptions.module';
 import { SubscriptionsService }               from './graphql/subscriptions/subscriptions.service';
 import { InvitesModule }                      from './graphql/invites/invites.module';
 import { DevicesModule }                      from './graphql/devices/devices.module';
-import { ConfigModule }                       from './config/config.module';
-import { ProductModule }                      from './controllers/product/product.module';
-import { UsersModule }                        from './graphql/users/users.module';
+import { CustomersModule }                    from './graphql/customers/customers.module';
 import { WarehousesModule }                   from './graphql/warehouses/warehouses.module';
 import { OrdersModule }                       from './graphql/orders/orders.module';
 import { CarriersModule }                     from './graphql/carriers/carriers.module';
 import { ProductsModule }                     from './graphql/products/products.module';
-import Logger                                 from 'bunyan';
-import { env }                                from './env';
-import { createLogger }                       from './helpers/Log';
-import { CommandBus, EventBus, CqrsModule }   from '@nestjs/cqrs';
-import { TestController }                     from './controllers/test.controller';
-import { ModuleRef }                          from '@nestjs/core';
 import { GeoLocationsModule }                 from './graphql/geo-locations/geo-locations.module';
 import { SCALARS }                            from './graphql/scalars';
 import { WarehousesProductsModule }           from './graphql/warehouses-products/warehouses-products.modules';
 import { WarehousesCarriersModule }           from './graphql/warehouses-carriers/warehouses-carriers.module';
 import { WarehousesOrdersModule }             from './graphql/warehouses-orders/warehouses-orders.module';
 import { InvitesRequestsModule }              from './graphql/invites-requests/invites-requests.module';
-import { AuthModule }                         from './auth/auth.module';
 import { AdminsModule }                       from './graphql/admin/admins.module';
 import { DataModule }                         from './graphql/data/data.module';
 import { CarriersOrdersModule }               from './graphql/carriers-orders/carriers-orders.module';
 import { GeoLocationOrdersModule }            from './graphql/geo-locations/orders/geo-location-orders.module';
 import { GeoLocationMerchantsModule }         from './graphql/geo-locations/merchants/geo-location-merchants.module';
-import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
-import { fileLoader, mergeTypes }             from 'merge-graphql-schemas';
-import { GetAboutUsHandler }                  from './services/users';
-import { TypeOrmModule }                      from '@nestjs/typeorm';
-import { ServicesModule }                     from './services/services.module';
-import { ServicesApp }                        from './services/services.app';
 import { CurrencyModule }                     from './graphql/currency/currency.module';
 import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
 import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
+import { AuthModule }                         from './auth/auth.module';
+import { env }                                from './env';
+import { createLogger }                       from './helpers/Log';
+import { GetAboutUsHandler }                  from './services/customers';
+import { ServicesModule }                     from './services/services.module';
+import { ServicesApp }                        from './services/services.app';
 import { getHost, getPort }                   from './utils';
 
 const gqlEndpoint = env.GQL_ENDPOINT;
@@ -67,8 +67,8 @@ const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 
 @Module({
 	        controllers: [TestController],
-	        providers: [...CommandHandlers, ...EventHandlers],
-	        imports: [
+	        providers:   [...CommandHandlers, ...EventHandlers],
+	        imports:     [
 		        DataModule,
 		        ServicesModule,
 		        CqrsModule,
@@ -78,13 +78,13 @@ const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 		        ConfigModule,
 		        // configure TypeORM Connection which will be possible to use inside NestJS (e.g. resolvers)
 		        TypeOrmModule.forRoot({
-			                              type: 'mongodb',
-			                              url: env.DB_URI,
+			                              type:            'mongodb',
+			                              url:             env.DB_URI,
 			                              entities,
-			                              synchronize: true,
+			                              synchronize:     true,
 			                              useNewUrlParser: true,
-			                              autoReconnect: true,
-			                              logging: true
+			                              autoReconnect:   true,
+			                              logging:         true
 		                              }),
 		        // define which repositories shall be registered in the current scope (each entity will have own
 		        // repository). Thanks to that we can inject the XXXXRepository to the NestJS using the
@@ -95,20 +95,20 @@ const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 				        getHost(gqlSubscriptionsEndpoint)
 		        ),
 		        GraphQLModule.forRoot({
-			                              typePaths: ['./**/*.graphql'],
+			                              typePaths:                   ['./**/*.graphql'],
 			                              installSubscriptionHandlers: true,
-			                              debug: true,
-			                              playground: true,
-			                              context: ({ req, res }) => ({
+			                              debug:                       true,
+			                              playground:                  true,
+			                              context:                     ({ req, res }) => ({
 				                              req
 			                              })
 		                              }),
 		        InvitesModule,
 		        DevicesModule,
 		        ProductModule,
+		        CustomersModule,
 		        WarehousesModule,
 		        GeoLocationsModule,
-		        UsersModule,
 		        OrdersModule,
 		        CarriersModule,
 		        CarriersOrdersModule,
@@ -183,13 +183,13 @@ export class ApplicationModule implements NestModule, OnModuleInit
 	{
 		return new ApolloServer({
 			                        schema,
-			                        context: ({ req, res }) => ({
+			                        context:    ({ req, res }) => ({
 				                        req
 			                        }),
 			                        playground: {
-				                        endpoint: gqlEndpoint,
+				                        endpoint:             gqlEndpoint,
 				                        subscriptionEndpoint: subscriptionsEndpoint,
-				                        settings: {
+				                        settings:             {
 					                        'editor.theme': 'dark'
 				                        }
 			                        }
