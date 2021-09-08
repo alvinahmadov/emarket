@@ -1,21 +1,20 @@
-import { Injectable } from '@angular/core';
-import User           from '@modules/server.common/entities/User';
-import { UserRouter } from '@modules/client.common.angular2/routers/user-router.service';
-import { first }      from 'rxjs/operators';
+import { Injectable }     from '@angular/core';
+import { first }          from 'rxjs/operators';
+import { CustomerRouter } from '@modules/client.common.angular2/routers/customer-router.service';
 
 @Injectable({
 	            providedIn: 'root',
             })
 export class Store
 {
-	constructor(private readonly userRouter: UserRouter) {}
+	constructor(private readonly userRouter: CustomerRouter) {}
 	
-	get userId(): User['id'] | null
+	get userId(): string | null
 	{
 		return localStorage.getItem('_userId') || null;
 	}
 	
-	set userId(id: User['id'] | null)
+	set userId(id: string | null)
 	{
 		if(id == null)
 		{
@@ -24,6 +23,23 @@ export class Store
 		else
 		{
 			localStorage.setItem('_userId', id);
+		}
+	}
+	
+	get languageCode(): string
+	{
+		return localStorage.getItem('_languageCode') || null;
+	}
+	
+	set languageCode(code: string)
+	{
+		if(code == null)
+		{
+			localStorage.removeItem('_languageCode');
+		}
+		else
+		{
+			localStorage.setItem('_languageCode', code);
 		}
 	}
 	
@@ -51,14 +67,14 @@ export class Store
 		);
 	}
 	
-	get buyProduct(): string
+	get buyProductId(): string
 	{
-		return localStorage.getItem('_buyProduct');
+		return localStorage.getItem('_buyProductId');
 	}
 	
-	set buyProduct(warehouseProductId: string)
+	set buyProductId(warehouseProductId: string)
 	{
-		localStorage.setItem('_buyProduct', warehouseProductId);
+		localStorage.setItem('_buyProductId', warehouseProductId);
 	}
 	
 	get merchantId(): string
@@ -143,7 +159,7 @@ export class Store
 		localStorage.setItem('serverConnection', val);
 	}
 	
-	async isLogged()
+	isLogged()
 	{
 		const userId = this.userId;
 		
@@ -151,11 +167,9 @@ export class Store
 		{
 			try
 			{
-				await this.userRouter
-				          .get(userId)
-				          .pipe(first())
-				          .toPromise();
-				
+				this.userRouter
+				    .get(userId)
+				    .pipe(first());
 				return true;
 			} catch(error)
 			{
