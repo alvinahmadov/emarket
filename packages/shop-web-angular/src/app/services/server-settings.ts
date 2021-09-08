@@ -1,8 +1,8 @@
-import { Injectable }     from '@angular/core';
-import { InviteRouter }   from '@modules/client.common.angular2/routers/invite-router.service';
-import { UserAuthRouter } from '@modules/client.common.angular2/routers/user-auth-router.service';
-import RegistrationSystem from '@modules/server.common/enums/RegistrationSystem';
-import { Store }          from './store';
+import { Injectable }         from '@angular/core';
+import { InviteRouter }       from '@modules/client.common.angular2/routers/invite-router.service';
+import { CustomerAuthRouter } from '@modules/client.common.angular2/routers/customer-auth-router.service';
+import RegistrationSystem     from '@modules/server.common/enums/RegistrationSystem';
+import { Store }              from './store';
 
 @Injectable({
 	            providedIn: 'root',
@@ -11,12 +11,12 @@ export class ServerSettings
 {
 	constructor(
 			private readonly inviteRouter: InviteRouter,
-			private readonly userAuthRouter: UserAuthRouter,
+			private readonly userAuthRouter: CustomerAuthRouter,
 			private readonly store: Store
 	)
 	{}
 	
-	load()
+	load(): Promise<boolean>
 	{
 		return new Promise(async(resolve, reject) =>
 		                   {
