@@ -30,13 +30,13 @@ export class Request<T>
 			                      this.socket.emit(this.event, ...this.args,
 			                                       (err: any, res: T | PromiseLike<T>) =>
 			                                       {
-				                                       if(err != null)
+				                                       if(!err)
 				                                       {
-					                                       reject(Request.deserializeError(err));
+					                                       resolve(res);
 				                                       }
 				                                       else
 				                                       {
-					                                       resolve(res);
+					                                       reject(Request.deserializeError(err));
 				                                       }
 			                                       });
 		                      });
