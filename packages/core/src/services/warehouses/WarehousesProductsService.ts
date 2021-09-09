@@ -6,26 +6,28 @@ import { Observable, of }         from 'rxjs';
 import { exhaustMap, first, map } from 'rxjs/operators';
 import { _throw }                 from 'rxjs/observable/throw';
 import {
-	asyncListener,
-	observableListener,
-	routerName,
-	serialization
+	asyncListener, observableListener,
+	routerName, serialization
 }                                 from '@pyro/io';
 import { ExistenceEventType }     from '@pyro/db-server';
-import IWarehouseProduct, {
-	IWarehouseProductCreateObject
-}                                 from '@modules/server.common/interfaces/IWarehouseProduct';
+import IWarehouseProduct,
+{ IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
 import IProduct                   from '@modules/server.common/interfaces/IProduct';
 import IPagingOptions             from '@modules/server.common/interfaces/IPagingOptions';
 import IWarehouse                 from '@modules/server.common/interfaces/IWarehouse';
+import IComment                   from '@modules/server.common/interfaces/IComment';
 import IWarehouseProductsRouter   from '@modules/server.common/routers/IWarehouseProductsRouter';
+import DeliveryType               from '@modules/server.common/enums/DeliveryType';
 import WarehouseProduct           from '@modules/server.common/entities/WarehouseProduct';
+import Comment                    from '@modules/server.common/entities/Comment';
 import Warehouse                  from '@modules/server.common/entities/Warehouse';
 import { WarehousesService }      from './WarehousesService';
 import IService                   from '../IService';
 import { createLogger }           from '../../helpers/Log';
 
 const noGetProductTypeMessage = `There should be true at least one of the two - "isCarrierRequired" or "isTakeaway"!`;
+
+type CountOpType = "sold" | "likes" | "views" | "qty";
 
 /**
  * Warehouses Products Service
@@ -34,6 +36,8 @@ const noGetProductTypeMessage = `There should be true at least one of the two - 
  * @class WarehousesProductsService
  * @implements {IWarehouseProductsRouter}
  * @implements {IService}
+ *
+ * Handles client requests on warehouse product
  */
 @injectable()
 @routerName('warehouse-products')
@@ -44,7 +48,10 @@ export class WarehousesProductsService
 		                                              name: 'warehouseProductsService'
 	                                              });
 	
-	constructor(private readonly warehousesService: WarehousesService) {}
+	constructor(
+			private readonly warehousesService: WarehousesService
+	)
+	{}
 	
 	/**
 	 * Get all products for given warehouse (not only available, but all assigned)
@@ -55,7 +62,7 @@ export class WarehousesProductsService
 	 * @memberof WarehousesProductsService
 	 */
 	@observableListener()
-	get(
+	public get(
 			warehouseId: string,
 			fullProducts: boolean = true
 	): Observable<WarehouseProduct[]>
@@ -83,12 +90,12 @@ export class WarehousesProductsService
 	}
 	
 	@asyncListener()
-	async getProductsWithPagination(
-			id: string,
+	public async getProductsWithPagination(
+			warehouseId: string,
 			pagingOptions: IPagingOptions
 	): Promise<WarehouseProduct[]>
 	{
-		const allProducts = await this.get(id)
+		const allProducts = await this.get(warehouseId)
 		                              .pipe(first())
 		                              .toPromise();
 		
@@ -118,9 +125,9 @@ export class WarehousesProductsService
 	}
 	
 	@asyncListener()
-	async getProductsCount(id: string)
+	public async getProductsCount(warehouseId: string)
 	{
-		const allProducts = await this.get(id)
+		const allProducts = await this.get(warehouseId)
 		                              .pipe(first())
 		                              .toPromise();
 		
@@ -135,7 +142,7 @@ export class WarehousesProductsService
 	 * @memberof WarehousesProductsService
 	 */
 	@observableListener()
-	getAvailable(warehouseId: string): Observable<WarehouseProduct[]>
+	public getAvailable(warehouseId: string): Observable<WarehouseProduct[]>
 	{
 		return this.get(warehouseId)
 		           .pipe(
@@ -148,47 +155,6 @@ export class WarehousesProductsService
 						               )
 				           )
 		           );
-	}
-	
-	/**
-	 * Remove products from warehouse
-	 *
-	 * @param {string} warehouseId
-	 * @param {string[]} productsIds
-	 * @returns {Promise<WarehouseProduct[]>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	async remove(
-			warehouseId: string,
-			productsIds: string[]
-	): Promise<WarehouseProduct[]>
-	{
-		this.log.info('Removing products ' + productsIds);
-		
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId, true)
-		                            .pipe(first())
-		                            .toPromise();
-		
-		if(warehouse == null)
-		{
-			throw new Error(`There is no warehouse with the id ${warehouse}!`);
-		}
-		
-		warehouse.products = warehouse.products.filter((p) =>
-		                                               {
-			                                               if(!p.product['_id'])
-			                                               {
-				                                               return false;
-			                                               }
-			
-			                                               const productId = p.product['id'];
-			                                               return !productsIds.includes(productId);
-		                                               });
-		await this.warehousesService.save(warehouse);
-		
-		return warehouse.products;
 	}
 	
 	/**
@@ -206,7 +172,7 @@ export class WarehousesProductsService
 	 * @memberof WarehousesProductsService
 	 */
 	@asyncListener()
-	async add(
+	public async add(
 			warehouseId: string,
 			products: IWarehouseProductCreateObject[],
 			triggerChange: boolean = true
@@ -217,15 +183,8 @@ export class WarehousesProductsService
 		
 		this.log.info('Adding products ' + JSON.stringify(products));
 		
-		let warehouse = await this.warehousesService
-		                          .get(warehouseId, false)
-		                          .pipe(first())
-		                          .toPromise(); // products not populated!
-		
-		if(warehouse == null)
-		{
-			throw new Error(`There is no warehouse with the id ${warehouse}!`);
-		}
+		// products not populated!
+		let warehouse = await this._getWarehouse(warehouseId, false);
 		
 		const notUpdatedWarehouse = _.clone(warehouse);
 		
@@ -305,10 +264,10 @@ export class WarehousesProductsService
 		if(triggerChange)
 		{
 			this.warehousesService.existence.next({
-				                                      id:        warehouse.id,
-				                                      value:     warehouse,
+				                                      id: warehouse.id,
+				                                      value: warehouse,
 				                                      lastValue: notUpdatedWarehouse,
-				                                      type:      ExistenceEventType.Updated
+				                                      type: ExistenceEventType.Updated
 			                                      });
 		}
 		
@@ -331,102 +290,32 @@ export class WarehousesProductsService
 	}
 	
 	/**
-	 * Increase inventory of given product using existed product price by given count
-	 * If no such product exists in warehouse yet, do nothing
+	 * Remove products from warehouse
 	 *
 	 * @param {string} warehouseId
-	 * @param {string} productId
-	 * @param {number} count
-	 * @returns {Promise<WarehouseProduct>}
+	 * @param {string[]} productsIds
+	 * @returns {Promise<WarehouseProduct[]>}
 	 * @memberof WarehousesProductsService
 	 */
 	@asyncListener()
-	async increaseCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>
+	public async remove(warehouseId: string, productsIds: string[]): Promise<WarehouseProduct[]>
 	{
-		const warehouse = await this._getWarehouse(warehouseId);
+		this.log.info('Removing products ' + productsIds);
 		
-		if(warehouse)
-		{
-			const existedProduct = _.find(
-					warehouse.products,
-					(warehouseProduct) => warehouseProduct.productId === productId
-			);
+		const warehouse = await this._getWarehouse(warehouseId, true);
+		warehouse.products = warehouse.products.filter((p) =>
+		                                               {
+			                                               if(!p.product['_id'])
+			                                               {
+				                                               return false;
+			                                               }
 			
-			if(existedProduct)
-			{
-				// we want to add given qty of such products
-				existedProduct.count += count;
-				
-				return this.saveUpdated(warehouseId, existedProduct);
-			}
-			else
-			{
-				const errMsg = 'Cannot find product';
-				this.log.error(new Error(errMsg));
-				throw new Error(errMsg);
-			}
-		}
-		else
-		{
-			const errMsg = 'Cannot find warehouse';
-			this.log.error(new Error(errMsg));
-			throw new Error(errMsg);
-		}
-	}
-	
-	/**
-	 * Increase sold qty of given product by given count
-	 * If no such product exists in warehouse yet, do nothing
-	 *
-	 * @param {string} warehouseId
-	 * @param {string} productId
-	 * @param {number} count
-	 * @returns {Promise<WarehouseProduct>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	async increaseSoldCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>
-	{
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
+			                                               const productId = p.product['id'];
+			                                               return !productsIds.includes(productId);
+		                                               });
+		await this.warehousesService.save(warehouse);
 		
-		if(warehouse)
-		{
-			const existedProduct = _.find(
-					warehouse.products,
-					(warehouseProduct) => warehouseProduct.productId === productId
-			);
-			
-			if(existedProduct)
-			{
-				// we want to add given qty of such products
-				existedProduct.soldCount += count;
-				
-				return this.saveUpdated(warehouseId, existedProduct);
-			}
-			else
-			{
-				const errMsg = 'Cannot find product';
-				this.log.error(new Error(errMsg));
-				throw new Error(errMsg);
-			}
-		}
-		else
-		{
-			const errMsg = 'Cannot find warehouse';
-			this.log.error(new Error(errMsg));
-			throw new Error(errMsg);
-		}
+		return warehouse.products;
 	}
 	
 	/**
@@ -438,7 +327,7 @@ export class WarehousesProductsService
 	 * @memberof WarehousesProductsService
 	 */
 	@asyncListener()
-	async saveUpdated(
+	public async update(
 			warehouseId: string,
 			@serialization((u: IWarehouseProduct) => new WarehouseProduct(u))
 					_updatedWarehouseProduct: WarehouseProduct
@@ -459,7 +348,7 @@ export class WarehousesProductsService
 		const updatedWarehouse = (
 				await this.warehousesService.updateMultiple(
 						{
-							_id:            new Types.ObjectId(warehouseId),
+							_id: new Types.ObjectId(warehouseId),
 							'products._id': updatedWarehouseProduct._id
 						},
 						{
@@ -476,6 +365,237 @@ export class WarehousesProductsService
 	}
 	
 	/**
+	 * Increase inventory of given product using existed product price by given count
+	 * If no such product exists in warehouse yet, do nothing
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async increaseCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, count);
+	}
+	
+	/**
+	 * Increase sold qty of given product by given count
+	 * If no such product exists in warehouse yet, do nothing
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async increaseSoldCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, count, "sold");
+	}
+	
+	/**
+	 * Increase views counter of given product by given count
+	 * It increased on every unique product view by single customer
+	 * If no such product exists in warehouse yet, do nothing
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async increaseViewsCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, count, "views");
+	}
+	
+	/**
+	 * Increase likes counter of given product by given count
+	 * It increased when customer presses like on product details
+	 * If no such product exists in warehouse yet, do nothing
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async increaseLikesCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, count, "likes");
+	}
+	
+	/**
+	 * Removes products from warehouse (called during sell of the product)
+	 * Always cause change notification to be send to the clients
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count how many to remove
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async decreaseCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		// TODO: Some global distributed lock should be apply here
+		// so we can't decrease product count on 2 separate servers at the same time!
+		return this._changeCount(warehouseId, productId, -count);
+	}
+	
+	/**
+	 * Decrease product's sold count from warehouse (called during the order cancel)
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async decreaseSoldCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, -count, "sold");
+	}
+	
+	/**
+	 * Decrease product's views count from warehouse (called when merchant is banned)
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async decreaseViewsCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, -count, "views");
+	}
+	
+	/**
+	 * Decrease products likes count from warehouse (called when merchant is banned)
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {number} count
+	 *
+	 * @throws {Error} When warehouse with warehouseId or product with productId not found.
+	 *
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async decreaseLikesCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		return this._changeCount(warehouseId, productId, -count, "likes");
+	}
+	
+	/**
+	 * Add comment from customer on the product's page
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {IComment} comment
+	 *
+	 * @throws {Error} When warehouse with warehouseId or product with productId not found.
+	 *
+	 * @returns {Promise<WarehouseProduct>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async addComment(
+			warehouseId: string,
+			productId: string,
+			@serialization((c: IComment) => new Comment(c))
+					comment: Comment
+	): Promise<void>
+	{
+		const warehouse = await this._getWarehouse(warehouseId);
+		const warehouseProduct = this._getProduct(productId, warehouse);
+		
+		if(!warehouseProduct.comments)
+			warehouseProduct.comments = [];
+		
+		warehouseProduct.comments.push(comment);
+		
+		await this.update(warehouseId, warehouseProduct);
+	}
+	
+	/**
+	 * Remove comment from customer on the product's page
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId to which product should be added
+	 * @param {string} commentId Id of comment
+	 *
+	 * @throws {Error} When warehouse with warehouseId or product with productId not found.
+	 *
+	 * @returns {Promise<void>}
+	 * @memberof WarehousesProductsService
+	 */
+	@asyncListener()
+	public async removeComment(
+			warehouseId: string,
+			productId: string,
+			commentId: string
+	): Promise<void>
+	{
+		const warehouse = await this._getWarehouse(warehouseId);
+		const warehouseProduct = this._getProduct(productId, warehouse);
+		warehouseProduct.comments = _.filter(
+				warehouseProduct.comments,
+				comment => comment.id !== commentId
+		);
+		_.forEach(warehouseProduct.comments, (comment, index) =>
+		{
+			if(comment.id === commentId)
+			{
+				warehouseProduct.comments.splice(index, 1);
+			}
+		})
+		
+		await this.update(warehouseId, warehouseProduct);
+	}
+	
+	/**
 	 * Change price for the product
 	 *
 	 * @param {string} warehouseId
@@ -485,7 +605,7 @@ export class WarehousesProductsService
 	 * @memberof WarehousesProductsService
 	 */
 	@asyncListener()
-	async changePrice(
+	public async changePrice(
 			warehouseId: string,
 			productId: string,
 			price: number
@@ -494,17 +614,7 @@ export class WarehousesProductsService
 		// TODO: Some global distributed lock should be apply here
 		// so we can't change product price on 2 separate servers at the same time?
 		
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId, false)
-		                            .pipe(first())
-		                            .toPromise();
-		
-		if(warehouse == null)
-		{
-			throw new Error(
-					`There is no such an warehouse with the id ${warehouseId}`
-			);
-		}
+		const warehouse = await this._getWarehouse(warehouseId, false);
 		
 		this.log.info(
 				'Change product price requested in warehouse: ' +
@@ -518,168 +628,15 @@ export class WarehousesProductsService
 				(p) => p.productId === productId
 		);
 		
-		if(product != null)
-		{
-			this.log.info(
-					`Product price before: ${product.price} and we want to change it to: ${price}`
-			);
+		this._isValidProduct(warehouseId, productId, product);
+		
+		this.log.info(
+				`Product price before: ${product.price} and we want to change it to: ${price}`
+		);
+		
+		if(price >= 0)
 			product.price = price;
-			
-			return this.saveUpdated(warehouseId, product);
-		}
-		else
-		{
-			throw new Error(
-					`There is no such an product with the id ${productId} in the warehouse with the id ${warehouseId}`
-			);
-		}
-	}
-	
-	/**
-	 * Removes products from warehouse (called during sell of the product)
-	 * Always cause change notification to be send to the clients
-	 *
-	 * @param {string} warehouseId
-	 * @param {string} productId what product availability should be decreased
-	 * @param {number} count how many to remove
-	 * @returns {Promise<WarehouseProduct>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	async decreaseCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>
-	{
-		// TODO: Some global distributed lock should be apply here
-		// so we can't decrease product count on 2 separate servers at the same time!
-		
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
-		
-		if(warehouse == null)
-		{
-			throw new Error(`Cannot find warehouse: ${warehouseId}`);
-		}
-		
-		this.log.info(
-				`Remove requested in warehouse: ${JSON.stringify(
-						warehouse
-				)} for product id: ${productId}`
-		);
-		
-		const product = _.find(
-				warehouse.products,
-				(p) => p.productId === productId
-		);
-		
-		if(product != null)
-		{
-			this.log.info(
-					`Product count before remove: ${product.count} and we want to remove ${count} products`
-			);
-			
-			if(product.count >= count)
-			{
-				product.count -= count;
-				return this.saveUpdated(warehouseId, product);
-			}
-			else
-			{
-				const errorMsg =
-						      'Request to remove more products than available';
-				
-				this.log.error({
-					               err: new Error(errorMsg),
-					               product,
-					               count
-				               });
-				
-				throw new Error(errorMsg);
-			}
-		}
-		else
-		{
-			throw new Error(
-					`There is no such an product with the id ${productId} in the warehouse with the id ${warehouseId}`
-			);
-		}
-	}
-	
-	/**
-	 * Decrease products sold count from warehouse (called during the order cancel)
-	 *
-	 * @param {string} warehouseId
-	 * @param {string} productId
-	 * @param {number} count
-	 * @returns {Promise<WarehouseProduct>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	async decreaseSoldCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>
-	{
-		// TODO: Some global distributed lock should be apply here
-		// so we can't decrease product sold count on 2 separate servers at the same time!
-		
-		const warehouse = await this.warehousesService
-		                            .get(warehouseId)
-		                            .pipe(first())
-		                            .toPromise();
-		
-		if(warehouse == null)
-		{
-			throw new Error(`Cannot find warehouse: ${warehouseId}`);
-		}
-		
-		this.log.info(
-				`Remove requested in warehouse: ${JSON.stringify(
-						warehouse
-				)} for product id: ${productId}`
-		);
-		
-		const product = _.find(
-				warehouse.products,
-				(p) => p.productId === productId
-		);
-		
-		if(product != null)
-		{
-			this.log.info(
-					`Product sold count before decrease: ${product.soldCount} and we want to decrease ${count} products`
-			);
-			
-			if(product.soldCount >= count)
-			{
-				product.soldCount -= count;
-				return this.saveUpdated(warehouseId, product);
-			}
-			else
-			{
-				const errorMsg =
-						      'Request to decrease count of more products than available';
-				
-				this.log.error({
-					               err: new Error(errorMsg),
-					               product,
-					               count
-				               });
-				
-				throw new Error(errorMsg);
-			}
-		}
-		else
-		{
-			throw new Error(
-					`There is no such an product with the id ${productId} in the warehouse with the id ${warehouseId}`
-			);
-		}
+		return this.update(warehouseId, product);
 	}
 	
 	/**
@@ -691,33 +648,36 @@ export class WarehousesProductsService
 	 * @memberof WarehousesProductsService
 	 */
 	@observableListener()
-	getTopProducts(
-			warehouseId: string,
-			quantity: number
-	): Observable<WarehouseProduct[]>
+	public getTopProducts(warehouseId: string, quantity: number): Observable<WarehouseProduct[]>
 	{
-		return this.get(warehouseId).pipe(
-				map((warehouseProducts) =>
-				    {
-					    let topProducts = _.filter(
-							    warehouseProducts,
-							    (warehouseProduct) => warehouseProduct.soldCount > 0
-					    );
+		return this.get(warehouseId)
+		           .pipe(
+				           map((warehouseProducts) =>
+				               {
+					               let topProducts = _.filter(
+							               warehouseProducts,
+							               (warehouseProduct) => warehouseProduct.soldCount > 0
+					               );
 					
-					    topProducts = _.orderBy(topProducts, ['soldCount'], ['desc']);
+					               topProducts = _.orderBy(
+							               topProducts,
+							               ['soldCount'],
+							               ['desc']
+					               );
 					
-					    return _.take(topProducts, quantity);
-				    })
-		);
+					               return _.take(topProducts, quantity);
+				               })
+		           );
 	}
 	
 	@observableListener()
-	getProduct(
+	public getProduct(
 			warehouseId: string,
 			warehouseProductId: string
 	): Observable<WarehouseProduct>
 	{
-		return this.warehousesService.get(warehouseId, true)
+		return this.warehousesService
+		           .get(warehouseId, true)
 		           .pipe(
 				           exhaustMap((warehouse) =>
 				                      {
@@ -740,119 +700,298 @@ export class WarehousesProductsService
 		           );
 	}
 	
+	/**
+	 * Changes availability of the product
+	 *
+	 * @param {string} warehouseId Id of warehouse containing product
+	 * @param {string} productId Id of product of warehouse to apply change
+	 * @param {boolean} isAvailable Value to change
+	 *
+	 * @returns {Promise<WarehouseProduct>} Updated warehouse promise
+	 * */
 	@asyncListener()
-	async changeProductAvailability(
+	public async changeProductAvailability(
 			warehouseId: string,
 			productId: string,
 			isAvailable: boolean
 	): Promise<WarehouseProduct>
 	{
 		const warehouse = await this._getWarehouse(warehouseId);
-		if(warehouse)
-		{
-			const existedProduct = _.find(
-					warehouse.products,
-					(warehouseProduct) => warehouseProduct.productId === productId
-			);
-			
-			if(existedProduct)
-			{
-				existedProduct.isProductAvailable = isAvailable;
-				
-				return this.saveUpdated(warehouseId, existedProduct);
-			}
-			else
-			{
-				const errMsg = 'Cannot find product';
-				this.log.error(new Error(errMsg));
-				throw new Error(errMsg);
-			}
-		}
-		else
-		{
-			const errMsg = 'Cannot find warehouse';
-			this.log.error(new Error(errMsg));
-			throw new Error(errMsg);
-		}
+		const existedProduct = this._getProduct(productId, warehouse);
+		existedProduct.isProductAvailable = isAvailable;
+		return this.update(warehouseId, existedProduct);
 	}
 	
+	/**
+	 * Changes value of isTakeaway for product
+	 *
+	 * @param {string} warehouseId Id of warehouse containing product
+	 * @param {string} productId Id of product of warehouse to apply change
+	 * @param {boolean} isTakeaway Value to change
+	 *
+	 * @returns {Promise<WarehouseProduct>} Updated warehouse promise
+	 * */
 	@asyncListener()
-	async changeProductTakeaway(
+	public async changeProductTakeaway(
 			warehouseId: string,
 			productId: string,
 			isTakeaway: boolean
 	): Promise<WarehouseProduct>
 	{
-		const warehouse = await this._getWarehouse(warehouseId);
-		if(warehouse)
-		{
-			const existedProduct = _.find(
-					warehouse.products,
-					(warehouseProduct) => warehouseProduct.productId === productId
-			);
-			
-			if(existedProduct)
-			{
-				existedProduct.isTakeaway = isTakeaway;
-				
-				return this.saveUpdated(warehouseId, existedProduct);
-			}
-			else
-			{
-				const errMsg = 'Cannot find product';
-				this.log.error(new Error(errMsg));
-				throw new Error(errMsg);
-			}
-		}
-		else
-		{
-			const errMsg = 'Cannot find warehouse';
-			this.log.error(new Error(errMsg));
-			throw new Error(errMsg);
-		}
+		return this._changeProductDeliveryType(
+				warehouseId,
+				productId,
+				DeliveryType.Takeaway,
+				isTakeaway
+		);
 	}
 	
+	/**
+	 * Changes value of isDeliveryRequired for product
+	 *
+	 * @param {string} warehouseId Id of warehouse containing product
+	 * @param {string} productId Id of product of warehouse to apply change
+	 * @param {boolean} isDelivery Value to change
+	 *
+	 * @returns {Promise<WarehouseProduct>} Updated warehouse promise
+	 * */
 	@asyncListener()
-	async changeProductDelivery(
+	public async changeProductDelivery(
 			warehouseId: string,
 			productId: string,
 			isDelivery: boolean
 	): Promise<WarehouseProduct>
 	{
+		return this._changeProductDeliveryType(
+				warehouseId,
+				productId,
+				DeliveryType.Delivery,
+				isDelivery
+		);
+	}
+	
+	/**
+	 * Searches for warehouse and checks if it is valid.
+	 *
+	 * @param {string} warehouseId Id of warehouse to get.
+	 * @param {boolean} fullProducts Populate with product details.
+	 *
+	 * @throws {Error} When warehouse with warehouseId not found.
+	 *
+	 * @returns {Warehouse | null}
+	 * @memberOf {WarehousesProductsService}
+	 * */
+	protected async _getWarehouse(
+			warehouseId: string,
+			fullProducts: boolean = true
+	): Promise<Warehouse | null>
+	{
+		const warehouse = await this.warehousesService
+		                            .get(warehouseId, fullProducts)
+		                            .pipe(first())
+		                            .toPromise();
+		
+		this._isValidWarehouse(warehouseId, warehouse);
+		
+		return warehouse;
+	}
+	
+	/**
+	 * Searches for product and checks if it is valid.
+	 *
+	 * @param {string} productId Id of product of warehouse to check for validity.
+	 * @param {Warehouse} warehouse Warehouse containing product.
+	 *
+	 * @throws {Error} When product with productId not found.
+	 * @memberOf {WarehousesProductsService}
+	 * */
+	protected _getProduct(productId: string, warehouse: Warehouse): WarehouseProduct | null
+	{
+		this._isValidWarehouse(warehouse.id, warehouse);
+		const warehouseProduct = _.find(
+				warehouse.products,
+				(product) => product.productId === productId
+		);
+		
+		this._isValidProduct(warehouse.id, productId, warehouseProduct);
+		return warehouseProduct
+	}
+	
+	/**
+	 * Applies delivery type change for product
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {DeliveryType} deliveryType
+	 * @param {boolean} value Value of type change
+	 *
+	 * @throws {Error} If wrong type specified
+	 *
+	 * @returns {Promise<WarehouseProduct>} Updated warehouse promise
+	 * */
+	protected async _changeProductDeliveryType(
+			warehouseId: string,
+			productId: string,
+			deliveryType: DeliveryType,
+			value: boolean
+	): Promise<WarehouseProduct>
+	{
 		const warehouse = await this._getWarehouse(warehouseId);
-		if(warehouse)
+		const warehouseProduct = this._getProduct(productId, warehouse);
+		
+		this.log.info(
+				'Change product delivery type requested in warehouse: ' +
+				JSON.stringify(warehouse) +
+				' for product id: ' + productId + ' to ' + deliveryType.toString()
+		);
+		
+		switch(deliveryType)
 		{
-			const existedProduct = _.find(
-					warehouse.products,
-					(warehouseProduct) => warehouseProduct.productId === productId
-			);
-			
-			if(existedProduct)
+			case DeliveryType.Takeaway:
+				warehouseProduct.isTakeaway = value;
+				break;
+			case DeliveryType.Delivery:
+				warehouseProduct.isDeliveryRequired = value;
+				break;
+			default:
 			{
-				existedProduct.isDeliveryRequired = isDelivery;
+				const error = new Error(`Invalid delivery type: ${deliveryType}`);
 				
-				return this.saveUpdated(warehouseId, existedProduct);
-			}
-			else
-			{
-				const errMsg = 'Cannot find product';
-				this.log.error(new Error(errMsg));
-				throw new Error(errMsg);
+				this.log.error(error);
+				
+				throw error;
 			}
 		}
-		else
+		
+		return this.update(warehouseId, warehouseProduct);
+	}
+	
+	/**
+	 * Increases or decreases number of product's
+	 * quantity/sold/views/likes count in warehouse
+	 *
+	 * @param {string} warehouseId Id of warehouse to update products
+	 * @param {string} productId Id of product to change count
+	 * @param {number} count Count to change, for increase must be positive value
+	 * @param {CountOpType} opType Type of change to apply on product in warehouse.
+	 * Available: qty, sold, likes, views. Default: qty
+	 *
+	 * @returns {Promise<WarehouseProduct>} Updated warehouse promise
+	 * */
+	protected async _changeCount(
+			warehouseId: string,
+			productId: string,
+			count: number,
+			opType: CountOpType = "qty"
+	): Promise<WarehouseProduct>
+	{
+		// TODO: Some global distributed lock should be apply here so we can't change product (sold) count on 2 separate servers at the same time!
+		
+		const warehouse = await this._getWarehouse(warehouseId);
+		const warehouseProduct = this._getProduct(productId, warehouse);
+		
+		// check only for negative values
+		const countCheck = (currentCount, changeCount): void =>
 		{
-			const errMsg = 'Cannot find warehouse';
-			this.log.error(new Error(errMsg));
-			throw new Error(errMsg);
+			this.log.info(
+					`Remove requested in warehouse: ${
+							JSON.stringify(warehouse)
+					} for product id: ${productId}`
+			);
+			
+			if(currentCount < Math.abs(changeCount))
+			{
+				const error = new Error(`Request to remove more (${changeCount}) than available (${currentCount})`);
+				this.log.error({ err: error, changeCount });
+				throw error;
+			}
+			
+			let op = count > 0 ? 'increase' : 'decrease';
+			this.log.info(
+					`Product ${opType !== "qty" ? opType : ''} count before ${op}: ${
+							currentCount
+					} and we want to ${op} ${Math.abs(changeCount)}`
+			);
+		};
+		
+		if(!count)
+			return warehouseProduct;
+		
+		switch(opType)
+		{
+			case "qty":
+			{
+				if(count < 0)
+					countCheck(warehouseProduct.count, count);
+				warehouseProduct.count += count;
+			}
+				break;
+			case "sold":
+			{
+				if(count < 0)
+					countCheck(warehouseProduct.soldCount, count);
+				warehouseProduct.soldCount += count;
+			}
+				break;
+			case "views":
+			{
+				if(count < 0)
+					countCheck(warehouseProduct.viewsCount, count);
+				warehouseProduct.viewsCount += count;
+			}
+				break;
+			case "likes":
+			{
+				if(count < 0)
+					countCheck(warehouseProduct.likesCount, count);
+				warehouseProduct.likesCount += count;
+			}
+		}
+		
+		return this.update(warehouseId, warehouseProduct);
+	}
+	
+	/**
+	 * Null check for warehouse
+	 *
+	 * @param {string} warehouseId
+	 * @param {Warehouse} warehouse
+	 *
+	 * @throws {Error}
+	 * */
+	private _isValidWarehouse(warehouseId: string, warehouse: Warehouse): void
+	{
+		if(!warehouse)
+		{
+			const error = new Error(`Warehouse with the id ${warehouseId} doesn't exist`);
+			this.log.error(error);
+			throw error;
 		}
 	}
 	
-	private async _getWarehouse(warehouseId: string): Promise<Warehouse>
+	/**
+	 * Null check for warehouse product
+	 *
+	 * @param {string} warehouseId
+	 * @param {string} productId
+	 * @param {WarehouseProduct} warehouseProduct
+	 *
+	 * @throws {Error}
+	 *
+	 * */
+	private _isValidProduct(
+			warehouseId: string,
+			productId: string,
+			warehouseProduct: WarehouseProduct | null
+	): void
 	{
-		return await this.warehousesService
-		                 .get(warehouseId)
-		                 .pipe(first())
-		                 .toPromise();
+		if(!warehouseProduct)
+		{
+			const error = new Error(
+					`There is no such an product with the id ${productId} in the warehouse with the id ${warehouseId}`
+			);
+			this.log.error(error);
+			throw error;
+		}
 	}
 }
