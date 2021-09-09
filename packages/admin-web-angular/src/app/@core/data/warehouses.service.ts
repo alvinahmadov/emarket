@@ -58,7 +58,7 @@ export class WarehousesService
 		           .query<{
 			           getAllStores: Warehouse[]
 		           }>({
-			              query: GQLQueries.StoreAllLight,
+			              query: GQLQueries.WarehouseAllLight,
 		              })
 		           .pipe(
 				           map((res) => res.data.getAllStores)
