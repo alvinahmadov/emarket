@@ -49,7 +49,7 @@ export class ObservableResponseSubscriber<T>
 		return this.socket
 		           .fromEvent(`${this.subscriptionId}_error`)
 		           .pipe(
-				           exhaustMap((error) => throwError(this.deserializeError(error)))
+				           exhaustMap((error) => throwError(ObservableResponseSubscriber.deserializeError(error)))
 		           );
 	}
 	
@@ -58,7 +58,7 @@ export class ObservableResponseSubscriber<T>
 		return this.socket.fromEvent(`${this.subscriptionId}_complete`);
 	}
 	
-	private deserializeError(error)
+	private static deserializeError(error)
 	{
 		if(error.__isError__)
 		{
