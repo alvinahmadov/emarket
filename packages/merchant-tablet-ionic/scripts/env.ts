@@ -2,8 +2,8 @@
 // We are using dotenv (.env) for consistency with other Platform projects
 // This is Angular app and all settings will be loaded into the client browser!
 
-import { cleanEnv, num, str, bool, makeValidator } from 'envalid';
-import { v4 as uuid }                              from 'uuid';
+import { cleanEnv, num, str, bool } from 'envalid';
+import { v4 as uuid }               from 'uuid';
 
 export type Environment = Readonly<{
 	production: boolean;
@@ -22,8 +22,13 @@ export type Environment = Readonly<{
 	CLOUDINARY_UPLOAD_URL: string;
 	API_FILE_UPLOAD_URL: string;
 	
-	DEFAULT_LOGIN_USERNAME: string;
-	DEFAULT_LOGIN_PASSWORD: string;
+	FAKE_MERCHANT_NAME: string;
+	FAKE_MERCHANT_PASSWORD: string;
+	FAKE_MERCHANT_EMAIL: string;
+	
+	DEFAULT_COORDINATES: boolean;
+	DEFAULT_LATITUDE: number;
+	DEFAULT_LONGITUDE: number;
 	
 	LOGIN_LOGO: string;
 	NO_INTERNET_LOGO: string;
@@ -53,6 +58,7 @@ export type Environment = Readonly<{
 	SETTINGS_MAINTENANCE_API_URL?: string;
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
+	HOST: string;
 	PORT: number;
 }>;
 
@@ -79,8 +85,13 @@ export const env: Environment = cleanEnv(
 				                         default: '',
 			                         }),
 			
-			DEFAULT_LOGIN_USERNAME: str({ default: 'user' }),
-			DEFAULT_LOGIN_PASSWORD: str({ default: '12345' }),
+			FAKE_MERCHANT_NAME: str({ default: 'merchant' }),
+			FAKE_MERCHANT_PASSWORD: str({ default: '12345' }),
+			FAKE_MERCHANT_EMAIL: str({ default: 'merchant@emarket.com' }),
+			
+			DEFAULT_COORDINATES: bool({ default: false }),
+			DEFAULT_LATITUDE: num({ default: 37.6156 }),
+			DEFAULT_LONGITUDE: num({ default: 55.7522 }),
 			
 			LOGIN_LOGO: str({ default: '' }),
 			NO_INTERNET_LOGO: str({ default: '' }),
@@ -113,6 +124,7 @@ export const env: Environment = cleanEnv(
 			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			WEB_CONCURRENCY: num({ default: 1 }),
 			WEB_MEMORY: num({ default: 4096 }),
+			HOST: str({ default: 'localhost' }),
 			PORT: num({ default: 4202 }),
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }

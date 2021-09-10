@@ -14,8 +14,13 @@ export interface Environment
 	CLOUDINARY_UPLOAD_URL: string;
 	API_FILE_UPLOAD_URL: string;
 	
-	DEFAULT_LOGIN_USERNAME: string;
-	DEFAULT_LOGIN_PASSWORD: string;
+	FAKE_MERCHANT_NAME: string;
+	FAKE_MERCHANT_PASSWORD: string;
+	FAKE_MERCHANT_EMAIL: string;
+	
+	DEFAULT_COORDINATES: boolean;
+	DEFAULT_LATITUDE: number;
+	DEFAULT_LONGITUDE: number;
 	
 	LOGIN_LOGO: string;
 	NO_INTERNET_LOGO: string;
