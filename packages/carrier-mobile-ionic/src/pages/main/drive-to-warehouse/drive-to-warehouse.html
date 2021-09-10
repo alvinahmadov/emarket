@@ -5,12 +5,12 @@
 		<div class="row">
 			<div>
 				<span class="left-info"
-					>To: {{ selectedOrder?.user.fullAddress }}</span
+				>To: {{ selectedOrder?.user.fullAddress }}</span
 				>
 				<span
-					[ngClass]="platform.isRTL ? 'rtl' : 'ltr'"
-					class="right-text"
-					>{{ carrierUserDistance + 'km' }}</span
+						[ngClass]="platform.isRTL ? 'rtl' : 'ltr'"
+						class="right-text"
+				>{{ carrierUserDistance + 'km' }}</span
 				>
 			</div>
 			<div class="center-info">
@@ -20,38 +20,38 @@
 	</div>
 	<div class="buttons">
 		<div
-			class="button-bar"
-			*ngIf="!workTaken && !selectedOrder?.isCancelled && !isTakenFromAnotherCarrier && !this.orderCarrierCompetition"
+				*ngIf="!workTaken && !selectedOrder?.isCancelled && !isTakenFromAnotherCarrier && !this.orderCarrierCompetition"
+				class="button-bar"
 		>
-			<button class="button button-brand" (click)="takeWork()">
+			<button (click)="takeWork()" class="button button-brand">
 				{{ 'DRIVE_TO_WAREHOUSE_VIEW.TAKE_WORK' | translate }}
 			</button>
-
-			<button class="button button-assertive" (click)="skipWork()">
+			
+			<button (click)="skipWork()" class="button button-assertive">
 				{{ 'DRIVE_TO_WAREHOUSE_VIEW.SKIP_WORK' | translate }}
 			</button>
 		</div>
 		<div
-			class="button-bar"
-			*ngIf="(workTaken || this.orderCarrierCompetition) && (!selectedOrder?.isCancelled || fromDelivery) && !isTakenFromAnotherCarrier"
+				*ngIf="(workTaken || this.orderCarrierCompetition) && (!selectedOrder?.isCancelled || fromDelivery) && !isTakenFromAnotherCarrier"
+				class="button-bar"
 		>
-			<button class="button button-brand" (click)="carrierInWarehouse()">
+			<button (click)="carrierInWarehouse()" class="button button-brand">
 				{{ "DRIVE_TO_WAREHOUSE_VIEW.I'M_THERE" | translate }}
 			</button>
-
+			
 			<button
-				class="button button-assertive"
-				*ngIf="!selectedOrder.isCancelled"
-				(click)="cancelWork()"
+					(click)="cancelWork()"
+					*ngIf="!selectedOrder.isCancelled"
+					class="button button-assertive"
 			>
 				{{ 'DRIVE_TO_WAREHOUSE_VIEW.CANCEL' | translate }}
 			</button>
 		</div>
 		<div
-			class="button-bar"
-			*ngIf="selectedOrder?.isCancelled && !fromDelivery || isTakenFromAnotherCarrier"
+				*ngIf="selectedOrder?.isCancelled && !fromDelivery || isTakenFromAnotherCarrier"
+				class="button-bar"
 		>
-			<button class="button button-assertive" (click)="unselectOrder()">
+			<button (click)="unselectOrder()" class="button button-assertive">
 				{{ 'OK' | translate }}
 			</button>
 		</div>

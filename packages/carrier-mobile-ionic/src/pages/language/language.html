@@ -13,26 +13,26 @@
 	</ion-title>
 </ion-header>
 
-<ion-content scroll="false" padding class="language-content">
+<ion-content class="language-content" padding scroll="false">
 	<div class="content">
-		<ion-radio-group [(ngModel)]="language" (ionChange)="languageChange()">
+		<ion-radio-group (ionChange)="languageChange()" [(ngModel)]="language">
 			<ion-item>
 				<ion-label>{{ 'LANGUAGE_VIEW.ENGLISH' | translate }}</ion-label>
 				<ion-radio value="en-US"></ion-radio>
 			</ion-item>
-
+			
 			<ion-item>
 				<ion-label
-					>{{ 'LANGUAGE_VIEW.BULGARIAN' | translate }}</ion-label
+				>{{ 'LANGUAGE_VIEW.BULGARIAN' | translate }}</ion-label
 				>
 				<ion-radio value="bg-BG"></ion-radio>
 			</ion-item>
-
+			
 			<ion-item>
 				<ion-label>{{ 'LANGUAGE_VIEW.HEBREW' | translate }}</ion-label>
 				<ion-radio value="he-IL"></ion-radio>
 			</ion-item>
-
+			
 			<ion-item>
 				<ion-label>{{ 'LANGUAGE_VIEW.RUSSIAN' | translate }}</ion-label>
 				<ion-radio value="ru-RU"></ion-radio>

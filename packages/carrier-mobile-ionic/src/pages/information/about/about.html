@@ -13,16 +13,16 @@
 	</ion-title>
 </ion-header>
 
-<ion-content scroll="true" class="app-view has-header">
+<ion-content class="app-view has-header" scroll="true">
 	<div class="about-content">
 		<loading [hidden]="useAboutHtml != null"></loading>
 		<div
-			*ngIf="useAboutHtml != null"
-			[innerHTML]="useAboutHtml | safe: 'html'"
+				*ngIf="useAboutHtml != null"
+				[innerHTML]="useAboutHtml | safe: 'html'"
 		></div>
 		<h5
-			style="padding-left: 10px; color: #888;"
-			*ngIf="useAboutHtml != null"
+				*ngIf="useAboutHtml != null"
+				style="padding-left: 10px; color: #888;"
 		>
 			App Version: {{ appVersion }}
 		</h5>

@@ -73,11 +73,11 @@ ion-backdrop {
 
 .order-info-modal {
 	display: block;
-
+	
 	.modal-wrapper {
 		background: rgba(255, 255, 255, 0);
 	}
-
+	
 	.ion-page {
 		max-width: 250px;
 		margin: 0 auto;
@@ -143,6 +143,7 @@ ion-menu-button {
 ion-header {
 	ion-menu-toggle {
 		display: contents;
+		
 		ion-icon {
 			font-size: 2rem !important;
 		}

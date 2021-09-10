@@ -4,27 +4,27 @@
 	<div class="info">
 		{{ 'HOME_VIEW.DELIVERIES' | translate }}: {{ carrier?.numberOfDeliveries
 		}}
-		<span class="right-text" *ngIf="isWorking">
+		<span *ngIf="isWorking" class="right-text">
 			{{ 'HOME_VIEW.WORKING' | translate }}
 		</span>
-		<span class="right-text" *ngIf="!isWorking">
+		<span *ngIf="!isWorking" class="right-text">
 			{{ 'HOME_VIEW.NOT_WORKING' | translate }}
 		</span>
 	</div>
 	<div class="buttons">
 		<div class="button-bar">
 			<button
-				class="button button-brand big-text"
-				*ngIf="!isWorking"
-				(click)="startWorking()"
+					(click)="startWorking()"
+					*ngIf="!isWorking"
+					class="button button-brand big-text"
 			>
 				{{ 'HOME_VIEW.START_WORKING' | translate }}
 			</button>
-
+			
 			<button
-				class="button button-assertive big-text"
-				*ngIf="isWorking"
-				(click)="stopWorking()"
+					(click)="stopWorking()"
+					*ngIf="isWorking"
+					class="button button-assertive big-text"
 			>
 				{{ 'HOME_VIEW.STOP_WORKING' | translate }}
 			</button>

@@ -1,26 +1,26 @@
-import { NgModule } from '@angular/core';
-import { LanguagePage } from './language';
-import { TranslateModule } from '@ngx-translate/core';
-import { IonicModule } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
+import { NgModule }             from '@angular/core';
+import { LanguagePage }         from './language';
+import { TranslateModule }      from '@ngx-translate/core';
+import { IonicModule }          from '@ionic/angular';
+import { CommonModule }         from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule }          from '@angular/forms';
 
 const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: LanguagePage,
 	},
 ];
 
 @NgModule({
-	declarations: [LanguagePage],
-	imports: [
-		IonicModule,
-		CommonModule,
-		FormsModule,
-		RouterModule.forChild(routes),
-		TranslateModule.forChild(),
-	],
-})
+	          declarations: [LanguagePage],
+	          imports:      [
+		          IonicModule,
+		          CommonModule,
+		          FormsModule,
+		          RouterModule.forChild(routes),
+		          TranslateModule.forChild(),
+	          ],
+          })
 export class LanguagePageModule {}

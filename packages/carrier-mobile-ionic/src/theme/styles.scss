@@ -4,71 +4,76 @@ $home-view-map-height: 116px;
 	.map {
 		height: 78%;
 	}
-
+	
 	.bottom-container {
 		bottom: 0;
 		position: fixed;
 		width: 100%;
 		background-color: #f3f3f3;
 		height: 22%;
+		
 		.info {
 			font-size: 16px;
 			padding: 12px 20px 0 20px;
-
+			
 			height: 55%;
 			display: flex !important;
 			align-content: center !important;
 			align-items: center !important;
 			padding-top: 0 !important;
-
+			
 			.right-text.rtl {
 				position: absolute;
 				left: 20px !important;
 			}
+			
 			.right-text.ltr {
 				position: absolute;
 				right: 20px !important;
 			}
+			
 			.left-info {
 				max-width: 80%;
 			}
 		}
-
+		
 		.buttons {
 			text-align: center;
 			font-size: 40px;
 			padding: 0px;
-
+			
 			.button {
 				padding: 10px 30px;
-
+				
 				&.big-text {
 					font-size: 20px;
 				}
 			}
-
+			
 			.button-bar {
 				height: 100%;
+				
 				.button {
 					height: 100% !important;
 					font-size: auto !important;
 					padding: 0 !important;
 				}
 			}
+			
 			height: 45%;
 		}
 	}
-
+	
 	// .product-image {
 	// 	width: 100%;
 	// }
 	.angular-google-map {
 		width: 100%;
 		height: 100%;
-
+		
 		.angular-google-map-container {
 			height: calc(100% - #{$home-view-map-height});
-
+			
 			.map-marker-label {
 				font-size: 15px;
 			}
@@ -83,7 +88,7 @@ $home-view-map-height: 116px;
 	background-color: $assertive;
 	opacity: 0.8;
 	z-index: 9999;
-
+	
 	.money-amount {
 		opacity: 1;
 		font-size: 17px;
@@ -102,7 +107,7 @@ $home-view-map-height: 116px;
 	background-color: $balanced;
 	opacity: 0.8;
 	z-index: 9999;
-
+	
 	.already-paid {
 		opacity: 1;
 		font-size: 15px;
@@ -143,7 +148,7 @@ $home-view-map-height: 116px;
 	flex: 1;
 	display: block;
 	overflow: hidden;
-
+	
 	padding: 0 16px;
 	width: 0;
 	border-width: 1px 0px 1px 1px;
@@ -260,7 +265,7 @@ $home-view-map-height: 116px;
 	top: 0;
 	border-top-width: 0;
 	border-bottom-width: 1px;
-
+	
 	.disable-user-behavior {
 		-webkit-user-select: none;
 		-moz-user-select: none;

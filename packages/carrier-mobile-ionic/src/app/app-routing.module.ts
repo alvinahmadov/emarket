@@ -1,37 +1,37 @@
-import { NgModule } from '@angular/core';
+import { NgModule }                           from '@angular/core';
 import { RouterModule, Routes, ExtraOptions } from '@angular/router';
-import { PagesModuleGuard } from 'pages/pages.module.guard';
-import { InfoModuleGuard } from './info/info.module.guard';
+import { PagesModuleGuard }                   from 'pages/pages.module.guard';
+import { InfoModuleGuard }                    from './info/info.module.guard';
 
 const routes: Routes = [
 	{
-		path: 'info',
+		path:         'info',
 		loadChildren: () =>
-			import('./info/info.module').then((m) => m.InfoPageModule),
-		canLoad: [InfoModuleGuard],
+				              import('./info/info.module').then((m) => m.InfoPageModule),
+		canLoad:      [InfoModuleGuard],
 	},
 	{
-		path: '',
+		path:         '',
 		loadChildren: () =>
-			import('../pages/pages.module').then((m) => m.PagesModule),
-		canLoad: [PagesModuleGuard],
+				              import('../pages/pages.module').then((m) => m.PagesModule),
+		canLoad:      [PagesModuleGuard],
 	},
 	{
-		path: '**',
-		pathMatch: 'full',
+		path:       '**',
+		pathMatch:  'full',
 		redirectTo: '',
 	},
 ];
 
 const config: ExtraOptions = {
-	useHash: true,
+	useHash:       true,
 	enableTracing: true,
 };
 
 @NgModule({
-	// imports: [RouterModule.forRoot(routes, config)],
-	imports: [RouterModule.forRoot(routes)],
-	exports: [RouterModule],
-	providers: [PagesModuleGuard, InfoModuleGuard],
-})
+	          // imports: [RouterModule.forRoot(routes, config)],
+	          imports:   [RouterModule.forRoot(routes)],
+	          exports:   [RouterModule],
+	          providers: [PagesModuleGuard, InfoModuleGuard],
+          })
 export class AppRoutingModule {}

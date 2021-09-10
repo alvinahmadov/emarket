@@ -1,6 +1,6 @@
 <div
-	class="money-amount-container"
-	*ngIf="!selectedOrder?.isPaid && !selectedOrder?. isCancelled"
+		*ngIf="!selectedOrder?.isPaid && !selectedOrder?. isCancelled"
+		class="money-amount-container"
 >
 	<div class="money-amount">
 		{{ 'DELIVERY_VIEW.THE_CUSTOMER_HAS_TO_PAY' | translate }} ${{
@@ -9,8 +9,8 @@
 </div>
 
 <div
-	class="already-paid-container"
-	*ngIf="selectedOrder?.isPaid && !selectedOrder?. isCancelled"
+		*ngIf="selectedOrder?.isPaid && !selectedOrder?. isCancelled"
+		class="already-paid-container"
 >
 	<div class="already-paid">
 		{{ 'DELIVERY_VIEW.CUSTOMER_ALREADY_PAID_WITH_CARD' | translate }}
@@ -23,31 +23,31 @@
 	<div class="info">
 		<span class="left-info">{{ selectedOrder?.user.fullAddress }}</span>
 		<span *ngIf="carrierUserDistance" class="right-text"
-			>{{ carrierUserDistance + 'km' }}</span
+		>{{ carrierUserDistance + 'km' }}</span
 		>
 	</div>
-
+	
 	<div class="buttons">
 		<div class="button-bar">
 			<button
-				*ngIf="!selectedOrder?.isCancelled"
-				[disabled]="disabledButtons"
-				class="button button-brand"
-				(click)="delivered()"
+					(click)="delivered()"
+					*ngIf="!selectedOrder?.isCancelled"
+					[disabled]="disabledButtons"
+					class="button button-brand"
 			>
 				{{ 'DELIVERY_VIEW.DELIVERED' | translate }}
 			</button>
-
+			
 			<button
-				[disabled]="disabledButtons"
-				class="button button-assertive"
-				(click)="cancel()"
+					(click)="cancel()"
+					[disabled]="disabledButtons"
+					class="button button-assertive"
 			>
 				<span *ngIf="!selectedOrder?.isCancelled"
-					>{{ 'DELIVERY_VIEW.CANCEL' | translate }}</span
+				>{{ 'DELIVERY_VIEW.CANCEL' | translate }}</span
 				>
 				<span *ngIf="selectedOrder?.isCancelled"
-					>{{ 'OK' | translate }}</span
+				>{{ 'OK' | translate }}</span
 				>
 			</button>
 		</div>

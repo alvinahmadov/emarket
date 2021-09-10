@@ -1,30 +1,30 @@
-import { NgModule } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { NgModule }             from '@angular/core';
+import { TranslateModule }      from '@ngx-translate/core';
 import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
 	{
-		path: 'get',
+		path:         'get',
 		loadChildren: () =>
-			import('./get-product/get-product.module').then(
-				(m) => m.GetProductPageModule
-			),
+				              import('./get-product/get-product.module').then(
+						              (m) => m.GetProductPageModule
+				              ),
 	},
 	{
-		path: 'return',
+		path:         'return',
 		loadChildren: () =>
-			import('./return-product/return-product.module').then(
-				(m) => m.ReturnProductPageModule
-			),
+				              import('./return-product/return-product.module').then(
+						              (m) => m.ReturnProductPageModule
+				              ),
 	},
 	{
-		path: '',
-		pathMatch: 'full',
+		path:       '',
+		pathMatch:  'full',
 		redirectTo: 'get',
 	},
 ];
 
 @NgModule({
-	imports: [TranslateModule.forChild(), RouterModule.forChild(routes)],
-})
+	          imports: [TranslateModule.forChild(), RouterModule.forChild(routes)],
+          })
 export class ProductModule {}

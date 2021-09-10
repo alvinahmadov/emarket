@@ -14,7 +14,7 @@ import { TranslateLoader, TranslateModule }            from '@ngx-translate/core
 import { TranslateHttpLoader }                         from '@ngx-translate/http-loader';
 import { GraphQLModule }                               from '../graphql/apollo.config';
 import { environment }                                 from '../environments/environment';
-import { GoogleMapsLoader }                            from '@modules/client.common.angular2/services/googlemaps-loader';
+import { GoogleMapsLoader }                            from '@modules/client.common.angular2/services/googleMapsLoader';
 import { CarriersOrdersService }                       from '../services/carriers-orders.service';
 import { MaintenanceService }                          from '@modules/client.common.angular2/services/maintenance.service';
 import { Vibration }                                   from '@ionic-native/vibration/ngx';
@@ -29,18 +29,18 @@ import { AppComponent }                                from './app.component';
 import { MenuModule }                                  from 'components/menu/menu.module';
 
 @NgModule({
-	          schemas: [NO_ERRORS_SCHEMA],
-	          declarations: [AppComponent],
-	          imports: [
+	          schemas:         [NO_ERRORS_SCHEMA],
+	          declarations:    [AppComponent],
+	          imports:         [
 		          BrowserModule,
 		          AppRoutingModule,
 		          GraphQLModule,
 		          MenuModule,
 		          TranslateModule.forRoot({
 			                                  loader: {
-				                                  provide: TranslateLoader,
+				                                  provide:    TranslateLoader,
 				                                  useFactory: HttpLoaderFactory,
-				                                  deps: [HttpClient],
+				                                  deps:       [HttpClient],
 			                                  },
 		                                  }),
 		          IonicModule.forRoot(),
@@ -50,29 +50,29 @@ import { MenuModule }                                  from 'components/menu/men
 		          HttpClientModule,
 		          PipesModule,
 	          ],
-	          bootstrap: [AppComponent],
+	          bootstrap:       [AppComponent],
 	          entryComponents: [AppComponent],
-	          providers: [
+	          providers:       [
 		          ServerConnectionService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: serverConnectionFactory,
-			          deps: [ServerConnectionService, Store],
-			          multi: true,
+			          deps:       [ServerConnectionService, Store],
+			          multi:      true,
 		          },
 		          GoogleMapsLoader,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: googleMapsLoaderFactory,
-			          deps: [GoogleMapsLoader],
-			          multi: true,
+			          deps:       [GoogleMapsLoader],
+			          multi:      true,
 		          },
 		          MaintenanceService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: maintenanceFactory,
-			          deps: [MaintenanceService],
-			          multi: true,
+			          deps:       [MaintenanceService],
+			          multi:      true,
 		          },
 		          StatusBar,
 		          SplashScreen,

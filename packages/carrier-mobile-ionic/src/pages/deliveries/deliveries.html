@@ -17,8 +17,8 @@
 	<div class="orders">
 		<div>
 			<div
-				class="order-container"
-				*ngFor="let order of currentCompletedOrders"
+					*ngFor="let order of currentCompletedOrders"
+					class="order-container"
 			>
 				<order-card [order]="order"></order-card>
 			</div>

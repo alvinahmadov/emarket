@@ -3,19 +3,19 @@ import { MapComponent }                                   from '../common/map/ma
 import { OrderRouter }                                    from '@modules/client.common.angular2/routers/order-router.service';
 import IOrder                                             from '@modules/server.common/interfaces/IOrder';
 import { Router }                                         from '@angular/router';
-import { takeUntil }                                      from 'rxjs/operators';
+import { first, takeUntil }                               from 'rxjs/operators';
 import { GeoLocationService }                             from 'services/geo-location.service';
 import GeoLocation                                        from '@modules/server.common/entities/GeoLocation';
 import { Geolocation }                                    from '@ionic-native/geolocation/ngx';
 import IGeoLocation                                       from '@modules/server.common/interfaces/IGeoLocation';
-import GeoUtils                                           from '@modules/server.common/utilities/geolocation';
+import Utils                                              from '@modules/server.common/utils';
 import { CarrierOrdersRouter }                            from '@modules/client.common.angular2/routers/carrier-orders-router.service';
 import { Store }                                          from 'services/store.service';
 import OrderCarrierStatus                                 from '@modules/server.common/enums/OrderCarrierStatus';
 import { Subject }                                        from 'rxjs';
 
 @Component({
-	           selector: 'page-starting-delivery',
+	           selector:    'page-starting-delivery',
 	           templateUrl: 'starting-delivery.html',
            })
 export class StartingDeliveryPage implements AfterViewInit, OnDestroy
@@ -57,7 +57,7 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 				OrderCarrierStatus.CarrierStartDelivery
 		);
 		
-		await this.router.navigateByUrl('/main/delivery', {
+		this.router.navigateByUrl('/main/delivery', {
 			skipLocationChange: false,
 		});
 		this.disabledButtons = false;
@@ -70,8 +70,14 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 		
 		this.router.navigateByUrl('/product/return', {
 			skipLocationChange: false,
-		}).catch(console.error);
+		});
 		this.disabledButtons = false;
+	}
+	
+	ngOnDestroy(): void
+	{
+		this.destroy$.next();
+		this.destroy$.complete();
 	}
 	
 	private loadData()
@@ -91,7 +97,7 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 			               // MongoDb store coordinates lng => lat
 			               const dbGeoInput = {
 				               loc: {
-					               type: 'Point',
+					               type:        'Point',
 					               coordinates: [
 						               position.coords.longitude,
 						               position.coords.latitude,
@@ -106,7 +112,7 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 			
 			               const userGeo = this.selectedOrder.user['geoLocation'];
 			
-			               this.carrierUserDistance = GeoUtils.getDistance(
+			               this.carrierUserDistance = Utils.getDistance(
 					               userGeo as GeoLocation,
 					               dbGeoInput as GeoLocation
 			               ).toFixed(2);
@@ -121,11 +127,5 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 			
 			               this.disabledButtons = false;
 		               });
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 }

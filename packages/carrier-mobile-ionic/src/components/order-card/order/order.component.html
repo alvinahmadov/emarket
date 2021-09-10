@@ -2,13 +2,13 @@
 	<div class="order-header">
 		<section *ngIf="customerLogo.length > 0" class="logo">
 			<e-cu-warehouse-logo [logo]="customerLogo"></e-cu-warehouse-logo>
-			<img src="" />
+			<img src=""/>
 		</section>
 		<section class="address">
 			<div class="top">
 				{{ 'DELIVERY_VIEW.TO' | translate }}: {{ customerBasicInfo }}
 			</div>
-
+			
 			<div class="top">{{ customerAddress }}</div>
 			<div class="bottom">{{ customerNotes }}</div>
 			<small>
@@ -24,17 +24,17 @@
 			</small>
 		</section>
 	</div>
-
+	
 	<div class="hr"></div>
-
+	
 	<div class="order-header">
 		<section *ngIf="warehouseLogo.length > 0" class="logo">
 			<e-cu-warehouse-logo [logo]="warehouseLogo"></e-cu-warehouse-logo>
 		</section>
-
+		
 		<section class="address">
 			<span [ngClass]="platform.isRTL ? 'rtl' : 'ltr'" class="total-price"
-				>${{ totalPrice }}</span
+			>${{ totalPrice }}</span
 			>
 			<div class="top">
 				{{ 'DELIVERY_VIEW.FROM' | translate }}: {{ warehouseName }}
@@ -44,42 +44,42 @@
 			<small class="delivery-time"> {{ deliveryTime }} </small>
 		</section>
 	</div>
-
+	
 	<div class="hr"></div>
-
+	
 	<div class="order-body">
 		<div
-			class="product-container"
-			*ngFor="let product of orderProductsToShow"
+				*ngFor="let product of orderProductsToShow"
+				class="product-container"
 		>
 			<e-cu-order-product
-				[orderProduct]="product"
-				[showDetailsButton]="showDetailsButton"
+					[orderProduct]="product"
+					[showDetailsButton]="showDetailsButton"
 			></e-cu-order-product>
 		</div>
 	</div>
-
-	<div class="actions text-center pb-2" *ngIf="showMoreIcon">
+	
+	<div *ngIf="showMoreIcon" class="actions text-center pb-2">
 		<a
-			(click)="toggleOrderProducts()"
-			*ngIf="
+				(click)="toggleOrderProducts()"
+				*ngIf="
 				showMoreIcon &&
 				orderProductsToShow.length !== order.products.length
 			"
 		>
-			<ion-icon name="ios-arrow-down" class="more"></ion-icon>
+			<ion-icon class="more" name="ios-arrow-down"></ion-icon>
 			{{ order.products.length - productsMaxAmountToShow }}
 			{{ 'MORE' | translate }}
 		</a>
-
+		
 		<a
-			(click)="toggleOrderProducts()"
-			*ngIf="
+				(click)="toggleOrderProducts()"
+				*ngIf="
 				showMoreIcon &&
 				orderProductsToShow.length === order.products.length
 			"
 		>
-			<ion-icon name="ios-arrow-up" class="less"></ion-icon>
+			<ion-icon class="less" name="ios-arrow-up"></ion-icon>
 		</a>
 	</div>
 </div>

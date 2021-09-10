@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import gql                      from 'graphql-tag';
 import { OrderProductFragment } from './product/product.model';
 
 export const OrderFragment = gql`

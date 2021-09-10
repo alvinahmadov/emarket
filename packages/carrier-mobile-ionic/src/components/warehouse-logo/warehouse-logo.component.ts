@@ -1,9 +1,9 @@
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
 
 @Component({
-	selector: 'e-cu-warehouse-logo',
-	styles: [
-		`
+	           selector: 'e-cu-warehouse-logo',
+	           styles:   [
+		           `
 			:host {
 				width: 56px;
 				height: 56px;
@@ -35,27 +35,30 @@ import { Component, HostBinding, Input, OnInit } from '@angular/core';
 				opacity: 0.8;
 			}
 		`,
-	],
-	template: `
+	           ],
+	           template: `
 		<img [src]="logo" [ngClass]="{ bordered: border, lighted: light }" />
 	`,
-})
-export class WarehouseLogoComponent implements OnInit {
+           })
+export class WarehouseLogoComponent implements OnInit
+{
 	@Input()
 	public logo: string;
-
+	
 	@Input()
 	@HostBinding('class.bordered')
 	public border: boolean = false;
-
+	
 	@Input()
 	public light: boolean = false;
-
-	constructor() {
+	
+	constructor()
+	{
 		return;
 	}
-
-	ngOnInit() {
+	
+	ngOnInit()
+	{
 		return;
 	}
 }

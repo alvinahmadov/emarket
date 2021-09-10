@@ -5,13 +5,15 @@
 	height: 100%;
 	display: flex;
 	align-items: center;
+	
 	.view-content {
 		margin: auto;
-
+		
 		.logo {
 			text-align: center;
 		}
 	}
+	
 	.info-massage h3 {
 		color: red;
 		width: 100%;
