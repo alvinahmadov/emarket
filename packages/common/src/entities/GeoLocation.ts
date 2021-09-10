@@ -7,10 +7,10 @@ import {
 	ILocation
 }                                             from '../interfaces/IGeoLocation';
 import Country                                from '../enums/Country';
-import { getCountries }                       from '../data/abbreviation-to-country';
+import { getCountryName }                     from '../data/countries';
 
 export const locationPreSchema = {
-	type:        { type: String },
+	type: { type: String },
 	coordinates: [Number]
 };
 
@@ -67,8 +67,6 @@ class GeoLocation extends DBObject<IGeoLocation, IGeoLocationCreateObject>
 		return getCountryName(lang, this.countryId);
 	}
 	
-	setCountryName(countryName: string) {}
-	
 	get isLocValid(): any
 	{
 		return (
@@ -104,45 +102,3 @@ class GeoLocation extends DBObject<IGeoLocation, IGeoLocationCreateObject>
 }
 
 export default GeoLocation;
-
-export type CountryName = string;
-
-export function getCountryName(lang: string, country: null): null;
-export function getCountryName(lang: string, country: Country): string;
-export function getCountryName(lang: string, country: Country | null): string | null;
-export function getCountryName(lang: string, country: Country | null): string | null
-{
-	let countries = getCountries(lang);
-	return countries[Country[country]] || null;
-}
-
-export function getDefaultCountryName(country: null): null;
-export function getDefaultCountryName(country: Country): string;
-export function getDefaultCountryName(country: Country | null): string | null;
-export function getDefaultCountryName(country: Country | null): string | null
-{
-	let countries = getCountries('en-US');
-	return countries[Country[country]] || null;
-}
-
-export function countriesIdsToNamesArrayFn(lang: string = 'ru-RU'): {
-	id: Country;
-	name: CountryName;
-}[]
-{
-	return Object.keys(getCountries(lang))
-	             .map((abbr) =>
-	                  {
-		                  return {
-			                  id:   Country[abbr],
-			                  name: getCountryName(lang, +Country[abbr])
-		                  };
-	                  })
-	             .sort((c1, c2) =>
-	                   {
-		                   return c1.name.localeCompare(c2.name)
-	                   }
-	             );
-}
-
-export const countriesIdsToNamesArray = countriesIdsToNamesArrayFn();
