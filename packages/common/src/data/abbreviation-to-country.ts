@@ -1,4 +1,4 @@
-import { COUNTRIES } from "../data/countries";
+// noinspection JSUnusedGlobalSymbols
 
 export enum CountryAbbreviations
 {
@@ -251,10 +251,3 @@ export enum CountryAbbreviations
 	ZM = 'ZM',
 	ZW = 'ZW'
 }
-
-export function getCountries(lang: string = 'en-US'): object
-{
-	return COUNTRIES[lang];
-}
-
-export const countries = getCountries();
