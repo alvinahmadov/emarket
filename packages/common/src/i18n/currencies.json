@@ -1,0 +1,146 @@
+{
+	"RU": {
+		"name": "Российский рубль",
+		"code": "RUB",
+		"sign": "₽",
+		"order": "after"
+	},
+	"GB": {
+		"name": "British pound",
+		"code": "GBP",
+		"sign": "£",
+		"order": "before"
+	},
+	"US": {
+		"name": "US Dollars",
+		"code": "USD",
+		"sign": "$",
+		"order": "before"
+	},
+	"CN": {
+		"name": "圆",
+		"code": "CNY",
+		"sign": "¥",
+		"order": "after"
+	},
+	"EU": {
+		"name": "Euro",
+		"code": "EUR",
+		"sign": "€",
+		"order": "before"
+	},
+	"BY": {
+		"name": "Рубель",
+		"code": "BYN",
+		"sign": "Br",
+		"order": "after"
+	},
+	"UA": {
+		"name": "Гривня",
+		"code": "UAH",
+		"sign": "₴",
+		"order": "after"
+	},
+	"MD": {
+		"name": "Leu",
+		"code": "MDL",
+		"sign": "lei",
+		"order": "after"
+	},
+	"AZ": {
+		"name": "Manat",
+		"code": "AZN",
+		"sign": "₼",
+		"order": "after"
+	},
+	"AM": {
+		"name": "դր",
+		"code": "AMD",
+		"sign": "դր.",
+		"order": "after"
+	},
+	"GE": {
+		"name": "Lari",
+		"code": "GEL",
+		"sign": "Lari",
+		"order": "after"
+	},
+	"TJ": {
+		"name": "Сом",
+		"code": "TJS",
+		"sign": "смн.",
+		"order": "after"
+	},
+	"KG": {
+		"name": "Сом",
+		"code": "KGS",
+		"sign": "сом",
+		"order": "after"
+	},
+	"UZ": {
+		"name": "Сўм",
+		"code": "UZS",
+		"sign": "сўм",
+		"order": "after"
+	},
+	"TM": {
+		"name": "Türkmenistan manady",
+		"code": "TMT",
+		"sign": "man.",
+		"order": "after"
+	},
+	"AE": {
+		"name": ".د.إ",
+		"code": "AED",
+		"sign": ".د.إ",
+		"order": "after"
+	},
+	"SA": {
+		"name": "ريال سعودي",
+		"code": "SAR",
+		"sign": "ريال) ﷼)",
+		"order": "after"
+	},
+	"BG": {
+		"name": "Лев",
+		"code": "BGN",
+		"sign": "лв.",
+		"order": "after"
+	},
+	"IR": {
+		"name": "﷼",
+		"code": "IRR",
+		"sign": "﷼",
+		"order": "after"
+	},
+	"IL": {
+		"name": "שקל חדש",
+		"code": "ILS",
+		"sign": "₪",
+		"order": "after"
+	},
+	"IN": {
+		"name": "Indian Rupee",
+		"code": "RUP",
+		"sign": "₹",
+		"order": "after"
+	},
+	"KZ": {
+		"name": "Тенге",
+		"code": "KZT",
+		"sign": "₸",
+		"order": "after"
+	},
+	"RS": {
+		"name": "Динар",
+		"code": "RSD",
+		"sign": "Дин.",
+		"order": "after"
+	},
+	"TR": {
+		"name": "Türk lirası",
+		"code": "TRY",
+		"sign": "₺",
+		"order": "after"
+	}
+}
