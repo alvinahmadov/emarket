@@ -1,4 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ModalController }                     from '@ionic/angular';
+import { TranslateService }                    from '@ngx-translate/core';
 import Carrier                                 from '@modules/server.common/entities/Carrier';
 import Order                                   from '@modules/server.common/entities/Order';
 import Warehouse                               from '@modules/server.common/entities/Warehouse';
@@ -6,18 +8,16 @@ import CommonUtils                             from '@modules/server.common/util
 import { CarrierOrdersRouter }                 from '@modules/client.common.angular2/routers/carrier-orders-router.service';
 import { LocalDataSource }                     from 'ng2-smart-table';
 import { forkJoin, Observable, Subject }       from 'rxjs';
-import { TranslateService }                    from '@ngx-translate/core';
 import { takeUntil }                           from 'rxjs/operators';
 import { CustomerComponent }                   from '../../../components/carrier-deliveries-table/customer';
 import { DeliveryComponent }                   from '../../../components/carrier-deliveries-table/delivery';
 import { StatusComponent }                     from '../../../components/carrier-deliveries-table/status';
 import { WarehouseComponent }                  from '../../../components/carrier-deliveries-table/warehouse';
-import { ModalController }                     from '@ionic/angular';
 
 @Component({
 	           selector:    'carrier-deliveries-popup',
-	           templateUrl: 'carrier-deliveries-popup.html',
 	           styleUrls:   ['./carrier-deliveries-popup.scss'],
+	           templateUrl: './carrier-deliveries-popup.html',
            })
 export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 {
@@ -68,7 +68,7 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 	
 	ngOnInit(): void
 	{
-		const loadData = (orders: Order[]) =>
+		const loadData = (orders: Order[]): void =>
 		{
 			const dataVM = orders.map((o: Order) =>
 			                          {
@@ -95,7 +95,7 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 			                   populateWarehouse: true,
 			                   completion:        'completed',
 		                   })
-		                   .subscribe((orders) =>
+		                   .subscribe((orders: Order[]) =>
 		                              {
 			                              this.orders = orders;
 			                              loadData(orders);
