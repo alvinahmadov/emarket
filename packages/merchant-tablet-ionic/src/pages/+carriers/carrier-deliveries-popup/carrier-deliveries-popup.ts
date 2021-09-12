@@ -1,10 +1,11 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import Carrier                                 from '@modules/server.common/entities/Carrier';
 import Order                                   from '@modules/server.common/entities/Order';
-import { CarrierOrdersRouter }                 from '@modules/client.common.angular2/routers/carrier-orders-router.service';
 import Warehouse                               from '@modules/server.common/entities/Warehouse';
+import CommonUtils                             from '@modules/server.common/utilities/common';
+import { CarrierOrdersRouter }                 from '@modules/client.common.angular2/routers/carrier-orders-router.service';
 import { LocalDataSource }                     from 'ng2-smart-table';
-import { Subject, Observable, forkJoin }       from 'rxjs';
+import { forkJoin, Observable, Subject }       from 'rxjs';
 import { TranslateService }                    from '@ngx-translate/core';
 import { takeUntil }                           from 'rxjs/operators';
 import { CustomerComponent }                   from '../../../components/carrier-deliveries-table/customer';
@@ -12,12 +13,11 @@ import { DeliveryComponent }                   from '../../../components/carrier
 import { StatusComponent }                     from '../../../components/carrier-deliveries-table/status';
 import { WarehouseComponent }                  from '../../../components/carrier-deliveries-table/warehouse';
 import { ModalController }                     from '@ionic/angular';
-import UserOrder                               from '@modules/server.common/entities/UserOrder';
 
 @Component({
-	           selector: 'carrier-deliveries-popup',
+	           selector:    'carrier-deliveries-popup',
 	           templateUrl: 'carrier-deliveries-popup.html',
-	           styleUrls: ['./carrier-deliveries-popup.scss'],
+	           styleUrls:   ['./carrier-deliveries-popup.scss'],
            })
 export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 {
@@ -44,26 +44,16 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 		this._loadSettingsSmartTable();
 	}
 	
-	getUserName(order: Order)
+	getUserName(order: Order): string
 	{
-		const user: UserOrder = order.user;
-		
-		if(user.firstName)
-		{
-			if(user.lastName)
-			{
-				return user.firstName + ' ' + user.lastName;
-			}
-			return user.firstName;
-		}
+		return order.customer.fullName
 	}
 	
 	getStoreFullAddress(order: Order)
 	{
 		const store: Warehouse = order.warehouse as Warehouse;
 		const geoLocation = store.geoLocation;
-		const fullAddress = `${geoLocation.city}, ${geoLocation.streetAddress} ${geoLocation.house}`;
-		return fullAddress;
+		return `${geoLocation.city}, ${geoLocation.streetAddress} ${geoLocation.house}`;
 	}
 	
 	getTotalDeliveryTime(order: Order)
@@ -98,6 +88,11 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
             ${hours} : ${min} : ${sec}`;
 	}
 	
+	getTotalDeliveryTime1(order: Order)
+	{
+		return CommonUtils.getTotalDeliveryTime(order);
+	}
+	
 	cancelModal()
 	{
 		this.modalCtrl.dismiss();
@@ -105,18 +100,22 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 	
 	ngOnInit(): void
 	{
-		const loadData = (orders) =>
+		const loadData = (orders: Order[]) =>
 		{
 			const dataVM = orders.map((o: Order) =>
 			                          {
-				                          let status = o.isCompleted ? 'Completed' : '';
-				                          status += o.isPaid ? 'Paid' : '';
+				                          let status = o.isCompleted
+				                                       ? 'Completed'
+				                                       : '';
+				                          status += o.isPaid
+				                                    ? 'Paid'
+				                                    : '';
 				                          return {
-					                          customer: this.getUserName(o),
+					                          customer:  this.getUserName(o),
 					                          status,
 					                          warehouse: o.warehouse['name'],
-					                          delivery: this.getTotalDeliveryTime(o),
-					                          order: o,
+					                          delivery:  this.getTotalDeliveryTime(o),
+					                          order:     o,
 				                          };
 			                          });
 			
@@ -126,7 +125,7 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 		this.$orders = this.carrierOrdersRouter
 		                   .get(this.carrier.id, {
 			                   populateWarehouse: true,
-			                   completion: 'completed',
+			                   completion:        'completed',
 		                   })
 		                   .subscribe((orders) =>
 		                              {
@@ -165,28 +164,28 @@ export class CarrierDeliveriesPopupPage implements OnInit, OnDestroy
 					           this.settingsSmartTable = {
 						           actions: true,
 						           columns: {
-							           customer: {
-								           title: customer,
-								           type: 'custom',
+							           customer:  {
+								           title:           customer,
+								           type:            'custom',
 								           renderComponent: CustomerComponent,
 							           },
 							           warehouse: {
-								           title: warehouse,
-								           type: 'custom',
+								           title:           warehouse,
+								           type:            'custom',
 								           renderComponent: WarehouseComponent,
 							           },
-							           status: {
-								           title: status,
-								           type: 'custom',
+							           status:    {
+								           title:           status,
+								           type:            'custom',
 								           renderComponent: StatusComponent,
 							           },
-							           delivery: {
-								           title: delivery,
-								           type: 'custom',
+							           delivery:  {
+								           title:           delivery,
+								           type:            'custom',
 								           renderComponent: DeliveryComponent,
 							           },
 						           },
-						           pager: {
+						           pager:   {
 							           display: true,
 							           perPage: 5,
 						           },
