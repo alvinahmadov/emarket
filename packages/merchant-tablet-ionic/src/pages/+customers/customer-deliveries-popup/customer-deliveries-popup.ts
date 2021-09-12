@@ -1,31 +1,31 @@
-import { Component, OnDestroy, Input, OnInit } from '@angular/core';
-import User                                    from '@modules/server.common/entities/User';
-import Order                             from '@modules/server.common/entities/Order';
-import { UserOrdersRouter }              from '@modules/client.common.angular2/routers/user-orders-router.service';
-import Carrier                           from '@modules/server.common/entities/Carrier';
-import { LocalDataSource }               from 'ng2-smart-table';
-import { Subject, Observable, forkJoin } from 'rxjs';
-import { TranslateService }              from '@ngx-translate/core';
-import { takeUntil }                     from 'rxjs/operators';
-import { OrderIdComponent }              from '../../../components/customer-deliveries-table/orderId';
-import { DeliveryComponent }             from '../../../components/customer-deliveries-table/delivery';
-import { AddressComponent }              from '../../../components/customer-deliveries-table/address';
-import { StatusComponent }               from '../../../components/customer-deliveries-table/status';
-import CommonUtils                       from '@modules/server.common/utilities/common';
-import { ModalController }               from '@ionic/angular';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ModalController }                     from '@ionic/angular';
+import { TranslateService }                    from '@ngx-translate/core';
+import { forkJoin, Observable, Subject }       from 'rxjs';
+import { takeUntil }                           from 'rxjs/operators';
+import { LocalDataSource }                     from 'ng2-smart-table';
+import Customer                                from '@modules/server.common/entities/Customer';
+import Order                                   from '@modules/server.common/entities/Order';
+import Carrier                                 from '@modules/server.common/entities/Carrier';
+import CommonUtils                             from '@modules/server.common/utilities/common';
+import { CustomerOrdersRouter }                from '@modules/client.common.angular2/routers/customer-orders-router.service';
+import { AddressComponent }                    from '../../../components/customer-deliveries-table/address';
+import { DeliveryComponent }                   from '../../../components/customer-deliveries-table/delivery';
+import { OrderIdComponent }                    from '../../../components/customer-deliveries-table/orderId';
+import { StatusComponent }                     from '../../../components/customer-deliveries-table/status';
 
 @Component({
-	           selector: 'customer-deliveries-popup',
-	           templateUrl: 'customer-deliveries-popup.html',
-	           styleUrls: ['./customer-deliveries-popup.scss'],
+	           selector:    'customer-deliveries-popup',
+	           styleUrls:   ['./customer-deliveries-popup.scss'],
+	           templateUrl: './customer-deliveries-popup.html',
            })
 export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 {
 	@Input()
-	user: User;
+	customer: Customer;
 	orders: Order[];
 	ordersFromWarehouse: Order[];
-	userId: string;
+	customerId: string;
 	showNoDeliveryIcon: boolean;
 	ordersCurrentWarehouse: Order[];
 	carrier: Carrier;
@@ -39,7 +39,7 @@ export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 	
 	constructor(
 			public modalController: ModalController,
-			private readonly userOrdersRouter: UserOrdersRouter,
+			private readonly userOrdersRouter: CustomerOrdersRouter,
 			private readonly translateService: TranslateService
 	)
 	{
@@ -66,9 +66,9 @@ export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 	
 	ngOnInit(): void
 	{
-		this.userId = this.user.id;
+		this.customerId = this.customer.id;
 		this.$orders = this.userOrdersRouter
-		                   .get(this.user.id)
+		                   .get(this.customer.id)
 		                   .subscribe((orders) =>
 		                              {
 			                              this.orders = orders;
@@ -84,43 +84,15 @@ export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 	{
 		if(order.isCompleted)
 		{
-			const addressUser: User = order.user as User;
+			const addressUser: Customer = order.customer as Customer;
 			const geoLocation = addressUser.geoLocation;
-			const fullAddress = `${geoLocation.city}, ${geoLocation.streetAddress} ${geoLocation.house}`;
-			return fullAddress;
+			return `${geoLocation.city}, ${geoLocation.streetAddress} ${geoLocation.house}`;
 		}
 	}
 	
 	getTotalDeliveryTime(order: Order)
 	{
-		const start = order.createdAt;
-		
-		const end = new Date(order.deliveryTime);
-		
-		let delta = Math.abs(start.getTime() - end.getTime()) / 1000;
-		
-		const days = Math.floor(delta / 86400);
-		delta -= days * 86400;
-		
-		const hours = Math.floor(delta / 3600) % 24;
-		delta -= hours * 3600;
-		
-		const minutes = Math.floor(delta / 60) % 60;
-		delta -= minutes * 60;
-		
-		const seconds = delta % 60;
-		let secondsStr = seconds.toString();
-		secondsStr = secondsStr.substring(0, secondsStr.indexOf('.'));
-		
-		let h = '0' + hours;
-		h = h.substr(-2);
-		let min = '0' + minutes;
-		min = min.substr(-2);
-		let sec = '0' + secondsStr;
-		sec = sec.substr(-2);
-		
-		return `${days !== 0 ? days + 'days ' : ''}
-            ${hours} : ${min} : ${sec}`;
+		return CommonUtils.getTotalDeliveryTime(order);
 	}
 	
 	getOrders()
@@ -132,11 +104,11 @@ export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 				                           let status = o.isCompleted ? 'Completed' : '';
 				                           status += o.isPaid ? 'Paid' : '';
 				                           return {
-					                           orderId: CommonUtils.getIdFromTheDate(o),
+					                           orderId:  CommonUtils.getIdFromTheDate(o),
 					                           status,
-					                           address: this.getCustomerFullAddress(o),
+					                           address:  this.getCustomerFullAddress(o),
 					                           delivery: this.getTotalDeliveryTime(o),
-					                           order: o,
+					                           order:    o,
 				                           };
 			                           });
 			
@@ -178,29 +150,29 @@ export class CustomerDeliveriesPopupPage implements OnInit, OnDestroy
 					           this.settingsSmartTable = {
 						           actions: true,
 						           columns: {
-							           orderId: {
-								           title: orderId,
-								           class: 'text-align-left',
-								           type: 'custom',
+							           orderId:  {
+								           title:           orderId,
+								           class:           'text-align-left',
+								           type:            'custom',
 								           renderComponent: OrderIdComponent,
 							           },
 							           delivery: {
-								           title: delivery,
-								           type: 'custom',
+								           title:           delivery,
+								           type:            'custom',
 								           renderComponent: DeliveryComponent,
 							           },
-							           address: {
-								           title: address,
-								           type: 'custom',
+							           address:  {
+								           title:           address,
+								           type:            'custom',
 								           renderComponent: AddressComponent,
 							           },
-							           status: {
-								           title: status,
-								           type: 'custom',
+							           status:   {
+								           title:           status,
+								           type:            'custom',
 								           renderComponent: StatusComponent,
 							           },
 						           },
-						           pager: {
+						           pager:   {
 							           display: true,
 							           perPage: 4,
 						           },
