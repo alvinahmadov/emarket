@@ -12,32 +12,32 @@ export class WarehouseProductsService
 	constructor(private readonly _apollo: Apollo) {}
 	
 	getProductsWithPagination(
-			id: string,
+			storeId: string,
 			pagingOptions?: IPagingOptions
 	): Observable<WarehouseProduct[]>
 	{
 		return this._apollo
 		           .watchQuery<{
-			           productsCategories: WarehouseProduct[]
+			           warehouseProducts: WarehouseProduct[]
 		           }>({
-			              query: GQLQueries.WarehouseProductProductsWithPagination,
+			              query:        GQLQueries.WarehouseProductProductsWithPagination,
 			              pollInterval: 2000,
-			              variables: { id, pagingOptions },
+			              variables:    { storeId, pagingOptions },
 		              })
 		           .valueChanges.pipe(
-						map((res) => res.data['getProductsWithPagination'])
+						map((res) => res.data['getWarehouseProductsWithPagination'])
 				);
 	}
 	
-	async getProductsCount(id: string)
+	async getProductsCount(storeId: string)
 	{
 		const res = await this._apollo
 		                      .query({
-			                             query: GQLQueries.WarehouseProductProductsCount,
-			                             variables: { id },
+			                             query:     GQLQueries.WarehouseProductProductsCount,
+			                             variables: { storeId },
 		                             })
 		                      .toPromise();
 		
-		return res.data['getProductsCount'];
+		return res.data['getWarehouseProductsCount'];
 	}
 }
