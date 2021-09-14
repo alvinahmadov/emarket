@@ -8,6 +8,7 @@ export interface Environment
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
 	GOOGLE_MAPS_API_KEY: string;
+	YANDEX_MAPS_API_KEY: string;
 	
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
@@ -32,6 +33,8 @@ export interface Environment
 	GENERATE_PASSWORD_CHARSET: string;
 	
 	CURRENCY_SYMBOL: string;
+	
+	FAKE_CUSTOMERS_COUNT: number;
 	
 	DEFAULT_LANGUAGE: string;
 	AVAILABLE_LOCALES: string;
