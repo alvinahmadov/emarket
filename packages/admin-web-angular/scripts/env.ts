@@ -13,6 +13,7 @@ export type Env = Readonly<{
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
 	GOOGLE_MAPS_API_KEY: string;
+	YANDEX_MAPS_API_KEY: string;
 	
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
@@ -38,6 +39,8 @@ export type Env = Readonly<{
 	
 	CURRENCY_SYMBOL: string;
 	
+	FAKE_CUSTOMERS_COUNT: number;
+	
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
 	
@@ -55,16 +58,17 @@ export const env: Env = cleanEnv(
 		{
 			production: bool({ default: true }),
 			
-			HTTP_SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
-			HTTPS_SERVICES_ENDPOINT: str({ default: 'https://localhost:5501' }),
-			GQL_ENDPOINT: str({ default: 'http://localhost:5555/graphql' }),
+			HTTP_SERVICES_ENDPOINT:     str({ default: 'http://localhost:5500' }),
+			HTTPS_SERVICES_ENDPOINT:    str({ default: 'https://localhost:5501' }),
+			GQL_ENDPOINT:               str({ default: 'http://localhost:5555/graphql' }),
 			GQL_SUBSCRIPTIONS_ENDPOINT: str({
 				                                default: 'ws://localhost:5050/subscriptions',
 			                                }),
 			
 			GOOGLE_MAPS_API_KEY: str({ default: '' }),
+			YANDEX_MAPS_API_KEY: str({ default: '' }),
 			
-			DEFAULT_LATITUDE: num({ default: 37.642036 }),
+			DEFAULT_LATITUDE:  num({ default: 37.642036 }),
 			DEFAULT_LONGITUDE: num({ default: 55.708215 }),
 			
 			NO_INTERNET_LOGO: str({ default: '' }),
@@ -85,13 +89,13 @@ export const env: Env = cleanEnv(
 				                         default: '',
 			                         }),
 			
-			COMPANY_NAME: str({ default: 'Company' }),
-			COMPANY_SITE_LINK: str({ default: 'https://localhost:4200/' }),
-			COMPANY_GITHUB_LINK: str({ default: 'https://github.com' }),
+			COMPANY_NAME:          str({ default: 'Company' }),
+			COMPANY_SITE_LINK:     str({ default: 'https://localhost:4200/' }),
+			COMPANY_GITHUB_LINK:   str({ default: 'https://github.com' }),
 			COMPANY_FACEBOOK_LINK: str({
 				                           default: 'https://www.facebook.com',
 			                           }),
-			COMPANY_TWITTER_LINK: str({ default: 'https://twitter.com' }),
+			COMPANY_TWITTER_LINK:  str({ default: 'https://twitter.com' }),
 			COMPANY_LINKEDIN_LINK: str({
 				                           default: 'https://www.linkedin.com.',
 			                           }),
@@ -103,17 +107,19 @@ export const env: Env = cleanEnv(
 			
 			CURRENCY_SYMBOL: str({ default: '₽' }),
 			
+			FAKE_CUSTOMERS_COUNT: num({ default: 1000 }),
+			
 			// For maintenance micro service.
-			SETTINGS_APP_TYPE: str({ default: 'admin' }),
+			SETTINGS_APP_TYPE:            str({ default: 'admin' }),
 			SETTINGS_MAINTENANCE_API_URL: str({
 				                                  default: '',
 			                                  }),
 			
-			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
+			DEFAULT_LANGUAGE:  str({ default: 'ru-RU' }),
 			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
-			WEB_MEMORY: num({ default: 4096 }),
+			WEB_MEMORY:      num({ default: 4096 }),
 			
 			HOST: str({ default: 'localhost' }),
 			PORT: num({ default: 4200 }),
