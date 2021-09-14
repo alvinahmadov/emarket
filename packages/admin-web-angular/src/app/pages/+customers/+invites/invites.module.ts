@@ -5,7 +5,7 @@ import { Ng2SmartTableModule }             from 'ng2-smart-table';
 import { ToasterModule }                   from 'angular2-toaster';
 import { TranslateModule }                 from '@ngx-translate/core';
 import { HighlightModule }                 from 'ngx-highlightjs';
-import { ThemeModule }                     from '../../../@theme';
+import { ThemeModule }                     from '@app/@theme';
 import { InvitesComponent }                from './invites.component';
 import { InvitesService }                  from '../../../@core/data/invites.service';
 import { InvitesRequestsModule }           from './+invites-requests/invites-requests.module';
@@ -15,13 +15,13 @@ import { ConfirmationModalModule }         from '../../../@shared/confirmation-m
 
 const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: InvitesComponent,
 	},
 ];
 
 @NgModule({
-	          imports: [
+	          imports:         [
 		          CommonModule,
 		          Ng2SmartTableModule,
 		          ThemeModule,
@@ -34,9 +34,9 @@ const routes: Routes = [
 		          ConfirmationModalModule,
 		          NbButtonModule,
 	          ],
-	          declarations: [InvitesComponent],
+	          declarations:    [InvitesComponent],
 	          entryComponents: [CountryRenderComponent],
-	          providers: [JsonPipe, InvitesService],
+	          providers:       [JsonPipe, InvitesService],
           })
 export class InvitesModule
 {
