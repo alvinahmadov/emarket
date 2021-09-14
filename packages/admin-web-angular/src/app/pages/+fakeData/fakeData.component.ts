@@ -47,7 +47,7 @@ import { environment }                               from 'environments/environm
 
 const NEED_DEFAULT_SETTINGS_MESSAGE =
 		      "Can't generate fake data without DEFAULT_LONGITUDE and DEFAULT_LATITUDE";
-// TODO: Add to environment file
+
 const qty = environment.FAKE_CUSTOMERS_COUNT;
 const lng = environment.DEFAULT_LONGITUDE;
 const lat = environment.DEFAULT_LATITUDE;
