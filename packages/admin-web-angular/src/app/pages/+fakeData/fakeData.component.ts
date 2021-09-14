@@ -1,62 +1,61 @@
-import { Component, OnDestroy, OnInit }  from '@angular/core';
-import Invite                            from '@modules/server.common/entities/Invite';
-import { IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
-import { InviteRouter }                  from '@modules/client.common.angular2/routers/invite-router.service';
-import { CarrierRouter }                 from '@modules/client.common.angular2/routers/carrier-router.service';
-import { UserRouter }                    from '@modules/client.common.angular2/routers/user-router.service';
-import { ProductRouter }                 from '@modules/client.common.angular2/routers/product-router.service';
-import { WarehouseRouter }               from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { WarehouseAuthRouter }           from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
-import Product                           from '@modules/server.common/entities/Product';
-import { WarehouseProductsRouter }       from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import Warehouse                         from '@modules/server.common/entities/Warehouse';
-import User                              from '@modules/server.common/entities/User';
-import { WarehouseOrdersRouter }         from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { OrderRouter }                   from '@modules/client.common.angular2/routers/order-router.service';
-import Order                             from '@modules/server.common/entities/Order';
-import Carrier                           from '@modules/server.common/entities/Carrier';
-import { FakeDataBtnState }              from '../../models/FakeDataBtnState';
-import FakeDataCarriers                  from '../../@core/data/fakeDataServices/carriers';
-import FakeDataInvites                   from '../../@core/data/fakeDataServices/invites';
-import FakeDataProducts                  from '../../@core/data/fakeDataServices/products';
-import FakeDataWarehouses                from '../../@core/data/fakeDataServices/warehouses';
-import FakeDataWarehousesProducts        from '../../@core/data/fakeDataServices/warehousesProducts';
-import FakeDataUsers                     from '../../@core/data/fakeDataServices/users';
-import { UserAuthRouter }                from '@modules/client.common.angular2/routers/user-auth-router.service';
-import { CarriersService }               from '../../@core/data/carriers.service';
-import { Subject }                       from 'rxjs';
-import { ToasterService }                from 'angular2-toaster';
-import { first, takeUntil }              from 'rxjs/operators';
-import { WarehousesService }             from '../../@core/data/warehouses.service';
-import { DataService }                   from '../../@core/data/data.service';
-import ProductsCategory                  from '@modules/server.common/entities/ProductsCategory';
-import { ProductsCategoryService }       from '../../@core/data/productsCategory.service';
-import FakeDataProductsCategories        from '../../@core/data/fakeDataServices/productsCategories';
-import {
-	IProductsCategoryName,
-	IProductsCategory,
-}                                        from '@modules/server.common/interfaces/IProductsCategory';
-import { NotifyService }                 from '@app/@core/services/notify/notify.service';
-import { OrdersService }                 from '@app/@core/data/orders.service';
-import { ICarrierRegistrationInput }     from '@modules/server.common/routers/ICarrierRouter';
-import { InvitesService }                from '@app/@core/data/invites.service';
-import { InvitesRequestsService }        from '@app/@core/data/invites-requests.service';
-import { UsersService }                  from '@app/@core/data/users.service';
-import { environment }                   from 'environments/environment';
-import _                                 from 'lodash';
-import { CurrenciesService }             from '@app/@core/data/currencies.service';
+import { Component, OnDestroy, OnInit }              from '@angular/core';
+import _                                             from 'lodash';
+import { Subject }                                   from 'rxjs';
+import { first, takeUntil }                          from 'rxjs/operators';
+import { ToasterService }                            from 'angular2-toaster';
+import { IProductsCategory, IProductsCategoryName, } from '@modules/server.common/interfaces/IProductsCategory';
+import { IWarehouseProductCreateObject }             from '@modules/server.common/interfaces/IWarehouseProduct';
+import { ICarrierRegistrationInput }                 from '@modules/server.common/routers/ICarrierRouter';
+import { CountryAbbreviations }                      from '@modules/server.common/data/abbreviation-to-country';
+import { getCurrency }                               from '@modules/server.common/data/currencies';
+import Carrier                                       from '@modules/server.common/entities/Carrier';
+import Customer                                      from '@modules/server.common/entities/Customer';
+import Invite                                        from '@modules/server.common/entities/Invite';
+import Order                                         from '@modules/server.common/entities/Order';
+import Product                                       from '@modules/server.common/entities/Product';
+import ProductsCategory                              from '@modules/server.common/entities/ProductsCategory';
+import Warehouse                                     from '@modules/server.common/entities/Warehouse';
+import { CarrierRouter }                             from '@modules/client.common.angular2/routers/carrier-router.service';
+import { CustomerRouter }                            from '@modules/client.common.angular2/routers/customer-router.service';
+import { CustomerAuthRouter }                        from '@modules/client.common.angular2/routers/customer-auth-router.service';
+import { InviteRouter }                              from '@modules/client.common.angular2/routers/invite-router.service';
+import { OrderRouter }                               from '@modules/client.common.angular2/routers/order-router.service';
+import { ProductRouter }                             from '@modules/client.common.angular2/routers/product-router.service';
+import { WarehouseRouter }                           from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter }                       from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
+import { WarehouseOrdersRouter }                     from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { WarehouseProductsRouter }                   from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { FakeDataBtnState }                          from '@app/models/FakeDataBtnState';
+import FakeDataCarriers                              from '@app/@core/data/fakeDataServices/carriers';
+import FakeDataUsers                                 from '@app/@core/data/fakeDataServices/customers';
+import FakeDataInvites                               from '@app/@core/data/fakeDataServices/invites';
+import FakeDataProducts                              from '@app/@core/data/fakeDataServices/products';
+import FakeDataProductsCategories                    from '@app/@core/data/fakeDataServices/productsCategories';
+import FakeDataWarehouses                            from '@app/@core/data/fakeDataServices/warehouses';
+import FakeDataWarehousesProducts                    from '@app/@core/data/fakeDataServices/warehousesProducts';
+import { CarriersService }                           from '@app/@core/data/carriers.service';
+import { CurrenciesService }                         from '@app/@core/data/currencies.service';
+import { CustomersService }                          from '@app/@core/data/customers.service';
+import { DataService }                               from '@app/@core/data/data.service';
+import { InvitesService }                            from '@app/@core/data/invites.service';
+import { InvitesRequestsService }                    from '@app/@core/data/invites-requests.service';
+import { OrdersService }                             from '@app/@core/data/orders.service';
+import { ProductsCategoryService }                   from '@app/@core/data/productsCategory.service';
+import { WarehousesService }                         from '@app/@core/data/warehouses.service';
+import { NotifyService }                             from '@app/@core/services/notify/notify.service';
+import { environment }                               from 'environments/environment';
 
 const NEED_DEFAULT_SETTINGS_MESSAGE =
-		"Can't generate fake data without DEFAULT_LONGITUDE and DEFAULT_LATITUDE";
+		      "Can't generate fake data without DEFAULT_LONGITUDE and DEFAULT_LATITUDE";
 // TODO: Add to environment file
-const qty = 1000;
-const lng = environment['DEFAULT_LONGITUDE'];
-const lat = environment['DEFAULT_LATITUDE'];
+const qty = environment.FAKE_CUSTOMERS_COUNT;
+const lng = environment.DEFAULT_LONGITUDE;
+const lat = environment.DEFAULT_LATITUDE;
 
 @Component({
-	           selector: 'ea-fake-data',
+	           selector:    'ea-fake-data',
+	           styleUrls:   ['./fakeData.component.scss'],
 	           templateUrl: './fakeData.component.html',
-	           styleUrls: ['./fakeData.component.scss'],
            })
 export class FakeDataComponent implements OnInit, OnDestroy
 {
@@ -70,7 +69,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	warehouse1: Warehouse;
 	warehouse2: Warehouse;
 	warehouse3: Warehouse;
-	user: User;
+	customer: Customer;
 	order1: Order;
 	order2: Order;
 	includeHardcodedData: boolean = true;
@@ -96,19 +95,18 @@ export class FakeDataComponent implements OnInit, OnDestroy
 			protected fakeDataInvites: FakeDataInvites,
 			protected fakeDataUsers: FakeDataUsers,
 			protected fakeDataCarriers: FakeDataCarriers,
-			private readonly _fakeDataProductsCategories: FakeDataProductsCategories,
-			protected carrierRouter: CarrierRouter,
-			protected userRouter: UserRouter,
-			protected userAuthRouter: UserAuthRouter,
 			protected fakeDataProducts: FakeDataProducts,
+			protected carrierRouter: CarrierRouter,
+			protected customerRouter: CustomerRouter,
+			protected customerAuthRouter: CustomerAuthRouter,
+			protected inviteRouter: InviteRouter,
+			protected orderRouter: OrderRouter,
 			protected productRouter: ProductRouter,
+			protected toasterService: ToasterService,
 			protected warehouseRouter: WarehouseRouter,
 			protected warehouseAuthRouter: WarehouseAuthRouter,
-			protected toasterService: ToasterService,
-			protected inviteRouter: InviteRouter,
-			protected warehouseProductsRouter: WarehouseProductsRouter,
 			protected warehouseOrdersRouter: WarehouseOrdersRouter,
-			protected orderRouter: OrderRouter,
+			protected warehouseProductsRouter: WarehouseProductsRouter,
 			private readonly _carriersService: CarriersService,
 			private readonly _warehousesService: WarehousesService,
 			private readonly _dataService: DataService,
@@ -117,14 +115,16 @@ export class FakeDataComponent implements OnInit, OnDestroy
 			private readonly _invitesService: InvitesService,
 			private readonly _inviteRequestsService: InvitesRequestsService,
 			private readonly _notifyService: NotifyService,
-			private readonly _usersService: UsersService,
-			private readonly _currenciesService: CurrenciesService
+			private readonly _customersService: CustomersService,
+			private readonly _currenciesService: CurrenciesService,
+			private readonly _fakeDataProductsCategories: FakeDataProductsCategories,
 	)
 	{
 		this._setupButtonStatuses();
 		this._setupButtonLoading();
 	}
 	
+	// noinspection JSUnusedLocalSymbols
 	private get _hasProducts()
 	{
 		return (
@@ -144,32 +144,32 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		const errror = (message: string) => this._notifyService.error(message);
 		
 		return {
-			invite: (id) =>
-					showMessage(`Invite with id "${id}" created successfully`),
-			user: (id) =>
-					showMessage(`User with id "${id}" created successfully`),
-			carrier: (id) =>
-					showMessage(`Carrier with id "${id}" created successfully`),
-			product: (id) =>
-					showMessage(`Product with id "${id}" created successfully`),
-			warehouse: (id) =>
-					showMessage(`Warehouse with id "${id}" created successfully`),
-			warehouseAddProducts: (id) =>
-					showMessage(
-							`Warehouse with id "${id}" added products successfully`
-					),
-			geoLocation: (id) =>
-					showMessage(`Warehouse with id "${id}" update geo location`),
-			order: (id) =>
-					showMessage(`Order with id "${id}" created successfully`),
-			confirmOrder: (id) =>
-					showMessage(`Order with id "${id}" confirmed`),
-			clearAll: () => showMessage('All data was removed from database'),
+			invite:                       (id) =>
+					                              showMessage(`Invite with id "${id}" created successfully`),
+			customer:                     (id) =>
+					                              showMessage(`User with id "${id}" created successfully`),
+			carrier:                      (id) =>
+					                              showMessage(`Carrier with id "${id}" created successfully`),
+			product:                      (id) =>
+					                              showMessage(`Product with id "${id}" created successfully`),
+			warehouse:                    (id) =>
+					                              showMessage(`Warehouse with id "${id}" created successfully`),
+			warehouseAddProducts:         (id) =>
+					                              showMessage(
+							                              `Warehouse with id "${id}" added products successfully`
+					                              ),
+			geoLocation:                  (id) =>
+					                              showMessage(`Warehouse with id "${id}" update geo location`),
+			order:                        (id) =>
+					                              showMessage(`Order with id "${id}" created successfully`),
+			confirmOrder:                 (id) =>
+					                              showMessage(`Order with id "${id}" confirmed`),
+			clearAll:                     () => showMessage('All data was removed from database'),
 			generateRandomOrdersPerStore: (storeId, ordersCount) =>
-					showMessage(
-							`Store with id "${storeId}" has new ${ordersCount} orders.`
-					),
-			errorGenerate: (msg) => errror(msg),
+					                              showMessage(
+							                              `Store with id "${storeId}" has new ${ordersCount} orders.`
+					                              ),
+			errorGenerate:                (msg) => errror(msg),
 		};
 	}
 	
@@ -316,10 +316,10 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		const create = async() =>
 		{
 			const userRegisterInput = this.fakeDataUsers.getUserRegistrationInput();
-			const user: User = await this.userAuthRouter.register(
+			const customer: Customer = await this.customerAuthRouter.register(
 					userRegisterInput
 			);
-			this._notify.user(user.id);
+			this._notify.customer(customer.id);
 			
 			if(userNumber <= 100)
 			{
@@ -343,16 +343,18 @@ export class FakeDataComponent implements OnInit, OnDestroy
 			await this._createInvite();
 		}
 		
-		this.user = await this.userAuthRouter.register({
-			                                               user: {
-				                                               geoLocation: this.invite.geoLocation,
-				                                               apartment: this.invite.apartment,
-			                                               },
-		                                               });
+		this.customer = await this.customerAuthRouter.register({
+			                                                       user: {
+				                                                       username:    '',
+				                                                       email:       '',
+				                                                       geoLocation: this.invite.geoLocation,
+				                                                       apartment:   this.invite.apartment,
+			                                                       },
+		                                                       });
 		
 		this.isBtnDisabled.user = false;
 		this.loading.user = false;
-		this._notify.user(this.user.id);
+		this._notify.customer(this.customer.id);
 	}
 	
 	async createCarrier1()
@@ -604,7 +606,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		this.isBtnDisabled.warehouseProduct3 = true;
 		this.loading.warehouseProduct3 = true;
 		
-		this._createWarehouseProducts(this.warehouse3.id, [
+		await this._createWarehouseProducts(this.warehouse3.id, [
 			this.sushiBoxProduct.id,
 		]);
 		
@@ -617,7 +619,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		this.isBtnDisabled.warehouseGeoLocation = true;
 		this.loading.warehouseGeoLocation = true;
 		
-		const newGeoLocation = this.fakeDataWarehouses.getNewGeoLocation1();
+		const newGeoLocation = this.fakeDataWarehouses.getRandomGeoLocation();
 		await this.warehouseRouter.updateGeoLocation(
 				this.warehouse1.id,
 				newGeoLocation
@@ -634,7 +636,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		this.loading.createOrder1 = true;
 		
 		this.order1 = await this._createOrder(
-				this.user.id,
+				this.customer.id,
 				this.warehouse1.id,
 				this.peperoniAndMushroomPizzaProduct.id
 		);
@@ -661,7 +663,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		this.loading.createOrder2 = true;
 		
 		this.order2 = await this._createOrder(
-				this.user.id,
+				this.customer.id,
 				this.warehouse1.id,
 				this.sushiBoxProduct.id
 		);
@@ -725,13 +727,13 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	}
 	
 	private async _createOrder(
-			userId: string,
+			customerId: string,
 			warehouseId: string,
 			productId: string
 	): Promise<Order>
 	{
 		const order: Order = await this.warehouseOrdersRouter.createByProductType(
-				userId,
+				customerId,
 				warehouseId,
 				productId
 		);
@@ -755,7 +757,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	{
 		if(lng && lat)
 		{
-			const response = await this._usersService // maybe _usersService?
+			const response = await this._customersService
 			                           .generateCustomCustomers(qty, lng, lat)
 			                           .toPromise();
 			
@@ -849,7 +851,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	
 	private async _isUserEmailExists(email: string): Promise<boolean>
 	{
-		return this._usersService.isUserEmailExists(email);
+		return this._customersService.isCustomerEmailExists(email);
 	}
 	
 	private async _createHardcodedCarriers()
@@ -992,15 +994,17 @@ export class FakeDataComponent implements OnInit, OnDestroy
 			'dominexPizza',
 		])
 		{
-			const objToRegister = this.fakeDataWarehouses.registrationInputs[
-					objKey
-					];
+			const objToRegister = this.fakeDataWarehouses
+					.registrationInputs[objKey];
 			
 			// We don't want warehouses with the same usernames.
 			if(
 					this._existingWarehouses.some(
 							(w: Warehouse) =>
-									w.username === objToRegister.warehouse.username
+							{
+								const warehouse: Warehouse = objToRegister.warehouse
+								return w.username === warehouse.username
+							}
 					)
 			)
 			{
@@ -1050,16 +1054,15 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		}
 		else
 		{
-			const user: User = await this.userAuthRouter.register(
+			return await this.customerAuthRouter.register(
 					userRegisterInput
 			);
-			return user;
 		}
 	}
 	
 	private async _createRandomUserWithOrder()
 	{
-		const user: User = await this._createRandomUser();
+		const customer: Customer = await this._createRandomUser();
 		const warehouse: Warehouse = await this._createWarehouseWithCarrier();
 		
 		const p1: Product = await this._createProduct();
@@ -1067,10 +1070,10 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		
 		await this._createWarehouseProducts(warehouse.id, [p1.id, p2.id]);
 		
-		await this._createOrder(user.id, warehouse.id, p1.id);
-		await this._createOrder(user.id, warehouse.id, p2.id);
+		await this._createOrder(customer.id, warehouse.id, p1.id);
+		await this._createOrder(customer.id, warehouse.id, p2.id);
 		
-		this._notify.user(user.id);
+		this._notify.customer(customer.id);
 	}
 	
 	private async _generateProductCategories()
@@ -1081,14 +1084,14 @@ export class FakeDataComponent implements OnInit, OnDestroy
 					(c) =>
 					{
 						return {
-							_id: c.id,
-							name: c.name.map((n) =>
-							                 {
-								                 return {
-									                 locale: n.locale,
-									                 value: n.value,
-								                 };
-							                 }),
+							_id:        c.id,
+							name:       c.name.map((n) =>
+							                       {
+								                       return {
+									                       locale: n.locale,
+									                       value:  n.value,
+								                       };
+							                       }),
 							_createdAt: c._createdAt,
 							_updatedAt: c._updatedAt,
 						};
@@ -1283,19 +1286,41 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	
 	private async _generateCurrencies()
 	{
-		const currenciesCodes = ['USD', 'ILS', 'EUR', 'BGN', 'RUB', 'UYU'];
+		const currencies = await this._currenciesService
+		                             .getCurrencies()
+		                             .pipe(first())
+		                             .toPromise();
 		
-		for(const currencyCode of currenciesCodes)
+		if(!currencies.length)
 		{
-			const res = await this._currenciesService
-			                      .create({ currencyCode })
-			                      .pipe(first())
-			                      .toPromise();
-			
-			this.toasterService.pop(
-					res.success ? 'success' : 'warning',
-					res.message
-			);
+			for(const abbr in CountryAbbreviations)
+			{
+				const data = getCurrency(abbr);
+				if(data)
+				{
+					try
+					{
+						const res = await this._currenciesService
+						                      .create({
+							                              code:  data.code,
+							                              name:  data?.name,
+							                              sign:  data?.sign ?? data.code,
+							                              order: data?.order
+						                              })
+						                      .pipe(first())
+						                      .toPromise();
+						
+						this.toasterService.pop(
+								res.success ? 'success' : 'warning',
+								res.message
+						);
+					} catch(e)
+					{
+						console.error(`Error on currency create: ${e.message}`);
+					}
+				}
+				
+			}
 		}
 	}
 }
