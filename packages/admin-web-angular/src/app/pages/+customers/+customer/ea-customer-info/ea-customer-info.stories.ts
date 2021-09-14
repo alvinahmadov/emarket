@@ -34,36 +34,36 @@ import { CustomerLocationComponent }                          from '../ea-custom
 import { CustomerProductsComponent }                          from '../ea-customer-products/ea-customer-products/ea-customer-products.component';
 import { CustomerStoresComponent }                            from '../ea-customer-stores/ea-customer-stores.component';
 import { CustomerMetricsComponent }                           from '../ea-customer-metrics/ea-customer-metrics.component';
-import { UsersService }                                       from '@app/@core/data/users.service';
+import { CustomersService }                                   from '@app/@core/data/customers.service';
 
 const stories = storiesOf('Customer Info', module);
 
-const user = {
-	_id: '5cc0925e8979b91ee93c86a1',
-	firstName: 'Maxwell',
-	lastName: 'Mante',
-	image: 'https://s3.amazonaws.com/uifaces/faces/twitter/jm_denis/128.jpg',
-	email: 'Mason.Kutch33@hotmail.com',
-	apartment: '138',
-	phone: '1-566-610-8055 x749',
+const customer = {
+	_id:         '5cc0925e8979b91ee93c86a1',
+	firstName:   'Maxwell',
+	lastName:    'Mante',
+	image:       'https://s3.amazonaws.com/uifaces/faces/twitter/jm_denis/128.jpg',
+	email:       'Mason.Kutch33@hotmail.com',
+	apartment:   '138',
+	phone:       '1-566-610-8055 x749',
 	geoLocation: {
 		streetAddress: '139 Lebsack Parks',
-		city: 'Angelineland',
-		house: '150',
-		loc: {
-			type: 'Point',
+		city:          'Angelineland',
+		house:         '150',
+		loc:           {
+			type:        'Point',
 			coordinates: [23.3332736, 42.6459136],
-			__typename: 'Loc',
+			__typename:  'Loc',
 		},
-		__typename: 'GeoLocation',
+		__typename:    'GeoLocation',
 	},
-	__typename: 'User',
+	__typename:  'User',
 };
 
 export function createApollo(httpLink: HttpLink)
 {
 	return {
-		link: httpLink.create({ uri: 'https://api.example.com/graphql' }),
+		link:  httpLink.create({ uri: 'https://api.example.com/graphql' }),
 		cache: new InMemoryCache(),
 	};
 }
@@ -84,7 +84,7 @@ stories.addDecorator(
 				               CustomerStoresComponent,
 				               CustomerMetricsComponent,
 			               ],
-			               imports: [
+			               imports:      [
 				               NgSelectModule,
 				               CommonModule,
 				               ThemeModule,
@@ -114,17 +114,17 @@ stories.addDecorator(
 				               NgSelectModule,
 				               FormsModule,
 			               ],
-			               providers: [
+			               providers:    [
 				               {
-					               provide: APOLLO_OPTIONS,
+					               provide:    APOLLO_OPTIONS,
 					               useFactory: createApollo,
-					               deps: [HttpLink],
+					               deps:       [HttpLink],
 				               },
 				               TranslateStore,
 				               NotifyService,
 				               TranslateService,
 				               HttpLink,
-				               UsersService,
+				               CustomersService,
 				               { provide: APP_BASE_HREF, useValue: '/' },
 			               ],
 		               })
@@ -132,7 +132,7 @@ stories.addDecorator(
 
 stories.add('Customer Info', () => ({
 	component: CustomerInfoComponent,
-	props: {
-		user: object('User', user),
+	props:     {
+		customer: object('Customer', customer),
 	},
 }));
