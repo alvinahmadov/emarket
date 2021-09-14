@@ -1,39 +1,46 @@
 import { NgModule }                        from '@angular/core';
 import { CommonModule, JsonPipe }          from '@angular/common';
 import { RouterModule, Routes }            from '@angular/router';
-import { Ng2SmartTableModule }             from 'ng2-smart-table';
-import { ToasterModule }                   from 'angular2-toaster';
-import { TranslateModule }                 from '@ngx-translate/core';
-import { CustomersComponent }              from './customers.component';
-import { ThemeModule }                     from '../../@theme';
-import { HighlightModule }                 from 'ngx-highlightjs';
-import { RenderComponentsModule }          from '../../@shared/render-component/render-components.module';
-import { GeoLocationService }              from '../../@core/data/geo-location.service';
-import { UserMutationModule }              from '../../@shared/user/user-mutation';
-import { CustomerTableModule }             from '../../@shared/render-component/customer-table/customer-table.module';
 import { NbSpinnerModule, NbButtonModule } from '@nebular/theme';
+import { TranslateModule }                 from '@ngx-translate/core';
+import { Ng2SmartTableModule }             from 'ng2-smart-table';
+import { HighlightModule }                 from 'ngx-highlightjs';
+import { ToasterModule }                   from 'angular2-toaster';
+import { ThemeModule }                     from '@app/@theme';
+import { RenderComponentsModule }          from '@app/@shared/render-component/render-components.module';
+import { GeoLocationService }              from '@app/@core/data/geo-location.service';
+import { UserMutationModule }              from '@app/@shared/user/user-mutation';
+import { CustomerTableModule }             from '@app/@shared/render-component/customer-table/customer-table.module';
 import { NotifyService }                   from '@app/@core/services/notify/notify.service';
 import { BanConfirmModule }                from '@app/@shared/user/ban-confirm';
+import { CustomersComponent }              from './customers.component';
 
 const routes: Routes = [
 	{
-		path: 'list',
+		path:      'list',
 		component: CustomersComponent,
 	},
 	{
-		path: 'invites',
+		path:         'invites',
 		loadChildren: () =>
-				import('./+invites/invites.module').then((m) => m.InvitesModule),
+				              import('./+invites/invites.module').then((m) => m.InvitesModule),
 	},
 	{
-		path: 'list/:id',
+		path:         'chats',
 		loadChildren: () =>
-				import('./+customer/customer.module').then((m) => m.CustomerModule),
+				              import('./+chats/chats.module')
+						              .then((m) => m.ChatsModule)
+						              .catch(err => console.error(err)),
+	},
+	{
+		path:         'list/:id',
+		loadChildren: () =>
+				              import('./+customer/customer.module').then((m) => m.CustomerModule),
 	},
 ];
 
 @NgModule({
-	          imports: [
+	          imports:      [
 		          CommonModule,
 		          Ng2SmartTableModule,
 		          ThemeModule,
@@ -49,7 +56,7 @@ const routes: Routes = [
 		          NbButtonModule,
 	          ],
 	          declarations: [CustomersComponent],
-	          providers: [JsonPipe, GeoLocationService, NotifyService],
+	          providers:    [JsonPipe, GeoLocationService, NotifyService],
           })
 export class CustomersModule
 {
