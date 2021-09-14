@@ -1,62 +1,62 @@
-import { from, Observable, of }         from 'rxjs';
+import { Injectable }                   from '@angular/core';
 import { NbAuthResult, NbAuthStrategy } from '@nebular/auth';
 import { ActivatedRoute }               from '@angular/router';
-import { Apollo }                       from 'apollo-angular';
-import { catchError, map }              from 'rxjs/operators';
-import { Injectable }                   from '@angular/core';
-import { Store }                        from '../data/store.service';
 import { NbAuthStrategyClass }          from '@nebular/auth/auth.options';
+import { Apollo }                       from 'apollo-angular';
+import { from, Observable, of }         from 'rxjs';
+import { catchError, map }              from 'rxjs/operators';
 import { GQLMutations, GQLQueries }     from '@modules/server.common/utilities/graphql'
 import CommonUtils                      from '@modules/server.common/utilities/common';
+import { Store }                        from '@app/@core/data/store.service';
 
 @Injectable()
 export class AdminAuthStrategy extends NbAuthStrategy
 {
 	private static config = {
-		login: {
-			redirect: {
+		login:       {
+			redirect:        {
 				success: '/',
 				failure: null,
 			},
-			defaultErrors: [
+			defaultErrors:   [
 				'Login/Email combination is not correct, please try again.',
 			],
 			defaultMessages: ['You have been successfully logged in.'],
 		},
-		register: {
-			redirect: {
+		register:    {
+			redirect:        {
 				success: '/',
 				failure: null,
 			},
-			defaultErrors: ['Something went wrong, please try again.'],
+			defaultErrors:   ['Something went wrong, please try again.'],
 			defaultMessages: ['You have been successfully registered.'],
 		},
-		logout: {
-			redirect: {
+		logout:      {
+			redirect:        {
 				success: '/',
 				failure: null,
 			},
-			defaultErrors: ['Something went wrong, please try again.'],
+			defaultErrors:   ['Something went wrong, please try again.'],
 			defaultMessages: ['You have been successfully logged out.'],
 		},
 		requestPass: {
-			redirect: {
+			redirect:        {
 				success: '/',
 				failure: null,
 			},
-			defaultErrors: ['Something went wrong, please try again.'],
+			defaultErrors:   ['Something went wrong, please try again.'],
 			defaultMessages: [
 				'Reset password instructions have been sent to your email.',
 			],
 		},
-		resetPass: {
-			redirect: {
+		resetPass:   {
+			redirect:              {
 				success: '/',
 				failure: null,
 			},
 			resetPasswordTokenKey: 'reset_password_token',
-			defaultErrors: ['Something went wrong, please try again.'],
-			defaultMessages: ['Your password has been successfully changed.'],
+			defaultErrors:         ['Something went wrong, please try again.'],
+			defaultMessages:       ['Your password has been successfully changed.'],
 		},
 	};
 	
@@ -78,7 +78,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	{
 		return this.apollo
 		           .query({
-			                  query: GQLQueries.AdminByEmail,
+			                  query:     GQLQueries.AdminByEmail,
 			                  variables: { email },
 		                  })
 		           .pipe(map((res) => res.data['adminByEmail']));
@@ -97,19 +97,12 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		
 		return this.apollo
 		           .mutate({
-			                   mutation: GQLMutations.AdminLogin,
-			                   variables: { email, password },
+			                   mutation:    GQLMutations.AdminLogin,
+			                   variables:   { email, password },
 			                   errorPolicy: 'all',
 		                   })
 		           .pipe(
 				           map(
-						           /*
-						            Instead of res: any, it should be:
-						            res: {
-						            data: { adminLogin: IAdminLoginResponse };
-						            errors;
-						            }
-						            */
 						           (res: any) =>
 						           {
 							           const { data, errors } = res;
@@ -162,15 +155,15 @@ export class AdminAuthStrategy extends NbAuthStrategy
 				                      })
 		           );
 	}
-
-    register(args: {
+	
+	register(args: {
 		email: string;
 		fullName: string;
 		password: string;
 		confirmPassword: string;
 		terms: boolean;
 	}): Observable<NbAuthResult>
-    {
+	{
 		const { email, fullName, password, confirmPassword, terms } = args;
 		
 		if(password !== confirmPassword)
@@ -181,20 +174,18 @@ export class AdminAuthStrategy extends NbAuthStrategy
 					])
 			);
 		}
-	
-	    const letter = fullName.charAt(0).toUpperCase();
-	    const pictureUrl = CommonUtils.getDummyImage(300, 300, letter);
-	
-	    const mutation = GQLMutations.AdminRegister;
+		
+		const letter = fullName.charAt(0).toUpperCase();
+		const avatar = CommonUtils.getDummyImage(300, 300, letter);
 		
 		return this.apollo
 		           .mutate({
-			                   mutation: GQLMutations.AdminRegister,
-			                   variables: {
+			                   mutation:    GQLMutations.AdminRegister,
+			                   variables:   {
 				                   email,
 				                   fullName,
 				                   password,
-				                   pictureUrl,
+				                   avatar,
 			                   },
 			                   errorPolicy: 'all',
 		                   })
@@ -239,7 +230,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 					                      );
 				                      })
 		           );
-    }
+	}
 	
 	logout(): Observable<NbAuthResult>
 	{
