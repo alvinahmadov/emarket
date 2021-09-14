@@ -3,15 +3,15 @@ import { FormBuilder, FormControl, FormGroup }        from '@angular/forms';
 import { ActivatedRoute, Router }                     from '@angular/router';
 import { first }                                      from 'rxjs/operators';
 import { ToasterService }                             from 'angular2-toaster';
-import { BasicInfoFormComponent }                     from '../../../../@shared/user/forms';
-import { LocationFormComponent }                      from '../../../../@shared/forms/location';
-import { UserRouter }                                 from '@modules/client.common.angular2/routers/user-router.service';
+import { CustomerRouter }                             from '@modules/client.common.angular2/routers/customer-router.service';
 import IGeoLocation                                   from '@modules/server.common/interfaces/IGeoLocation';
-import User                                           from '@modules/server.common/entities/User';
+import Customer                                       from '@modules/server.common/entities/Customer';
+import { BasicInfoFormComponent }                     from '@app/@shared/user/forms';
+import { LocationFormComponent }                      from '@app/@shared/forms/location';
 
 @Component({
+	           styleUrls:   ['./customer-edit.component.scss'],
 	           templateUrl: './customer-edit.component.html',
-	           styleUrls: ['./customer-edit.component.scss'],
            })
 export class CustomerEditComponent implements OnInit
 {
@@ -29,19 +29,19 @@ export class CustomerEditComponent implements OnInit
 	
 	readonly form: FormGroup = this._formBuilder.group({
 		                                                   basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
-		                                                   location: LocationFormComponent.buildForm(this._formBuilder),
+		                                                   location:  LocationFormComponent.buildForm(this._formBuilder),
 	                                                   });
 	
 	readonly basicInfo = this.form.get('basicInfo') as FormControl;
 	readonly location = this.form.get('location') as FormControl;
 	
-	private _currentCustomer: User;
+	public _currentCustomer: Customer;
 	
 	constructor(
 			private readonly _activatedRoute: ActivatedRoute,
 			private readonly _router: Router,
 			private readonly _formBuilder: FormBuilder,
-			private readonly _customerRouter: UserRouter,
+			private readonly _customerRouter: CustomerRouter,
 			private readonly _toasterService: ToasterService
 	)
 	{}
@@ -93,14 +93,14 @@ export class CustomerEditComponent implements OnInit
 		this.mapTypeEmitter.emit(mapType);
 	}
 	
-	protected async updateCustomer()
+	async updateCustomer()
 	{
 		const geoLocationInput = this.locationForm.getValue();
 		geoLocationInput.loc.coordinates.reverse();
 		try
 		{
 			this.loading = true;
-			const customer = await this._customerRouter.updateUser(
+			const customer = await this._customerRouter.updateCustomer(
 					this._currentCustomer.id,
 					{
 						...this.basicInfoForm.getValue(),
