@@ -1,27 +1,26 @@
 import { Component, AfterViewInit, Input } from '@angular/core';
 import { DefaultEditor, Cell }             from 'ng2-smart-table';
-
 import {
-	Country,
-	CountryName,
+	TCountryName,
 	countriesIdsToNamesArray,
-} from '@modules/server.common/entities/GeoLocation';
+}                                          from '@modules/server.common/data/countries';
+import Country                             from '@modules/server.common/enums/Country';
 
 @Component({
 	           template: `
-		<select
-			[(ngModel)]="this.cell.newValue"
-			(change)="onChanged($event)"
-			class="form-control ng-pristine ng-valid ng-touched"
-		>
-			<option
-				*ngFor="let country of countries"
-				value="{{ country.name }}"
-			>
-				{{ country.name }}
-			</option>
-		</select>
-	`,
+		                     <select
+				                     [(ngModel)]="this.cell.newValue"
+				                     (change)="onChanged($event)"
+				                     class="form-control ng-pristine ng-valid ng-touched"
+		                     >
+			                     <option
+					                     *ngFor="let country of countries"
+					                     value="{{ country.name }}"
+			                     >
+				                     {{ country.name }}
+			                     </option>
+		                     </select>
+	                     `,
            })
 export class CountryRenderComponent extends DefaultEditor
 		implements AfterViewInit
@@ -36,7 +35,7 @@ export class CountryRenderComponent extends DefaultEditor
 		super();
 	}
 	
-	get countries(): Array<{ id: Country; name: CountryName }>
+	get countries(): Array<{ id: Country; name: TCountryName }>
 	{
 		return countriesIdsToNamesArray;
 	}
