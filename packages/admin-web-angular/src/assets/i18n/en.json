@@ -28,7 +28,8 @@
         "NAME": "Name",
         "QTY": "QTY",
         "PRICE": "Price",
-        "IMAGE": "Image"
+        "IMAGE": "Image",
+        "COMMENT": "Comment"
       }
     },
     "ORDER_SIDEBAR": {
@@ -748,9 +749,12 @@
     "MANAGE_CUSTOMER": "Manage customer",
     "CUSTOMER": "Customer",
     "CUSTOMERS_DEVICES": "Devices",
+    "CHAT_CUSTOMER": "Chat",
+    "BANNED_ONLY": "Show Banned only",
     "INVITE": "Invite",
     "NOT_INVITED_ONLY": "Not invited only",
     "ORDER": "Order",
+    "LOCATION": "Location",
     "ORDERS_STATISTICS": "Orders statistics",
     "NUMBER_OF_ORDERS": "Number of Orders",
     "CANCELED_ORDERS": "Canceled Orders",
@@ -994,7 +998,8 @@
             "PRODUCT": "Product",
             "PRICE": "Price",
             "AVAILABLE": "Available",
-            "AMOUNT": "Amount"
+            "AMOUNT": "Amount",
+            "COMMENT": "Comment"
           }
         }
       }
@@ -1011,7 +1016,8 @@
     "CUSTOMERS": {
       "CUSTOMERS": "Customers",
       "MANAGEMENT": "Management",
-      "INVITES": "Invites"
+      "INVITES": "Invites",
+      "CHATS": "Chats"
     },
     "CARRIERS": "Carriers",
     "SIMULATION": "Simulation",

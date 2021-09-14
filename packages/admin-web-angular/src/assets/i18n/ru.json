@@ -2,7 +2,7 @@
   "COMMON": {
     "SAVE": "Сохранить",
     "CANCEL": "Отмена",
-    "USA": "США",
+    "USA": "США"
   },
   "ORDER_VIEW": {
     "ORDER_HEADER_INFO": {
@@ -26,7 +26,8 @@
         "NAME": "Наименование",
         "QTY": "Кол-во",
         "PRICE": "Цена",
-        "IMAGE": "Изображение"
+        "IMAGE": "Изображение",
+        "COMMENT": "Комментарий"
       }
     },
     "ORDER_SIDEBAR": {
@@ -204,7 +205,7 @@
     "CONFIMR_1st_ORDER": "Подтвердите первый заказ",
     "CONFIMR_2nd_ORDER": "Подтвердите второй заказ",
     "SETUP_MERCHANTS": {
-      "SETUP_MERCHANTS": "Настроить торговцев",
+      "SETUP_MERCHANTS": "Настроить магазины",
       "PREV": "ПРЕДУПРЕЖДЕНИЕ",
       "NEXT": "СЛЕДУЮЩИЙ",
       "ADD": "Добавить",
@@ -746,9 +747,12 @@
     "MANAGE_CUSTOMER": "Управление клиентом",
     "CUSTOMER": "Покупатель",
     "CUSTOMERS_DEVICES": "Устройства",
+    "CHAT_CUSTOMER": "Написать",
+    "BANNED_ONLY": "Показать только забаненные",
     "INVITE": "Пригласить",
     "NOT_INVITED_ONLY": "Не приглашены только",
     "ORDER": "Заказ",
+    "LOCATION": "Местоположение",
     "ORDERS_STATISTICS": "Статистика заказов",
     "NUMBER_OF_ORDERS": "Количество заказов",
     "CANCELED_ORDERS": "Отмененные заказы",
@@ -759,7 +763,7 @@
     "ORDERS_HISTORY": "История заказов",
     "AVAILABLE_PRODUCTS": "Доступные товары",
     "NEARBY_STORES": "Магазин поблизости",
-    "INVITES_REQUESTS_MANAGEMENT": "Предлагает управлению запросами",
+    "INVITES_REQUESTS_MANAGEMENT": "Управление запросами приглашений",
     "INVITES_MANAGEMENT": "Управление приглашениями",
     "DESCRIPTION": "Описание",
     "DETAILS": "Детали",
@@ -833,12 +837,12 @@
     },
     "CUSTOMER_VIEW": {
       "MANAGE_CUSTOMER": "Управление клиентом",
-      "EDIT": "Редактирование",
-      "CUSTOMER": "Покупатель"
+      "EDIT": "Редактировать",
+      "CUSTOMER": "Клиент"
     },
     "INVITES_VIEW": {
       "DELETE": "Удалить",
-      "INVITE": "Пригласить"
+      "INVITE": "Приглашение"
     }
   },
   "CARRIERS_VIEW": {
@@ -992,7 +996,8 @@
             "PRODUCT": "Товар",
             "PRICE": "Цена",
             "AVAILABLE": "Доступно",
-            "AMOUNT": "Сумма"
+            "AMOUNT": "Сумма",
+            "COMMENT": "Комментарий"
           }
         }
       }
@@ -1009,7 +1014,8 @@
     "CUSTOMERS": {
       "CUSTOMERS": "Клиенты",
       "MANAGEMENT": "Управление",
-      "INVITES": "Приглашения"
+      "INVITES": "Приглашения",
+      "CHATS": "Чаты"
     },
     "CARRIERS": "Перевозчики",
     "SIMULATION": "Симуляция",
