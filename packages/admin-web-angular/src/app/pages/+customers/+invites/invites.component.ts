@@ -1,29 +1,25 @@
+import { NgbModal }                      from '@ng-bootstrap/ng-bootstrap';
 import {
-	Component,
-	OnDestroy,
-	ElementRef,
-	Renderer2,
 	AfterViewChecked,
+	OnDestroy,
 	OnInit,
-} from '@angular/core';
-
-import { Subject, Observable, forkJoin } from 'rxjs';
+	Component,
+	ElementRef,
+	Renderer2
+}                                        from '@angular/core';
+import { TranslateService }              from '@ngx-translate/core';
 import { LocalDataSource }               from 'ng2-smart-table';
-import { InvitesService }                from '../../../@core/data/invites.service';
-import Invite                            from '@modules/server.common/entities/Invite';
-import { takeUntil, first }              from 'rxjs/operators';
-import { ToasterService }                from 'angular2-toaster';
+import { forkJoin, Observable, Subject } from 'rxjs';
+import { first, takeUntil }              from 'rxjs/operators';
+import { getDefaultCountryName }         from '@modules/server.common/data/countries';
 import { IInviteUpdateObject }           from '@modules/server.common/interfaces/IInvite';
 import { IGeolocationUpdateObject }      from '@modules/server.common/interfaces/IGeoLocation';
-import {
-	Country,
-	getCountryName,
-}                                        from '@modules/server.common/entities/GeoLocation';
-import { CountryRenderComponent }        from './country-render/country-render.component';
-import { TranslateService }              from '@ngx-translate/core';
+import Country                           from '@modules/server.common/enums/Country';
+import Invite                            from '@modules/server.common/entities/Invite';
+import { InvitesService }                from '@app/@core/data/invites.service';
 import { NotifyService }                 from '@app/@core/services/notify/notify.service';
-import { NgbModal }                      from '@ng-bootstrap/ng-bootstrap';
-import { ConfimationModalComponent }     from '../../../@shared/confirmation-modal/confirmation-modal.component';
+import { ConfimationModalComponent }     from '@app/@shared/confirmation-modal/confirmation-modal.component';
+import { CountryRenderComponent }        from './country-render/country-render.component';
 
 export interface InviteViewModel
 {
@@ -39,9 +35,9 @@ export interface InviteViewModel
 const perPage = 10;
 
 @Component({
-	           selector: 'ea-invites',
+	           selector:    'ea-invites',
+	           styleUrls:   ['/invites.component.scss'],
 	           templateUrl: './invites.component.html',
-	           styleUrls: ['/invites.component.scss'],
            })
 export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 {
@@ -120,7 +116,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		try
 		{
 			this.loading = true;
-			const createDataObject = this.inviteCreateObject(e.newData);
+			const createDataObject = InvitesComponent.inviteCreateObject(e.newData);
 			const createInput = await this._invitesService.getCreateInviteObject(
 					createDataObject
 			);
@@ -147,12 +143,12 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 	async deleteConfirm(e)
 	{
 		const activeModal = this.modalService.open(ConfimationModalComponent, {
-			size: 'sm',
+			size:      'sm',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 		const modalComponent: ConfimationModalComponent =
-				activeModal.componentInstance;
+				      activeModal.componentInstance;
 		
 		await modalComponent.confirmEvent
 		                    .pipe(takeUntil(modalComponent.ngDestroy$))
@@ -186,7 +182,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		try
 		{
 			this.loading = true;
-			const createDataObject = this.inviteCreateObject(e.newData);
+			const createDataObject = InvitesComponent.inviteCreateObject(e.newData);
 			const createInput = await this._invitesService.getCreateInviteObject(
 					createDataObject
 			);
@@ -277,39 +273,39 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 						{
 							this.settingsSmartTable = {
 								selectMode: 'multi',
-								add: {
-									addButtonContent: '<i class="ion-md-add"></i>',
+								add:        {
+									addButtonContent:    '<i class="ion-md-add"></i>',
 									createButtonContent:
-											'<i class="ion-md-checkmark"></i>',
+									                     '<i class="ion-md-checkmark"></i>',
 									cancelButtonContent: '<i class="ion-md-close"></i>',
-									confirmCreate: true,
+									confirmCreate:       true,
 								},
-								edit: {
-									editButtonContent: '<i class="ion-md-create"></i>',
+								edit:       {
+									editButtonContent:   '<i class="ion-md-create"></i>',
 									saveButtonContent:
-											'<i class="ion-md-checkmark"></i>',
+									                     '<i class="ion-md-checkmark"></i>',
 									cancelButtonContent: '<i class="ion-md-close"></i>',
-									confirmSave: true,
+									confirmSave:         true,
 								},
-								delete: {
+								delete:     {
 									deleteButtonContent: '<i class="ion-md-trash"></i>',
-									confirmDelete: true,
+									confirmDelete:       true,
 								},
-								columns: {
-									country: {
-										title: country,
+								columns:    {
+									country:   {
+										title:  country,
 										editor: {
-											type: 'custom',
+											type:      'custom',
 											component: CountryRenderComponent,
 										},
 									},
-									city: { title: city },
-									address: { title: streetAddress },
-									house: { title: house },
+									city:      { title: city },
+									address:   { title: streetAddress },
+									house:     { title: house },
 									apartment: { title: apartment },
-									invite: { title: inviteCode },
+									invite:    { title: inviteCode },
 								},
-								pager: {
+								pager:      {
 									display: true,
 									perPage,
 								},
@@ -328,25 +324,27 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		
 		const loadData = async() =>
 		{
-			const invitesVM = invites.map((invite) =>
-			                              {
-				                              this.loading = false;
-				
-				                              return {
-					                              country:
-							                              getCountryName(invite.geoLocation.countryId).trim() ||
-							                              this.noInfoSign,
-					                              city: invite.geoLocation.city.trim() || this.noInfoSign,
-					                              address:
-							                              invite.geoLocation.streetAddress.trim() ||
-							                              this.noInfoSign,
-					                              house: invite.geoLocation.house.trim() || this.noInfoSign,
-					                              apartment: invite.apartment.trim() || this.noInfoSign,
-					                              invite: invite.code.trim() || this.noInfoSign,
-					                              id: invite.id,
-					                              geoLocation: invite.geoLocation,
-				                              };
-			                              });
+			const invitesVM = invites.map(
+					(invite) =>
+					{
+						this.loading = false;
+						
+						return {
+							country:
+									getDefaultCountryName(invite.geoLocation.countryId) ||
+									this.noInfoSign,
+							city:        invite.geoLocation.city.trim() || this.noInfoSign,
+							address:
+									invite.geoLocation.streetAddress.trim() ||
+									this.noInfoSign,
+							house:       invite.geoLocation.house.trim() || this.noInfoSign,
+							apartment:   invite.apartment.trim() || this.noInfoSign,
+							invite:      invite.code.trim() || this.noInfoSign,
+							id:          invite.id,
+							geoLocation: invite.geoLocation,
+						};
+					}
+			);
 			
 			await this.loadDataCount();
 			
@@ -362,7 +360,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		this.loading = true;
 		this.$invites = this._invitesService
 		                    .getInvites({
-			                                skip: perPage * (page - 1),
+			                                skip:  perPage * (page - 1),
 			                                limit: perPage,
 		                                })
 		                    .pipe(takeUntil(this.ngDestroy$))
@@ -378,29 +376,27 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 	private getUpdateInviteObject(data: InviteViewModel): IInviteUpdateObject
 	{
 		const geoLocation: IGeolocationUpdateObject = {
-			countryId: Country[data.country],
-			city: data.city,
+			countryId:     Country[data.country],
+			city:          data.city,
 			streetAddress: data.address,
-			house: data.house,
+			house:         data.house,
 		};
 		
-		const invite: IInviteUpdateObject = {
-			code: data.invite,
+		return {
+			code:      data.invite,
 			apartment: data.apartment,
 			geoLocation,
 		};
-		
-		return invite;
 	}
 	
-	private inviteCreateObject(data)
+	private static inviteCreateObject(data)
 	{
-		this.inviteValidation(data);
+		InvitesComponent.inviteValidation(data);
 		data.apartment = data.apartment || ' ';
 		return data;
 	}
 	
-	private inviteValidation(data)
+	private static inviteValidation(data)
 	{
 		if(!data.address || !data.city || !data.country || !data.house)
 		{
