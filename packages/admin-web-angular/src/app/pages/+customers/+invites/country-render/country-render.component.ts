@@ -1,11 +1,10 @@
 import { Component, AfterViewInit, Input } from '@angular/core';
 import { DefaultEditor, Cell }             from 'ng2-smart-table';
-
 import {
-	Country,
-	CountryName,
+	TCountryName,
 	countriesIdsToNamesArray,
-} from '@modules/server.common/entities/GeoLocation';
+}                                          from '@modules/server.common/data/countries';
+import Country                             from '@modules/server.common/enums/Country';
 
 @Component({
 	           templateUrl: './country-render.component.html',
@@ -23,7 +22,7 @@ export class CountryRenderComponent extends DefaultEditor
 		super();
 	}
 	
-	get countries(): Array<{ id: Country; name: CountryName }>
+	get countries(): Array<{ id: Country; name: TCountryName }>
 	{
 		return countriesIdsToNamesArray;
 	}
