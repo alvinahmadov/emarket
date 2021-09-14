@@ -1,26 +1,26 @@
 import { NgModule }                         from '@angular/core';
 import { CommonModule }                     from '@angular/common';
-import { ThemeModule }                      from '../../@theme/theme.module';
 import { RouterModule }                     from '@angular/router';
-import { routes }                           from './fakeData.routes';
-import { FakeDataComponent }                from './fakeData.component';
-import FakeDataInvites                      from '../../@core/data/fakeDataServices/invites';
-import FakeDataCarriers                     from '../../@core/data/fakeDataServices/carriers';
-import FakeDataProducts                     from '../../@core/data/fakeDataServices/products';
-import FakeDataWarehouses                   from '../../@core/data/fakeDataServices/warehouses';
-import FakeDataWarehousesProducts           from '../../@core/data/fakeDataServices/warehousesProducts';
-import FakeDataUsers                        from '../../@core/data/fakeDataServices/users';
+import { NbSpinnerModule, NbButtonModule }  from '@nebular/theme';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { HttpClient }                       from '@angular/common/http';
 import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
 import { ToasterModule }                    from 'angular2-toaster';
-import FakeDataProductsCategories           from '../../@core/data/fakeDataServices/productsCategories';
-import { NbSpinnerModule, NbButtonModule }  from '@nebular/theme';
-import { NotifyService }                    from '@app/@core/services/notify/notify.service';
+import FakeDataCarriers                     from '@app/@core/data/fakeDataServices/carriers';
+import FakeDataUsers                        from '@app/@core/data/fakeDataServices/customers';
+import FakeDataInvites                      from '@app/@core/data/fakeDataServices/invites';
+import FakeDataProducts                     from '@app/@core/data/fakeDataServices/products';
+import FakeDataProductsCategories           from '@app/@core/data/fakeDataServices/productsCategories';
+import FakeDataWarehouses                   from '@app/@core/data/fakeDataServices/warehouses';
+import FakeDataWarehousesProducts           from '@app/@core/data/fakeDataServices/warehousesProducts';
 import { InvitesService }                   from '@app/@core/data/invites.service';
 import { InvitesRequestsService }           from '@app/@core/data/invites-requests.service';
-import { UsersService }                     from '@app/@core/data/users.service';
 import { CurrenciesService }                from '@app/@core/data/currencies.service';
+import { CustomersService }                 from '@app/@core/data/customers.service';
+import { NotifyService }                    from '@app/@core/services/notify/notify.service';
+import { ThemeModule }                      from '@app/@theme/theme.module';
+import { routes }                           from './fakeData.routes';
+import { FakeDataComponent }                from './fakeData.component';
 
 export function HttpLoaderFactory(http: HttpClient)
 {
@@ -28,15 +28,15 @@ export function HttpLoaderFactory(http: HttpClient)
 }
 
 @NgModule({
-	          imports: [
+	          imports:      [
 		          CommonModule,
 		          ThemeModule,
 		          ToasterModule.forRoot(),
 		          TranslateModule.forChild({
 			                                   loader: {
-				                                   provide: TranslateLoader,
+				                                   provide:    TranslateLoader,
 				                                   useFactory: HttpLoaderFactory,
-				                                   deps: [HttpClient],
+				                                   deps:       [HttpClient],
 			                                   },
 		                                   }),
 		          RouterModule.forChild(routes),
@@ -44,7 +44,7 @@ export function HttpLoaderFactory(http: HttpClient)
 		          NbButtonModule,
 	          ],
 	          declarations: [FakeDataComponent],
-	          providers: [
+	          providers:    [
 		          FakeDataInvites,
 		          FakeDataCarriers,
 		          FakeDataProducts,
@@ -54,7 +54,7 @@ export function HttpLoaderFactory(http: HttpClient)
 		          FakeDataProductsCategories,
 		          InvitesService,
 		          InvitesRequestsService,
-		          UsersService,
+		          CustomersService,
 		          NotifyService,
 		          CurrenciesService,
 	          ],
