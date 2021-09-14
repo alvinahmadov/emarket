@@ -74,6 +74,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		return [AdminAuthStrategy, options];
 	}
 	
+	// noinspection JSUnusedGlobalSymbols
 	getByEmail(email: string)
 	{
 		return this.apollo
@@ -91,8 +92,6 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	}): Observable<NbAuthResult>
 	{
 		const { email, password } = args;
-		
-		// TODO implement remember me feature
 		const rememberMe = !!args.rememberMe;
 		
 		return this.apollo
@@ -129,7 +128,9 @@ export class AdminAuthStrategy extends NbAuthStrategy
 							           }
 							
 							           this.store.adminId = data.adminLogin.admin.id;
-							           this.store.token = data.adminLogin.token;
+							
+							           if(rememberMe)
+								           this.store.token = data.adminLogin.token;
 							
 							           return new NbAuthResult(
 									           isSuccessful,
