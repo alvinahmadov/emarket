@@ -1,78 +1,89 @@
 <nb-card>
-    <toaster-container></toaster-container>
-
-    <nb-card-header>
-        <button
-                (click)="showCreateUserModal()"
-                class="mr-2 d-inline-block"
-                nbButton
-                status="success"
-        >
-            <i class="ion-md-add button-icon mr-1"></i>
-
-            <small _ngcontent-c55="">{{
-                'CUSTOMERS_VIEW.CREATE' | translate
-                }}</small>
-        </button>
-
-        <button
-                (click)="deleteSelectedRows()"
-                [disabled]="!hasSelectedCustomers"
-                class="mr-2 d-inline-block"
-                nbButton
-                status="danger"
-        >
-            <i class="ion-md-trash button-icon mr-1"></i>
-
-            <small _ngcontent-c55="">{{
-                'CUSTOMERS_VIEW.DELETE' | translate
-                }}</small>
-        </button>
-
-        <button
-                [routerLink]="['/devices']"
-                class="mr-2 d-inline-block"
-                nbButton
-                status="info"
-        >
-            <i class="ion-md-phone-portrait"></i>&nbsp;&nbsp;
-            {{ 'CUSTOMERS_VIEW.CUSTOMERS_DEVICES' | translate }}
-        </button>
-
-        <button
-                (click)="banSelectedRows()"
-                [disabled]="!isOnlyOneCustomerSelected || showBanLoading"
-                [nbSpinner]="showBanLoading"
-                class="mr-2 d-inline-block"
-                nbButton
-                status="danger"
-        >
-            <i class="ion-md-close-circle button-icon mr-1"></i>
-
-            <small *ngIf="isUserBanned" _ngcontent-c55="">{{
-                'CUSTOMERS_VIEW.UNBAN' | translate
-                }}</small>
-
-            <small *ngIf="!isUserBanned" _ngcontent-c55="">{{
-                'CUSTOMERS_VIEW.BAN' | translate
-                }}</small>
-        </button>
-        <input
-                [(ngModel)]="showOnlyBanned"
-                [ngModelOptions]="{ standalone: true }"
-                id="showBannedOnly"
-                name="bannedOnly"
-                type="checkbox"
-        />
-        <label for="bannedOnly">Show Banned Only</label>
-    </nb-card-header>
-
-    <nb-card-body [nbSpinner]="loading">
-        <ng2-smart-table
-                (userRowSelect)="selectCustomerTmp($event)"
-                [settings]="settingsSmartTable"
-                [source]="sourceSmartTable"
-        >
-        </ng2-smart-table>
-    </nb-card-body>
+	<toaster-container></toaster-container>
+	
+	<nb-card-header>
+		<button
+				(click)="showCreateUserModal()"
+				class="mr-2 d-inline-block"
+				nbButton
+				status="success"
+		>
+			<i class="ion-md-add button-icon mr-1"></i>
+			
+			<small _ngcontent-c55="">{{
+				'CUSTOMERS_VIEW.CREATE' | translate
+				}}</small>
+		</button>
+		
+		<button
+				(click)="deleteSelectedRows()"
+				[disabled]="!hasSelectedCustomers"
+				class="mr-2 d-inline-block"
+				nbButton
+				status="danger"
+		>
+			<i class="ion-md-trash button-icon mr-1"></i>
+			
+			<small _ngcontent-c55="">{{
+				'CUSTOMERS_VIEW.DELETE' | translate
+				}}</small>
+		</button>
+		
+		<button
+				(click)="banSelectedRows()"
+				[disabled]="!isOnlyOneCustomerSelected || showBanLoading"
+				[nbSpinner]="showBanLoading"
+				class="mr-2 d-inline-block"
+				nbButton
+				status="danger"
+		>
+			<i class="ion-md-close-circle button-icon mr-1"></i>
+			
+			<small *ngIf="isUserBanned" _ngcontent-c55="">{{
+				'CUSTOMERS_VIEW.UNBAN' | translate
+				}}</small>
+			
+			<small *ngIf="!isUserBanned" _ngcontent-c55="">{{
+				'CUSTOMERS_VIEW.BAN' | translate
+				}}</small>
+		</button>
+		
+		<!--        <button-->
+		<!--                [routerLink]="['/chats']"-->
+		<!--                [disabled]="!hasSelectedCustomers"-->
+		<!--                class="mr-2 d-inline-block"-->
+		<!--                nbButton-->
+		<!--                status="warning"-->
+		<!--        >-->
+		<!--            <i class="socicon-wechat"></i>&nbsp;&nbsp;-->
+		<!--            {{ 'CUSTOMERS_VIEW.CHAT_CUSTOMER' | translate }}-->
+		<!--        </button>-->
+		<button
+				[routerLink]="['/devices']"
+				class="mr-2 d-inline-block"
+				nbButton
+				status="info"
+		>
+			<i class="ion-md-phone-portrait"></i>&nbsp;&nbsp;
+			{{ 'CUSTOMERS_VIEW.CUSTOMERS_DEVICES' | translate }}
+		</button>
+		<input
+				[(ngModel)]="showOnlyBanned"
+				[ngModelOptions]="{ standalone: true }"
+				id="showBannedOnly"
+				name="bannedOnly"
+				type="checkbox"
+				style="margin: 0 25px"
+		/>
+		<label for="showBannedOnly"> {{ 'CUSTOMERS_VIEW.BANNED_ONLY' | translate }} </label>
+	</nb-card-header>
+	
+	<nb-card-body [nbSpinner]="loading">
+		<ng2-smart-table
+				(userRowSelect)="selectCustomerTmp($event)"
+				[settings]="settingsSmartTable"
+				[source]="sourceSmartTable"
+		>
+		</ng2-smart-table>
+	</nb-card-body>
 </nb-card>
