@@ -1,31 +1,31 @@
-import { inject, injectable }            from 'inversify';
-import Logger                            from 'bunyan';
-import { WarehousesService }             from '../warehouses';
-import Warehouse                         from '@modules/server.common/entities/Warehouse';
-import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
-import ProductInfo                       from '@modules/server.common/entities/ProductInfo';
-import _                                 from 'lodash';
-import GeoUtils                          from '@modules/server.common/utilities/geolocation';
-import { createLogger }                  from '../../helpers/Log';
-import { GeoLocationsWarehousesService } from './GeoLocationsWarehousesService';
-import IGeoLocation                      from '@modules/server.common/interfaces/IGeoLocation';
+import { inject, injectable }             from 'inversify';
+import Logger                             from 'bunyan';
+import _                                  from 'lodash';
+import { map }                            from 'rxjs/operators';
 import {
 	observableListener,
 	routerName,
 	serialization,
 	asyncListener
-}                                        from '@pyro/io';
-import IGeoLocationProductsRouter        from '@modules/server.common/routers/IGeoLocationProductsRouter';
-import IService                          from '../IService';
-import { map }                            from 'rxjs/operators';
+}                                         from '@pyro/io';
+import IGeoLocation                       from '@modules/server.common/interfaces/IGeoLocation';
 import {
 	IProductTitle,
 	IProductDescription,
 	IProductDetails
 }                                         from '@modules/server.common/interfaces/IProduct';
+import IWarehouseProduct                  from '@modules/server.common/interfaces/IWarehouseProduct';
+import IGeoLocationProductsRouter         from '@modules/server.common/routers/IGeoLocationProductsRouter';
+import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import GeoLocation                        from '@modules/server.common/entities/GeoLocation';
+import ProductInfo                        from '@modules/server.common/entities/ProductInfo';
 import WarehouseProduct                   from '@modules/server.common/entities/WarehouseProduct';
+import GeoUtils                           from '@modules/server.common/utilities/geolocation';
+import { WarehousesService }              from '@core/services/warehouses';
+import { GeoLocationsWarehousesService }  from '@core/services/geo-locations/GeoLocationsWarehousesService';
+import IService                           from '@core/services/IService';
+import { createLogger }                   from '@core/helpers/Log';
 import { IGetGeoLocationProductsOptions } from 'graphql/geo-locations/geo-location.resolver';
-import IWarehouseProduct                  from "@modules/server.common/interfaces/IWarehouseProduct";
 
 @injectable()
 @routerName('geo-location-products')
@@ -73,17 +73,20 @@ export class GeoLocationsProductsService
 	{
 		try
 		{
-			const merchants = await this.geoLocationsWarehousesService
-			                            .getMerchants(
+			const distance: number = options?.trackingDistance
+			                         ?? GeoLocationsWarehousesService.TrackingDistance;
+			
+			const warehouses = await this.geoLocationsWarehousesService
+			                            .getStores(
 					                            geoLocation,
-					                            GeoLocationsWarehousesService.TrackingDistance,
+					                            distance,
 					                            {
 						                            fullProducts: true,
-						                            activeOnly: true,
+						                            activeOnly:   true,
 						                            merchantsIds: options ? options.merchantIds : null
 					                            }
 			                            );
-			const productsIds: Array<string[]> = merchants.map(
+			const productsIds: Array<string[]> = warehouses.map(
 					(m) =>
 					{
 						let products = m.products
@@ -127,12 +130,12 @@ export class GeoLocationsProductsService
 			searchText?: string
 	): Promise<ProductInfo[]>
 	{
-		const merchants = await this.geoLocationsWarehousesService.getMerchants(
+		const merchants = await this.geoLocationsWarehousesService.getStores(
 				geoLocation,
 				GeoLocationsWarehousesService.TrackingDistance,
 				{
 					fullProducts: true,
-					activeOnly: true,
+					activeOnly:   true,
 					merchantsIds: options ? options.merchantIds : null
 				}
 		);
@@ -179,14 +182,14 @@ export class GeoLocationsProductsService
 					
 					     return warehouse;
 				     }) // remove all warehouse products which count is 0.
-				.map((warehouse) =>
-						     _.map(warehouse.products, (warehouseProduct) =>
+				.map((warehouse: Warehouse) =>
+						     _.map(warehouse.products, (warehouseProduct: WarehouseProduct) =>
 						     {
 							     return new ProductInfo({
-								                            warehouseId: warehouse.id,
+								                            warehouseId:   warehouse.id,
 								                            warehouseLogo: warehouse.logo,
 								                            warehouseProduct,
-								                            distance: GeoUtils.getDistance(
+								                            distance:      GeoUtils.getDistance(
 										                            geoLocation,
 										                            warehouse.geoLocation
 								                            )
@@ -194,8 +197,8 @@ export class GeoLocationsProductsService
 						     })
 				)
 				.flatten()
-				.groupBy((productInfo) => productInfo.warehouseProduct.productId)
-				.map((productInfos: ProductInfo[], productId) =>
+				.groupBy((productInfo: ProductInfo) => productInfo.warehouseProduct.productId)
+				.map((productInfos: ProductInfo[]) =>
 				     {
 					     return _.minBy(
 							     productInfos,
@@ -207,32 +210,32 @@ export class GeoLocationsProductsService
 				.value();
 	}
 	
-	private productsFilter(wProduct, options)
+	private productsFilter(wProduct: IWarehouseProduct, options): boolean
 	{
 		if(!options)
 		{
 			return true;
 		}
 		
-		wProduct.product.images = wProduct.product
-		                                  .images
-		                                  .filter(
-				                                  (i) =>
-				                                  {
-					                                  return (
-							                                  (options.imageOrientation !== undefined
-							                                   ? options.imageOrientation === 1
-							                                     ? i.orientation === 1
-							                                     : i.orientation === 0 || i.orientation
-							                                       === 2
-							                                   : true) &&
-							                                  (options.locale !== undefined
-							                                   ? i.locale === options.locale
-							                                   : true)
-					                                  );
-				                                  });
+		wProduct.product['images'] = wProduct.product
+				['images']
+				.filter(
+						(i) =>
+						{
+							return (
+									(options.imageOrientation !== undefined
+									 ? options.imageOrientation === 1
+									   ? i.orientation === 1
+									   : i.orientation === 0 || i.orientation
+									     === 2
+									 : true) &&
+									(options.locale !== undefined
+									 ? i.locale === options.locale
+									 : true)
+							);
+						});
 		
-		if(!wProduct.product.images || wProduct.product.images.length === 0)
+		if(!wProduct.product['images'] || wProduct.product['images'].length === 0)
 		{
 			return false;
 		}
@@ -244,7 +247,7 @@ export class GeoLocationsProductsService
 		         : true;
 	}
 	
-	private static filterBySearchText(wProduct, searchText)
+	private static filterBySearchText(wProduct: IWarehouseProduct, searchText: string): boolean
 	{
 		if(!searchText)
 		{
