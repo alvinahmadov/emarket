@@ -3,8 +3,8 @@ import { Subject }                                        from 'rxjs';
 import Warehouse                                          from '@modules/server.common/entities/Warehouse';
 
 @Component({
-	           selector: 'ea-warehouse-main-info',
-	           styleUrls: ['./warehouse-main-info.component.scss'],
+	           selector:    'ea-warehouse-main-info',
+	           styleUrls:   ['./warehouse-main-info.component.scss'],
 	           templateUrl: './warehouse-main-info.component.html',
            })
 export class WarehouseMainInfoViewComponent
@@ -12,8 +12,8 @@ export class WarehouseMainInfoViewComponent
 {
 	@Input()
 	public selectedWarehouse: Warehouse;
-	protected isManufacturing: boolean;
-	protected isCarrierRequired: boolean;
+	public isManufacturing: boolean;
+	public isCarrierRequired: boolean;
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor() {}
