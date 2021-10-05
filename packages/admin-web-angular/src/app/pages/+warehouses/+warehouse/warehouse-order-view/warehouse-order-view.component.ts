@@ -1,27 +1,35 @@
 import {
 	Component,
-	ViewChild,
-	OnInit,
-	OnDestroy,
-	EventEmitter,
 	Input,
 	OnChanges,
-} from '@angular/core';
-
-import { Subject, Observable }   from 'rxjs';
-import Order                     from '@modules/server.common/entities/Order';
-import OrderWarehouseStatus      from '@modules/server.common/enums/OrderWarehouseStatus';
-import { OrderRouter }           from '@modules/client.common.angular2/routers/order-router.service';
-import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale';
-import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
-import { environment }           from 'environments/environment';
+	OnDestroy,
+	OnInit,
+	ViewChild,
+}                                from '@angular/core';
 import { TranslateService }      from '@ngx-translate/core';
+import { Observable, Subject }   from 'rxjs';
 import { takeUntil }             from 'rxjs/operators';
+import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale';
+import OrderWarehouseStatus      from '@modules/server.common/enums/OrderWarehouseStatus';
 import DeliveryType              from '@modules/server.common/enums/DeliveryType';
+import Order                     from '@modules/server.common/entities/Order';
+import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
+import { OrderRouter }           from '@modules/client.common.angular2/routers/order-router.service';
+import { environment }           from 'environments/environment';
+
+interface ISlideImage
+{
+	caption: string;
+	style: {
+		height?: string
+	};
+	title: string;
+	url: string
+}
 
 @Component({
-	           selector: 'ea-warehouse-order-view',
-	           styleUrls: ['./warehouse-order-view.component.scss'],
+	           selector:    'ea-warehouse-order-view',
+	           styleUrls:   ['./warehouse-order-view.component.scss'],
 	           templateUrl: './warehouse-order-view.component.html',
            })
 export class WarehouseOrderViewComponent
@@ -37,7 +45,7 @@ export class WarehouseOrderViewComponent
 	isSelectedOrderActionsAvailable: boolean = true;
 	loading: boolean;
 	QTY: string;
-	slideImages: any;
+	slideImages: ISlideImage[];
 	orderTypeDelivery: DeliveryType = DeliveryType.Delivery;
 	orderTypeTakeaway: DeliveryType = DeliveryType.Takeaway;
 	
@@ -82,30 +90,30 @@ export class WarehouseOrderViewComponent
 	
 	getSlideImage()
 	{
-		const images = this.selectedOrder.products.map((p) =>
-		                                               {
-			                                               const productTitle = this._productLocalesService.getTranslate(
-					                                               p.product.title
-			                                               );
-			                                               const productCount = p.count;
-			                                               const productPrice = p.price;
+		this.slideImages = this.selectedOrder
+		                       .products
+		                       .map((p) =>
+		                            {
+			                            const productTitle = this._productLocalesService.getTranslate(
+					                            p.product.title
+			                            );
+			                            const productCount = p.count;
+			                            const productPrice = p.price;
 			
-			                                               this.takeSlidebarTranslates();
-			                                               return {
-				                                               url: this._productLocalesService.getTranslate(p.product.images),
-				                                               caption: `${productTitle} (${
-						                                               environment.CURRENCY_SYMBOL + productPrice
-				                                               }, ${this.QTY}: ${productCount})`,
-				                                               title: this._productLocalesService.getTranslate(
-						                                               p.product.description
-				                                               ),
-				                                               style: {
-					                                               height: '100%',
-				                                               },
-			                                               };
-		                                               });
-		
-		this.slideImages = images;
+			                            this.takeSlidebarTranslates();
+			                            //TODO: Add dynamic currency symbol
+			                            return {
+				                            url:     this._productLocalesService.getTranslate(p.product.images),
+				                            caption: `${productTitle} (${environment.CURRENCY_SYMBOL + ' ' + productPrice},
+				                            ${this.QTY}: ${productCount})`,
+				                            title:   this._productLocalesService.getTranslate(
+						                            p.product.description
+				                            ),
+				                            style:   {
+					                            height: '100%',
+				                            },
+			                            };
+		                            });
 	}
 	
 	async updateOrderWarehouseStatus(status: OrderWarehouseStatus)
