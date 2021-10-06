@@ -30,7 +30,7 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 	 */
 	@Schema({ type: String, required: true })
 	@Column()
-	name: string;
+	username: string;
 	
 	/**
 	 * Primary Email Address
@@ -192,14 +192,21 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 	}
 	
 	/**
-	 * Get full name of customer
+	 * Get full name of customer or username if none provided
 	 *
 	 * @readonly
 	 * @memberof User
 	 */
 	get fullName(): string
 	{
-		return `${this.firstName} ${this.lastName}`;
+		if(this.firstName)
+		{
+			if(this.lastName)
+				return `${this.firstName} ${this.lastName}`;
+			
+			return this.firstName;
+		}
+		return `${this.username}`;
 	}
 	
 	/**
