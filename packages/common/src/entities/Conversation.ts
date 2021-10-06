@@ -17,7 +17,7 @@ class Conversation extends DBObject<IConversation, IConversationCreateObject>
 	/**
 	 * ChannelID used for chat
 	 *
-	 * @type {(string | null)}
+	 * @type {string}
 	 * @memberof Device
 	 */
 	@Schema({ type: String, required: true })
