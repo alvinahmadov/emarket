@@ -1,6 +1,7 @@
 import { Entity, Column }                           from 'typeorm';
 import { ModelName, DBObject, Schema, Types }       from '../@pyro/db';
 import IConversation, { IConversationCreateObject } from '../interfaces/IConversation';
+import IPlatform                                    from '../interfaces/IPlatform';
 
 /**
  * Represent Device (e.g. Table or Browser, used by someone to access one of apps)
@@ -32,7 +33,7 @@ class Conversation extends DBObject<IConversation, IConversationCreateObject>
 	 */
 	@Types.String('browser')
 	@Column()
-	platform: string;
+	platform: IPlatform;
 	
 	/**
 	 * Language for chat
