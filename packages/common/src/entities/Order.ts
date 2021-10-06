@@ -199,6 +199,7 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Column()
 	stripeChargeId?: string;
 	
+	// TODO: Add payment id for other payment gateways
 	/**
 	 * Human readable Order Number in the Store (short id of order, unique in the given store only)
 	 *
@@ -208,6 +209,14 @@ class Order extends DBObject<IOrder, IOrderCreateObject> implements IOrder
 	@Types.Number()
 	@Column()
 	orderNumber: number;
+	
+	@Types.String('RUB')
+	@Column()
+	orderCurrency: string;
+	
+	@Types.String('')
+	@Column()
+	orderNotes: string;
 	
 	/**
 	 * Type of the order: Delivery or Takeaway
