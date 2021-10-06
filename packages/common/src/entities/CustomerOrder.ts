@@ -24,7 +24,7 @@ class CustomerOrder extends DBObject<ICustomerOrder, ICustomerOrderCreateObject>
 	 */
 	@Schema({ type: String, required: false })
 	@Column()
-	name: string;
+	username: string;
 	
 	/**
 	 * Primary Email Address
@@ -169,7 +169,7 @@ class CustomerOrder extends DBObject<ICustomerOrder, ICustomerOrderCreateObject>
 	{
 		return (
 				`${this.geoLocation.city}, ${this.geoLocation.streetAddress} ` +
-				`${this.apartment}/${this.geoLocation.house}`
+				`${this.geoLocation.house} ${this.apartment ? '/' + this.apartment : ''}`
 		);
 	}
 	
@@ -181,7 +181,14 @@ class CustomerOrder extends DBObject<ICustomerOrder, ICustomerOrderCreateObject>
 	 */
 	get fullName(): string
 	{
-		return `${this.firstName} ${this.lastName}`;
+		if(this.firstName)
+		{
+			if(this.lastName)
+				return `${this.firstName} ${this.lastName}`;
+			
+			return this.firstName;
+		}
+		return `${this.username}`;
 	}
 }
 
