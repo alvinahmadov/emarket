@@ -32,7 +32,7 @@ class Conversation extends DBObject<IConversation, IConversationCreateObject>
 	 */
 	@Types.String('browser')
 	@Column()
-	type: string;
+	platform: string;
 	
 	/**
 	 * Language for chat
