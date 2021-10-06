@@ -1,7 +1,6 @@
 import _                                                 from 'lodash';
 import { Entity, Column }                                from 'typeorm';
 import { DBObject, getSchema, ModelName, Schema, Types } from '../@pyro/db';
-import Customer                                          from './Customer';
 import GeoLocation                                       from './GeoLocation';
 import PaymentGateway                                    from './PaymentGateway';
 import WarehouseProduct, { WithPopulatedProduct }        from './WarehouseProduct';
@@ -56,15 +55,6 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	@Schema({ type: String, unique: true })
 	@Column()
 	username: string;
-	
-	/**
-	 * Merchant admin user
-	 *
-	 * @type {IUser}
-	 * @memberof IWarehouseCreateObject
-	 */
-	@Schema(getSchema(Customer))
-	merchant?: Customer;
 	
 	/**
 	 * Is Warehouse working right now
