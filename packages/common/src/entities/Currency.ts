@@ -18,9 +18,21 @@ class Currency extends DBObject<ICurrency, ICurrencyCreateObject>
 	 * @type {string}
 	 * @memberof Currency
 	 */
-	@Schema({ type: String, unique: true })
+	@Schema({ type: String, unique: true, length: 3 })
 	@Column()
-	currencyCode: string;
+	code: string;
+	
+	@Schema({ type: String, unique: true, required: false })
+	@Column()
+	name: string;
+	
+	@Types.String('')
+	@Column()
+	sign: string;
+	
+	@Types.String('after')
+	@Column()
+	order: string;
 	
 	/**
 	 * Is Currency removed completely from the system
@@ -34,10 +46,3 @@ class Currency extends DBObject<ICurrency, ICurrencyCreateObject>
 }
 
 export default Currency;
-
-export const countriesDefaultCurrencies = {
-	IL: 'ILS',
-	RU: 'RUB',
-	US: 'USD',
-	BG: 'BGN'
-};
