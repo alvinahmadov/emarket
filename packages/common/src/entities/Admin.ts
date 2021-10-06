@@ -36,7 +36,7 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	@Schema({ type: String, unique: true })
 	@Types.String()
 	@Column()
-	name: string;
+	username: string;
 	
 	/**
 	 * Password hash
@@ -103,7 +103,12 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	
 	get fullName()
 	{
-		return `${this.firstName} ${this.lastName}`;
+		if(this.firstName && this.lastName)
+		{ return `${this.firstName} ${this.lastName}`; }
+		else if(this.firstName)
+		{ return this.firstName; }
+		else
+		{ return this.username ?? this.email; }
 	}
 }
 
