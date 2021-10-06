@@ -103,12 +103,17 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	
 	get fullName()
 	{
-		if(this.firstName && this.lastName)
-		{ return `${this.firstName} ${this.lastName}`; }
-		else if(this.firstName)
-		{ return this.firstName; }
+		if(this.firstName)
+		{
+			if(this.lastName)
+				return `${this.firstName} ${this.lastName}`;
+			
+			return this.firstName;
+		}
 		else
-		{ return this.username ?? this.email; }
+		{
+			return this.username ?? this.email;
+		}
 	}
 }
 
