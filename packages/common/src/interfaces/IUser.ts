@@ -4,7 +4,7 @@ import { PyroObjectId } from "@pyro/db";
 interface IUser
 {
 	_id?: PyroObjectId;
-	name?: string;
+	username?: string;
 	email?: string;
 	hash?: string;
 	avatar?: string;
