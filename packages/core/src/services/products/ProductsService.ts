@@ -1,22 +1,22 @@
 import Logger                    from 'bunyan';
 import { injectable }            from 'inversify';
-import { createLogger }          from '../../helpers/Log';
-import Product                   from '@modules/server.common/entities/Product';
-import { DBService }             from '@pyro/db-server';
-import { default as IProduct }   from '@modules/server.common/interfaces/IProduct';
-import IProductRouter            from '@modules/server.common/routers/IProductRouter';
 import { Observable }            from 'rxjs';
+import { first, switchMap, map } from 'rxjs/operators';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
 }                                from '@pyro/io';
-import IService                  from '../IService';
+import { DBService }             from '@pyro/db-server';
 import { CreateObject }          from '@pyro/db/db-create-object';
 import { UpdateObject }          from '@pyro/db/db-update-object';
-import { first, switchMap, map } from 'rxjs/operators';
+import { default as IProduct }   from '@modules/server.common/interfaces/IProduct';
 import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
+import Product                   from '@modules/server.common/entities/Product';
+import IProductRouter            from '@modules/server.common/routers/IProductRouter';
+import IService                  from '../IService';
+import { createLogger }          from '../../helpers/Log';
 
 @injectable()
 @routerName('product')
@@ -32,14 +32,15 @@ export class ProductsService extends DBService<Product>
 	@observableListener()
 	get(id: Product['id']): Observable<Product | null>
 	{
-		return super.get(id).pipe(
-				map(async(product) =>
-				    {
-					    await this.throwIfNotExists(id);
-					    return product;
-				    }),
-				switchMap((product) => product)
-		);
+		return super.get(id)
+		            .pipe(
+				            map(async(product) =>
+				                {
+					                await this.throwIfNotExists(id);
+					                return product;
+				                }),
+				            switchMap((product) => product)
+		            );
 	}
 	
 	@asyncListener()
@@ -59,7 +60,7 @@ export class ProductsService extends DBService<Product>
 		return this.Model.find({
 			                       ...findInput,
 			                       isDeleted: { $eq: false },
-			                       _id: { $nin: existedProductsIds }
+			                       _id:       { $nin: existedProductsIds }
 		                       })
 		           .sort(sortObj)
 		           .skip(pagingOptions.skip)
