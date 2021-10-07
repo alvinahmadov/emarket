@@ -1,6 +1,6 @@
-<img
-        (click)="redirect()"
-        *ngIf="imageUrl"
-        class="redirect-image"
-        src="{{ imageUrl }}"
+<img *ngIf="imageUrl"
+     (click)="redirect()"
+     class="redirect-image"
+     src="{{ imageUrl }}"
+     alt="{{ value }}"
 />
