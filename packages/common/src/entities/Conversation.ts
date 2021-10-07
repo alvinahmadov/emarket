@@ -26,6 +26,12 @@ class Conversation extends DBObject<IConversation, IConversationCreateObject>
 	channelId: string;
 	
 	/**
+	 * Ids of users participating in conversation
+	 * */
+	@Schema([String])
+	participants: string[];
+	
+	/**
 	 * Platform of the device (browser, ios, android, etc)
 	 *
 	 * @type {IPlatform}
