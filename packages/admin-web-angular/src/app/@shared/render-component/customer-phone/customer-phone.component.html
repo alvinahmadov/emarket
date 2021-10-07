@@ -1,5 +1,7 @@
 <div>
-    <a *ngIf="rowData.phone.length > 0" href="tel:{{ rowData.phone }}">
-        <i class="fas fa-phone-square"></i> <span>{{ rowData.phone }}</span>
-    </a>
+	<a *ngIf="hasPhone"
+	   href="tel:{{ phone }}">
+		<i class="fas fa-phone-square"></i>
+		<span>{{ phone }}</span>
+	</a>
 </div>
