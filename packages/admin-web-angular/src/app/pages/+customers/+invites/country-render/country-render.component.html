@@ -1,9 +1,11 @@
 <select
-        (change)="onChanged($event)"
-        [(ngModel)]="this.cell.newValue"
-        class="form-control ng-pristine ng-valid ng-touched"
+		(change)="onChanged($event)"
+		[(ngModel)]="this.cell.newValue"
+		class="form-control ng-pristine ng-valid ng-touched"
 >
-    <option *ngFor="let country of countries" value="{{ country.name }}">
-        {{ country.name }}
-    </option>
+	<option *ngFor="let country of countries"
+	        value="{{ country.id }}"
+	>
+		{{ country.name }}
+	</option>
 </select>
