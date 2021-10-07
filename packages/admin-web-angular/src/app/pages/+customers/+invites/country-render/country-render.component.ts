@@ -2,9 +2,10 @@ import { Component, AfterViewInit, Input } from '@angular/core';
 import { DefaultEditor, Cell }             from 'ng2-smart-table';
 import {
 	TCountryName,
-	countriesIdsToNamesArray,
+	countriesIdsToNamesArrayFn
 }                                          from '@modules/server.common/data/countries';
 import Country                             from '@modules/server.common/enums/Country';
+import { Store }                           from '@app/@core/data/store.service';
 
 @Component({
 	           templateUrl: './country-render.component.html',
@@ -13,21 +14,24 @@ export class CountryRenderComponent extends DefaultEditor
 		implements AfterViewInit
 {
 	@Input()
-	cell: Cell;
+	public cell: Cell;
 	
-	country: string;
+	public country: string;
 	
-	constructor()
+	public locale: string;
+	
+	constructor(private store: Store)
 	{
 		super();
+		this.locale = this.store.locale ?? 'ru-RU';
 	}
 	
-	get countries(): Array<{ id: Country; name: TCountryName }>
+	public get countries(): Array<{ id: Country; name: TCountryName }>
 	{
-		return countriesIdsToNamesArray;
+		return countriesIdsToNamesArrayFn(this.locale);
 	}
 	
-	ngAfterViewInit() {}
+	public ngAfterViewInit() {}
 	
-	onChanged(e) {}
+	public onChanged(e) {}
 }
