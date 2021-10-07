@@ -12,6 +12,7 @@ import { CustomersService }                    from '@app/@core/data/customers.s
 import { OrdersService }                       from '@app/@core/data/orders.service';
 import { NotifyService }                       from '@app/@core/services/notify/notify.service';
 import { RedirectNameComponent }               from '@app/@shared/render-component/name-redirect/name-redirect.component';
+import { RedirectChatComponent }               from '@app/@shared/render-component/chat-redirect/chat-redirect.component';
 import { CustomerImageComponent }              from '@app/@shared/render-component/customer-table/customer-table/customer-image.component';
 import { CustomerOrdersNumberComponent }       from '@app/@shared/render-component/customer-table/customer-orders-number/customer-orders-number.component';
 import { CustomerEmailComponent }              from '@app/@shared/render-component/customer-email/customer-email.component';
@@ -51,7 +52,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 	public settingsSmartTable: object;
 	public sourceSmartTable = new LocalDataSource();
 	private ngDestroy$ = new Subject<void>();
-	private _selectedCustomers: CustomerViewModel[] = [];
+	public selectedCustomers: CustomerViewModel[] = [];
 	private dataCount: number;
 	private $customers;
 	
@@ -82,19 +83,19 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 	
 	public get isOnlyOneCustomerSelected(): boolean
 	{
-		return this._selectedCustomers.length === 1;
+		return this.selectedCustomers.length === 1;
 	}
 	
 	public get isCustomerBanned()
 	{
 		return (
-				this._selectedCustomers[0] && this._selectedCustomers[0].isBanned
+				this.selectedCustomers[0] && this.selectedCustomers[0].isBanned
 		);
 	}
 	
 	public get hasSelectedCustomers(): boolean
 	{
-		return this._selectedCustomers.length > 0;
+		return this.selectedCustomers.length > 0;
 	}
 	
 	ngAfterViewInit()
@@ -129,12 +130,12 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 	
 	public selectCustomerTmp(ev)
 	{
-		this._selectedCustomers = ev.selected;
+		this.selectedCustomers = ev.selected;
 	}
 	
 	public deleteSelectedRows()
 	{
-		const idsForDelete: string[] = this._selectedCustomers.map((w) => w.id);
+		const idsForDelete: string[] = this.selectedCustomers.map((w) => w.id);
 		
 		try
 		{
@@ -143,7 +144,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			    .removeByIds(idsForDelete)
 			    .pipe(first())
 			    .toPromise();
-			this._selectedCustomers = [];
+			this.selectedCustomers = [];
 			
 			this.loading = false;
 			const message = `Users was removed`;
@@ -180,7 +181,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			windowClass: 'ng-custom',
 			backdrop:    'static',
 		});
-		modal.componentInstance.user = this._selectedCustomers[0];
+		modal.componentInstance.user = this.selectedCustomers[0];
 		modal.result
 		     .then(async(user) =>
 		           {
@@ -201,7 +202,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			windowClass: 'ng-custom',
 			backdrop:    'static',
 		});
-		modal.componentInstance.user = this._selectedCustomers[0];
+		modal.componentInstance.user = this.selectedCustomers[0];
 		modal.result
 		     .then(async(user) =>
 		           {
@@ -229,7 +230,8 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 				getTranslate('COUNTRY'),
 				getTranslate('CITY'),
 				getTranslate('ADDRESS'),
-				getTranslate('ORDERS_QTY')
+				getTranslate('ORDERS_QTY'),
+				getTranslate('CHAT'),
 		).subscribe(
 				([
 					 id,
@@ -241,6 +243,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 					 city,
 					 address,
 					 ordersQty,
+					 chat
 				 ]) =>
 				{
 					this.settingsSmartTable = {
@@ -291,6 +294,15 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 								type:            'custom',
 								renderComponent: CustomerOrdersNumberComponent,
 								filter:          false,
+							},
+							chat:      {
+								title:                   chat,
+								type:                    'custom',
+								renderComponent:         RedirectChatComponent,
+								onComponentInitFunction: (instance: RedirectChatComponent) =>
+								                         {
+									                         instance.redirectPage = 'chats/user';
+								                         },
 							},
 						},
 						pager:      {
