@@ -1,25 +1,25 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router }       from '@angular/router';
-import { UsersService }                 from '../../../@core/data/users.service';
-import User                             from '@modules/server.common/entities/User';
 import { Observable, Subject }          from 'rxjs';
 import { first, takeUntil, switchMap }  from 'rxjs/operators';
+import Customer                         from '@modules/server.common/entities/Customer';
+import { CustomersService }             from '@app/@core/data/customers.service';
 
 @Component({
-	           selector: 'ea-customer',
+	           selector:    'ea-customer',
+	           styleUrls:   ['./customer.component.scss'],
 	           templateUrl: './customer.component.html',
-	           styleUrls: ['./customer.component.scss'],
            })
 export class CustomerComponent implements OnInit, OnDestroy
 {
-	user$: Observable<User>;
-	users: User[] = [];
-	selectedUser: User;
+	customer$: Observable<Customer>;
+	customers: Customer[] = [];
+	selectedCustomer: Customer;
 	
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(
-			private readonly _userService: UsersService,
+			private readonly _customersService: CustomersService,
 			private readonly _router: ActivatedRoute,
 			private readonly _route: Router
 	)
@@ -27,10 +27,10 @@ export class CustomerComponent implements OnInit, OnDestroy
 	
 	ngOnInit()
 	{
-		this.user$ = this._router.params.pipe(
+		this.customer$ = this._router.params.pipe(
 				switchMap((p) =>
 				          {
-					          return this._userService.getUserById(p.id);
+					          return this._customersService.getCustomerById(p.id);
 				          })
 		);
 		
@@ -48,12 +48,12 @@ export class CustomerComponent implements OnInit, OnDestroy
 	
 	async loadUsers()
 	{
-		this._userService
-		    .getUsers()
+		this._customersService
+		    .getCustomers()
 		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe((users) =>
+		    .subscribe((customers) =>
 		               {
-			               this.users = users;
+			               this.customers = customers;
 			               this._selectCurrentUser();
 		               });
 	}
@@ -67,7 +67,7 @@ export class CustomerComponent implements OnInit, OnDestroy
 	private async _selectCurrentUser()
 	{
 		const routeParams = await this._router.params.pipe(first()).toPromise();
-		this.selectedUser = this.users.filter(
+		this.selectedCustomer = this.customers.filter(
 				(u) => u.id === routeParams.id
 		)[0];
 	}
