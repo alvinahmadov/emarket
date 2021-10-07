@@ -1,5 +1,5 @@
 import Admin          from '@modules/server.common/entities/Admin';
-import User           from '@modules/server.common/entities/User';
+import Customer       from '@modules/server.common/entities/Customer';
 import { Injectable } from '@angular/core';
 
 @Injectable()
@@ -39,21 +39,59 @@ export class Store
 		}
 	}
 	
-	get userId(): User['id'] | null
+	get userId(): Customer['id'] | null
 	{
-		return localStorage.getItem('_userId') || null;
+		return localStorage.getItem('_simUserId') || null;
 	}
 	
-	set userId(id: User['id'] | null)
+	set userId(id: Customer['id'] | null)
 	{
 		if(id == null)
 		{
-			localStorage.removeItem('_userId');
+			localStorage.removeItem('_simUserId');
 		}
 		else
 		{
-			localStorage.setItem('_userId', id);
+			localStorage.setItem('_simUserId', id);
 		}
+	}
+	
+	get locale(): string
+	{
+		return localStorage.getItem('_locale');
+	}
+	
+	set locale(locale: string)
+	{
+		if(locale)
+			localStorage.setItem('_locale', locale)
+	}
+	
+	get theme()
+	{
+		return localStorage.getItem('theme')
+	}
+	
+	set theme(theme)
+	{
+		if(!theme)
+		{
+			localStorage.removeItem('theme');
+		}
+		else
+		{
+			localStorage.setItem('theme', theme)
+		}
+	}
+	
+	get currency(): string
+	{
+		return localStorage.getItem('_curreny');
+	}
+	
+	set currency(code: string)
+	{
+		localStorage.setItem('_curreny', code);
 	}
 	
 	get maintenanceMode(): string | null
@@ -91,12 +129,12 @@ export class Store
 		localStorage.setItem('fakeDataGenerator', val);
 	}
 	
-	clearMaintenanceMode()
+	public clearMaintenanceMode()
 	{
 		localStorage.removeItem('maintenanceMode');
 	}
 	
-	clear()
+	public clear()
 	{
 		localStorage.clear();
 	}
