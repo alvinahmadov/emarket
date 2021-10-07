@@ -18,24 +18,17 @@ import { CustomersComponent }              from './customers.component';
 const routes: Routes = [
 	{
 		path:      'list',
-		component: CustomersComponent,
+		component: CustomersComponent
 	},
 	{
 		path:         'invites',
-		loadChildren: () =>
-				              import('./+invites/invites.module').then((m) => m.InvitesModule),
-	},
-	{
-		path:         'chats',
-		loadChildren: () =>
-				              import('./+chats/chats.module')
-						              .then((m) => m.ChatsModule)
-						              .catch(err => console.error(err)),
+		loadChildren: () => import('./+invites/invites.module')
+				.then((m) => m.InvitesModule)
 	},
 	{
 		path:         'list/:id',
-		loadChildren: () =>
-				              import('./+customer/customer.module').then((m) => m.CustomerModule),
+		loadChildren: () => import('./+customer/customer.module')
+				.then((m) => m.CustomerModule)
 	},
 ];
 
