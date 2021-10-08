@@ -1,11 +1,11 @@
-import Currency                  from '@modules/server.common/entities/Currency';
 import { injectable }            from 'inversify';
+import Logger                    from 'bunyan';
 import { routerName }            from '@pyro/io';
 import { DBService }             from '@pyro/db-server';
-import IService                  from 'services/IService';
 import { ICurrencyCreateObject } from '@modules/server.common/interfaces/ICurrency';
-import { createLogger }          from '../../helpers/Log';
-import Logger                    from 'bunyan';
+import Currency                  from '@modules/server.common/entities/Currency';
+import IService                  from 'services/IService';
+import { createLogger }          from 'helpers/Log';
 
 export interface CurrencyMutationRespone
 {
@@ -36,7 +36,7 @@ export class CurrenciesService extends DBService<Currency> implements IService
 		{
 			data = await this.create(currency);
 			success = true;
-			message = `Successfully create currency ${data.currencyCode}`;
+			message = `Successfully create currency ${data.code}`;
 		} catch(error)
 		{
 			success = false;
