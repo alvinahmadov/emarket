@@ -60,8 +60,8 @@ export class CustomerResolver
 		
 		return (
 				(await this._customersService.count({
-					                                    _id: { $nin: [new Types.ObjectId(userId)] },
-					                                    isDeleted: { $eq: false },
+					                                    _id:         { $nin: [new Types.ObjectId(userId)] },
+					                                    isDeleted:   { $eq: false },
 					                                    [memberKey]: memberValue
 				                                    })) > 0
 		);
@@ -74,19 +74,28 @@ export class CustomerResolver
 	}
 	
 	@Query('customers')
-	async getCustomers(_, { findInput, pagingOptions = {} })
+	async getCustomers(_, { pagingOptions = {} })
+	{
+		return this.findCustomers(_, { findInput: null, pagingOptions });
+	}
+	
+	@Query('findCustomers')
+	async findCustomers(_, { findInput, pagingOptions = {} })
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
 			pagingOptions['sort'] = { field: '_createdAt', sortBy: 'desc' };
 		}
 		
-		const users = await this._customersService.getCustomers(
+		if(!findInput)
+			findInput = {}
+		
+		const customers = await this._customersService.getCustomers(
 				findInput,
 				pagingOptions
 		);
 		
-		return users.map((u) => new Customer(u));
+		return customers.map((u) => new Customer(u));
 	}
 	
 	@Query('getOrders')
@@ -193,7 +202,7 @@ export class CustomerResolver
 	{
 		const users = await this._customersService
 		                        .find({
-			                              _id: { $in: ids },
+			                              _id:       { $in: ids },
 			                              isDeleted: { $eq: false }
 		                              });
 		
@@ -205,11 +214,11 @@ export class CustomerResolver
 	@ResolveField('devices')
 	async getDevices(_user: ICustomer)
 	{
-		const user = new Customer(_user);
-		let userDevices = await this._devicesService
-		                            .getMultipleDevices(user.devicesIds);
+		const customer = new Customer(_user);
+		let customerDevices = await this._devicesService
+		                                .getMultipleDevices(customer.devicesIds);
 		
-		return userDevices
+		return customerDevices
 				.pipe(first())
 				.toPromise();
 	}
