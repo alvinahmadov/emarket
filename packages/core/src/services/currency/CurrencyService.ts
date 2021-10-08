@@ -5,7 +5,7 @@ import { DBService }             from '@pyro/db-server';
 import { ICurrencyCreateObject } from '@modules/server.common/interfaces/ICurrency';
 import Currency                  from '@modules/server.common/entities/Currency';
 import IService                  from 'services/IService';
-import { createLogger }          from 'helpers/Log';
+import { createLogger }          from '../../helpers/Log';
 
 export interface CurrencyMutationRespone
 {
