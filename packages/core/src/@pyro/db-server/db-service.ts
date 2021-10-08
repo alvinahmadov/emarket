@@ -99,7 +99,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return of(null).pipe(
 				concat(
 						this.existence.pipe(
-								filter((event, index) => _.includes(ids, event.id)),
+								filter((event) => _.includes(ids, event.id)),
 								share()
 						)
 				),
@@ -182,6 +182,166 @@ export abstract class DBService<T extends DBObject<any, any>>
 	}
 	
 	/**
+	 * Deletes all records from the DB
+	 *
+	 * @returns {Promise<void>}
+	 * @memberof DBService
+	 */
+	async deleteAll(): Promise<void>
+	{
+		if(env.isProd)
+		{
+			return;
+		}
+		
+		const callId = uuid();
+		
+		this.log.debug({ callId }, '.deleteAll() called!');
+		
+		try
+		{
+			await this.Model
+			          .deleteMany({})
+			          .exec();
+		} catch(err)
+		{
+			this.log.error({ callId, err }, '.deleteAll() thrown error!');
+			throw err;
+		}
+		
+		this.log.debug({ callId }, '.deleteAll() removed all!');
+	}
+	
+	/**
+	 * Deletes record from the DB
+	 *
+	 * @param {T['id']} objectId
+	 * @returns {Promise<void>}
+	 * @memberof DBService
+	 */
+	async delete(objectId: T['id']): Promise<void>
+	{
+		const callId = uuid();
+		
+		this.log.debug({ callId, objectId }, '.delete(objectId) called');
+		
+		let lastValue: T | null;
+		
+		try
+		{
+			const lastValueRaw = (await this.Model
+			                                .findByIdAndDelete(objectId)
+			                                .lean()
+			                                .exec()) as RawObject<T>;
+			
+			lastValue = this.parse(lastValueRaw);
+		} catch(err)
+		{
+			this.log.error(
+					{ callId, objectId, err },
+					'.delete(objectId) thrown error!'
+			);
+			
+			throw err;
+		}
+		
+		if(lastValue == null)
+		{
+			throw new Error('.delete(objectId) error - Object don\'t exist');
+		}
+		else
+		{
+			this.existence.next({
+				                    id:        objectId,
+				                    value:     null,
+				                    lastValue: lastValue,
+				                    type:      ExistenceEventType.Removed
+			                    });
+			
+			this.log.debug(
+					{ callId, objectId, lastValue },
+					'.delete(objectId) deleted object'
+			);
+		}
+	}
+	
+	/**
+	 * Delete multiple records from DB (efficient way)
+	 *
+	 * @param {FindObject<T>} conditions
+	 * @returns {Promise<void>}
+	 * @memberof DBService
+	 */
+	async deleteMultiple(conditions: FindObject<T>): Promise<void>
+	{
+		const callId = uuid();
+		
+		this.log.debug(
+				{ callId, conditions },
+				'.deleteMultiple(conditions) called'
+		);
+		
+		let lastValues: T[];
+		
+		try
+		{
+			lastValues = await this.find(conditions);
+			
+			await this.Model
+			          .deleteMany({
+				                      _id: { $in: lastValues.map((o: T) => this.getObjectId(o.id)) }
+			                      })
+			          .exec();
+		} catch(err)
+		{
+			this.log.error(
+					{ callId, conditions, err },
+					'.deleteMultiple(conditions) thrown error!'
+			);
+			throw err;
+		}
+		
+		_.each(lastValues, (lastValue) =>
+		{
+			this.existence.next({
+				                    id:    lastValue.id,
+				                    lastValue,
+				                    value: null,
+				                    type:  ExistenceEventType.Removed
+			                    });
+		});
+		
+		this.log.debug(
+				{
+					callId,
+					conditions,
+					lastValues
+				},
+				'.removeMultiple(conditions) removed objects'
+		);
+	}
+	
+	/**
+	 * Remove multiple records by Ids
+	 *
+	 * @param {Array<T['id']>} ids
+	 * @returns {Promise<void>}
+	 * @memberof DBService
+	 */
+	async deleteMultipleByIds(ids: T['id'][]): Promise<void>
+	{
+		this.Model
+		    .deleteMany(
+				    {
+					    _id: { $in: ids.map((id) => this.getObjectId(id)) }
+				    },
+				    { isDeleted: true },
+				    { multi: true }
+		    )
+		    .exec();
+	}
+	
+	/**
 	 * Removes all records from the DB
 	 *
 	 * @returns {Promise<void>}
@@ -214,7 +374,6 @@ export abstract class DBService<T extends DBObject<any, any>>
 	
 	/**
 	 * Removes record from the DB
-	 * TODO: we should add another method which set IsDeteled = true and do not delete record from DB in most cases
 	 *
 	 * @param {T['id']} objectId
 	 * @returns {Promise<void>}
@@ -253,10 +412,10 @@ export abstract class DBService<T extends DBObject<any, any>>
 		else
 		{
 			this.existence.next({
-				                    id:    objectId,
-				                    value: null,
-				                    lastValue,
-				                    type:  ExistenceEventType.Removed
+				                    id:        objectId,
+				                    value:     null,
+				                    lastValue: lastValue,
+				                    type:      ExistenceEventType.Removed
 			                    });
 			
 			this.log.debug(
@@ -469,7 +628,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 					objectId,
 					updateObj,
 					updatedValue: updatedObject,
-					lastValue: beforeUpdateObject
+					lastValue:    beforeUpdateObject
 				},
 				'.update(objectId, updateObj) updated object'
 		);
@@ -558,8 +717,6 @@ export abstract class DBService<T extends DBObject<any, any>>
 		{
 			updatedObjects = await this.updateMultiple(
 					{
-						// TODO: rewrite below
-						// tslint:disable-next-line:no-object-literal-type-assertion
 						_id: {
 							     $in: _.map(
 									     ids,
