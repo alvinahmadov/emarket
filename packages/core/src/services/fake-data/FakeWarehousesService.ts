@@ -1,6 +1,5 @@
 import { injectable }               from 'inversify';
 import faker                        from 'faker';
-import UserRole                     from '@modules/server.common/consts/role';
 import { IWarehouseCreateObject }   from '@modules/server.common/interfaces/IWarehouse';
 import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
 import ForwardOrdersMethod          from '@modules/server.common/enums/ForwardOrdersMethod';
@@ -12,14 +11,6 @@ import {
 	WarehousesService,
 	WarehousesAuthService
 }                                   from '../warehouses';
-
-export declare type TestWarehouseUserGenerationInput = {
-	username?: string;
-	email?: string;
-	password?: string;
-	coordinates?: [number, number];
-	role?: UserRole | string;
-}
 
 @injectable()
 export class FakeWarehousesService
