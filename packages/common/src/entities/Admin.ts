@@ -1,8 +1,8 @@
+import { Entity, Column }             from 'typeorm';
+import { Schema, Types }              from '@pyro/db';
 import { DBObject, ModelName }        from '../@pyro/db';
 import IAdmin, { IAdminCreateObject } from '../interfaces/IAdmin';
-import { Schema, Types }              from '@pyro/db';
-import { Entity, Column }             from 'typeorm';
-import UserRole                       from '../consts/role';
+import Role                           from '../enums/Role';
 
 /**
  * Registered Admin Users (e.g. Administrators)
@@ -61,7 +61,7 @@ class Admin extends DBObject<IAdmin, IAdminCreateObject> implements IAdmin
 	
 	@Types.String('admin')
 	@Column()
-	role: UserRole;
+	role: Role;
 	
 	/**
 	 * User First Name
