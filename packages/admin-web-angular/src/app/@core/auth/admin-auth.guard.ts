@@ -6,7 +6,7 @@ import {
 	RouterStateSnapshot,
 }                     from '@angular/router';
 import { Apollo }     from 'apollo-angular';
-import gql            from 'graphql-tag';
+import { GQLQueries } from '@modules/server.common/utilities/graphql';
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate
@@ -18,20 +18,18 @@ export class AdminAuthGuard implements CanActivate
 	{}
 	
 	async isAuthenticated()
-    {
-        const res = await this.apollo
-		.query<{ adminAuthenticated: boolean }>({
-                                                    query: gql`
-                                                        query IsAdminAuthenticated {
-                                                            adminAuthenticated
-                                                        }
-			                                        `,
-			                                        fetchPolicy: 'network-only',
-                                                })
-		.toPromise();
+	{
+		const res = await this.apollo
+		                      .query<{
+			                      adminAuthenticated: boolean
+		                      }>({
+			                         query:       GQLQueries.AdminAuthentticated,
+			                         fetchPolicy: 'network-only',
+		                         })
+		                      .toPromise();
 		
 		return res.data.adminAuthenticated;
-    }
+	}
 	
 	async canActivate(
 			route: ActivatedRouteSnapshot,
