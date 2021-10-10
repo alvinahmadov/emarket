@@ -1,9 +1,17 @@
 import { sample } from 'lodash';
-import Order      from '../entities/Order';
+import Order from '../entities/Order';
+import { Observable } from 'rxjs';
+import fs from 'fs';
 
 namespace CommonUtils
 {
-	// tslint:disable-next-line:no-shadowed-variable
+	export const millisToSeconds = (milliseconds: number): number => milliseconds / 1000;
+	
+	export const generateObjectIdString = (
+			m = Math, d = Date,
+			h           = 16, s   = (x) => m.floor(x).toString(h)
+	) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
+	
 	export function toDate(date: string | Date)
 	{
 		if(date instanceof Date)
@@ -14,6 +22,18 @@ namespace CommonUtils
 		{
 			return new Date(date);
 		}
+	}
+	
+	export function dateComparator(d1: string | Date, d2: string | Date, order: "asc" | "dsc" = "asc")
+	{
+		const tm1 = toDate(d1).getTime();
+		const tm2 = toDate(d2).getTime();
+		
+		if(order === "asc")
+			return tm1 - tm2;
+		else
+			return tm2 - tm1;
+		
 	}
 	
 	export function generatedLogoColor()
@@ -31,18 +51,6 @@ namespace CommonUtils
 	) =>
 	{
 		return `https://dummyimage.com/${width}x${height}/${CommonUtils.generatedLogoColor()}/ffffff.jpg&text=${letter}`;
-	};
-	
-	export const generateObjectIdString = (
-			m = Math,
-			d = Date,
-			h = 16,
-			s = (x) => m.floor(x).toString(h)
-	) =>
-	{
-		return (
-				s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h))
-		);
 	};
 	
 	export function getIdFromTheDate(order: Order): string
@@ -101,6 +109,99 @@ namespace CommonUtils
 	{
 		const re = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i;
 		return re.test(String(email).toLowerCase());
+	}
+	
+	export function observeFile(fileName: string): Observable<string>
+	{
+		return Observable.create((observer) =>
+		                         {
+			                         const fetchTranslations = () =>
+			                         {
+				                         fs.readFile(fileName, 'utf-8', (err, content) =>
+				                         {
+					                         observer.next(content);
+					
+					                         if(err)
+					                         {
+						                         observer.error(err);
+					                         }
+				                         });
+			                         };
+			
+			                         fetchTranslations();
+			
+			                         fs.watchFile(fileName, fetchTranslations);
+			
+			                         return () =>
+			                         {
+				                         fs.unwatchFile(fileName, fetchTranslations);
+			                         };
+		                         });
+	}
+	
+	/**
+	 * gee
+	 * @param {[number, number]} point - around which point
+	 * @param {number} radius - in meters
+	 * @returns {[number]}
+	 */
+	export function randomCoordinatesNear(
+			[longitude, latitude]: [number, number],
+			radius: number
+	): [number, number]
+	{
+		const r = 100 / 111300; // = 100 meters
+		const y0 = longitude;
+		const x0 = latitude;
+		const u = Math.random();
+		const v = Math.random();
+		const w = r * Math.sqrt(u);
+		const t = 2 * Math.PI * v;
+		const x = w * Math.cos(t);
+		const y1 = w * Math.sin(t);
+		const x1 = x / Math.cos(y0);
+		
+		return [y0 + y1, x0 + x1];
+	}
+	
+	export function getHost(url: string): string
+	{
+		return getHostAndPort(url)[0];
+	}
+	
+	export function getPort(url: string): number
+	{
+		return getHostAndPort(url)[1]
+	}
+	
+	export function getHostAndPort(url: string): [string, number]
+	{
+		const parts = getUrlChunks(url);
+		
+		const scheme: string = parts[0];
+		let host: string = parts[1].replace(/\//g, '');
+		let port: number = parseInt(parts[parts.length - 1], 10);
+		
+		if((scheme === "http" || scheme === 'ws') && (isNaN(port) || parts.length < 3))
+		{
+			port = 80;
+		}
+		if((scheme === "https" || scheme === 'ws') && (isNaN(port) || parts.length < 3))
+		{
+			port = 443;
+		}
+		if(parts.length === 1 || isNaN(port))
+		{
+			host = "localhost"
+			port = 80;
+		}
+		return [host, port];
+	}
+	
+	function getUrlChunks(url: string): string[]
+	{
+		url = url.match(/^(([a-z]+:)?(\/\/)?[^\/]+).*$/)[1] || url;
+		return url.split(':');
 	}
 }
 
