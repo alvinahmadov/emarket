@@ -9,12 +9,12 @@ import {
 	NbThemeService,
 }                                           from '@nebular/theme';
 
-import { StateService } from '../../../@core/data/state.service';
+import { StateService } from '@app/@core/data/state.service';
 
 // TODO: move layouts into the framework
 @Component({
-	           selector: 'ngx-sample-layout',
-	           styleUrls: ['./sample.layout.scss'],
+	           selector:    'ngx-sample-layout',
+	           styleUrls:   ['./sample.layout.scss'],
 	           templateUrl: 'sample.layout.html',
            })
 export class SampleLayoutComponent implements OnDestroy
@@ -26,38 +26,38 @@ export class SampleLayoutComponent implements OnDestroy
 		},
 		{
 			title: 'Buttons',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/buttons',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/buttons',
 		},
 		{
 			title: 'Grid',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/grid',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/grid',
 		},
 		{
 			title: 'Icons',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/icons',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/icons',
 		},
 		{
 			title: 'Modals',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/modals',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/modals',
 		},
 		{
 			title: 'Typography',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/typography',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/typography',
 		},
 		{
 			title: 'Animated Searches',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/search-fields',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/search-fields',
 		},
 		{
 			title: 'Tabs',
-			icon: 'ion ion-android-radio-button-off',
-			link: '/ui-features/tabs',
+			icon:  'ion ion-android-radio-button-off',
+			link:  '/ui-features/tabs',
 		},
 	];
 	layout: any = {};
