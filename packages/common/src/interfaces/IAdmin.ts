@@ -9,7 +9,7 @@ export interface IAdminCreateObject extends DBCreateObject, IUser
 	 * @type {string}
 	 * @memberof IAdminCreateObject
 	 */
-	name: string;
+	username: string;
 	
 	email: string;
 	
@@ -32,10 +32,18 @@ export interface IAdminUpdateObject extends DBCreateObject, IUser
 	 * @type {string}
 	 * @memberof IAdminCreateObject
 	 */
-	name?: string;
+	username?: string;
 	
 	email?: string;
 	avatar?: string;
+	firstName?: string;
+	lastName?: string;
+}
+
+export interface IAdminFindInput extends IUser
+{
+	username?: string;
+	email?: string;
 	firstName?: string;
 	lastName?: string;
 }
