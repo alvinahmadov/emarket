@@ -1,6 +1,5 @@
 import pm2, { StartOptions }     from 'pm2';
 import { CommonUtils as Common } from '@modules/server.common/utilities';
-import { createLogger }          from './helpers/Log';
 import { env }                   from './env';
 
 const mode = env.isProd ? 'production' : 'development';
@@ -9,7 +8,7 @@ const MACHINE_NAME = process.env.KEYMETRICS_MACHINE_NAME;
 const PRIVATE_KEY = process.env.KEYMETRICS_SECRET_KEY;
 const PUBLIC_KEY = process.env.KEYMETRICS_PUBLIC_KEY;
 const [HOST, PORT] = Common.getHostAndPort(env.SERVICES_ENDPOINT)
-const appName = process.env.PM2_APP_NAME || 'EMarket';
+const APPNAME = process.env.PM2_APP_NAME || 'EMarket';
 const isProd = env.isProd;
 const instances = env.WEB_CONCURRENCY;
 const maxMemory = env.WEB_MEMORY;
@@ -24,8 +23,10 @@ const startOptions: StartOptions = {
 	watch:              env.isDev,
 	env:                {
 		NODE_ENV:                isProd ? 'production' : 'development',
+		APP_NAME:                APPNAME,
 		PORT:                    PORT.toString() || "5500",
 		HOST:                    HOST || "http://localhost",
+		KEYMETRICS_PM2_APP_NAME: APPNAME,
 		KEYMETRICS_MACHINE_NAME: MACHINE_NAME,
 		KEYMETRICS_PUBLIC:       PUBLIC_KEY,
 		KEYMETRICS_SECRET:       PRIVATE_KEY,
