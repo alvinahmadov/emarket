@@ -36,11 +36,9 @@ export class DataModule
 {
 	static forRoot(): ModuleWithProviders<DataModule>
 	{
-		const providers: ModuleWithProviders<DataModule> = {
+		return {
 			ngModule:  DataModule,
 			providers: [...SERVICES],
 		};
-		
-		return providers;
 	}
 }
