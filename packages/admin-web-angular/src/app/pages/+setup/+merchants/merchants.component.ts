@@ -9,13 +9,13 @@ import { SetupMerchantDeliveryAndTakeawayComponent } from './components/settings
 import { SetupMerchantOrdersSettingsComponent }      from './components/settings/orders/orders.component';
 import { IWarehouseCreateObject }                    from '@modules/server.common/interfaces/IWarehouse';
 import GeoLocation                                   from '@modules/server.common/entities/GeoLocation';
+import Warehouse                                     from '@modules/server.common/entities/Warehouse';
 import { WarehouseAuthRouter }                       from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 import { ToasterService }                            from 'angular2-toaster';
 import { NbStepperComponent }                        from '@nebular/theme';
-import Warehouse                                     from '@modules/server.common/entities/Warehouse';
 
 @Component({
-	           styleUrls: ['./merchants.component.scss'],
+	           styleUrls:   ['./merchants.component.scss'],
 	           templateUrl: './merchants.component.html',
            })
 export class SetupMerchantsComponent
@@ -62,9 +62,7 @@ export class SetupMerchantsComponent
 	{
 		try
 		{
-			this.currentStore = await this.warehouseAuthRouter.register(
-					this.getMerchantCreateObj()
-			);
+			this.currentStore = await this.warehouseAuthRouter.register(this.getMerchantCreateObj());
 			
 			this.toasterService.pop(
 					'success',
@@ -75,8 +73,8 @@ export class SetupMerchantsComponent
 		} catch(error)
 		{
 			this.toasterService.pop({
-				                        type: 'error',
-				                        title: `Error in creating warehouse: "${error.message}"`,
+				                        type:    'error',
+				                        title:   `Error in creating warehouse: "${error.message}"`,
 				                        timeout: 0,
 			                        });
 		}
@@ -99,24 +97,21 @@ export class SetupMerchantsComponent
 			
 			warehouse = {
 				contactEmail: accountModel.email,
-				username: accountModel.username,
+				username:     accountModel.username,
 				...this.stepBasicInfo.basicInfoCreateObj,
 				...this.stepContactInfo.contactInfoModel,
-				geoLocation: geoLocationInput as GeoLocation,
-				isPaymentEnabled: this.stepPayments.isPaymentEnabled,
-				isManufacturing: this.stepManufacturing.isManufacturing,
-				isCarrierRequired: this.stepDeliveryAndTakeaway
-						.isCarrierRequired,
-				productsDelivery: this.stepDeliveryAndTakeaway.productsDelivery,
-				productsTakeaway: this.stepDeliveryAndTakeaway.productsTakeaway,
-				hasRestrictedCarriers:
-						this.stepDeliveryAndTakeaway.restrictedCarriersIds.length >
-						0,
-				carriersIds: this.stepDeliveryAndTakeaway.restrictedCarriersIds,
-				orderBarcodeType: this.stepOrdersSettings.iorderBarcodeType,
-				isActive: true,
-				paymentGateways: this.stepPayments.paymentsGateways,
-				isCashPaymentEnabled: this.stepPayments.isCashPaymentEnabled,
+				geoLocation:           geoLocationInput as GeoLocation,
+				isPaymentEnabled:      this.stepPayments.isPaymentEnabled,
+				isManufacturing:       this.stepManufacturing.isManufacturing,
+				isCarrierRequired:     this.stepDeliveryAndTakeaway.isCarrierRequired,
+				productsDelivery:      this.stepDeliveryAndTakeaway.productsDelivery,
+				productsTakeaway:      this.stepDeliveryAndTakeaway.productsTakeaway,
+				hasRestrictedCarriers: this.stepDeliveryAndTakeaway.restrictedCarriersIds.length > 0,
+				carriersIds:           this.stepDeliveryAndTakeaway.restrictedCarriersIds,
+				orderBarcodeType:      this.stepOrdersSettings.iorderBarcodeType,
+				isActive:              true,
+				paymentGateways:       this.stepPayments.paymentsGateways,
+				isCashPaymentEnabled:  this.stepPayments.isCashPaymentEnabled,
 			};
 			password = accountModel.password;
 		}
