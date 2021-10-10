@@ -12,7 +12,6 @@ import Role                                 from '../enums/Role';
 
 /**
  * Customer who make orders
- * TODO: historically called 'User', but we will rename to 'Customer'
  *
  * @class Customer
  * @extends {DBObject<ICustomer, ICustomerCreateObject>}
