@@ -25,9 +25,9 @@ export declare type TestWarehouseUserGenerationInput = {
 export class FakeWarehousesService
 {
 	constructor(
-			private readonly usersService: CustomersService,
-			private readonly warehousesService: WarehousesService,
-			private readonly warehousesAuthService: WarehousesAuthService
+			private readonly _customersService: CustomersService,
+			private readonly _warehousesService: WarehousesService,
+			private readonly _warehousesAuthService: WarehousesAuthService
 	)
 	{}
 	
@@ -35,13 +35,12 @@ export class FakeWarehousesService
 	{
 		if(merchant)
 		{
-			const warehouse = await this.getWarehouse({ 'merchant._id': merchant.id });
+			const warehouse = await this._getWarehouse({ username: merchant.username });
 			if(warehouse)
 			{
 				return warehouse;
 			}
 			
-			console.log('Creating new warehouse');
 			let warehouseCreateObj: IWarehouseCreateObject;
 			
 			const warehouseName = faker.company.companyName();
@@ -53,11 +52,8 @@ export class FakeWarehousesService
 			const isActive = true;
 			const inStoreMode = true;
 			
-			console.log('Creating warehouse from merchant object', merchant);
-			
 			warehouseCreateObj = {
-				username:           merchant.name,
-				merchant:           merchant,
+				username:           merchant.username,
 				name:               warehouseName,
 				logo:               logo,
 				geoLocation:        geoLocation,
@@ -74,12 +70,12 @@ export class FakeWarehousesService
 			};
 			
 			// Make customer as a new merchant
-			await this.usersService.updateRole(merchant.id, 'merchant');
+			await this._customersService.updateRole(merchant.id, 'merchant');
 			
-			return this.warehousesAuthService.register({
-				                                           warehouse: warehouseCreateObj,
-				                                           password:  password
-			                                           });
+			return this._warehousesAuthService.register({
+				                                            warehouse: warehouseCreateObj,
+				                                            password:  password
+			                                            });
 		}
 		
 		return null;
@@ -100,8 +96,8 @@ export class FakeWarehousesService
 		};
 	}
 	
-	private async getWarehouse(findObj)
+	private async _getWarehouse(findObj)
 	{
-		return await this.warehousesService.findOne(findObj);
+		return await this._warehousesService.findOne(findObj);
 	}
 }
