@@ -1,27 +1,24 @@
-import _                         from "lodash";
-import { injectable }            from "inversify";
-import faker                     from "faker";
-import { ICustomerCreateObject } from "@modules/server.common/interfaces/ICustomer";
+import _                         from 'lodash';
+import { injectable }            from 'inversify';
+import faker                     from 'faker';
+import { ICustomerCreateObject } from '@modules/server.common/interfaces/ICustomer';
 import {
 	IGeoLocationCreateObject,
 	IGeolocationUpdateObject
-}                                from "@modules/server.common/interfaces/IGeoLocation";
-import UserRole                  from '@modules/server.common/consts/role';
+}                                from '@modules/server.common/interfaces/IGeoLocation';
+import Role                      from '@modules/server.common/enums/Role';
 import Country                   from '@modules/server.common/enums/Country';
 import Customer                  from '@modules/server.common/entities/Customer';
-import GeoLocation               from "@modules/server.common/entities/GeoLocation";
-import CommonUtils               from "@modules/server.common/utilities/common";
-import {
-	CustomersAuthService,
-	CustomersService
-}                                from "../customers";
+import GeoLocation               from '@modules/server.common/entities/GeoLocation';
+import CommonUtils               from '@modules/server.common/utilities/common';
+import { CustomersService }      from '../customers';
+import { CustomersAuthService }  from '../customers/CustomersAuthService';
 
-export declare type TestUserGenerationInput = {
+export type TUserGenerationInput = {
 	username: string;
 	email: string;
-	password: string;
 	coordinates?: [number, number];
-	role?: string;
+	role?: Role;
 	firstName?: string;
 	lastName?: string;
 }
@@ -30,7 +27,7 @@ export declare type TestUserGenerationInput = {
 export class FakeUsersService
 {
 	constructor(
-			private readonly _usersService: CustomersService,
+			private readonly _customersService: CustomersService,
 			private readonly _usersAuthService: CustomersAuthService
 	)
 	{}
@@ -41,24 +38,22 @@ export class FakeUsersService
 	 * @returns {Promise<Customer>}
 	 * @memberof FakeUsersService
 	 */
-	async generateMerchant(input: TestUserGenerationInput): Promise<Customer>
+	async generateMerchant(input: TUserGenerationInput, password: string): Promise<Customer>
 	{
-		const existingUser = await this._usersService.findOne({ email: input.email });
+		const existingUser = await this._customersService.findOne({ email: input.email });
 		
 		if(existingUser && existingUser.role === 'merchant')
 		{
-			console.log('Returning existing merchant')
 			return existingUser;
 		}
 		
-		console.log('Creating new merchant')
 		return this._generateUser({
 			                          username:    input.username,
 			                          email:       input.email,
-			                          password:    input.password,
 			                          coordinates: input.coordinates,
 			                          role:        'merchant',
-		                          });
+		                          },
+		                          password);
 	}
 	
 	/**
@@ -79,17 +74,16 @@ export class FakeUsersService
 		];
 		const email = faker.internet.email(firstName, lastName);
 		
-		const input: TestUserGenerationInput = {
-			username:    faker.internet.userName(firstName, lastName),
+		const input: TUserGenerationInput = {
+			username:    username,
 			email:       email,
-			password:    password,
 			role:        'customer',
 			coordinates: coordinates,
 			firstName:   firstName,
 			lastName:    lastName,
 		}
 		
-		return this._generateUser(input);
+		return this._generateUser(input, password);
 	}
 	
 	/**
@@ -108,7 +102,7 @@ export class FakeUsersService
 	): Promise<ICustomerCreateObject[]>
 	{
 		const existingEmails = _.map(
-				await this._usersService
+				await this._customersService
 				          .Model
 				          .find({})
 				          .select({ email: 1 })
@@ -164,16 +158,16 @@ export class FakeUsersService
 			}
 		}
 		
-		return this._usersService
+		return this._customersService
 		           .Model
 		           .insertMany(customersToCreate);
 	}
 	
-	private async _generateUser(input: TestUserGenerationInput): Promise<Customer | null>
+	private async _generateUser(input: TUserGenerationInput, password: string): Promise<Customer | null>
 	{
-		let role: UserRole = input.role === 'merchant'
-		                     ? 'merchant'
-		                     : 'customer';
+		let role: Role = input.role !== "merchant"
+		                 ? "customer"
+		                 : input.role;
 		
 		const coordinates = input.coordinates
 		                    ?? [
@@ -198,33 +192,32 @@ export class FakeUsersService
 		
 		const avatar = CommonUtils.getDummyImage(300, 300, `${firstName[0]}${lastName[0]}`);
 		
-		const user = await this._usersService
-		                       .initCustomer(
-				                       {
-					                       name:                    input.username,
-					                       email:                   input.email,
-					                       firstName:               firstName,
-					                       lastName:                lastName,
-					                       phone:                   phone,
-					                       avatar:                  avatar,
-					                       role:                    role,
-					                       isRegistrationCompleted: true,
-					                       isBanned:                false
-				                       }
-		                       );
+		const customer = await this._customersService
+		                           .initCustomer(
+				                           {
+					                           username:                input.username,
+					                           email:                   input.email,
+					                           firstName:               firstName,
+					                           lastName:                lastName,
+					                           phone:                   phone,
+					                           avatar:                  avatar,
+					                           role:                    role,
+					                           isRegistrationCompleted: true,
+					                           isBanned:                false
+				                           }
+		                           );
 		
-		if(!user)
+		if(!customer)
 		{
-			console.log(user)
 			return null;
 		}
 		
-		await this._usersService
-		          .updateGeoLocation(user.id, geoLocation as GeoLocation);
+		await this._customersService
+		          .updateGeoLocation(customer.id, geoLocation as GeoLocation);
 		
 		return this._usersAuthService.register({
-			                                       user:     user,
-			                                       password: input.password
+			                                       user:     customer,
+			                                       password: password
 		                                       });
 	}
 }
