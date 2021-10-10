@@ -1,9 +1,9 @@
 import { Injectable }        from '@angular/core';
-import { Store }             from '../data/store.service';
+import { take, map }         from 'rxjs/operators';
 import { Apollo }            from 'apollo-angular';
 import { IAdminAppSettings } from '@modules/server.common/interfaces/IAppsSettings';
-import gql                   from 'graphql-tag';
-import { take, map }         from 'rxjs/operators';
+import { GQLQueries }        from "@modules/server.common/utilities/graphql";
+import { Store }             from '@app/@core/data/store.service';
 
 @Injectable({
 	            providedIn: 'root',
@@ -24,31 +24,26 @@ export class ServerSettingsService
 			
 			                   if(res)
 			                   {
-				                   this.store.adminPasswordReset = res.adminPasswordReset;
-				                   this.store.fakeDataGenerator = res.fakeDataGenerator;
+				                   this.store.adminPasswordReset = `${res.adminPasswordReset}`;
+				                   this.store.fakeDataGenerator = `${res.fakeDataGenerator}`;
 			                   }
 			
 			                   resolve(true);
 		                   });
 	}
-
-    getAdminAppSettings()
-    {
-        return this._apollo
-		.query<{ settings: IAdminAppSettings }>({
-                                                    query: gql`
-                                                        query adminAppSettings {
-                                                            adminAppSettings {
-                                                                adminPasswordReset
-                                                                fakeDataGenerator
-                                                            }
-                                                        }
-			                                        `,
-                                                })
-		.pipe(
-				take(1),
-				map((res) => res.data['adminAppSettings'])
-		)
-		.toPromise();
-    }
+	
+	getAdminAppSettings()
+	{
+		return this._apollo
+		           .query<{
+			           settings: IAdminAppSettings
+		           }>({
+			              query: GQLQueries.AdminAppSettings,
+		              })
+		           .pipe(
+				           take(1),
+				           map((res) => res.data.settings)
+		           )
+		           .toPromise();
+	}
 }
