@@ -12,6 +12,9 @@ export type Env = Readonly<{
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
 	
+	TIME_ZONE: string;
+	ALLOWED_ORIGINS: string;
+	
 	CONNECTION_TIMEOUT: number;
 	
 	HTTPS_SERVICES_ENDPOINT: string;
@@ -92,6 +95,10 @@ export type Env = Readonly<{
 	ARCGIS_CLIENT_SECRET: string;
 	IP_STACK_API_KEY?: string;
 	
+	TALKJS_APP_ID: string;
+	TALKJS_APP_NAME: string;
+	TALKJS_SECRET_KEY: string;
+	
 	LOG_LEVEL?: string;
 	
 	APOLLO_KEY?: string;
@@ -113,6 +120,9 @@ export const env: Env = cleanEnv(
 			WEB_CONCURRENCY: num({ default: 1 }),
 			WEB_MEMORY:      num({ default: 2048 }),
 			
+			TIME_ZONE:       str({ default: 'Europe/Moscow' }),
+			ALLOWED_ORIGINS: str({ default: '*' }),
+			
 			CONNECTION_TIMEOUT: num({ default: 30 }),
 			
 			HTTPS_SERVICES_ENDPOINT:    url({ default: 'https://localhost:5501' }),
@@ -131,15 +141,15 @@ export const env: Env = cleanEnv(
 			
 			STRIPE_SECRET_KEY: str({ default: '' }),
 			
-			YOOMONEY_SHOP_ID: str({ default: '' }),
+			YOOMONEY_SHOP_ID:    str({ default: '' }),
 			YOOMONEY_SECRET_KEY: str({ default: '' }),
 			
-			BITPAY_SHOP_NAME: str({ default: '' }),
-			BITPAY_WALLET_ID: str({ default: '' }),
+			BITPAY_SHOP_NAME:  str({ default: '' }),
+			BITPAY_WALLET_ID:  str({ default: '' }),
 			BITPAY_PUBLIC_KEY: str({ default: '' }),
 			BITPAY_SECRET_KEY: str({ default: '' }),
 			
-			URBAN_AIRSHIP_KEY: str({ default: '' }),
+			URBAN_AIRSHIP_KEY:    str({ default: '' }),
 			URBAN_AIRSHIP_SECRET: str({ default: '' }),
 			
 			AWS_ACCESS_KEY_ID:     str({ default: '' }),
@@ -180,21 +190,21 @@ export const env: Env = cleanEnv(
 			WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS: num({
 				                                           desc:    'Used for passwords encryption, recommended value: 12',
 				                                           docs:
-						                                           'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
+				                                                    'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
 				                                           default: 12
 			                                           }),
 			
 			CARRIER_PASSWORD_BCRYPT_SALT_ROUNDS: num({
-				                                         desc: 'Used for passwords encryption, recommended value: 12',
+				                                         desc:    'Used for passwords encryption, recommended value: 12',
 				                                         docs:
-						                                         'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
+				                                                  'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
 				                                         default: 12
 			                                         }),
 			
 			USER_PASSWORD_BCRYPT_SALT_ROUNDS: num({
-				                                      desc: 'Used for passwords encryption, recommended value: 10',
+				                                      desc:    'Used for passwords encryption, recommended value: 10',
 				                                      docs:
-						                                      'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
+				                                               'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
 				                                      default: 10
 			                                      }),
 			
@@ -215,20 +225,25 @@ export const env: Env = cleanEnv(
 			ARCGIS_CLIENT_ID:     str({ default: '' }),
 			ARCGIS_CLIENT_SECRET: str({ default: '' }),
 			IP_STACK_API_KEY:     str({ default: '' }),
-			LOG_LEVEL:            str({
-				                          choices: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
-				                          default: 'error'
-			                          }),
+			
+			TALKJS_APP_ID:     str({ default: '' }),
+			TALKJS_APP_NAME:   str({ default: 'emarket' }),
+			TALKJS_SECRET_KEY: str({ default: '' }),
+			
+			LOG_LEVEL:  str({
+				                choices: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+				                default: 'error'
+			                }),
 			APOLLO_KEY: str({
 				                desc:
 						                'Apollo Engine Key (optional, see https://www.apollographql.com/docs/platform/schema-registry)',
 				                default: ''
 			                }),
 			
-			APOLLO_GRAPH_ID: str({
-				                     desc: 'Apollo graph id',
-				                     default: ''
-			                     }),
+			APOLLO_GRAPH_ID:      str({
+				                          desc:    'Apollo graph id',
+				                          default: ''
+			                          }),
 			APOLLO_GRAPH_VARIANT: str(
 					{ default: 'current' }
 			),
