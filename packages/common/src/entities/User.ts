@@ -1,7 +1,7 @@
-import IUser            from '../interfaces/IUser';
-import { PyroObjectId } from '@pyro/db';
-import UserRole         from '../consts/role';
 import uuid             from 'uuid';
+import { PyroObjectId } from '@pyro/db';
+import IUser            from '../interfaces/IUser';
+import Role             from '../enums/Role';
 
 /**
  * User class that's common for admin, merchant and customer
@@ -15,7 +15,7 @@ export class User implements IUser
 	avatar: string;
 	firstName: string;
 	lastName: string;
-	role: UserRole;
+	role: Role;
 	
 	constructor(user: IUser)
 	{
