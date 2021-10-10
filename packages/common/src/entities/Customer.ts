@@ -8,7 +8,7 @@ import {
 	Types
 }                                           from '../@pyro/db';
 import ICustomer, { ICustomerCreateObject } from '../interfaces/ICustomer';
-import UserRole                             from '../consts/role';
+import Role                                 from '../enums/Role';
 
 /**
  * Customer who make orders
@@ -98,7 +98,7 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 		        required: false
 	        })
 	@Column()
-	role?: UserRole;
+	role?: Role;
 	
 	/**
 	 * Current customer location (customer address, last known location of the customer)
