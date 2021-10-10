@@ -1,32 +1,32 @@
-import { Injectable }                         from '@angular/core';
-import { Apollo }                             from 'apollo-angular';
-import { Observable }                         from 'rxjs';
-import { map, share }                         from 'rxjs/operators';
-import IUser, { IResponseGenerateCustomers, } from '@modules/server.common/interfaces/IUser';
-import IPagingOptions                         from '@modules/server.common/interfaces/IPagingOptions';
-import User                                   from '@modules/server.common/entities/User';
-import { IUserRegistrationInput }             from '@modules/server.common/routers/IUserAuthRouter';
-import { GQLMutations, GQLQueries }           from '@modules/server.common/utilities';
+import { Injectable }                             from '@angular/core';
+import { Apollo }                                 from 'apollo-angular';
+import { Observable }                             from 'rxjs';
+import { map, share }                             from 'rxjs/operators';
+import ICustomer, { IResponseGenerateCustomers, } from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions                             from '@modules/server.common/interfaces/IPagingOptions';
+import Customer                                   from '@modules/server.common/entities/Customer';
+import { ICustomerRegistrationInput }             from '@modules/server.common/routers/ICustomerAuthRouter';
+import { GQLMutations, GQLQueries }               from '@modules/server.common/utilities';
 
 @Injectable()
-export class UsersService
+export class CustomersService
 {
 	constructor(private readonly _apollo: Apollo) {}
 	
-	isUserEmailExists(email: string): Promise<boolean>
+	isCustomerEmailExists(email: string): Promise<boolean>
 	{
 		return this._apollo
 		           .query<{
 			           isUserEmailExists: boolean
 		           }>({
-			              query: GQLQueries.UserEmailExists,
+			              query:     GQLQueries.CustomerEmailExists,
 			              variables: { email },
 		              })
 		           .pipe(map((res) => res.data.isUserEmailExists))
 		           .toPromise();
 	}
 	
-	isUserExists(conditions: {
+	isCustomerExists(conditions: {
 		exceptCustomerId: string;
 		memberKey: string;
 		memberValue: string;
@@ -34,42 +34,42 @@ export class UsersService
 	{
 		return this._apollo
 		           .query({
-			                  query: GQLQueries.UserExists,
+			                  query:     GQLQueries.CustomerExists,
 			                  variables: { conditions },
 		                  })
 		           .pipe(map((res) => res.data['isUserExists']));
 	}
 	
-	getUsers(pagingOptions?: IPagingOptions): Observable<User[]>
+	getCustomers(pagingOptions?: IPagingOptions): Observable<Customer[]>
 	{
 		return this._apollo
 		           .watchQuery<{
-			           users: IUser[]
+			           customers: ICustomer[]
 		           }>(
 				           {
-					           query: GQLQueries.UserAllBy,
-					           variables: { pagingOptions },
+					           query:        GQLQueries.CustomerAllPaging,
+					           variables:    { pagingOptions },
 					           pollInterval: 5000,
 				           }
 		           )
 		           .valueChanges
 		           .pipe(
-				           map((res) => res.data.users),
-				           map((users) => users.map((user) => this._userFactory(user))),
+				           map((res) => res.data.customers),
+				           map((customers) => customers.map((customer) => this._customerFactory(customer))),
 				           share()
 		           );
 	}
 	
-	getUserById(id: string)
+	getCustomerById(id: string)
 	{
 		return this._apollo
 		           .query({
-			                  query: GQLQueries.UserById,
+			                  query:     GQLQueries.CustomerById,
 			                  variables: { id },
 		                  })
 		           .pipe(
-				           map((res) => res.data['user']),
-				           map((user) => this._userFactory(user)),
+				           map((res) => res.data['customer']),
+				           map((user) => this._customerFactory(user)),
 				           share()
 		           );
 	}
@@ -78,52 +78,52 @@ export class UsersService
 	{
 		return this._apollo
 		           .mutate({
-			                   mutation: GQLMutations.UserRemoveById,
+			                   mutation:  GQLMutations.CustomerRemoveByIds,
 			                   variables: { ids },
 		                   });
 	}
 	
-	async registerUser(registerInput: IUserRegistrationInput)
+	async registerCustomer(registerInput: ICustomerRegistrationInput)
 	{
 		const res = await this._apollo
 		                      .mutate({
-			                              mutation: GQLMutations.UserRegister,
+			                              mutation:  GQLMutations.CustomerRegister,
 			                              variables: { registerInput },
 		                              })
 		                      .toPromise();
 		
-		return res.data['registerUser'];
+		return res.data['registerCustomer'];
 	}
 	
-	async banUser(id: string)
+	async banCustomer(id: string)
 	{
 		return this._apollo
 		           .mutate({
-			                   mutation: GQLMutations.UserBan,
+			                   mutation:  GQLMutations.CustomerBan,
 			                   variables: { id },
 		                   })
 		           .toPromise();
 	}
 	
-	async unbanUser(id: string)
+	async unbanCustomer(id: string)
 	{
 		return this._apollo
 		           .mutate({
-			                   mutation: GQLMutations.UserUnban,
+			                   mutation:  GQLMutations.CustomerUnban,
 			                   variables: { id },
 		                   })
 		           .toPromise();
 	}
 	
-	async getCountOfUsers()
+	async getCountOfCustomers()
 	{
 		const res = await this._apollo
 		                      .query({
-			                             query: GQLQueries.UserCount,
+			                             query: GQLQueries.CustomersCount,
 		                             })
 		                      .toPromise();
 		
-		return res.data['getCountOfUsers'];
+		return res.data['getCountOfCustomers'];
 	}
 	
 	async getCustomerMetrics(
@@ -136,7 +136,7 @@ export class UsersService
 	{
 		const res = await this._apollo
 		                      .query({
-			                             query: GQLQueries.UserMetrics,
+			                             query:     GQLQueries.UserMetrics,
 			                             variables: { id },
 		                             })
 		                      .toPromise();
@@ -152,21 +152,21 @@ export class UsersService
 	{
 		return this._apollo
 		           .query<{
-			           generate1000Customers: IResponseGenerateCustomers
+			           generateCustomers: IResponseGenerateCustomers
 		           }>({
-			              query: GQLQueries.UserGenerateCustom,
+			              query:     GQLQueries.UserGenerateCustom,
 			              variables: { qty, defaultLng, defaultLat },
 		              })
 		           .pipe(
 				           map((res) =>
 				               {
-					               return res.data.generate1000Customers;
+					               return res.data.generateCustomers;
 				               })
 		           );
 	}
 	
-	protected _userFactory(user: IUser)
+	protected _customerFactory(customer: ICustomer)
 	{
-		return user == null ? null : new User(user);
+		return customer == null ? null : new Customer(customer);
 	}
 }
