@@ -10,7 +10,7 @@ import Country                                from '../enums/Country';
 import { getCountryName }                     from '../data/countries';
 
 export const locationPreSchema = {
-	type: { type: String },
+	type:        { type: String },
 	coordinates: [Number]
 };
 
