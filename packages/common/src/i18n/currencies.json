@@ -121,7 +121,7 @@
 	},
 	"IN": {
 		"name": "Indian Rupee",
-		"code": "RUP",
+		"code": "INR",
 		"sign": "₹",
 		"order": "after"
 	},
