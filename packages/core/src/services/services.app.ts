@@ -20,11 +20,12 @@ import requestIp                                    from 'request-ip';
 import { createConnection }                         from 'typeorm';
 import { IRoutersManager }                          from '@pyro/io';
 import { getModel }                                 from '@pyro/db-server';
+import { getCurrency }                              from '@modules/server.common/data/currencies';
+import { CountryAbbreviations }                     from '@modules/server.common/data/abbreviation-to-country';
 import OAuthStrategy                                from '@modules/server.common/enums/OAuthStrategy';
 import Admin                                        from '@modules/server.common/entities/Admin';
 import Device                                       from '@modules/server.common/entities/Device';
 import Carrier                                      from '@modules/server.common/entities/Carrier';
-// import Conversation                                 from '@modules/server.common/entities/Conversation';
 import Invite                                       from '@modules/server.common/entities/Invite';
 import InviteRequest                                from '@modules/server.common/entities/InviteRequest';
 import Order                                        from '@modules/server.common/entities/Order';
@@ -34,12 +35,13 @@ import Customer                                     from '@modules/server.common
 import Warehouse                                    from '@modules/server.common/entities/Warehouse';
 import Promotion                                    from '@modules/server.common/entities/Promotion';
 import CommonUtils                                  from '@modules/server.common/utilities/common';
-import { FakeUsersService }                         from './fake-data/FakeUsersService';
+import { FakeUsersService, TUserGenerationInput }   from './fake-data/FakeUsersService';
 import { FakeWarehousesService }                    from './fake-data/FakeWarehousesService';
 import IService, { ServiceSymbol }                  from './IService';
 import { AdminsService }                            from './admins';
 import { SocialStrategiesService }                  from './customers';
 import { CustomersService }                         from './customers';
+import { CurrenciesService }                        from './currency/CurrencyService';
 import { CustomersAuthService }                     from './customers/CustomersAuthService';
 import { WarehousesAuthService, WarehousesService } from './warehouses';
 import { createLogger }                             from '../helpers/Log';
@@ -80,6 +82,8 @@ export class ServicesApp
 			private readonly _usersService: CustomersService,
 			@inject(CustomersAuthService)
 			private readonly _usersAuthService: CustomersAuthService,
+			@inject(CurrenciesService)
+			private readonly _currencyService: CurrenciesService,
 			@inject(ConfigService)
 					_configService: ConfigService
 	)
@@ -125,15 +129,15 @@ export class ServicesApp
 		const entities = ServicesApp.getEntities();
 		
 		const conn = await createConnection({
-			                                    name: 'typeorm',
-			                                    type: 'mongodb',
-			                                    url: env.DB_URI,
-			                                    entities: entities,
-			                                    synchronize: true,
-			                                    useNewUrlParser: true,
-			                                    poolSize: ServicesApp._poolSize,
-			                                    connectTimeoutMS: ServicesApp._connectTimeoutMS,
-			                                    logging: true,
+			                                    name:               'typeorm',
+			                                    type:               'mongodb',
+			                                    url:                env.DB_URI,
+			                                    entities:           entities,
+			                                    synchronize:        true,
+			                                    useNewUrlParser:    true,
+			                                    poolSize:           ServicesApp._poolSize,
+			                                    connectTimeoutMS:   ServicesApp._connectTimeoutMS,
+			                                    logging:            true,
 			                                    useUnifiedTopology: true
 		                                    });
 		
@@ -153,11 +157,11 @@ export class ServicesApp
 	private async _connectDB()
 	{
 		let connectionOptions: mongoose.ConnectionOptions = {
-			useCreateIndex: true,
-			useNewUrlParser: true,
-			useFindAndModify: false,
-			poolSize: env.DB_POOL_SIZE,
-			connectTimeoutMS: env.DB_CONNECT_TIMEOUT,
+			useCreateIndex:     true,
+			useNewUrlParser:    true,
+			useFindAndModify:   false,
+			poolSize:           env.DB_POOL_SIZE,
+			connectTimeoutMS:   env.DB_CONNECT_TIMEOUT,
 			useUnifiedTopology: true
 		};
 		
@@ -246,6 +250,7 @@ export class ServicesApp
 		await this._registerModels();
 		await this._registerEntityAdministrator();
 		await this._registerTestMerchantAndWarehouse();
+		await this._populateCurrencies();
 		this._passportSetup();
 		await this._startExpress();
 		await this._startSocketIO();
@@ -286,11 +291,12 @@ export class ServicesApp
 		{
 			await this._adminsService
 			          .register({
-				                    admin: {
-					                    email: adminEmail,
-					                    name: adminName,
-					                    hash: null,
-					                    avatar: CommonUtils.getDummyImage(300, 300, adminName.slice(0, 2))
+				                    admin:    {
+					                    email:    adminEmail,
+					                    username: adminName,
+					                    hash:     null,
+					                    role:     "admin",
+					                    avatar:   CommonUtils.getDummyImage(300, 300, adminName.slice(0, 2))
 				                    },
 				                    password: adminPassword
 			                    });
@@ -302,11 +308,10 @@ export class ServicesApp
 		if(!env.isProd)
 		{
 			let warehouse;
-			const userInput = {
+			const userInput: TUserGenerationInput = {
 				username: env.FAKE_MERCHANT_NAME,
-				password: env.FAKE_MERCHANT_PASSWORD,
-				email: env.FAKE_MERCHANT_EMAIL,
-				role: 'merchant'
+				email:    env.FAKE_MERCHANT_EMAIL,
+				role:     "merchant"
 			};
 			
 			const password = env.FAKE_MERCHANT_PASSWORD;
@@ -324,7 +329,7 @@ export class ServicesApp
 								      this.warehousesAuthService
 						      );
 				
-				const merchant = await fakeUsersService.generateMerchant(userInput);
+				const merchant = await fakeUsersService.generateMerchant(userInput, env.FAKE_MERCHANT_PASSWORD);
 				if(merchant)
 				{
 					this.log.info(
@@ -348,6 +353,36 @@ export class ServicesApp
 			} catch(err)
 			{
 				this.log.warn("Couldn't create test merchant and/or warehouse", err);
+			}
+		}
+	}
+	
+	private async _populateCurrencies()
+	{
+		const currencies = await this._currencyService.getAllCurrencies();
+		
+		if(!currencies.length)
+		{
+			for(const abbr in CountryAbbreviations)
+			{
+				const data = getCurrency(abbr);
+				if(data)
+				{
+					try
+					{
+						await this._currencyService
+						          .createCurrency({
+							                          code:  data.code,
+							                          name:  data?.name,
+							                          sign:  data?.sign ?? data.code,
+							                          order: data?.order
+						                          })
+					} catch(e)
+					{
+						console.error(`Error on currency create: ${e.message}`);
+					}
+				}
+				
 			}
 		}
 	}
@@ -413,10 +448,10 @@ export class ServicesApp
 		this.expressApp = express();
 		
 		const hbs = exphbs.create({
-			                          extname: '.hbs',
+			                          extname:       '.hbs',
 			                          defaultLayout: 'main',
-			                          layoutsDir: path.join('res', 'views', 'layouts'),
-			                          partialsDir: path.join('res', 'templates')
+			                          layoutsDir:    path.join('res', 'views', 'layouts'),
+			                          partialsDir:   path.join('res', 'templates')
 		                          });
 		
 		// configure Handlebars templates
@@ -450,7 +485,7 @@ export class ServicesApp
 			this.httpsServer = https.createServer(
 					{
 						cert: fs.readFileSync(httpsCertPath),
-						key: fs.readFileSync(httpsKeyPath)
+						key:  fs.readFileSync(httpsKeyPath)
 					},
 					this.expressApp
 			);
@@ -481,10 +516,15 @@ export class ServicesApp
 		// TODO: we may want to restric access some way
 		// (but needs to be careful because we serve some HTML pages for all clients too, e.g. About Us)
 		
-		const methods: string[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+		// const methods: string[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+		let origins = env.ALLOWED_ORIGINS.split(',');
+		if(!origins || origins.length === 0)
+		{
+			origins = [''];
+		}
 		
 		const corsOptions = {
-			origin: '*',
+			origin:      origins,
 			credentials: true
 		};
 		
@@ -520,10 +560,7 @@ export class ServicesApp
 		// Get location (lat, long) by IP address
 		// TODO: put into separate service
 		this.expressApp.get('/getLocationByIP',
-		                    (
-				                    req,
-				                    res
-		                    ) =>
+		                    (req, res) =>
 		                    {
 			                    const ipStackKey = env.IP_STACK_API_KEY;
 			                    if(ipStackKey)
@@ -535,7 +572,7 @@ export class ServicesApp
 					                    ipstack(clientIp, ipStackKey, (err, response) =>
 					                    {
 						                    res.json({
-							                             latitude: response.latitude,
+							                             latitude:  response.latitude,
 							                             longitude: response.longitude
 						                             });
 					                    });
@@ -560,16 +597,13 @@ export class ServicesApp
 		const httpsUrl = `${httpsHost}:${httpsPort}`;
 		const httpUrl = `${httpHost}:${httpPort}`;
 		
-		const conf = require('dotenv').config();
-		
 		const environment = this.expressApp.get('environment');
 		
 		this.log.info(
 				{
 					httpsUrl,
 					httpUrl,
-					environment,
-					dotenv: conf
+					environment
 				},
 				'Express server prepare to listen'
 		);
@@ -655,7 +689,7 @@ export class ServicesApp
 			                   {
 				                   pem.createCertificate(
 						                   {
-							                   days: 365,
+							                   days:       365,
 							                   selfSigned: true
 						                   },
 						                   (err, keys) =>
@@ -731,29 +765,29 @@ export class ServicesApp
 	{
 		// Facebook route auth
 		this._authRoutesHelper({
-			                       name: 'facebook',
-			                       auth_url: '/auth/facebook',
-			                       callback_url: '/auth/facebook',
+			                       name:             'facebook',
+			                       auth_url:         '/auth/facebook',
+			                       callback_url:     '/auth/facebook',
 			                       failure_redirect: '/login',
-			                       scope: ['email', 'public_profile']
+			                       scope:            ['email', 'public_profile']
 		                       })
 		
 		// Yandex route auth
 		this._authRoutesHelper({
-			                       name: 'yandex',
-			                       auth_url: '/auth/yandex',
-			                       callback_url: '/auth/yandex/callback',
+			                       name:             'yandex',
+			                       auth_url:         '/auth/yandex',
+			                       callback_url:     '/auth/yandex/callback',
 			                       failure_redirect: '/login',
-			                       scope: ['profile', 'email']
+			                       scope:            ['profile', 'email']
 		                       })
 		
 		// Google route auth
 		this._authRoutesHelper({
-			                       name: 'google',
-			                       auth_url: '/auth/google',
-			                       callback_url: '/auth/google/callback',
+			                       name:             'google',
+			                       auth_url:         '/auth/google',
+			                       callback_url:     '/auth/google/callback',
 			                       failure_redirect: '/login',
-			                       scope: ['profile', 'email']
+			                       scope:            ['profile', 'email']
 		                       })
 	}
 	
