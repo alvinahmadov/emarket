@@ -1,10 +1,11 @@
+import faker              from 'faker';
+import { Injectable }     from '@angular/core';
 import { StorageService } from '@modules/server.common/StorageService';
 import Order              from '@modules/server.common/entities/Order';
 import GeoLocation        from '@modules/server.common/entities/GeoLocation';
-import User               from '@modules/server.common/entities/User';
+import Customer           from '@modules/server.common/entities/Customer';
 import CommonUtils        from '@modules/server.common/utilities/common';
 import { environment }    from 'environments/environment';
-import { Injectable }     from '@angular/core';
 
 const lng = environment['DEFAULT_LONGITUDE'];
 const lat = environment['DEFAULT_LATITUDE'];
@@ -16,21 +17,21 @@ export class AdminStorageService extends StorageService
 	
 	order: Order | null = null;
 	
-	user: User | null = null;
+	user: Customer | null = null;
 	
 	customerGeoLocation: GeoLocation =
 			lng && lat
 			? new GeoLocation({
-				                  _id: CommonUtils.generateObjectIdString(),
-				                  _createdAt: new Date().toString(),
-				                  _updatedAt: new Date().toString(),
-				                  city: 'אשדוד',
-				                  postcode: '77452',
-				                  streetAddress: 'העצמאות',
-				                  house: '38',
-				                  countryId: 1,
-				                  loc: {
-					                  type: 'Point',
+				                  _id:           CommonUtils.generateObjectIdString(),
+				                  _createdAt:    new Date().toString(),
+				                  _updatedAt:    new Date().toString(),
+				                  city:          faker.address.city(),
+				                  postcode:      faker.address.zipCode('#####'),
+				                  streetAddress: faker.address.streetAddress(true),
+				                  house:         faker.random.number(100).toString(),
+				                  countryId:     1,
+				                  loc:           {
+					                  type:        'Point',
 					                  coordinates: [lng, lat],
 				                  },
 			                  })
