@@ -9,10 +9,13 @@ import {
 import { CommandBus, EventBus, CqrsModule }   from '@nestjs/cqrs';
 import { TypeOrmModule }                      from '@nestjs/typeorm';
 import { GraphQLModule }                      from '@nestjs/graphql';
+import { ScheduleModule }                     from '@nestjs/schedule';
 import { GraphQLSchema }                      from 'graphql';
 import { ApolloServer, makeExecutableSchema } from 'apollo-server-express';
 import { fileLoader, mergeTypes }             from 'merge-graphql-schemas';
 import mongoose                               from 'mongoose';
+import * as jwt                               from 'jsonwebtoken';
+import { CommonUtils as Common }              from '@modules/server.common/utilities'
 import { ConfigModule }                       from './config/config.module';
 import { TestController }                     from './controllers/test.controller';
 import { ProductModule }                      from './controllers/product/product.module';
@@ -40,12 +43,13 @@ import { CurrencyModule }                     from './graphql/currency/currency.
 import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
 import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
 import { AuthModule }                         from './auth/auth.module';
-import { env }                                from './env';
 import { createLogger }                       from './helpers/Log';
 import { GetAboutUsHandler }                  from './services/customers';
 import { ServicesModule }                     from './services/services.module';
 import { ServicesApp }                        from './services/services.app';
-import { getHost, getPort }                   from './utils';
+import { TasksModule }                        from './tasks/tasks.module';
+import { env }                                from './env';
+import { IncomingMessage, ServerResponse }    from 'http';
 
 const gqlEndpoint = env.GQL_ENDPOINT;
 const subscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT;
@@ -54,6 +58,48 @@ const graphqlPath = './**/*.graphql';
 const log: Logger = createLogger({
 	                                 name: 'ApplicationModule from NestJS'
                                  });
+
+type GraphQLContext = { req: IncomingMessage, res: ServerResponse }
+
+export async function apolloContextFactory(context: GraphQLContext)
+{
+	if(!context.req.connection)
+	{
+		// check connection for metadata
+		return context;
+	}
+	else
+	{
+		// check from req
+		if(!context.req?.headers)
+			throw new Error("No headers in request");
+		const authorization: string = context.req.headers.authorization;
+		const token = authorization ? authorization.split(' ')[1] : null;
+		
+		if(token)
+		{
+			try
+			{
+				//validate user in client.
+				const currentUser = await jwt.verify(token, env.JWT_SECRET);
+				
+				//add user to request
+				context.req['user'] = currentUser;
+				
+				return currentUser
+			} catch(e)
+			{
+			
+			}
+		}
+		return context.req;
+	}
+}
+
+export function apolloDefaultContextFactory({ req })
+{
+	return { req };
+}
 
 // Add here all CQRS command handlers
 export const CommandHandlers = [GetAboutUsHandler];
@@ -91,18 +137,18 @@ const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 		        // @InjectRepository() decorator NOTE: this could be used inside NestJS only, not inside our services
 		        TypeOrmModule.forFeature(entities),
 		        SubscriptionsModule.forRoot(
-				        getPort(gqlSubscriptionsEndpoint),
-				        getHost(gqlSubscriptionsEndpoint)
+				        Common.getPort(gqlSubscriptionsEndpoint),
+				        Common.getHost(gqlSubscriptionsEndpoint)
 		        ),
 		        GraphQLModule.forRoot({
 			                              typePaths:                   ['./**/*.graphql'],
 			                              installSubscriptionHandlers: true,
-			                              debug:                       true,
-			                              playground:                  true,
-			                              context:                     ({ req, res }) => ({
-				                              req
-			                              })
+			                              debug:                       !env.isProd,
+			                              playground:                  !env.isProd,
+			                              context:                     (ctx) => (apolloContextFactory(ctx))
 		                              }),
+		        ScheduleModule.forRoot(),
+		        TasksModule,
 		        InvitesModule,
 		        DevicesModule,
 		        ProductModule,
@@ -183,9 +229,7 @@ export class ApplicationModule implements NestModule, OnModuleInit
 	{
 		return new ApolloServer({
 			                        schema,
-			                        context:    ({ req, res }) => ({
-				                        req
-			                        }),
+			                        context:    (ctx) => apolloContextFactory(ctx),
 			                        playground: {
 				                        endpoint:             gqlEndpoint,
 				                        subscriptionEndpoint: subscriptionsEndpoint,
