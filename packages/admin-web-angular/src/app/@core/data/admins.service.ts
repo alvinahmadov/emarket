@@ -20,14 +20,15 @@ export class AdminsService
 		           .watchQuery<{
 			           admin: Admin
 		           }>({
-			              query: GQLQueries.Admin,
-			              variables: { id },
-			              pollInterval: 2000,
+			              query:        GQLQueries.Admin,
+			              variables:    { id },
+			              pollInterval: 10000,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data['admin']),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((res) => res.data['admin']),
+				           share()
+		           );
 	}
 	
 	updatePassword(
@@ -37,7 +38,7 @@ export class AdminsService
 	{
 		return this._apollo
 		           .mutate({
-			                   mutation: GQLMutations.AdminUpdatePassword,
+			                   mutation:  GQLMutations.AdminUpdatePassword,
 			                   variables: { id, password },
 		                   });
 	}
@@ -52,7 +53,7 @@ export class AdminsService
 			           id: string;
 			           updateInput: IAdminUpdateObject
 		           }>({
-			              mutation: GQLMutations.AdminUpdate,
+			              mutation:  GQLMutations.AdminUpdate,
 			              variables: {
 				              id,
 				              updateInput,
