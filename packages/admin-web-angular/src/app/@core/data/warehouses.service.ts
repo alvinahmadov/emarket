@@ -8,6 +8,7 @@ import IWarehouseProductCreateObject from '@modules/server.common/interfaces/IWa
 import GeoLocation                   from '@modules/server.common/entities/GeoLocation';
 import IPagingOptions                from '@modules/server.common/interfaces/IPagingOptions';
 import { GQLMutations, GQLQueries }  from '@modules/server.common/utilities';
+import WarehouseProduct              from '@modules/server.common/entities/WarehouseProduct';
 
 @Injectable()
 export class WarehousesService
@@ -71,7 +72,7 @@ export class WarehousesService
 		           .watchQuery<{
 			           getAllStores: Warehouse[]
 		           }>({
-			              query: GQLQueries.StoreLivePosition,
+			              query:        GQLQueries.WarehouseAllLight1,
 			              pollInterval: 5000,
 		              })
 		           .valueChanges
@@ -86,8 +87,8 @@ export class WarehousesService
 		           .watchQuery<{
 			           warehouses: IWarehouse[]
 		           }>({
-			              query: GQLQueries.StoreAllBy,
-			              variables: { pagingOptions },
+			              query:        GQLQueries.WarehousesAllWithPagination,
+			              variables:    { pagingOptions },
 			              pollInterval: 5000,
 		              })
 		           .valueChanges
@@ -104,9 +105,9 @@ export class WarehousesService
 		           .watchQuery<{
 			           nearbyStores: IWarehouse[]
 		           }>({
-			              query: GQLQueries.StoreNearbyStores,
+			              query:        GQLQueries.WarehousesNearby,
 			              pollInterval: 5000,
-			              variables: { geoLocation },
+			              variables:    { geoLocation },
 		              })
 		           .valueChanges.pipe(
 						map((res) => res.data.nearbyStores),
@@ -119,7 +120,7 @@ export class WarehousesService
 	{
 		return this._apollo
 		           .mutate({
-			                   mutation: GQLMutations.WarehouseRemoveByIds,
+			                   mutation:  GQLMutations.WarehouseRemoveByIds,
 			                   variables: { ids },
 		                   });
 	}
@@ -134,7 +135,7 @@ export class WarehousesService
 			           warehouseId: string;
 			           products: IWarehouseProductCreateObject[];
 		           }>({
-			              mutation: GQLMutations.WarehouseAddProducts,
+			              mutation:  GQLMutations.WarehouseAddProducts,
 			              variables: {
 				              warehouseId,
 				              products,
@@ -150,22 +151,47 @@ export class WarehousesService
 	{
 		return this._apollo
 		           .mutate({
-			                   mutation: GQLMutations.WarehouseRemoveProducts,
+			                   mutation:  GQLMutations.WarehouseRemoveProducts,
 			                   variables: { warehouseId, productsIds },
 		                   });
 	}
 	
-	getStoreById(id: string)
+	getStoreById(id: string): Observable<Warehouse>
 	{
 		return this._apollo
 		           .query({
-			                  query: GQLQueries.WarehouseStoreByIdLight,
+			                  query:     GQLQueries.WarehouseLight,
 			                  variables: { id },
 		                  })
 		           .pipe(
 				           map((res) => res.data['warehouse']),
 				           share()
 		           );
+	}
+	
+	getStoreProducts(storeId: string): Observable<WarehouseProduct[]>
+	{
+		return this._apollo.query({
+			                          query:     GQLQueries.WarehouseProductProductsWithPagination,
+			                          variables: { storeId }
+		                          })
+		           .pipe(
+				           map((res) => res.data['getWarehouseProductsWithPagination']),
+				           share()
+		           )
+	}
+	
+	getStoreAvailableProducts(storeId: string): Observable<WarehouseProduct[]>
+	{
+		return this._apollo
+		           .query({
+			                  query:     GQLQueries.WarehouseAvailableProducts,
+			                  variables: { storeId }
+		                  })
+		           .pipe(
+				           map((res) => res.data['getStoreAvailableProducts']),
+				           share()
+		           )
 	}
 	
 	async getCountOfMerchants()
