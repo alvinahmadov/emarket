@@ -15,6 +15,11 @@ export class AnalyticsService
 		this.enabled = false;
 	}
 	
+	toggle()
+	{
+		this.enabled = !this.enabled;
+	}
+	
 	trackPageViews()
 	{
 		if(this.enabled)
@@ -25,7 +30,7 @@ export class AnalyticsService
 			               {
 				               ga('send', {
 					               hitType: 'pageview',
-					               page: this.location.path(),
+					               page:    this.location.path(),
 				               });
 			               });
 		}
