@@ -35,7 +35,7 @@ const startOptions: StartOptions = {
 pm2.connect(() =>
             {
 	            pm2.start(startOptions,
-	                      (err, proc) =>
+	                      () =>
 	                      {
 		                      pm2.launchBus(function(err, bus)
 		                                    {
