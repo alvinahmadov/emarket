@@ -1,6 +1,6 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule }                  from '@angular/common';
-import { UsersService }                  from './users.service';
+import { CustomersService }              from 'app/@core/data/customers.service';
 import { StateService }                  from './state.service';
 import { SmartTableService }             from './smart-table.service';
 import { CarriersService }               from './carriers.service';
@@ -18,7 +18,7 @@ const SERVICES = [
 	CarriersService,
 	DeviceService,
 	OrdersService,
-	UsersService,
+	CustomersService,
 	ProductsService,
 	ProductsCategoryService,
 	WarehousesService,
@@ -29,7 +29,7 @@ const SERVICES = [
 ];
 
 @NgModule({
-	          imports: [CommonModule],
+	          imports:   [CommonModule],
 	          providers: [...SERVICES],
           })
 export class DataModule
@@ -37,7 +37,7 @@ export class DataModule
 	static forRoot(): ModuleWithProviders<DataModule>
 	{
 		const providers: ModuleWithProviders<DataModule> = {
-			ngModule: DataModule,
+			ngModule:  DataModule,
 			providers: [...SERVICES],
 		};
 		
