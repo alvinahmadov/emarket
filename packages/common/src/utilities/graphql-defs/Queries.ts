@@ -370,8 +370,8 @@ namespace GQLQueries
 		{
 			currencies
 			{
-				name
 				code
+				name
 				sign
 				order
 			}
@@ -1941,7 +1941,7 @@ namespace GQLQueries
 		{
 			removeCustomerOrders(storeId: $storeId, customerId: $customerId)
 			{
-				number
+				num
 				modified
 			}
 		}
