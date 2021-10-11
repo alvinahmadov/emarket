@@ -81,8 +81,9 @@ export class OrderComponent implements OnDestroy
 		return 0;
 	}
 	
-	public getWarehouseContactDetails(warehouse: Warehouse): string[]
+	public getWarehouseContactDetails(order: Order): string[]
 	{
+		const warehouse: Warehouse = order?.warehouse as Warehouse;
 		const details: string[] = [];
 		if(warehouse)
 		{
@@ -97,8 +98,10 @@ export class OrderComponent implements OnDestroy
 		return details.filter((d) => d);
 	}
 	
-	public getCustomerContactDetails(customer: Customer): string[]
+	public getCustomerContactDetails(order: Order): string[]
 	{
+		const customer: Customer = order?.customer as Customer;
+		
 		const details: string[] = [];
 		if(customer)
 		{
@@ -120,8 +123,9 @@ export class OrderComponent implements OnDestroy
 		return details.filter((d) => d);
 	}
 	
-	public getCarrierContactDetails(carrier: Carrier): string[]
+	public getCarrierContactDetails(order: Order): string[]
 	{
+		const carrier: Carrier = order?.carrier as Carrier;
 		const details: string[] = [];
 		if(carrier)
 		{
@@ -154,8 +158,11 @@ export class OrderComponent implements OnDestroy
 		);
 	}
 	
-	public getDistance(geoLocation1: GeoLocation, geoLocation2: GeoLocation): string
+	public getDistance(order: Order): string
 	{
+		const geoLocation1: GeoLocation = (<Customer>order?.customer)?.geoLocation;
+		const geoLocation2: GeoLocation = (<Warehouse>order?.warehouse)?.geoLocation;
+		
 		if(!this.distance && geoLocation1 && geoLocation2)
 		{
 			this.distance = '0';
