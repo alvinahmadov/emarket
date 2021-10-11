@@ -1,39 +1,39 @@
-import { Component, OnDestroy }          from '@angular/core';
-import User                              from '@modules/server.common/entities/User';
-import { WarehouseOrdersRouter }         from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { IOrderCreateInput }             from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import Order                             from '@modules/server.common/entities/Order';
 import { Observable, forkJoin, Subject } from 'rxjs';
-import { TranslateService }              from '@ngx-translate/core';
-import { LocalDataSource }               from 'ng2-smart-table';
-import { UserPhoneComponent }            from '../../components/users-table/phone';
-import { AddressComponent }              from '../../components/users-table/address';
-import { OrdersComponent }               from '../../components/users-table/orders';
-import { TotalComponent }                from '../../components/users-table/total';
-import { EmailComponent }                from '../../components/users-table/email';
-import { UserMutationComponent }         from '../../@shared/user/mutation/user-mutation.component';
-import { ImageUserComponent }            from '../../components/users-table/image';
-import { OrdersService }                 from '../../../src/services/orders.service';
-import { Store }                         from '../../../src/services/store.service';
-import { ModalController }               from '@ionic/angular';
-import { CustomerAddrPopupPage }         from './customer-addr-popup/customer-addr-popup';
-import { ConfirmDeletePopupPage }        from 'components/confirm-delete-popup/confirm-delete-popup';
-import { WarehouseOrdersService }        from 'services/warehouse-orders.service';
 import { takeUntil }                     from 'rxjs/operators';
 import 'rxjs/add/operator/takeUntil';
+import { LocalDataSource }               from 'ng2-smart-table';
+import { Component, OnDestroy }          from '@angular/core';
+import { ModalController }               from '@ionic/angular';
+import { TranslateService }              from '@ngx-translate/core';
+import Customer                          from '@modules/server.common/entities/Customer';
+import Order                             from '@modules/server.common/entities/Order';
+import { IOrderCreateInput }             from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import { WarehouseOrdersRouter }         from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { CustomerAddrPopupPage }         from './customer-addr-popup/customer-addr-popup';
+import { UserMutationComponent }         from '../../@shared/user/mutation/user-mutation.component';
+import { Storage }                       from '../../services/storage.service';
+import { WarehouseOrdersService }        from '../../services/warehouse-orders.service';
+import { OrdersService }                 from '../../services/orders.service';
+import { AddressComponent }              from '../../components/users-table/address';
+import { EmailComponent }                from '../../components/users-table/email';
+import { ImageUserComponent }            from '../../components/users-table/image';
+import { OrdersComponent }               from '../../components/users-table/orders';
+import { UserPhoneComponent }            from '../../components/users-table/phone';
+import { TotalComponent }                from '../../components/users-table/total';
+import { ConfirmDeletePopupPage }        from '../../components/confirm-delete-popup/confirm-delete-popup';
 
 @Component({
-	           selector: 'page-customers',
-	           templateUrl: 'customers.html',
-	           styleUrls: ['./customers.scss'],
+	           selector:    'page-customers',
+	           styleUrls:   ['./customers.scss'],
+	           templateUrl: './customers.html',
            })
 export class CustomersPage implements OnDestroy
 {
-	orders: Order[];
-	users: User[];
-	showNoDeliveryIcon: boolean;
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
+	public orders: Order[];
+	public customers: Customer[];
+	public showNoDeliveryIcon: boolean;
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
 	
 	private _ngDestroy$ = new Subject<void>();
 	private orders$: any;
@@ -44,49 +44,56 @@ export class CustomersPage implements OnDestroy
 			private readonly _translateService: TranslateService,
 			private readonly ordersService: OrdersService,
 			private readonly warehouseOrdersService: WarehouseOrdersService,
-			private readonly store: Store
+			private readonly store: Storage
 	)
 	{
-		this.loadUsers();
+		this.loadCustomers();
 		this._loadSettingsSmartTable();
 	}
 	
-	get warehouseId()
+	public ngOnDestroy(): void
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public get warehouseId(): string
 	{
 		return localStorage.getItem('_warehouseId');
 	}
 	
-	async ionViewCanEnter()
+	public getUserName(customer: Customer): string
+	{
+		if(customer)
+			return customer.fullName.trim();
+		return "";
+	}
+	
+	public async ionViewCanEnter(): Promise<boolean>
 	{
 		const isLogged = await this.store.isLogged();
 		
 		return this.store.maintenanceMode === null && isLogged;
 	}
 	
-	getUserName(user: User)
+	public ionViewWillLeave(): void
 	{
-		let name: string = '';
-		
-		if(user)
+		if(this.orders$)
 		{
-			const firstName = user.firstName;
-			const lastName = user.lastName;
-			name = `${firstName ? firstName : ''} ${lastName ? lastName : ''}`;
+			this.orders$.unsubscribe();
 		}
-		
-		return name.trim();
 	}
 	
-	getOrdersCount(userId: string)
+	public getOrdersCount(customerId: string): number
 	{
-		return this.orders.filter((o: Order) => o.user.id === userId).length;
+		return this.orders.filter((o: Order) => o.customer.id === customerId).length;
 	}
 	
-	getTotalPrice(userId: string)
+	public getTotalPrice(customerId: string): number
 	{
 		const orders = this.orders
 		                   .filter((o: Order) => o.isPaid)
-		                   .filter((o: Order) => o.user.id === userId);
+		                   .filter((o: Order) => o.customer.id === customerId);
 		let totalPrice = 0;
 		if(orders.length > 0)
 		{
@@ -97,46 +104,46 @@ export class CustomersPage implements OnDestroy
 		return totalPrice;
 	}
 	
-	async showCustomerMutationModal(user?: User)
+	public async showCustomerMutationModal(customer?: Customer): Promise<void>
 	{
 		const modal = await this._modalCtrl.create({
-			                                           component: UserMutationComponent,
-			                                           componentProps: { user },
-			                                           cssClass: 'customer-add-wrapper',
+			                                           component:      UserMutationComponent,
+			                                           componentProps: { customer },
+			                                           cssClass:       'customer-add-wrapper',
 		                                           });
 		
 		await modal.present();
 		
 		const res = await modal.onDidDismiss();
-		const userId = res.data;
-		if(userId)
+		const customerId = res.data;
+		if(customerId)
 		{
 			const orderCreateInput: IOrderCreateInput = {
 				warehouseId: this.warehouseId,
-				userId,
-				products: [],
+				customerId:  customerId,
+				products:    [],
 			};
 			
 			await this.warehouseOrdersRouter.create(orderCreateInput);
 		}
 	}
 	
-	async showAddress(e)
+	public async showAddress(e): Promise<void>
 	{
 		const modal = await this._modalCtrl.create({
-			                                           component: CustomerAddrPopupPage,
+			                                           component:      CustomerAddrPopupPage,
 			                                           componentProps: { user: e.data.user },
-			                                           cssClass: 'customer-address-popup',
+			                                           cssClass:       'customer-address-popup',
 		                                           });
 		await modal.present();
 	}
 	
-	async deleteCustomer(e)
+	public async deleteCustomer(e): Promise<void>
 	{
 		const modal = await this._modalCtrl.create({
-			                                           component: ConfirmDeletePopupPage,
+			                                           component:      ConfirmDeletePopupPage,
 			                                           componentProps: { data: e.data },
-			                                           cssClass: 'confirm-delete-wrapper',
+			                                           cssClass:       'confirm-delete-wrapper',
 		                                           });
 		
 		await modal.present();
@@ -144,87 +151,38 @@ export class CustomersPage implements OnDestroy
 		const res = await modal.onDidDismiss();
 		if(res.data)
 		{
-			const userId = e.data.user.id;
+			const customerId = e.data.customer.id;
 			const storeId = this.warehouseId;
 			
-			await this.warehouseOrdersService.removeUserOrders(storeId, userId);
+			await this.warehouseOrdersService.removeCustomerOrders(storeId, customerId);
 		}
 	}
 	
-	async editCustomer(e)
+	public async editCustomer(e): Promise<void>
 	{
-		const user = e.data.user;
-		this.showCustomerMutationModal(user);
+		const customer = e.data.customer;
+		await this.showCustomerMutationModal(customer);
 	}
 	
-	private loadUsers()
+	private loadCustomers(): void
 	{
-		// Here are loaded all orders and from them get info for users
-		// let loadData = (users, orders) => {
-		// 	const usersVM = users.map((u: User) => {
-		// 		return {
-		// 			image: u.image,
-		// 			name: this.getUserName(u),
-		// 			user: u,
-		// 			phone: u.phone,
-		// 			addresses: u.geoLocation.city,
-		// 			orders: this.getOrdersCount(u.id),
-		// 			total: this.getTotalPrice(u.id),
-		// 			allOrders: orders
-		// 		};
-		// 	});
-		
-		// 	this.sourceSmartTable.load(usersVM);
-		// };
-		
-		// this.orders$ = this.warehouseOrdersRouter
-		// 	.get(this.warehouseId, {
-		// 		order: true
-		// 	} as IWarehouseOrdersRouterGetOptions)
-		// 	.takeUntil(this._ngDestroy$)
-		// 	.subscribe((orders: Order[]) => {
-		// 		this.orders = orders;
-		
-		// 		let users = orders
-		// 			.filter((o: Order, i: number, self: Order[]) => {
-		// 				return (
-		// 					self.map((o) => o.user.id).indexOf(o.user.id) === i
-		// 				);
-		// 			})
-		// 			.map((o) => {
-		// 				let user: User = Object.assign(o.user);
-		// 				return user;
-		// 			});
-		
-		// 		if (users.length === 0) {
-		// 			this.showNoDeliveryIcon = true;
-		// 		} else {
-		// 			this.showNoDeliveryIcon = false;
-		// 		}
-		
-		// 		this.users = users;
-		// 		console.log(users);
-		
-		// 		loadData(this.users, this.orders);
-		// 	});
-		
 		const loadData = (usersInfo) =>
 		{
 			const usersVM = usersInfo.map(
 					(userInfo: {
-						user: User;
+						customer: Customer;
 						ordersCount: number;
 						totalPrice: number;
 					}) =>
 					{
 						return {
-							image: userInfo.user.image,
-							name: this.getUserName(userInfo.user),
-							user: userInfo.user,
-							phone: userInfo.user.phone,
-							addresses: userInfo.user.geoLocation.city,
-							orders: userInfo.ordersCount,
-							total: userInfo.totalPrice,
+							image:     userInfo.customer.avatar,
+							username:  userInfo.customer.username,
+							customer:  userInfo.customer,
+							phone:     userInfo.customer.phone,
+							addresses: userInfo.customer.geoLocation.city,
+							orders:    userInfo.ordersCount,
+							total:     userInfo.totalPrice,
 						};
 					}
 			);
@@ -238,7 +196,7 @@ export class CustomersPage implements OnDestroy
 		    .subscribe(
 				    (
 						    userInfo: Array<{
-							    user: User;
+							    customer: Customer;
 							    ordersCount: number;
 							    totalPrice: number;
 						    }>
@@ -253,7 +211,7 @@ export class CustomersPage implements OnDestroy
 		    );
 	}
 	
-	private _loadSettingsSmartTable()
+	private _loadSettingsSmartTable(): void
 	{
 		const columnTitlePrefix = 'CUSTOMERS_VIEW.';
 		const getTranslate = (name: string): Observable<string> =>
@@ -262,6 +220,7 @@ export class CustomersPage implements OnDestroy
 		forkJoin(
 				getTranslate('IMAGE'),
 				getTranslate('NAME'),
+				getTranslate('FULLNAME'),
 				getTranslate('PHONE_NUMBER'),
 				getTranslate('ADDRESSES'),
 				getTranslate('ORDERS'),
@@ -270,84 +229,71 @@ export class CustomersPage implements OnDestroy
 		)
 				.pipe(takeUntil(this._ngDestroy$))
 				.subscribe(
-						([image, name, phone, addresses, orders, total, email]) =>
+						([image, username, fullName, phone, addresses, orders, total, email]) =>
 						{
 							this.settingsSmartTable = {
-								mode: 'external',
-								edit: {
+								mode:    'external',
+								edit:    {
 									editButtonContent: '<i class="fa fa-edit"></i>',
-									confirmEdit: true,
+									confirmEdit:       true,
 								},
-								delete: {
+								delete:  {
 									deleteButtonContent: '<i class="fa fa-trash"></i>',
-									confirmDelete: true,
+									confirmDelete:       true,
 								},
 								actions: {
 									custom: [
 										{
-											name: 'track',
+											name:  'track',
 											title: '<i class="fa fa-map-marker"></i>',
 										},
 									],
 								},
 								columns: {
-									image: {
-										title: image,
-										type: 'custom',
+									image:     {
+										title:           image,
+										type:            'custom',
 										renderComponent: ImageUserComponent,
-										filter: false,
+										filter:          false,
 									},
-									name: { title: name },
-									phone: {
-										title: phone,
-										type: 'custom',
+									username:  { title: username },
+									fullName:  { title: fullName },
+									phone:     {
+										title:           phone,
+										type:            'custom',
 										renderComponent: UserPhoneComponent,
 									},
 									addresses: {
-										title: addresses,
-										type: 'custom',
+										title:           addresses,
+										type:            'custom',
 										renderComponent: AddressComponent,
 									},
-									orders: {
-										title: orders,
-										class: 'text-center',
-										type: 'custom',
+									orders:    {
+										title:           orders,
+										class:           'text-center',
+										type:            'custom',
 										renderComponent: OrdersComponent,
 									},
-									total: {
-										title: total,
-										class: 'text-center',
-										type: 'custom',
+									total:     {
+										title:           total,
+										class:           'text-center',
+										type:            'custom',
 										renderComponent: TotalComponent,
 									},
-									email: {
-										title: email,
-										class: 'text-center',
-										filter: false,
-										type: 'custom',
+									email:     {
+										title:           email,
+										class:           'text-center',
+										filter:          false,
+										type:            'custom',
 										renderComponent: EmailComponent,
 									},
 								},
-								pager: {
+								pager:   {
 									display: true,
 									perPage: 14,
 								},
 							};
 						}
 				);
-	}
-	
-	ionViewWillLeave()
-	{
-		if(this.orders$)
-		{
-			this.orders$.unsubscribe();
-		}
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
 	}
 }
