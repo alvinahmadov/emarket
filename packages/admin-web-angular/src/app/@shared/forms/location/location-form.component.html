@@ -19,9 +19,9 @@
 		</div>
 		
 		<div class="form-group row">
-			<label class="col-sm-2 control-label"
-			>* {{ 'WAREHOUSE_VIEW.MUTATION.ADDRESS' | translate }}</label
-			>
+			<label class="col-sm-2 control-label">
+				* {{ 'WAREHOUSE_VIEW.MUTATION.ADDRESS' | translate }}
+			</label>
 			
 			<div class="col-sm-3">
 				<select
@@ -31,8 +31,7 @@
 				>
 					<option disabled selected>
 						{{ 'WAREHOUSE_VIEW.MUTATION.COUNTRY' | translate }}...
-					</option
-					>
+					</option>
 					<option
 							*ngFor="let country of countries"
 							value="{{ country.id }}"
