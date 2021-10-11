@@ -188,7 +188,7 @@ const EUROZONE: string[] = [
 	"PT", "SK", "SI", "FI", "FR", "EE"
 ]
 
-const CURRENCIES: object =
+const CURRENCIES =
 ${getCurrencies()};
 
 /**
