@@ -1,4 +1,6 @@
-import { NgbModal }                      from '@ng-bootstrap/ng-bootstrap';
+// noinspection JSUnusedLocalSymbols
+
+import { NgbModal }                                    from '@ng-bootstrap/ng-bootstrap';
 import {
 	AfterViewChecked,
 	OnDestroy,
@@ -6,20 +8,21 @@ import {
 	Component,
 	ElementRef,
 	Renderer2
-}                                        from '@angular/core';
-import { TranslateService }              from '@ngx-translate/core';
-import { LocalDataSource }               from 'ng2-smart-table';
-import { forkJoin, Observable, Subject } from 'rxjs';
-import { first, takeUntil }              from 'rxjs/operators';
-import { getDefaultCountryName }         from '@modules/server.common/data/countries';
-import { IInviteUpdateObject }           from '@modules/server.common/interfaces/IInvite';
-import { IGeolocationUpdateObject }      from '@modules/server.common/interfaces/IGeoLocation';
-import Country                           from '@modules/server.common/enums/Country';
-import Invite                            from '@modules/server.common/entities/Invite';
-import { InvitesService }                from '@app/@core/data/invites.service';
-import { NotifyService }                 from '@app/@core/services/notify/notify.service';
-import { ConfimationModalComponent }     from '@app/@shared/confirmation-modal/confirmation-modal.component';
-import { CountryRenderComponent }        from './country-render/country-render.component';
+}                                                      from '@angular/core';
+import { TranslateService }                            from '@ngx-translate/core';
+import { LocalDataSource }                             from 'ng2-smart-table';
+import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
+import { first, takeUntil }                            from 'rxjs/operators';
+import { getCountryName }                              from '@modules/server.common/data/countries';
+import { IInviteUpdateObject }                         from '@modules/server.common/interfaces/IInvite';
+import { IGeolocationUpdateObject }                    from '@modules/server.common/interfaces/IGeoLocation';
+import Country                                         from '@modules/server.common/enums/Country';
+import Invite                                          from '@modules/server.common/entities/Invite';
+import { InvitesService }                              from '@app/@core/data/invites.service';
+import { StorageService }                              from '@app/@core/data/store.service';
+import { NotifyService }                               from '@app/@core/services/notify/notify.service';
+import { ConfimationModalComponent }                   from '@app/@shared/confirmation-modal/confirmation-modal.component';
+import { CountryRenderComponent }                      from './country-render/country-render.component';
 
 export interface InviteViewModel
 {
@@ -41,9 +44,10 @@ const perPage = 10;
            })
 export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 {
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
-	loading: boolean;
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
+	public loading: boolean;
+	public locale: string;
 	
 	private ngDestroy$ = new Subject<void>();
 	
@@ -53,10 +57,11 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 	private addClick2: boolean;
 	
 	private dataCount: number;
-	private $invites;
+	private $invites: Subscription;
 	
 	constructor(
 			private readonly _invitesService: InvitesService,
+			private readonly _storage: StorageService,
 			private readonly _elRef: ElementRef,
 			private readonly _renderer: Renderer2,
 			private readonly _translateService: TranslateService,
@@ -65,20 +70,21 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 	)
 	{}
 	
-	get hasSelectedInvites(): boolean
+	public get hasSelectedInvites(): boolean
 	{
 		return this.selectedInvites.length > 0;
 	}
 	
-	ngOnInit()
+	public ngOnInit(): void
 	{
+		this.locale = this._storage.locale ?? 'en-US';
 		this._loadSettingsSmartTable();
 		this._loadDataSmartTable();
 		this._applyTranslationOnSmartTable();
 		this.smartTableChange();
 	}
 	
-	ngAfterViewChecked(): void
+	public ngAfterViewChecked(): void
 	{
 		if(
 				this._elRef.nativeElement.querySelector(
@@ -106,19 +112,26 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		}
 	}
 	
-	selectInviteTmp(ev)
+	public ngOnDestroy(): void
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public selectInviteTmp(ev): void
 	{
 		this.selectedInvites = ev.selected;
 	}
 	
-	async createConfirm(e)
+	public async createConfirm(e): Promise<void>
 	{
 		try
 		{
 			this.loading = true;
 			const createDataObject = InvitesComponent.inviteCreateObject(e.newData);
 			const createInput = await this._invitesService.getCreateInviteObject(
-					createDataObject
+					createDataObject,
+					this.locale
 			);
 			await this._invitesService
 			          .createInvite(createInput)
@@ -140,7 +153,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		}
 	}
 	
-	async deleteConfirm(e)
+	public async deleteConfirm(e): Promise<void>
 	{
 		const activeModal = this.modalService.open(ConfimationModalComponent, {
 			size:      'sm',
@@ -152,7 +165,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		
 		await modalComponent.confirmEvent
 		                    .pipe(takeUntil(modalComponent.ngDestroy$))
-		                    .subscribe((dataEvent) =>
+		                    .subscribe(() =>
 		                               {
 			                               try
 			                               {
@@ -177,7 +190,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		                               });
 	}
 	
-	async editConfirm(e)
+	public async editConfirm(e): Promise<void>
 	{
 		try
 		{
@@ -207,7 +220,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		}
 	}
 	
-	async deleteSelectedRows()
+	public async deleteSelectedRows(): Promise<void>
 	{
 		const idsForDelete: string[] = this.selectedInvites.map((c) => c.id);
 		try
@@ -228,12 +241,6 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 			const message = `Something went wrong!`;
 			this._notifyService.error(message);
 		}
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 	
 	private _applyTranslationOnSmartTable()
@@ -320,9 +327,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		{
 			await this.$invites.unsubscribe();
 		}
-		let invites: Invite[] = [];
-		
-		const loadData = async() =>
+		const loadData = async(invites: Invite[]) =>
 		{
 			const invitesVM = invites.map(
 					(invite) =>
@@ -330,13 +335,14 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 						this.loading = false;
 						
 						return {
-							country:
-									getDefaultCountryName(invite.geoLocation.countryId) ||
-									this.noInfoSign,
+							country:     getCountryName(
+									             this.locale,
+									             invite.geoLocation.countryId
+							             ) ||
+							             this.noInfoSign,
 							city:        invite.geoLocation.city.trim() || this.noInfoSign,
-							address:
-									invite.geoLocation.streetAddress.trim() ||
-									this.noInfoSign,
+							address:     invite.geoLocation.streetAddress.trim() ||
+							             this.noInfoSign,
 							house:       invite.geoLocation.house.trim() || this.noInfoSign,
 							apartment:   invite.apartment.trim() || this.noInfoSign,
 							invite:      invite.code.trim() || this.noInfoSign,
@@ -364,16 +370,15 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 			                                limit: perPage,
 		                                })
 		                    .pipe(takeUntil(this.ngDestroy$))
-		                    .subscribe(async(i: Invite[]) =>
+		                    .subscribe(async(invites: Invite[]) =>
 		                               {
 			                               this.loading = true;
-			                               invites = i;
-			                               await loadData();
+			                               await loadData(invites);
 			                               this.loading = false;
 		                               });
 	}
 	
-	private getUpdateInviteObject(data: InviteViewModel): IInviteUpdateObject
+	private static getUpdateInviteObject(data: InviteViewModel): IInviteUpdateObject
 	{
 		const geoLocation: IGeolocationUpdateObject = {
 			countryId:     Country[data.country],
@@ -389,14 +394,14 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		};
 	}
 	
-	private static inviteCreateObject(data)
+	private static inviteCreateObject(data: any): any
 	{
 		InvitesComponent.inviteValidation(data);
 		data.apartment = data.apartment || ' ';
 		return data;
 	}
 	
-	private static inviteValidation(data)
+	private static inviteValidation(data: any): void
 	{
 		if(!data.address || !data.city || !data.country || !data.house)
 		{
@@ -404,7 +409,7 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 		}
 	}
 	
-	private async smartTableChange()
+	private async smartTableChange(): Promise<void>
 	{
 		this.sourceSmartTable
 		    .onChanged()
@@ -414,12 +419,12 @@ export class InvitesComponent implements OnInit, OnDestroy, AfterViewChecked
 			               if(event.action === 'page')
 			               {
 				               const page = event.paging.page;
-				               this._loadDataSmartTable(page);
+				               await this._loadDataSmartTable(page);
 			               }
 		               });
 	}
 	
-	private async loadDataCount()
+	private async loadDataCount(): Promise<void>
 	{
 		this.dataCount = await this._invitesService.getCountOfInvites();
 	}
