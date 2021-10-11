@@ -104,6 +104,11 @@ import Country from '../enums/Country';
 
 export type TCountryName = string;
 
+export type TCountryData = {
+	id: Country;
+	name: TCountryName;
+}
+
 export const COUNTRIES = ${getCountries()};
 
 export function getCountryName(locale: string, country: null): null;
@@ -129,10 +134,7 @@ export function getCountries(locale: string = 'en-US'): object
 	return COUNTRIES[locale];
 }
 
-export function countriesIdsToNamesArrayFn(lang: string = 'ru-RU'): {
-	id: Country;
-	name: TCountryName;
-}[]
+export function countriesIdsToNamesArrayFn(lang: string = 'ru-RU'): TCountryData[]
 {
 	return Object.keys(getCountries(lang))
 	             .map((abbr) =>
