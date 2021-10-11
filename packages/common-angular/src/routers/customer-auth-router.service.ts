@@ -15,29 +15,7 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 	
 	constructor(routerFactory: RouterFactory)
 	{
-		this.router = routerFactory.create('user-auth');
-	}
-	
-	/**
-	 * Register Customer
-	 * Note: if invites system is on - throws NotInvited if not invited
-	 *
-	 * @param {IUserRegistrationInput} input
-	 * @returns {Promise<User>}
-	 * @memberof UserAuthRouter
-	 */
-	async register(input: ICustomerRegistrationInput): Promise<Customer>
-	{
-		const u = await this.router.run<ICustomer>('register', input);
-		return this._userFactory(u);
-	}
-	
-	async addRegistrationInfo(
-			id: Customer['id'],
-			info: AddableRegistrationInfo
-	): Promise<void>
-	{
-		await this.router.run('addRegistrationInfo', id, info);
+		this.router = routerFactory.create('customer-auth');
 	}
 	
 	async login(
@@ -62,6 +40,28 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 				user:  this._userFactory(res.user),
 			};
 		}
+	}
+	
+	/**
+	 * Register Customer
+	 * Note: if invites system is on - throws NotInvited if not invited
+	 *
+	 * @param {IUserRegistrationInput} input
+	 * @returns {Promise<User>}
+	 * @memberof UserAuthRouter
+	 */
+	async register(input: ICustomerRegistrationInput): Promise<Customer>
+	{
+		const u = await this.router.run<ICustomer>('register', input);
+		return this._userFactory(u);
+	}
+	
+	async addRegistrationInfo(
+			id: Customer['id'],
+			info: AddableRegistrationInfo
+	): Promise<void>
+	{
+		await this.router.run('addRegistrationInfo', id, info);
 	}
 	
 	async updatePassword(
