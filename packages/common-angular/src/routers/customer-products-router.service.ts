@@ -10,7 +10,7 @@ export class CustomerProductsRouter implements ICustomerProductsRouter
 	
 	constructor(routerFactory: RouterFactory)
 	{
-		this.router = routerFactory.create('user-products');
+		this.router = routerFactory.create('customer-products');
 	}
 	
 	getPlaceholder(userId: string, deviceId: string): Observable<string>
