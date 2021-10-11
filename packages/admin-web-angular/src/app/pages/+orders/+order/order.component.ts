@@ -1,30 +1,30 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute }       from '@angular/router';
+import { Observable, Subject }  from 'rxjs';
 import { takeUntil }            from 'rxjs/operators';
-import Order                    from '@modules/server.common/entities/Order';
-import { Subject }              from 'rxjs';
-import Warehouse                from '@modules/server.common/entities/Warehouse';
-import User                     from '@modules/server.common/entities/User';
-import { OrderRouter }          from '@modules/client.common.angular2/routers/order-router.service';
-import Carrier                  from '@modules/server.common/entities/Carrier';
+import { TranslateService }     from '@ngx-translate/core';
 import OrderCarrierStatus       from '@modules/server.common/enums/OrderCarrierStatus';
+import Order                    from '@modules/server.common/entities/Order';
+import Warehouse                from '@modules/server.common/entities/Warehouse';
+import Customer                 from '@modules/server.common/entities/Customer';
+import Carrier                  from '@modules/server.common/entities/Carrier';
 import OrderProduct             from '@modules/server.common/entities/OrderProduct';
 import GeoLocation              from '@modules/server.common/entities/GeoLocation';
-import { TranslateService }     from '@ngx-translate/core';
 import { CommonUtils }          from '@modules/server.common/utilities';
+import { OrderRouter }          from '@modules/client.common.angular2/routers/order-router.service';
 
 const service = new google.maps.DistanceMatrixService();
 
 @Component({
-	           selector: 'ea-order',
-	           templateUrl: './order.component.html',
-	           styleUrls: ['./order.component.scss'],
+	           selector:    'ea-order',
+	           styleUrls:   ['./order.component.scss'],
+	           templateUrl: './order.component.html'
            })
 export class OrderComponent implements OnDestroy
 {
 	public orderId: string;
-	public order$;
 	public distance: string;
+	public order$: Observable<Order>;
 	
 	public PREFIX: string = 'ORDER_VIEW.ORDER_SIDEBAR.';
 	public WAREHOUSE_TITLE: string = 'WAREHOUSE';
@@ -46,25 +46,31 @@ export class OrderComponent implements OnDestroy
 		                  .pipe(takeUntil(this.ngDestroy$));
 	}
 	
-	get titleWarehouse()
+	public ngOnDestroy(): void
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public get titleWarehouse(): string
 	{
 		const titleForTr = this.PREFIX + this.WAREHOUSE_TITLE;
 		return this._translate(titleForTr);
 	}
 	
-	get titleCustomer()
+	public get titleCustomer(): string
 	{
 		const titleForTr = this.PREFIX + this.CUSTOMER_TITLE;
 		return this._translate(titleForTr);
 	}
 	
-	get titleCarrier()
+	public get titleCarrier(): string
 	{
 		const titleForTr = this.PREFIX + this.CARRIER_TITLE;
 		return this._translate(titleForTr);
 	}
 	
-	getTotalPrice(order)
+	public getTotalPrice(order): number
 	{
 		if(order && order.products.length > 0)
 		{
@@ -72,15 +78,12 @@ export class OrderComponent implements OnDestroy
 			            .map((p: OrderProduct) => p.price * p.count)
 			            .reduce((a, b) => a + b, 0);
 		}
-		else
-		{
-			return 0;
-		}
+		return 0;
 	}
 	
-	getWarehouseContactDetails(warehouse: Warehouse)
+	public getWarehouseContactDetails(warehouse: Warehouse): string[]
 	{
-		const details = [];
+		const details: string[] = [];
 		if(warehouse)
 		{
 			details.push(warehouse.name);
@@ -94,41 +97,32 @@ export class OrderComponent implements OnDestroy
 		return details.filter((d) => d);
 	}
 	
-	getCustomerContactDetails(user: User)
+	public getCustomerContactDetails(customer: Customer): string[]
 	{
-		const details = [];
-		if(user)
+		const details: string[] = [];
+		if(customer)
 		{
-			let name = '';
-			if(user.firstName)
-			{
-				name += user.firstName;
-			}
-			if(user.lastName)
-			{
-				name += ' ' + user.lastName;
-			}
-			details.push(name);
-			details.push(user.phone);
-			details.push(user.email);
+			details.push(customer.fullName ?? customer.username);
+			details.push(customer.phone);
+			details.push(customer.email);
 		}
-		if(user.geoLocation)
+		if(customer.geoLocation)
 		{
-			details.push(user.fullAddress);
+			details.push(customer.fullAddress);
 			
-			user.geoLocation.notes =
-					user.geoLocation.notes === undefined
+			customer.geoLocation.notes =
+					customer.geoLocation.notes === undefined
 					? ''
-					: user.geoLocation.notes;
+					: customer.geoLocation.notes;
 			
-			details.push(`Notes: ${user.geoLocation.notes}`);
+			details.push(`Notes: ${customer.geoLocation.notes}`);
 		}
 		return details.filter((d) => d);
 	}
 	
-	getCarrierContactDetails(carrier: Carrier)
+	public getCarrierContactDetails(carrier: Carrier): string[]
 	{
-		const details = [];
+		const details: string[] = [];
 		if(carrier)
 		{
 			details.push(
@@ -145,15 +139,14 @@ export class OrderComponent implements OnDestroy
 		return details.filter((d) => d);
 	}
 	
-	getOrderName(order: Order)
+	public getOrderName(order: Order): string
 	{
 		if(order)
-		{
 			return CommonUtils.getIdFromTheDate(order);
-		}
+		return ''
 	}
 	
-	isCarrierCurrent(order)
+	public isCarrierCurrent(order: Order): boolean
 	{
 		return (
 				order.carrierStatus >= OrderCarrierStatus.CarrierPickedUpOrder &&
@@ -161,29 +154,29 @@ export class OrderComponent implements OnDestroy
 		);
 	}
 	
-	getDistance(geoLocation1: GeoLocation, geoLocation2: GeoLocation)
+	public getDistance(geoLocation1: GeoLocation, geoLocation2: GeoLocation): string
 	{
 		if(!this.distance && geoLocation1 && geoLocation2)
 		{
 			this.distance = '0';
 			service.getDistanceMatrix(
 					{
-						origins: [
+						origins:       [
 							new google.maps.LatLng(
 									geoLocation1.coordinates.lat,
 									geoLocation1.coordinates.lng
 							),
 						],
-						destinations: [
+						destinations:  [
 							new google.maps.LatLng(
 									geoLocation2.coordinates.lat,
 									geoLocation2.coordinates.lng
 							),
 						],
-						travelMode: google.maps.TravelMode.DRIVING,
-						unitSystem: google.maps.UnitSystem.METRIC,
+						travelMode:    google.maps.TravelMode.DRIVING,
+						unitSystem:    google.maps.UnitSystem.METRIC,
 						avoidHighways: false,
-						avoidTolls: false,
+						avoidTolls:    false,
 					},
 					(response, status) =>
 					{
@@ -199,13 +192,7 @@ export class OrderComponent implements OnDestroy
 		return this.distance;
 	}
 	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-	}
-	
-	private static getFullAddress(geoLocation: GeoLocation)
+	private static getFullAddress(geoLocation: GeoLocation): string
 	{
 		return (
 				`${geoLocation.city}, ${geoLocation.streetAddress} ` +
