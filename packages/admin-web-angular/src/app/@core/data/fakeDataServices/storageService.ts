@@ -32,7 +32,7 @@ export class AdminStorageService extends StorageService
 				                  countryId:     1,
 				                  loc:           {
 					                  type:        'Point',
-					                  coordinates: [lng, lat],
+					                  coordinates: { lat, lng },
 				                  },
 			                  })
 			: null;
