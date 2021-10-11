@@ -30,6 +30,8 @@ export interface Environment
 	
 	GOOGLE_MAPS_API_KEY: string;
 	
+	TALKJS_APP_ID: string;
+	
 	GOOGLE_ANALYTICS_API_KEY: string;
 	FAKE_UUID: string;
 	MIXPANEL_API_KEY: string;
