@@ -3,14 +3,14 @@ import Customer       from '@modules/server.common/entities/Customer';
 import { Injectable } from '@angular/core';
 
 @Injectable()
-export class Store
+export class StorageService
 {
-	get token(): string | null
+	public get token(): string | null
 	{
 		return localStorage.getItem('token') || null;
 	}
 	
-	set token(token: string)
+	public set token(token: string)
 	{
 		if(token == null)
 		{
@@ -22,12 +22,12 @@ export class Store
 		}
 	}
 	
-	get adminId(): Admin['id'] | null
+	public get adminId(): Admin['id'] | null
 	{
 		return localStorage.getItem('_adminId') || null;
 	}
 	
-	set adminId(id: Admin['id'] | null)
+	public set adminId(id: Admin['id'] | null)
 	{
 		if(id == null)
 		{
@@ -39,12 +39,12 @@ export class Store
 		}
 	}
 	
-	get userId(): Customer['id'] | null
+	public get userId(): Customer['id'] | null
 	{
 		return localStorage.getItem('_simUserId') || null;
 	}
 	
-	set userId(id: Customer['id'] | null)
+	public set userId(id: Customer['id'] | null)
 	{
 		if(id == null)
 		{
@@ -56,23 +56,23 @@ export class Store
 		}
 	}
 	
-	get locale(): string
+	public get locale(): string | null
 	{
 		return localStorage.getItem('_locale');
 	}
 	
-	set locale(locale: string)
+	public set locale(locale: string)
 	{
 		if(locale)
 			localStorage.setItem('_locale', locale)
 	}
 	
-	get theme()
+	public get theme(): string | null
 	{
 		return localStorage.getItem('theme')
 	}
 	
-	set theme(theme)
+	public set theme(theme)
 	{
 		if(!theme)
 		{
@@ -84,47 +84,47 @@ export class Store
 		}
 	}
 	
-	get currency(): string
+	public get currency(): string | null
 	{
 		return localStorage.getItem('_curreny');
 	}
 	
-	set currency(code: string)
+	public set currency(code: string)
 	{
 		localStorage.setItem('_curreny', code);
 	}
 	
-	get maintenanceMode(): string | null
+	public get maintenanceMode(): string | null
 	{
 		return localStorage.getItem('maintenanceMode') || null;
 	}
 	
-	get serverConnection()
+	public get serverConnection(): string | null
 	{
 		return localStorage.getItem('serverConnection');
 	}
 	
-	set serverConnection(val: string)
+	public set serverConnection(val: string)
 	{
 		localStorage.setItem('serverConnection', val);
 	}
 	
-	get adminPasswordReset()
+	public get adminPasswordReset(): string | null
 	{
 		return localStorage.getItem('adminPasswordReset');
 	}
 	
-	set adminPasswordReset(val: string)
+	public set adminPasswordReset(val: string)
 	{
 		localStorage.setItem('adminPasswordReset', val);
 	}
 	
-	get fakeDataGenerator()
+	public get fakeDataGenerator(): string | null
 	{
 		return localStorage.getItem('fakeDataGenerator');
 	}
 	
-	set fakeDataGenerator(val: string)
+	public set fakeDataGenerator(val: string)
 	{
 		localStorage.setItem('fakeDataGenerator', val);
 	}
