@@ -1,39 +1,40 @@
+import { isEmpty, pick }             from 'lodash';
 import {
 	Component,
-	Input,
+	ElementRef,
 	EventEmitter,
+	Input,
 	Output,
 	ViewChild,
-	ElementRef,
-	AfterViewInit,
 	OnInit,
-} from '@angular/core';
-
+	AfterViewInit
+}                                    from '@angular/core';
 import {
 	AbstractControl,
 	FormArray,
 	FormBuilder,
 	FormGroup,
-	Validators,
-} from '@angular/forms';
+	Validators
+}                                    from '@angular/forms';
+import { AlertController }           from '@ionic/angular';
+import { TranslateService }          from '@ngx-translate/core';
+import {
+	countriesIdsToNamesArrayFn,
+	getCountryName
+}                                    from '@modules/server.common/data/countries';
+import { IGeoLocationCreateObject }  from '@modules/server.common/interfaces/IGeoLocation';
+import Country                       from '@modules/server.common/enums/Country';
+import GeoLocation                   from '@modules/server.common/entities/GeoLocation';
+import Customer                      from '@modules/server.common/entities/Customer';
+import { ProductLocalesService }     from '@modules/client.common.angular2/locale/product-locales.service';
+import { FormHelpers }               from '../../../forms/helpers';
+import { Storage as StorageService } from '../../../../services/storage.service';
 
-import GeoLocation, {
-	Country,
-	getCountryName,
-	countriesIdsToNamesArray,
-} from '@modules/server.common/entities/GeoLocation';
-
-import { pick, isEmpty }            from 'lodash';
-import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
-import { FormHelpers }              from '../../../forms/helpers';
-import { TranslateService }         from '@ngx-translate/core';
-import { ProductLocalesService }    from '@modules/client.common.angular2/locale/product-locales.service';
-import { AlertController }          from '@ionic/angular';
-import User                         from '@modules/server.common/entities/User';
+type CountryData = { id: Country; name: string };
 
 @Component({
-	           selector: 'location-form',
-	           styleUrls: ['./location-form.component.scss'],
+	           selector:    'location-form',
+	           styleUrls:   ['./location-form.component.scss'],
 	           templateUrl: './location-form.component.html',
            })
 export class LocationFormComponent implements OnInit, AfterViewInit
@@ -49,47 +50,66 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 	readonly apartment?: AbstractControl;
 	
 	@Input()
-	userData: User;
+	public customerData: Customer;
 	
 	@Input()
-	showAutocompleteSearch: boolean = false;
+	public showAutocompleteSearch: boolean = false;
 	
 	@Output()
-	mapCoordinatesEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
+	public mapCoordinatesEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
 	
 	@Output()
-	mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
 	
 	@ViewChild('autocomplete')
-	searchElement: ElementRef;
+	public searchElement: ElementRef;
 	
-	showCoordinates: boolean = false;
+	public showCoordinates: boolean = false;
+	
+	public readonly _countries: CountryData[]
+	public locale: string;
 	
 	private _lastUsedAddressText: string;
+	private _lat: number;
+	private _lng: number;
 	
 	constructor(
 			private readonly _alertController: AlertController,
-			private translate: TranslateService,
+			private readonly _storage: StorageService,
+			private readonly translate: TranslateService,
 			public readonly localeTranslateService: ProductLocalesService
 	)
-	{}
+	{
+		this.locale = this._storage.language ?? 'en-US';
+		this._countries = countriesIdsToNamesArrayFn(this.locale);
+	}
 	
-	get buttonOK()
+	public ngOnInit(): void
+	{
+		this.loadData();
+	}
+	
+	public ngAfterViewInit()
+	{
+		this._initGoogleAutocompleteApi();
+	}
+	
+	public get buttonOK(): string
 	{
 		return this._translate(this.PREFIX + this.OK);
 	}
 	
-	get buttonCancel()
+	public get buttonCancel(): string
 	{
 		return this._translate(this.PREFIX + this.CANCEL);
 	}
 	
-	get countries()
+	public get countries(): CountryData[]
 	{
-		return countriesIdsToNamesArray;
+		return this._countries;
 	}
 	
-	get isCountryValid(): boolean
+	public get isCountryValid(): boolean
 	{
 		return (
 				this.countryId.errors &&
@@ -97,12 +117,12 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		);
 	}
 	
-	get isCityValid(): boolean
+	public get isCityValid(): boolean
 	{
 		return this.city.errors && (this.city.dirty || this.city.touched);
 	}
 	
-	get isStreetAddressValid(): boolean
+	public get isStreetAddressValid(): boolean
 	{
 		return (
 				this.streetAddress.errors &&
@@ -110,12 +130,12 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		);
 	}
 	
-	get isHouseValid(): boolean
+	public get isHouseValid(): boolean
 	{
 		return this.house.errors && (this.house.dirty || this.house.touched);
 	}
 	
-	get isLocationValid(): boolean
+	public get isLocationValid(): boolean
 	{
 		return (
 				this.coordinates.errors &&
@@ -123,74 +143,62 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		);
 	}
 	
-	get countryId()
+	public get countryId(): AbstractControl
 	{
 		return this.form.get('countryId');
 	}
 	
-	get city()
+	public get city(): AbstractControl
 	{
 		return this.form.get('city');
 	}
 	
-	get streetAddress()
+	public get streetAddress(): AbstractControl
 	{
 		return this.form.get('streetAddress');
 	}
 	
-	get house()
+	public get house(): AbstractControl
 	{
 		return this.form.get('house');
 	}
 	
-	get postcode()
+	public get postcode(): AbstractControl
 	{
 		return this.form.get('postcode');
 	}
 	
-	get coordinates()
+	public get coordinates(): AbstractControl
 	{
 		return this.form.get('loc').get('coordinates') as FormArray;
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
-		const form = formBuilder.group({
-			                               countryId: [Country.US],
-			                               city: ['', [Validators.required]],
-			                               streetAddress: ['', [Validators.required]],
-			                               house: ['', [Validators.required]],
-			                               postcode: [''],
-			                               loc: formBuilder.group({
-				                                                      type: ['Point'],
-				                                                      coordinates: formBuilder.array([null, null]),
-			                                                      }),
-		                               });
-		
-		return form;
+		return formBuilder.group({
+			                         countryId:     [Country.US],
+			                         city:          ['', [Validators.required]],
+			                         streetAddress: ['', [Validators.required]],
+			                         house:         ['', [Validators.required]],
+			                         postcode:      [''],
+			                         loc:           formBuilder.group({
+				                                                          type:        ['Point'],
+				                                                          coordinates: formBuilder.array([null, null]),
+			                                                          }),
+		                         });
 	}
 	
-	static buildApartmentForm(formBuilder: FormBuilder): AbstractControl
+	public static buildApartmentForm(formBuilder: FormBuilder): AbstractControl
 	{
 		return formBuilder.control('');
 	}
 	
-	ngOnInit(): void
-	{
-		this.loadData();
-	}
-	
-	ngAfterViewInit()
-	{
-		this._initGoogleAutocompleteApi();
-	}
-	
-	toggleCoordinates()
+	public toggleCoordinates(): void
 	{
 		this.showCoordinates = !this.showCoordinates;
 	}
 	
-	onAddressChanges()
+	public onAddressChanges(): void
 	{
 		if(this.showAutocompleteSearch)
 		{
@@ -198,7 +206,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		}
 	}
 	
-	onCoordinatesChanged()
+	public onCoordinatesChanged(): void
 	{
 		if(this.showAutocompleteSearch)
 		{
@@ -206,7 +214,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		}
 	}
 	
-	getValue(): IGeoLocationCreateObject
+	public getValue(): IGeoLocationCreateObject
 	{
 		const location = this.form.getRawValue() as IGeoLocationCreateObject;
 		if(!location.postcode)
@@ -216,7 +224,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		return location;
 	}
 	
-	getApartment(): string
+	public getApartment(): string
 	{
 		// apartment is not part of geo location
 		if(!this.apartment)
@@ -226,7 +234,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		return this.apartment.value as string;
 	}
 	
-	setValue<T extends IGeoLocationCreateObject>(geoLocation: T)
+	public setValue<T extends IGeoLocationCreateObject>(geoLocation: T): void
 	{
 		FormHelpers.deepMark(this.form, 'dirty');
 		
@@ -239,7 +247,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		this._tryFindNewCoordinates();
 	}
 	
-	setApartment(apartment: string)
+	public setApartment(apartment: string): void
 	{
 		this.apartment.setValue(apartment);
 	}
@@ -248,29 +256,43 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 	{
 		let translationResult = '';
 		
-		this.translate.get(key).subscribe((res) =>
-		                                  {
-			                                  translationResult = res;
-		                                  });
+		this.translate
+		    .get(key)
+		    .subscribe((res) => translationResult = res);
 		
 		return translationResult;
 	}
 	
-	private async _applyFormattedAddress(address: string)
+	private loadData()
 	{
-		if(this.searchElement)
+		if(this.customerData)
 		{
-			const inputElement = await this.searchElement['getInputElement']();
-			inputElement.value = address;
+			const userGeoLocation: GeoLocation = new GeoLocation(
+					this.customerData.geoLocation
+			);
+			
+			this.city.setValue(userGeoLocation.city);
+			this.streetAddress.setValue(userGeoLocation.streetAddress);
+			this.house.setValue(userGeoLocation.house);
+			this.coordinates.setValue([
+				                          userGeoLocation.coordinates.lat,
+				                          userGeoLocation.coordinates.lng,
+			                          ]);
+			this.countryId.setValue(userGeoLocation.countryId.toString());
+			this.postcode.setValue(userGeoLocation.postcode);
+			
+			this.apartment.setValue(this.customerData.apartment);
+			
+			this._tryFindNewCoordinates();
 		}
 	}
 	
-	private _tryFindNewAddress()
+	private _tryFindNewAddress(): void
 	{
 		const house = this.house.value;
 		const streetAddress = this.streetAddress.value;
 		const city = this.city.value;
-		const countryName = getCountryName(+this.countryId.value);
+		const countryName = getCountryName(this.locale, +this.countryId.value);
 		
 		if(
 				isEmpty(streetAddress) ||
@@ -292,7 +314,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 			
 			geocoder.geocode(
 					{
-						address: `${streetAddress} ${house}, ${city}`,
+						address:               `${streetAddress} ${house}, ${city}`,
 						componentRestrictions: {
 							country: countryName,
 						},
@@ -312,10 +334,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		}
 	}
 	
-	private _lat: number;
-	private _lng: number;
-	
-	private _tryFindNewCoordinates()
+	private _tryFindNewCoordinates(): void
 	{
 		const formCoordinates = this.coordinates.value;
 		this._lat = formCoordinates[0];
@@ -343,7 +362,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 	
 	private _emitCoordinates(
 			location: google.maps.LatLng | google.maps.LatLngLiteral
-	)
+	): void
 	{
 		this.mapCoordinatesEmitter.emit(location);
 	}
@@ -352,24 +371,14 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 			geometry:
 					| google.maps.places.PlaceGeometry
 					| google.maps.GeocoderGeometry
-	)
+	): void
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	private async _popInvalidAddressMessage()
-	{
-		const alert = await this._alertController.create({
-			                                                 message: 'Invalid address, please try again!',
-		                                                 });
-		await alert.present();
-		
-		setTimeout(() => alert.dismiss(), 2000);
-	}
-	
-	private _setupGoogleAutocompleteOptions(
+	private static _setupGoogleAutocompleteOptions(
 			autocomplete: google.maps.places.Autocomplete
-	)
+	): void
 	{
 		autocomplete['setFields'](['address_components', 'geometry']);
 	}
@@ -377,7 +386,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 	private _applyNewPlaceOnTheMap(
 			place: google.maps.places.PlaceResult | google.maps.GeocoderResult,
 			useGeometryLatLng: boolean = true
-	)
+	): void
 	{
 		if(place.geometry === undefined || place.geometry === null)
 		{
@@ -402,7 +411,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 	
 	private _listenForGoogleAutocompleteAddressChanges(
 			autocomplete: google.maps.places.Autocomplete
-	)
+	): void
 	{
 		autocomplete.addListener('place_changed', (_) =>
 		{
@@ -415,20 +424,20 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 			locationResult:
 					| google.maps.GeocoderResult
 					| google.maps.places.PlaceResult
-	)
+	): void
 	{
 		const longName = 'long_name';
 		const shortName = 'short_name';
 		
 		const neededAddressTypes = {
-			country: shortName,
+			country:  shortName,
 			locality: longName,
 			// 'neighborhood' is not need for now
 			// neighborhood: longName,
-			route: longName,
-			intersection: longName,
-			street_number: longName,
-			postal_code: longName,
+			route:                       longName,
+			intersection:                longName,
+			street_number:               longName,
+			postal_code:                 longName,
 			administrative_area_level_1: shortName,
 			administrative_area_level_2: shortName,
 			administrative_area_level_3: shortName,
@@ -490,29 +499,13 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		);
 	}
 	
-	private async _initGoogleAutocompleteApi()
-	{
-		if(this.searchElement)
-		{
-			const inputElement = await this.searchElement['getInputElement']();
-			
-			const autocomplete = new google.maps.places.Autocomplete(
-					inputElement
-			);
-			
-			this._setupGoogleAutocompleteOptions(autocomplete);
-			
-			this._listenForGoogleAutocompleteAddressChanges(autocomplete);
-		}
-	}
-	
 	private _setFormLocationValues(
 			countryId,
 			city,
 			streetName,
 			streetNumber,
 			postcode
-	)
+	): void
 	{
 		if(!isEmpty(countryId))
 		{
@@ -538,27 +531,38 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		this.coordinates.setValue([this._lat, this._lng]);
 	}
 	
-	private loadData()
+	private async _applyFormattedAddress(address: string): Promise<void>
 	{
-		if(this.userData)
+		if(this.searchElement)
 		{
-			const userGeoLocation: GeoLocation = new GeoLocation(
-					this.userData.geoLocation
+			const inputElement = await this.searchElement['getInputElement']();
+			inputElement.value = address;
+		}
+	}
+	
+	private async _popInvalidAddressMessage(): Promise<void>
+	{
+		const alert = await this._alertController.create({
+			                                                 message: 'Invalid address, please try again!',
+		                                                 });
+		await alert.present();
+		
+		setTimeout(() => alert.dismiss(), 2000);
+	}
+	
+	private async _initGoogleAutocompleteApi(): Promise<void>
+	{
+		if(this.searchElement)
+		{
+			const inputElement = await this.searchElement['getInputElement']();
+			
+			const autocomplete = new google.maps.places.Autocomplete(
+					inputElement
 			);
 			
-			this.city.setValue(userGeoLocation.city);
-			this.streetAddress.setValue(userGeoLocation.streetAddress);
-			this.house.setValue(userGeoLocation.house);
-			this.coordinates.setValue([
-				                          userGeoLocation.coordinates.lat,
-				                          userGeoLocation.coordinates.lng,
-			                          ]);
-			this.countryId.setValue(userGeoLocation.countryId.toString());
-			this.postcode.setValue(userGeoLocation.postcode);
+			LocationFormComponent._setupGoogleAutocompleteOptions(autocomplete);
 			
-			this.apartment.setValue(this.userData.apartment);
-			
-			this._tryFindNewCoordinates();
+			this._listenForGoogleAutocompleteAddressChanges(autocomplete);
 		}
 	}
 }
