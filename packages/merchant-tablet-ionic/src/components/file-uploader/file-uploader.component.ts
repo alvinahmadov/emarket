@@ -8,17 +8,17 @@ import {
 }                                                      from '@angular/core';
 import { FileUploader, FileUploaderOptions, FileItem } from 'ng2-file-upload';
 import { environment }                                 from 'environments/environment';
-import { TranslateService }                            from '@ngx-translate/core';
 import { ActionSheetController }                       from '@ionic/angular';
 import { Camera, CameraOptions }                       from '@ionic-native/camera/ngx';
 import { IProductImage }                               from '@modules/server.common/interfaces/IProduct';
 import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
+import { LocaleService }                               from '@modules/client.common.angular2/locale/locale.service';
 import { NgModel }                                     from '@angular/forms';
 
 @Component({
-	           selector: 'e-cu-file-uploader',
+	           selector:    'e-cu-file-uploader',
 	           templateUrl: './file-uploader.component.html',
-	           styleUrls: ['./file-uploader.component.scss'],
+	           styleUrls:   ['./file-uploader.component.scss'],
            })
 export class FileUploaderComponent implements OnInit
 {
@@ -50,7 +50,7 @@ export class FileUploaderComponent implements OnInit
 	private PICTURE_URL: string = 'PICTURE_URL';
 	
 	constructor(
-			private translateService: TranslateService,
+			private localeService: LocaleService,
 			private actionSheetCtrl: ActionSheetController,
 			private camera: Camera,
 			public readonly localeTranslateService: ProductLocalesService
@@ -69,12 +69,12 @@ export class FileUploaderComponent implements OnInit
 	
 	get dragAndDrob()
 	{
-		return this._translate(this.PREFIX + this.DRAG_AND_DROP);
+		return this.localeService.translate(this.PREFIX + this.DRAG_AND_DROP);
 	}
 	
 	get pictureURL()
 	{
-		return this._translate(this.PREFIX + this.PICTURE_URL);
+		return this.localeService.translate(this.PREFIX + this.PICTURE_URL);
 	}
 	
 	get currentLocale()
@@ -128,23 +128,23 @@ export class FileUploaderComponent implements OnInit
 	async presentActionSheet()
 	{
 		const actionSheet = await this.actionSheetCtrl.create({
-			                                                      header: 'Select Image Source',
+			                                                      header:  'Select Image Source',
 			                                                      buttons: [
 				                                                      {
-					                                                      text: 'Load from Library',
+					                                                      text:    'Load from Library',
 					                                                      handler: () =>
-					                                                      {
-						                                                      this._takePicture(
-								                                                      this.camera.PictureSourceType.PHOTOLIBRARY
-						                                                      );
-					                                                      },
+					                                                               {
+						                                                               this._takePicture(
+								                                                               this.camera.PictureSourceType.PHOTOLIBRARY
+						                                                               );
+					                                                               },
 				                                                      },
 				                                                      {
-					                                                      text: 'Use Camera',
+					                                                      text:    'Use Camera',
 					                                                      handler: () =>
-					                                                      {
-						                                                      this._takePicture(this.camera.PictureSourceType.CAMERA);
-					                                                      },
+					                                                               {
+						                                                               this._takePicture(this.camera.PictureSourceType.CAMERA);
+					                                                               },
 				                                                      },
 				                                                      { text: 'Cancel', role: 'cancel' },
 			                                                      ],
@@ -157,11 +157,11 @@ export class FileUploaderComponent implements OnInit
 		const uploaderOptions: FileUploaderOptions = {
 			url: environment.CLOUDINARY_UPLOAD_URL,
 			
-			isHTML5: true,
+			isHTML5:           true,
 			removeAfterUpload: true,
-			headers: [
+			headers:           [
 				{
-					name: 'X-Requested-With',
+					name:  'X-Requested-With',
 					value: 'XMLHttpRequest',
 				},
 			],
@@ -190,24 +190,13 @@ export class FileUploaderComponent implements OnInit
 		};
 	}
 	
-	private _translate(key: string)
-	{
-		let translationResult = '';
-		
-		this.translateService.get(key).subscribe((res) =>
-		                                         {
-			                                         translationResult = res;
-		                                         });
-		return translationResult;
-	}
-	
 	private _takePicture(sourceType: number)
 	{
 		const options: CameraOptions = {
-			quality: 80,
-			destinationType: this.camera.DestinationType.DATA_URL,
-			encodingType: this.camera.EncodingType.JPEG,
-			mediaType: this.camera.MediaType.PICTURE,
+			quality:            80,
+			destinationType:    this.camera.DestinationType.DATA_URL,
+			encodingType:       this.camera.EncodingType.JPEG,
+			mediaType:          this.camera.MediaType.PICTURE,
 			correctOrientation: true,
 			sourceType,
 		};
