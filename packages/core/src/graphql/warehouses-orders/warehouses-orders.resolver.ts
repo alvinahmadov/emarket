@@ -112,7 +112,7 @@ export class WarehouseOrdersResolver
 		).exec();
 		
 		return {
-			number:   res.n,
+			num:      res.n,
 			modified: res.nModified
 		};
 	}
