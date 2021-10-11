@@ -1,24 +1,27 @@
-import { Component, OnInit, OnDestroy }   from '@angular/core';
-import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import { Component, OnDestroy, OnInit }   from '@angular/core';
+import { TranslateService }               from '@ngx-translate/core';
 import { Subject, Subscription }          from 'rxjs';
-import { WarehousesService }              from '../../@core/data/warehouses.service';
+import { takeUntil }                      from 'rxjs/operators';
+import Currency                           from '@modules/server.common/entities/Currency';
 import Order                              from '@modules/server.common/entities/Order';
-import { OrdersService }                  from '../../@core/data/orders.service';
+import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import { CurrenciesService }              from '@app/@core/data/currencies.service';
+import { OrdersService }                  from '@app/@core/data/orders.service';
+import { WarehousesService }              from '@app/@core/data/warehouses.service';
 import { WarehouseOrdersService }         from '@app/@core/data/warehouseOrders.service';
 import { DashboardLoadingIndicatorState } from '@app/models/DashboardLoadingIndicatorState';
-import { TranslateService }               from '@ngx-translate/core';
 import { DashboardInfoViewModel }         from '@app/models/DashboardInfoViewModel';
 import { IExistingCustomersViewModel }    from '@app/models/IExistingCustomersViewModel';
-import { takeUntil }                      from 'rxjs/operators';
 
 @Component({
-	           selector: 'ea-dashboard',
-	           styleUrls: ['./dashboard.component.scss'],
+	           selector:    'ea-dashboard',
+	           styleUrls:   ['./dashboard.component.scss'],
 	           templateUrl: './dashboard.component.html',
            })
 export class DashboardComponent implements OnInit, OnDestroy
 {
 	stores: Warehouse[] = [];
+	currencies: Currency[] = [];
 	
 	loading = new DashboardLoadingIndicatorState();
 	
@@ -34,22 +37,23 @@ export class DashboardComponent implements OnInit, OnDestroy
 	
 	hasSelectedStore: boolean = false;
 	selectedStoreId: string;
+	selectedCurrency: Currency;
 	isChartPanelOrdersLoad: boolean = true;
 	
 	averageRateCustomersToday = {
-		value: 0,
+		value:     0,
 		allStores: 0,
-		perStore: {}, // => perStore[storeId]
+		perStore:  {}, // => perStore[storeId]
 	};
 	averageRateOrdersToday = {
-		value: 0,
+		value:     0,
 		allStores: 0,
-		perStore: {},
+		perStore:  {},
 	};
 	averageRateRevenueToday = {
-		value: 0,
+		value:     0,
 		allStores: 0,
-		perStore: {},
+		perStore:  {},
 	};
 	
 	private _ngDestroy$ = new Subject<void>();
@@ -57,6 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 	
 	constructor(
 			private readonly _storesService: WarehousesService,
+			private readonly _currenciesService: CurrenciesService,
 			private readonly _storeOrdersService: WarehouseOrdersService,
 			private readonly _ordersService: OrdersService,
 			private readonly _translateService: TranslateService
@@ -92,7 +97,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 		const translationPrefix = 'DASHBOARD_VIEW';
 		
 		return {
-			labelTillAverage: this._translate(
+			labelTillAverage:       this._translate(
 					`${translationPrefix}.TILL_AVERAGE`
 			),
 			labelBetterThanAverage: this._translate(
@@ -104,24 +109,22 @@ export class DashboardComponent implements OnInit, OnDestroy
 	private get _toggleLoading()
 	{
 		return {
-			totalCustomers: (isLoading) =>
-					(this.loading.totalInfo.customers = isLoading),
-			totalOrders: (isLoading) =>
-					(this.loading.totalInfo.orders = isLoading),
-			totalRevenue: (isLoading) =>
-					(this.loading.totalInfo.revenue = isLoading),
+			totalCustomers: (isLoading) => (this.loading.totalInfo.customers = isLoading),
+			totalOrders:    (isLoading) => (this.loading.totalInfo.orders = isLoading),
+			totalRevenue:   (isLoading) => (this.loading.totalInfo.revenue = isLoading),
 			
-			todayCustomers: (isLoading) =>
-					(this.loading.todayInfo.customers = isLoading),
-			todayOrders: (isLoading) =>
-					(this.loading.todayInfo.orders = isLoading),
-			todayRevenue: (isLoading) =>
-					(this.loading.todayInfo.revenue = isLoading),
+			todayCustomers: (isLoading) => (this.loading.todayInfo.customers = isLoading),
+			todayOrders:    (isLoading) => (this.loading.todayInfo.orders = isLoading),
+			todayRevenue:   (isLoading) => (this.loading.todayInfo.revenue = isLoading),
 		};
 	}
 	
 	ngOnInit()
 	{
+		this._currenciesService
+		    .getCurrencies()
+		    .pipe(takeUntil(this._ngDestroy$))
+		    .subscribe(currencies => this.currencies = currencies);
 		this.loadAllStoresData();
 	}
 	
@@ -323,15 +326,13 @@ export class DashboardComponent implements OnInit, OnDestroy
 		               });
 	}
 	
-	private _calculateStoreDaysExistence(store: Warehouse)
+	private static _calculateStoreDaysExistence(store: Warehouse)
 	{
 		const day = 24 * 60 * 60 * 1000;
 		
 		const storeCreatedAt = new Date(store._createdAt);
 		const difference = Math.abs(Date.now() - storeCreatedAt.getTime());
-		const storeDaysExistence = difference / day;
-		
-		return storeDaysExistence;
+		return difference / day;
 	}
 	
 	private _calculateAveragePercentagesToday()
@@ -340,7 +341,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 		
 		this.stores.forEach((store) =>
 		                    {
-			                    let storeDaysExistence = this._calculateStoreDaysExistence(store);
+			                    let storeDaysExistence = DashboardComponent._calculateStoreDaysExistence(store);
 			                    storesDaysTotal += storeDaysExistence;
 			
 			                    if(storeDaysExistence < 1)
@@ -377,29 +378,20 @@ export class DashboardComponent implements OnInit, OnDestroy
 	
 	private _calculateAverageCustomersPercentGlobal(daysTotalAverage: number)
 	{
-		const averageCustomersPerDay =
-				this.totalInfo.customers / daysTotalAverage || 0;
-		
-		this.averageRateCustomersToday.allStores =
-				(this.todayInfo.customers / averageCustomersPerDay || 0) * 100;
+		const averageCustomersPerDay = this.totalInfo.customers / daysTotalAverage || 0;
+		this.averageRateCustomersToday.allStores = (this.todayInfo.customers / averageCustomersPerDay || 0) * 100;
 	}
 	
 	private _calculateAverageOrdersPercentGlobal(daysTotalAverage: number)
 	{
-		const averageOrdersPerDay =
-				this.totalInfo.orders / daysTotalAverage || 0;
-		
-		this.averageRateOrdersToday.allStores =
-				(this.todayInfo.orders / averageOrdersPerDay || 0) * 100;
+		const averageOrdersPerDay = this.totalInfo.orders / daysTotalAverage || 0;
+		this.averageRateOrdersToday.allStores = (this.todayInfo.orders / averageOrdersPerDay || 0) * 100;
 	}
 	
 	private _calculateAverageRevenuePercentGlobal(daysTotalAverage: number)
 	{
-		const averageRevenuePerDay =
-				this.totalInfo.revenue / daysTotalAverage || 0;
-		
-		this.averageRateRevenueToday.allStores =
-				(this.todayInfo.revenue / averageRevenuePerDay || 0) * 100;
+		const averageRevenuePerDay = this.totalInfo.revenue / daysTotalAverage || 0;
+		this.averageRateRevenueToday.allStores = (this.todayInfo.revenue / averageRevenuePerDay || 0) * 100;
 	}
 	
 	private _calculateAverageCustomersPercentCurrentStore(
@@ -407,11 +399,8 @@ export class DashboardComponent implements OnInit, OnDestroy
 			storeId: string
 	)
 	{
-		const averageCustomers =
-				this.totalInfo.customers / storeDaysExistence || 0;
-		
-		this.averageRateCustomersToday.perStore[storeId] =
-				(this.todayInfo.customers / averageCustomers || 0) * 100;
+		const averageCustomers = this.totalInfo.customers / storeDaysExistence || 0;
+		this.averageRateCustomersToday.perStore[storeId] = (this.todayInfo.customers / averageCustomers || 0) * 100;
 	}
 	
 	private _calculateAverageOrdersPercentCurrentStore(
@@ -420,9 +409,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 	)
 	{
 		const averageOrders = this.totalInfo.orders / storeDaysExistence || 0;
-		
-		this.averageRateOrdersToday.perStore[storeId] =
-				(this.todayInfo.orders / averageOrders || 0) * 100;
+		this.averageRateOrdersToday.perStore[storeId] = (this.todayInfo.orders / averageOrders || 0) * 100;
 	}
 	
 	private _calculateAverageRevenuePercentCurrentStore(
@@ -431,9 +418,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 	)
 	{
 		const averageRevenue = this.totalInfo.revenue / storeDaysExistence || 0;
-		
-		this.averageRateRevenueToday.perStore[storeId] =
-				(this.todayInfo.revenue / averageRevenue || 0) * 100;
+		this.averageRateRevenueToday.perStore[storeId] = (this.todayInfo.revenue / averageRevenue || 0) * 100;
 	}
 	
 	private async _calculateGlobalMetrics()
@@ -447,7 +432,6 @@ export class DashboardComponent implements OnInit, OnDestroy
 	private _calculateGlobalMetricsToday()
 	{
 		this.todayInfo.orders = this.completedOrdersToday.length;
-		
 		this.todayInfo.revenue = this.completedOrdersToday
 		                             .map((order) => order.totalPrice)
 		                             .reduce((prevPrice, nextPrice) => prevPrice + nextPrice, 0);
@@ -536,10 +520,9 @@ export class DashboardComponent implements OnInit, OnDestroy
 	{
 		let translationResult = '';
 		
-		this._translateService.get(key).subscribe((res) =>
-		                                          {
-			                                          translationResult = res;
-		                                          });
+		this._translateService
+		    .get(key)
+		    .subscribe((res) => translationResult = res);
 		
 		return translationResult;
 	}
