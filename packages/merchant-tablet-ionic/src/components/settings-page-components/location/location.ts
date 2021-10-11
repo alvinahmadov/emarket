@@ -1,59 +1,58 @@
 import {
 	Component,
-	Input,
-	OnInit,
-	OnChanges,
-	OnDestroy,
-	ViewChild,
 	ElementRef,
 	EventEmitter,
-}                           from '@angular/core';
-import Warehouse            from '@modules/server.common/entities/Warehouse';
-import { WarehouseRouter }  from '@modules/client.common.angular2/routers/warehouse-router.service';
+	Input,
+	OnChanges,
+	OnDestroy,
+	OnInit,
+	ViewChild,
+}                               from '@angular/core';
 import {
+	AbstractControl,
 	FormBuilder,
 	FormGroup,
-	AbstractControl,
-	Validators,
-}                           from '@angular/forms';
-import {
-	Country,
-	CountryName,
-	countriesIdsToNamesArray,
-	getCountryName,
-}                           from '@modules/server.common/entities/GeoLocation';
-import { isEmpty }          from 'lodash';
-import { TranslateService } from '@ngx-translate/core';
-import { AlertController }  from '@ionic/angular';
+	Validators
+}                               from '@angular/forms';
+import { TranslateService }     from '@ngx-translate/core';
+import { AlertController }      from '@ionic/angular';
+import { isEmpty }              from 'lodash';
+import { TCountryData }         from '@modules/server.common/data/countries';
+import { CountryAbbreviations } from '@modules/server.common/data/abbreviation-to-country';
+import Country                  from '@modules/server.common/enums/Country';
+import Warehouse                from '@modules/server.common/entities/Warehouse';
+import { WarehouseRouter }      from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { LocaleService }        from '@modules/client.common.angular2/locale/locale.service';
 
 @Component({
-	           selector: 'merchant-location',
+	           selector:    'merchant-location',
 	           templateUrl: 'location.html',
            })
 export class LocationComponent implements OnInit, OnChanges, OnDestroy
 {
-	OK: string = 'OK';
-	CANCEL: string = 'CANCEL';
-	PREFIX: string = 'SETTINGS_VIEW.';
-	locationForm: FormGroup;
-	country: AbstractControl;
-	city: AbstractControl;
-	postcode: AbstractControl;
-	street: AbstractControl;
-	house: AbstractControl;
-	apartment: AbstractControl;
-	autodetectCoordinates: AbstractControl;
-	latitude: AbstractControl;
-	longitude: AbstractControl;
+	public OK: string = 'OK';
+	public CANCEL: string = 'CANCEL';
+	public PREFIX: string = 'SETTINGS_VIEW.';
 	
-	map: google.maps.Map;
+	public locationForm: FormGroup;
+	public country: AbstractControl;
+	public city: AbstractControl;
+	public postcode: AbstractControl;
+	public street: AbstractControl;
+	public house: AbstractControl;
+	public apartment: AbstractControl;
+	public autodetectCoordinates: AbstractControl;
+	public latitude: AbstractControl;
+	public longitude: AbstractControl;
+	
+	public map: google.maps.Map;
 	
 	@ViewChild('autocomplete', { static: true })
-	searchElement: ElementRef;
+	public searchElement: ElementRef;
 	
-	mapCoordEmitter = new EventEmitter<google.maps.LatLng>();
+	public mapCoordEmitter = new EventEmitter<google.maps.LatLng>();
 	
-	mapGeometryEmitter = new EventEmitter<google.maps.GeocoderGeometry | google.maps.places.PlaceGeometry>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.GeocoderGeometry | google.maps.places.PlaceGeometry>();
 	
 	@Input()
 	private currWarehouse: Warehouse;
@@ -64,6 +63,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			private formBuilder: FormBuilder,
 			private warehouseRouter: WarehouseRouter,
 			public alertController: AlertController,
+			private localeService: LocaleService,
 			private translate: TranslateService
 	)
 	{
@@ -71,12 +71,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		this.bindFormControls();
 	}
 	
-	get countries(): Array<{ id: Country; name: CountryName }>
-	{
-		return countriesIdsToNamesArray;
-	}
-	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		if(this.currWarehouse)
 		{
@@ -99,36 +94,41 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this._initGoogleAutocompleteApi();
 		this._tryFindNewCoordinates();
 	}
 	
-	get buttonOK()
+	public get countries(): TCountryData[]
+	{
+		return this.localeService.countries;
+	}
+	
+	public get buttonOK(): string
 	{
 		return this._translate(this.PREFIX + this.OK);
 	}
 	
-	get buttonCancel()
+	public get buttonCancel(): string
 	{
 		return this._translate(this.PREFIX + this.CANCEL);
 	}
 	
-	async saveChanges()
+	public async saveChanges(): Promise<void>
 	{
 		this.prepareUpdate();
 		const warehouse = await this.warehouseRouter.save(this.currWarehouse);
 		const alert = await this.alertController.create({
 			                                                cssClass: 'success-info',
-			                                                message: 'Successfully saved changes',
-			                                                buttons: ['OK'],
+			                                                message:  `Successfully saved changes for ${warehouse.name}`,
+			                                                buttons:  ['OK'],
 		                                                });
 		
 		await alert.present();
 	}
 	
-	prepareUpdate()
+	public prepareUpdate(): void
 	{
 		this.currWarehouse.geoLocation.countryId = this.country.value;
 		this.currWarehouse.geoLocation.city = this.city.value;
@@ -137,12 +137,15 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		this.currWarehouse.geoLocation.house = this.house.value;
 		this.currWarehouse.geoLocation.apartment = this.apartment.value;
 		this.currWarehouse.geoLocation.loc = {
-			type: 'Point',
-			coordinates: [this.longitude.value, this.latitude.value],
+			type:        'Point',
+			coordinates: {
+				lng: this.longitude.value,
+				lat: this.latitude.value
+			},
 		};
 	}
 	
-	bindFormControls()
+	public bindFormControls(): void
 	{
 		this.country = this.locationForm.get('country');
 		this.city = this.locationForm.get('city');
@@ -157,22 +160,22 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		this.longitude = this.locationForm.get('longitude');
 	}
 	
-	buildForm()
+	public buildForm(): void
 	{
 		this.locationForm = this.formBuilder.group({
-			                                           country: ['', Validators.required],
-			                                           city: ['', Validators.required],
-			                                           postcode: [''],
-			                                           street: ['', Validators.required],
-			                                           house: ['', Validators.required],
-			                                           apartment: [''],
+			                                           country:               ['', Validators.required],
+			                                           city:                  ['', Validators.required],
+			                                           postcode:              [''],
+			                                           street:                ['', Validators.required],
+			                                           house:                 ['', Validators.required],
+			                                           apartment:             [''],
 			                                           autodetectCoordinates: [true],
-			                                           latitude: ['', Validators.required],
-			                                           longitude: ['', Validators.required],
+			                                           latitude:              ['', Validators.required],
+			                                           longitude:             ['', Validators.required],
 		                                           });
 	}
 	
-	textInputChange(val, input)
+	public textInputChange(val, input): void
 	{
 		if(input === 'latitude' || input === 'longitude')
 		{
@@ -184,7 +187,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	private _tryFindNewCoordinates()
+	private _tryFindNewCoordinates(): void
 	{
 		const geocoder = new google.maps.Geocoder();
 		
@@ -213,12 +216,10 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			locationResult:
 					| google.maps.GeocoderResult
 					| google.maps.places.PlaceResult
-	)
+	): void
 	{
-		if(
-				locationResult.geometry === undefined ||
-				locationResult.geometry === null
-		)
+		if(locationResult.geometry === undefined ||
+		   locationResult.geometry === null)
 		{
 			return;
 		}
@@ -237,10 +238,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 	{
 		let translationResult = '';
 		
-		this.translate.get(key).subscribe((res) =>
-		                                  {
-			                                  translationResult = res;
-		                                  });
+		this.translate.get(key).subscribe((res: string) => translationResult = res);
 		
 		return translationResult;
 	}
@@ -249,20 +247,20 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			locationResult:
 					| google.maps.GeocoderResult
 					| google.maps.places.PlaceResult
-	)
+	): void
 	{
 		const longName = 'long_name';
 		const shortName = 'short_name';
 		
 		const neededAddressTypes = {
-			country: shortName,
+			country:  shortName,
 			locality: longName,
 			// 'neighborhood' is not need for now
 			// neighborhood: longName,
-			route: longName,
-			intersection: longName,
-			street_number: longName,
-			postal_code: longName,
+			route:                       longName,
+			intersection:                longName,
+			street_number:               longName,
+			postal_code:                 longName,
 			administrative_area_level_1: shortName,
 			administrative_area_level_2: shortName,
 			administrative_area_level_3: shortName,
@@ -330,7 +328,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			streetName,
 			streetNumber,
 			postcode
-	)
+	): void
 	{
 		if(!isEmpty(country))
 		{
@@ -354,7 +352,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	private async _initGoogleAutocompleteApi()
+	private async _initGoogleAutocompleteApi(): Promise<void>
 	{
 		if(this.searchElement)
 		{
@@ -364,22 +362,33 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 					inputElement
 			);
 			
-			this._setupGoogleAutocompleteOptions(autocomplete);
+			LocationComponent._setupGoogleAutocompleteOptions(autocomplete);
 			this._listenForGoogleAutocompleteAddressChanges(autocomplete);
 		}
 	}
 	
-	private _setupGoogleAutocompleteOptions(
+	private static _setupGoogleAutocompleteOptions(
 			autocomplete: google.maps.places.Autocomplete
-	)
+	): void
 	{
-		autocomplete.setComponentRestrictions({ country: ['us', 'bg', 'il'] });
+		let restr = [
+			CountryAbbreviations.AZ,
+			CountryAbbreviations.KZ,
+			CountryAbbreviations.KY,
+			CountryAbbreviations.RU,
+			CountryAbbreviations.UA,
+			CountryAbbreviations.US,
+			CountryAbbreviations.UZ,
+		];
+		
+		restr.map((r) => r.toLowerCase());
+		autocomplete.setComponentRestrictions({ country: restr });
 		autocomplete['setFields'](['address_components', 'geometry']);
 	}
 	
 	private _listenForGoogleAutocompleteAddressChanges(
 			autocomplete: google.maps.places.Autocomplete
-	)
+	): void
 	{
 		autocomplete.addListener('place_changed', (_) =>
 		{
@@ -388,12 +397,12 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		});
 	}
 	
-	private _tryFindNewAddress()
+	private _tryFindNewAddress(): void
 	{
 		const house = this.house.value;
 		const city = this.city.value;
 		const streetAddress = this.street.value;
-		const countryName = getCountryName(+this.country.value);
+		const countryName = this.localeService.getCountryName(+this.country.value);
 		
 		if(
 				isEmpty(streetAddress) ||
@@ -415,7 +424,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			
 			geocoder.geocode(
 					{
-						address: `${streetAddress} ${house}, ${city}`,
+						address:               `${streetAddress} ${house}, ${city}`,
 						componentRestrictions: { country: countryName },
 					},
 					(results, status) =>
@@ -433,7 +442,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	private async _applyFormattedAddress(address: string)
+	private async _applyFormattedAddress(address: string): Promise<void>
 	{
 		if(this.searchElement)
 		{
