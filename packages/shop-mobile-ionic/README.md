@@ -1,1 +1,0 @@
-# Shop Mobile App (Ionic)
