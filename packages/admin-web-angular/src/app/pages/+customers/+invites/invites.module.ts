@@ -1,17 +1,18 @@
 import { NgModule }                        from '@angular/core';
 import { CommonModule, JsonPipe }          from '@angular/common';
 import { RouterModule, Routes }            from '@angular/router';
+import { NbSpinnerModule, NbButtonModule } from '@nebular/theme';
+import { TranslateModule }                 from '@ngx-translate/core';
 import { Ng2SmartTableModule }             from 'ng2-smart-table';
 import { ToasterModule }                   from 'angular2-toaster';
-import { TranslateModule }                 from '@ngx-translate/core';
 import { HighlightModule }                 from 'ngx-highlightjs';
 import { ThemeModule }                     from '@app/@theme';
+import { InvitesService }                  from '@app/@core/data/invites.service';
+import { StorageService }                  from '@app/@core/data/store.service';
+import { ConfirmationModalModule }         from '@app/@shared/confirmation-modal/confirmation-modal.module';
 import { InvitesComponent }                from './invites.component';
-import { InvitesService }                  from '../../../@core/data/invites.service';
 import { InvitesRequestsModule }           from './+invites-requests/invites-requests.module';
 import { CountryRenderComponent }          from './country-render/country-render.component';
-import { NbSpinnerModule, NbButtonModule } from '@nebular/theme';
-import { ConfirmationModalModule }         from '../../../@shared/confirmation-modal/confirmation-modal.module';
 
 const routes: Routes = [
 	{
@@ -36,7 +37,7 @@ const routes: Routes = [
 	          ],
 	          declarations:    [InvitesComponent],
 	          entryComponents: [CountryRenderComponent],
-	          providers:       [JsonPipe, InvitesService],
+	          providers:       [JsonPipe, InvitesService, StorageService],
           })
 export class InvitesModule
 {
