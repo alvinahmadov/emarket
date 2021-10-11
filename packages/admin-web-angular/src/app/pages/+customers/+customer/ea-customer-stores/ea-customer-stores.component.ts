@@ -1,41 +1,35 @@
-import {
-	Component,
-	EventEmitter,
-	Input,
-	OnDestroy,
-	OnInit,
-}                                     from '@angular/core';
-import { WarehouseViewModel }         from '../../../../models/WarehouseViewModel';
-import { WarehousesService }          from '../../../../@core/data/warehouses.service';
-import { OrdersService }              from '../../../../@core/data/orders.service';
-import { WarehouseMutationComponent } from '../../../../@shared/warehouse/warehouse-mutation';
-import User                           from '@modules/server.common/entities/User';
-import GeoLocation                    from '@modules/server.common/entities/GeoLocation';
-import Warehouse                      from '@modules/server.common/entities/Warehouse';
-import { ToasterService }             from 'angular2-toaster';
-import { NgbModal }                   from '@ng-bootstrap/ng-bootstrap';
-import { combineLatest, Subject }     from 'rxjs';
-import { first, takeUntil }           from 'rxjs/operators';
-import _                              from 'lodash';
-import { ActivatedRoute }             from '@angular/router';
-import { UserRouter }                 from '@modules/client.common.angular2/routers/user-router.service';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, } from '@angular/core';
+import { ActivatedRoute }                                     from '@angular/router';
+import { NgbModal }                                           from '@ng-bootstrap/ng-bootstrap';
+import { combineLatest, Subscription, Subject }               from 'rxjs';
+import { first, takeUntil }                                   from 'rxjs/operators';
+import { ToasterService }                                     from 'angular2-toaster';
+import Customer                                               from '@modules/server.common/entities/Customer';
+import GeoLocation                                            from '@modules/server.common/entities/GeoLocation';
+import Warehouse                                              from '@modules/server.common/entities/Warehouse';
+import { CustomerRouter }                                     from '@modules/client.common.angular2/routers/customer-router.service';
+import { WarehouseViewModel }                                 from '@app/models/WarehouseViewModel';
+import { WarehousesService }                                  from '@app/@core/data/warehouses.service';
+import { OrdersService }                                      from '@app/@core/data/orders.service';
+import { WarehouseMutationComponent }                         from '@app/@shared/warehouse/warehouse-mutation';
 
 @Component({
-	           selector: 'ea-customer-stores',
-	           styleUrls: ['./ea-customer-stores.component.scss'],
+	           selector:    'ea-customer-stores',
+	           styleUrls:   ['./ea-customer-stores.component.scss'],
 	           templateUrl: './ea-customer-stores.component.html',
            })
 export class CustomerStoresComponent implements OnInit, OnDestroy
 {
 	@Input()
-	currentUser: User;
+	public currentCustomer: Customer;
 	
-	params$: any;
+	public params$: Subscription;
 	
-	protected sourceEventEmitter = new EventEmitter<WarehouseViewModel[]>();
+	public sourceEventEmitter: EventEmitter<WarehouseViewModel[]> =
+			       new EventEmitter<WarehouseViewModel[]>();
 	
-	private _selectedCustomerDestroy$ = new Subject<void>();
-	private _ngDestroy$ = new Subject<void>();
+	private _selectedCustomerDestroy$: Subject<void> = new Subject<void>();
+	private _ngDestroy$: Subject<void> = new Subject<void>();
 	
 	private _selectedWarehouses: WarehouseViewModel[] = [];
 	
@@ -45,69 +39,37 @@ export class CustomerStoresComponent implements OnInit, OnDestroy
 			private readonly _warehousesService: WarehousesService,
 			private readonly _ordersService: OrdersService,
 			private readonly _router: ActivatedRoute,
-			private userRouter: UserRouter
+			private customerRouter: CustomerRouter
 	)
 	{
-		this.params$ = this._router.params.subscribe(async(res) =>
-		                                             {
-			                                             const user = await this.userRouter
-			                                                                    .get(res.id)
-			                                                                    .pipe(first())
-			                                                                    .toPromise();
-			                                             this._destroyExceptSelectedCustomerSubscriber();
-			                                             this.currentUser = user;
-			                                             if(this.currentUser)
-			                                             {
-				                                             this._loadNearbyWarehouses();
-			                                             }
-		                                             });
+		this.params$ = this._router
+		                   .params
+		                   .subscribe(
+				                   async(res) =>
+				                   {
+					                   const customer = await this.customerRouter
+					                                              .get(res.id)
+					                                              .pipe(first())
+					                                              .toPromise();
+					                   this._destroyExceptSelectedCustomerSubscriber();
+					                   this.currentCustomer = customer;
+					                   if(this.currentCustomer)
+					                   {
+						                   this._loadNearbyWarehouses();
+					                   }
+				                   }
+		                   );
 	}
 	
-	get hasSelectedWarehouses(): boolean
+	public ngOnInit(): void
 	{
-		return this._selectedWarehouses.length > 0;
-	}
-	
-	ngOnInit()
-	{
-		if(this.currentUser)
+		if(this.currentCustomer)
 		{
 			this._loadNearbyWarehouses();
 		}
 	}
 	
-	createWarehouseModel()
-	{
-		this._modalService.open(WarehouseMutationComponent, {
-			size: 'lg',
-			container: 'nb-layout',
-		});
-	}
-	
-	deleteSelectedRows()
-	{
-		const idsForDelete: string[] = this._selectedWarehouses.map(
-				(w) => w.id
-		);
-		
-		this._warehousesService.removeByIds(idsForDelete).subscribe(() =>
-		                                                            {
-			                                                            this._selectedWarehouses.forEach((warehouse) =>
-					                                                                                             this._toasterService.pop(
-							                                                                                             `success`,
-							                                                                                             `Warehouse '${warehouse.name}' DELETED`
-					                                                                                             )
-			                                                            );
-			                                                            this._selectedWarehouses = [];
-		                                                            });
-	}
-	
-	selectWarehouseTmp(ev)
-	{
-		this._selectedWarehouses = ev.selected;
-	}
-	
-	ngOnDestroy()
+	public ngOnDestroy(): void
 	{
 		this._selectedCustomerDestroy$.next();
 		this._selectedCustomerDestroy$.complete();
@@ -121,14 +83,53 @@ export class CustomerStoresComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	private _destroyExceptSelectedCustomerSubscriber()
+	public get hasSelectedWarehouses(): boolean
+	{
+		return this._selectedWarehouses.length > 0;
+	}
+	
+	public createWarehouseModel(): void
+	{
+		this._modalService.open(WarehouseMutationComponent, {
+			size:      'lg',
+			container: 'nb-layout',
+		});
+	}
+	
+	public deleteSelectedRows(): void
+	{
+		const idsForDelete: string[] = this._selectedWarehouses.map(
+				(w) => w.id
+		);
+		
+		this._warehousesService
+		    .removeByIds(idsForDelete)
+		    .subscribe(() =>
+		               {
+			               this._selectedWarehouses
+			                   .forEach((warehouse) => this._toasterService.pop(
+					                            `success`,
+					                            `Warehouse '${warehouse.name}' DELETED`
+			                            )
+			                   );
+			
+			               this._selectedWarehouses = [];
+		               });
+	}
+	
+	public selectWarehouseTmp(ev): void
+	{
+		this._selectedWarehouses = ev.selected;
+	}
+	
+	private _destroyExceptSelectedCustomerSubscriber(): void
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 		this._ngDestroy$ = new Subject<void>();
 	}
 	
-	private async _setupStoresData(warehouses)
+	private async _setupStoresData(warehouses: Warehouse[]): Promise<WarehouseViewModel[]>
 	{
 		const merchantsOrders = await this._ordersService.getMerchantsOrdersCountInfo(
 				warehouses.map((w) => w.id)
@@ -136,44 +137,39 @@ export class CustomerStoresComponent implements OnInit, OnDestroy
 		
 		const noInfoSign = '';
 		
-		const sourceResult = warehouses.map((warehouse) =>
-		                                    {
-			                                    const merchantOrders = merchantsOrders.find(
-					                                    (res) => res['id'] === warehouse.id
-			                                    );
-			                                    return {
-				                                    id: warehouse.id,
-				                                    name: warehouse.name || noInfoSign,
-				                                    email: warehouse.contactEmail || noInfoSign,
-				                                    phone: warehouse.contactPhone || noInfoSign,
-				                                    city: warehouse.geoLocation.city || noInfoSign,
-				                                    address: `
-					St. ${warehouse.geoLocation.streetAddress || noInfoSign}, House № ${
-						                                    warehouse.geoLocation.house || noInfoSign
-				                                    }
-				`,
-				                                    ordersQty: merchantOrders ? merchantOrders.ordersCount : 0,
-				                                    actions: {
-					                                    actionName: 'Order',
-					                                    actionOwnerId: this.currentUser.id,
-				                                    },
-			                                    };
-		                                    });
-		
-		return sourceResult;
+		return warehouses.map((warehouse) =>
+		                      {
+			                      const merchantOrders = merchantsOrders.find(
+					                      (res) => res['id'] === warehouse.id
+			                      );
+			                      return {
+				                      id:        warehouse.id,
+				                      name:      warehouse.name || noInfoSign,
+				                      email:     warehouse.contactEmail || noInfoSign,
+				                      phone:     warehouse.contactPhone || noInfoSign,
+				                      city:      warehouse.geoLocation.city || noInfoSign,
+				                      address:   `${warehouse.geoLocation.streetAddress || noInfoSign}, №
+				                      ${warehouse.geoLocation.house || noInfoSign}`,
+				                      ordersQty: merchantOrders ? merchantOrders.ordersCount : 0,
+				                      actions:   {
+					                      actionName:    'Order',
+					                      actionOwnerId: this.currentCustomer.id,
+				                      },
+			                      } as WarehouseViewModel;
+		                      });
 	}
 	
-	private _loadNearbyWarehouses()
+	private _loadNearbyWarehouses(): void
 	{
-		const emitSource = async(stores) =>
+		const emitSource = async(stores: Warehouse[]) =>
 		{
 			const sourceResult = await this._setupStoresData(stores);
 			this.sourceEventEmitter.emit(sourceResult);
 		};
 		
 		const {
-			loc: { type, coordinates },
-		} = this.currentUser.geoLocation;
+			      loc: { type, coordinates },
+		      } = this.currentCustomer.geoLocation;
 		const geoInput = { loc: { type, coordinates } } as GeoLocation;
 		
 		const stores$ = this._warehousesService.getNearbyStores(geoInput);
