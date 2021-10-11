@@ -1,9 +1,11 @@
 import IGeoLocation, { IGeoLocationCreateObject }    from './IGeoLocation';
+import IUser                                         from './IUser';
 import CarrierStatus                                 from '../enums/CarrierStatus';
 import { DBCreateObject, DBRawObject, PyroObjectId } from '../@pyro/db';
 
-export interface ICarrierCreateObject extends DBCreateObject
+export interface ICarrierCreateObject extends DBCreateObject, IUser
 {
+	username: string;
 	firstName: string;
 	lastName: string;
 	email?: string;
@@ -24,8 +26,6 @@ export interface ICarrierCreateObject extends DBCreateObject
 	
 	// Current carrier status (set via his mobile app), e.g. Online or Offline
 	status?: CarrierStatus;
-	
-	username: string;
 	phone: string;
 	
 	skippedOrderIds?: string[];
