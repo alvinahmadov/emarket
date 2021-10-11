@@ -1,5 +1,5 @@
-import UserRole         from '../consts/role'
-import { PyroObjectId } from "@pyro/db";
+import { PyroObjectId } from '../@pyro/db';
+import Role             from '../enums/Role'
 
 interface IUser
 {
@@ -10,7 +10,7 @@ interface IUser
 	avatar?: string;
 	firstName?: string;
 	lastName?: string;
-	role?: UserRole;
+	role?: Role;
 	
 	readonly fullName?: string;
 }
