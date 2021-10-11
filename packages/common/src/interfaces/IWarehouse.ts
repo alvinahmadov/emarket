@@ -1,5 +1,4 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
-import { ICustomerCreateObject }                     from './ICustomer';
 import IGeoLocation, { IGeoLocationCreateObject }    from './IGeoLocation';
 import IPaymentGatewayCreateObject, {
 	IPaymentGateway
@@ -27,14 +26,6 @@ export interface IWarehouseCreateObject extends DBCreateObject
 	 * @memberof IWarehouseCreateObject
 	 */
 	username: string;
-	
-	/**
-	 * Merchant admin user
-	 *
-	 * @type {ICustomerCreateObject}
-	 * @memberof IWarehouseCreateObject
-	 */
-	merchant?: ICustomerCreateObject;
 	
 	/**
 	 * URL of Merchant/Warehouse brand logo
