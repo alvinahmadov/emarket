@@ -20,7 +20,7 @@ export class AdminRouter implements IAdminRouter
 	public get(id: string): Observable<Admin | null>
 	{
 		return this.router
-		           .runAndObserve<Admin>('get', id)
+		           .runAndObserve<IAdmin>('get', id)
 		           .pipe(map((admin) => this._adminFactory(admin)));
 	}
 	
