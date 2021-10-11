@@ -2,7 +2,10 @@ import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
 
 export interface ICurrencyCreateObject extends DBCreateObject
 {
-	currencyCode: string;
+	code: string;
+	name?: string;
+	sign?: string;
+	order?: string;
 	isDeleted?: boolean;
 }
 
