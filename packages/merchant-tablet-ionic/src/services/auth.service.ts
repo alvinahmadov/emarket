@@ -1,12 +1,12 @@
 import { Injectable }                  from '@angular/core';
 import { Apollo }                      from 'apollo-angular';
 import bcrypt                          from 'bcryptjs';
-import { environment }                 from "../environments/environment";
+import { Observable }                  from 'rxjs';
+import { map, share }                  from 'rxjs/operators';
 import Warehouse                       from '@modules/server.common/entities/Warehouse';
 import { IWarehouseRegistrationInput } from '@modules/server.common/routers/IWarehouseAuthRouter';
 import { GQLMutations }                from '@modules/server.common/utilities/graphql';
-import { map, share }                  from 'rxjs/operators';
-import { Observable }                  from 'rxjs';
+import { environment }                 from '../environments/environment';
 
 export interface WarehouseLoginInfo
 {
@@ -30,16 +30,14 @@ export class AuthService
 {
 	constructor(private readonly apollo: Apollo) {}
 	
-	public isAuthenticated(
-			token: string
-	): Observable<boolean>
+	public isAuthenticated(token: string): Observable<boolean>
 	{
 		try
 		{
 			return this.apollo
 			           .mutate(
 					           {
-						           mutation: GQLMutations.WarehouseAuthenticated,
+						           mutation:  GQLMutations.WarehouseAuthenticated,
 						           variables: {
 							           token
 						           },
@@ -63,23 +61,22 @@ export class AuthService
 	): Observable<WarehouseLoginInfo>
 	{
 		return this.apollo
-		           .mutate<{ warehouseLogin: WarehouseLoginInfo }>(
-				           {
-					           mutation: GQLMutations.WarehouseLogin,
-					           variables: {
-						           username,
-						           password,
-					           },
-				           })
+		           .mutate<{
+			           warehouseLogin: WarehouseLoginInfo
+		           }>({
+			              mutation:  GQLMutations.WarehouseLogin,
+			              variables: {
+				              username,
+				              password,
+			              },
+		              })
 		           .pipe(
 				           map(result => result.data.warehouseLogin),
 				           share<WarehouseLoginInfo>()
 		           );
 	}
 	
-	public register(
-			input: IWarehouseRegistrationInput
-	): Observable<WarehouseRegisterInfo>
+	public register(input: IWarehouseRegistrationInput): Observable<WarehouseRegisterInfo>
 	{
 		const salt = bcrypt.genSaltSync(environment.WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS);
 		input.warehouse.hash = bcrypt.hashSync(input.password, salt);
@@ -89,7 +86,7 @@ export class AuthService
 			           warehouseRegister: WarehouseRegisterInput
 		           }>(
 				           {
-					           mutation: GQLMutations.WarehouseRegister,
+					           mutation:  GQLMutations.WarehouseRegister,
 					           variables: {
 						           input
 					           },
