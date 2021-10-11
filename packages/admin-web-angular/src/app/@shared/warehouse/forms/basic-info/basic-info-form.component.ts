@@ -6,14 +6,14 @@ import {
 	FormGroup,
 	Validators,
 }                                              from '@angular/forms';
-import { IWarehouseCreateObject }              from '@modules/server.common/interfaces/IWarehouse';
-import { first }                               from 'rxjs/operators';
-import { CarrierRouter }                       from '@modules/client.common.angular2/routers/carrier-router.service';
-import { IMultiSelectOption }                  from 'angular-2-dropdown-multiselect';
 import { pick }                                from 'lodash';
-import { FormHelpers }                         from '../../../forms/helpers';
-import { CommonUtils }                         from '@modules/server.common/utilities';
+import { IMultiSelectOption }                  from 'angular-2-dropdown-multiselect';
+import { first }                               from 'rxjs/operators';
 import { TranslateService }                    from '@ngx-translate/core';
+import { IWarehouseCreateObject }              from '@modules/server.common/interfaces/IWarehouse';
+import { CommonUtils }                         from '@modules/server.common/utilities';
+import { CarrierRouter }                       from '@modules/client.common.angular2/routers/carrier-router.service';
+import { FormHelpers }                         from '@app/@shared/forms/helpers';
 
 export type WarehouseBasicInfo = Pick<IWarehouseCreateObject,
 		| 'name'
@@ -27,24 +27,28 @@ export type WarehouseBasicInfo = Pick<IWarehouseCreateObject,
 		| 'ordersShortProcess'
 		| 'orderCancelation'>;
 
+export type TDelivery = 'all' | 'onlyStore' | 'preferStore';
+
 @Component({
-	           selector: 'ea-warehouse-basic-info-form',
-	           styleUrls: ['basic-info-form.component.scss'],
+	           selector:    'ea-warehouse-basic-info-form',
+	           styleUrls:   ['basic-info-form.component.scss'],
 	           templateUrl: 'basic-info-form.component.html',
            })
 export class BasicInfoFormComponent implements OnInit
 {
 	@ViewChild('fileInput', { static: true })
-	fileInput: any;
+	public fileInput: any;
 	
 	@Input()
 	readonly form: FormGroup;
 	@Input()
 	readonly password?: AbstractControl;
 	
-	uploaderPlaceholder: string;
+	public uploaderPlaceholder: string;
 	
-	carriersOptions: IMultiSelectOption[];
+	public carriersOptions: IMultiSelectOption[];
+	
+	private _delivery: TDelivery = 'all';
 	
 	constructor(
 			private readonly carrierRouter: CarrierRouter,
@@ -52,14 +56,18 @@ export class BasicInfoFormComponent implements OnInit
 	)
 	{}
 	
-	private _delivery: 'all' | 'onlyStore' | 'preferStore' = 'all';
+	public ngOnInit(): void
+	{
+		this.loadCarriersOptions();
+		this.getUploaderPlaceholderText();
+	}
 	
-	get delivery()
+	public get delivery(): TDelivery
 	{
 		return this._delivery;
 	}
 	
-	set delivery(value)
+	public set delivery(value: TDelivery)
 	{
 		this._delivery = value;
 		this.useOnlyRestrictedCarriersForDelivery.setValue(false);
@@ -76,56 +84,56 @@ export class BasicInfoFormComponent implements OnInit
 		}
 	}
 	
-	get name()
+	public get name(): AbstractControl
 	{
 		return this.form.get('name');
 	}
 	
-	get logo()
+	public get logo(): AbstractControl
 	{
 		return this.form.get('logo');
 	}
 	
-	get isActive()
+	public get isActive(): AbstractControl
 	{
 		return this.form.get('isActive');
 	}
 	
-	get username()
+	public get username(): AbstractControl
 	{
 		return this.form.get('username');
 	}
 	
-	get hasRestrictedCarriers()
+	public get hasRestrictedCarriers(): AbstractControl
 	{
 		return this.form.get('hasRestrictedCarriers');
 	}
 	
-	get carriersIds()
+	public get carriersIds(): AbstractControl
 	{
 		return this.form.get('carriersIds');
 	}
 	
-	get useOnlyRestrictedCarriersForDelivery()
+	public get useOnlyRestrictedCarriersForDelivery(): AbstractControl
 	{
 		return this.form.get('useOnlyRestrictedCarriersForDelivery');
 	}
 	
-	get preferRestrictedCarriersForDelivery()
+	public get preferRestrictedCarriersForDelivery(): AbstractControl
 	{
 		return this.form.get('preferRestrictedCarriersForDelivery');
 	}
 	
-	get showLogoMeta()
+	public get showLogoMeta(): boolean
 	{
 		return this.logo && this.logo.value !== '';
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		// would be used in the parent component and injected into this.form
 		return formBuilder.group({
-			                         name: [
+			                         name:     [
 				                         '',
 				                         [
 					                         Validators.required,
@@ -133,7 +141,7 @@ export class BasicInfoFormComponent implements OnInit
 					                         Validators.maxLength(255),
 				                         ],
 			                         ],
-			                         logo: [
+			                         logo:     [
 				                         '',
 				                         [
 					                         (control: AbstractControl) =>
@@ -144,7 +152,7 @@ export class BasicInfoFormComponent implements OnInit
 							                         if(
 									                         !control.value.startsWith('http') ||
 									                         control.value.match(
-											                         /s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/
+											                         /s?:?(\/\/[^"']*\.(?:jpg|jpeg|gif|png|svg))/
 									                         ) === null
 							                         )
 							                         {
@@ -158,20 +166,20 @@ export class BasicInfoFormComponent implements OnInit
 			                         isActive: [true, [Validators.required]],
 			                         username: ['', [Validators.required]],
 			
-			                         hasRestrictedCarriers: [false, [Validators.required]],
+			                         hasRestrictedCarriers:                [false, [Validators.required]],
 			                         useOnlyRestrictedCarriersForDelivery: [false],
-			                         preferRestrictedCarriersForDelivery: [false],
-			                         ordersShortProcess: [false],
-			                         carriersIds: [[]],
+			                         preferRestrictedCarriersForDelivery:  [false],
+			                         ordersShortProcess:                   [false],
+			                         carriersIds:                          [[]],
 		                         });
 	}
 	
-	static buildPasswordForm(formBuilder: FormBuilder): AbstractControl
+	public static buildPasswordForm(formBuilder: FormBuilder): AbstractControl
 	{
 		return new FormControl('', [Validators.required]);
 	}
 	
-	getValue(): WarehouseBasicInfo
+	public getValue(): WarehouseBasicInfo
 	{
 		const basicInfo = this.form.getRawValue() as {
 			name: string;
@@ -194,13 +202,13 @@ export class BasicInfoFormComponent implements OnInit
 		
 		return {
 			isActive: basicInfo.isActive,
-			name: basicInfo.name,
+			name:     basicInfo.name,
 			username: basicInfo.username,
-			logo: basicInfo.logo,
+			logo:     basicInfo.logo,
 			...(basicInfo.hasRestrictedCarriers
 			    ? {
 						hasRestrictedCarriers: basicInfo.hasRestrictedCarriers,
-						carriersIds: basicInfo.carriersIds,
+						carriersIds:           basicInfo.carriersIds,
 					}
 			    : {}),
 			...(basicInfo.hasRestrictedCarriers &&
@@ -214,22 +222,22 @@ export class BasicInfoFormComponent implements OnInit
 					}
 			    : {
 						useOnlyRestrictedCarriersForDelivery: false,
-						preferRestrictedCarriersForDelivery: false,
+						preferRestrictedCarriersForDelivery:  false,
 					}),
 			ordersShortProcess: basicInfo.ordersShortProcess,
-			orderCancelation: { enabled: false, onState: 0 },
+			orderCancelation:   { enabled: false, onState: 0 },
 		};
 	}
 	
-	setValue<T extends WarehouseBasicInfo>(basicInfo: T)
+	public setValue<T extends WarehouseBasicInfo>(basicInfo: T): void
 	{
 		FormHelpers.deepMark(this.form, 'dirty');
 		
 		basicInfo = Object.assign(
 				{
 					useOnlyRestrictedCarriersForDelivery: false,
-					preferRestrictedCarriersForDelivery: false,
-					ordersShortProcess: false,
+					preferRestrictedCarriersForDelivery:  false,
+					ordersShortProcess:                   false,
 				},
 				basicInfo
 		);
@@ -261,7 +269,7 @@ export class BasicInfoFormComponent implements OnInit
 		}
 	}
 	
-	getPassword(): string
+	public getPassword(): string
 	{
 		// password is not part of warehouse
 		if(!this.password)
@@ -271,18 +279,12 @@ export class BasicInfoFormComponent implements OnInit
 		return this.password.value as string;
 	}
 	
-	setPassword(value: string)
+	public setPassword(value: string)
 	{
 		this.password.setValue(value);
 	}
 	
-	ngOnInit(): void
-	{
-		this.loadCarriersOptions();
-		this.getUploaderPlaceholderText();
-	}
-	
-	deleteImg()
+	public deleteImg()
 	{
 		this.logo.setValue('');
 	}
@@ -309,7 +311,7 @@ export class BasicInfoFormComponent implements OnInit
 		this.carriersOptions = carriers.map((c) =>
 		                                    {
 			                                    return {
-				                                    id: c.id,
+				                                    id:   c.id,
 				                                    name: `${c.firstName} ${c.lastName}`,
 			                                    };
 		                                    });
