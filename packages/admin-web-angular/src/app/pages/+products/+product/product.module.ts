@@ -1,17 +1,19 @@
+// noinspection AngularInvalidImportedOrDeclaredSymbol
+
 import { NgModule }            from '@angular/core';
 import { CommonModule }        from '@angular/common';
-import { ThemeModule }         from '../../../@theme';
 import { RouterModule }        from '@angular/router';
-import { routes }              from './product.routes';
-import { FormWizardModule }    from '@ever-co/angular2-wizard';
-import { ToasterModule }       from 'angular2-toaster';
 import { TranslateModule }     from '@ngx-translate/core';
+import { ToasterModule }       from 'angular2-toaster';
 import { HighlightModule }     from 'ngx-highlightjs';
-import { ProductComponent }    from './product.component';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
+import { FormWizardModule }    from '@ever-co/angular2-wizard';
+import { ThemeModule }         from '@app/@theme';
+import { ProductComponent }    from './product.component';
+import { routes }              from './product.routes';
 
 @NgModule({
-	          imports: [
+	          imports:      [
 		          CommonModule,
 		          ThemeModule,
 		          FormWizardModule,
@@ -19,7 +21,7 @@ import { Ng2SmartTableModule } from 'ng2-smart-table';
 		          ToasterModule.forRoot(),
 		          TranslateModule.forChild(),
 		          RouterModule.forChild(routes),
-		          HighlightModule.forRoot({ theme: 'github' }),
+		          HighlightModule.forRoot({ theme: 'github' })
 	          ],
 	          declarations: [ProductComponent],
           })
