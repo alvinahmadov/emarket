@@ -5,103 +5,105 @@ import { FakeDataModuleGuard }  from './+fakeData/fakeData.module.guard';
 
 const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: PagesComponent,
-		children: [
+		children:  [
 			{
-				path: '',
+				path:       '',
 				redirectTo: 'sign-in-redirect',
-				pathMatch: 'full',
-			},
-			// {
-			// 	path: '',
-			// 	redirectTo: 'dashboard',
-			// 	pathMatch: 'full'
-			// },
-			{
-				path: 'sign-in-redirect',
-				loadChildren: () =>
-						import(
-								'app/pages/+sign-in-redirect/sign-in-redirect.module'
-								).then((m) => m.SignInRedirectModule),
+				pathMatch:  'full',
 			},
 			{
-				path: 'dashboard',
+				path:         'sign-in-redirect',
 				loadChildren: () =>
-						import('app/pages/+dashboard/dashboard.module').then(
-								(m) => m.DashboardModule
-						),
+						              import(
+								              'app/pages/+sign-in-redirect/sign-in-redirect.module'
+								              ).then((m) => m.SignInRedirectModule),
 			},
 			{
-				path: 'simulation',
+				path:         'dashboard',
 				loadChildren: () =>
-						import('app/pages/+simulation/simulation.module').then(
-								(m) => m.SimulationModule
-						),
+						              import('app/pages/+dashboard/dashboard.module').then(
+								              (m) => m.DashboardModule
+						              ),
 			},
 			{
-				path: 'stores',
+				path:         'simulation',
 				loadChildren: () =>
-						import('app/pages/+warehouses/warehouses.module').then(
-								(m) => m.WarehousesModule
-						),
+						              import('app/pages/+simulation/simulation.module').then(
+								              (m) => m.SimulationModule
+						              ),
 			},
 			{
-				path: 'carriers',
+				path:         'chats',
 				loadChildren: () =>
-						import('app/pages/+carriers/carriers.module').then(
-								(m) => m.CarriersModule
-						),
+						              import('app/pages/+chats/chats.module').then(
+								              (m) => m.ChatsModule
+						              ).catch(err => console.error(err)),
 			},
 			{
-				path: 'setup',
+				path:         'stores',
 				loadChildren: () =>
-						import('app/pages/+setup/setup.module').then(
-								(m) => m.SetupModule
-						),
+						              import('app/pages/+warehouses/warehouses.module').then(
+								              (m) => m.WarehousesModule
+						              ),
 			},
 			{
-				path: 'generate-initial-data',
+				path:         'carriers',
 				loadChildren: () =>
-						import('app/pages/+fakeData/fakeData.module').then(
-								(m) => m.FakeDataModule
-						),
-				canActivate: [FakeDataModuleGuard],
+						              import('app/pages/+carriers/carriers.module').then(
+								              (m) => m.CarriersModule
+						              ),
 			},
 			{
-				path: 'devices',
+				path:         'setup',
 				loadChildren: () =>
-						import('app/pages/+device/device.module').then(
-								(m) => m.DeviceModule
-						),
+						              import('app/pages/+setup/setup.module').then(
+								              (m) => m.SetupModule
+						              ),
 			},
 			{
-				path: 'customers',
+				path:         'generate-initial-data',
 				loadChildren: () =>
-						import('app/pages/+customers/customers.module').then(
-								(m) => m.CustomersModule
-						),
+						              import('app/pages/+fakeData/fakeData.module').then(
+								              (m) => m.FakeDataModule
+						              ),
+				canActivate:  [FakeDataModuleGuard],
 			},
 			{
-				path: 'orders',
+				path:         'devices',
 				loadChildren: () =>
-						import('app/pages/+orders/orders.module').then(
-								(m) => m.OrdersModule
-						),
+						              import('app/pages/+device/device.module').then(
+								              (m) => m.DeviceModule
+						              ),
 			},
 			{
-				path: 'products',
+				path:         'customers',
 				loadChildren: () =>
-						import('app/pages/+products/products.module').then(
-								(m) => m.ProductsModule
-						),
+						              import('app/pages/+customers/customers.module').then(
+								              (m) => m.CustomersModule
+						              ),
 			},
 			{
-				path: 'profile',
+				path:         'orders',
 				loadChildren: () =>
-						import('app/pages/+profile/profile.module').then(
-								(m) => m.ProfileModule
-						),
+						              import('app/pages/+orders/orders.module').then(
+								              (m) => m.OrdersModule
+						              ),
+			},
+			{
+				path:         'products',
+				loadChildren: () =>
+						              import('app/pages/+products/products.module').then(
+								              (m) => m.ProductsModule
+						              ),
+			},
+			{
+				path:         'profile',
+				loadChildren: () =>
+						              import('app/pages/+profile/profile.module').then(
+								              (m) => m.ProfileModule
+						              ),
 			},
 		],
 	},
