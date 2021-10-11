@@ -1,25 +1,25 @@
 import { Component, Input, OnInit, OnChanges, OnDestroy } from '@angular/core';
-import { LocalDataSource }                                from 'ng2-smart-table';
-import { Subject, forkJoin, Observable }                  from 'rxjs';
-import Order                                              from '@modules/server.common/entities/Order';
-import OrderProduct                                       from '@modules/server.common/entities/OrderProduct';
-import { ProductLocalesService }                          from '@modules/client.common.angular2/locale/product-locales.service';
-import Product                                            from '@modules/server.common/entities/Product';
-import { WarehouseOrdersRouter }                          from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import OrderWarehouseStatus                               from '@modules/server.common/enums/OrderWarehouseStatus';
-import OrderCarrierStatus                                 from '@modules/server.common/enums/OrderCarrierStatus';
-import { NgbModal }                                       from '@ng-bootstrap/ng-bootstrap';
-import { first, takeUntil }                               from 'rxjs/operators';
-import { OrderRouter }                                    from '@modules/client.common.angular2/routers/order-router.service';
 import { Router }                                         from '@angular/router';
+import { NgbModal }                                       from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService }                               from '@ngx-translate/core';
 import { ToasterService }                                 from 'angular2-toaster';
-import { ConfimationModalComponent }                      from '../../../../@shared/confirmation-modal/confirmation-modal.component';
-import { StoreOrderProductAmountComponent }               from '../../../../@shared/render-component/store-products-table/store-order-product-amount/store-order-product-amount.component';
-import { ProductTitleRedirectComponent }                  from '../../../../@shared/render-component/product-title-redirect/product-title-redirect.component';
-import { StoreProductPriceComponent }                     from '../../../../@shared/render-component/store-products-table/store-product-price.component';
-import { StoreProductImageComponent }                     from '../../../../@shared/render-component/store-products-table/store-product-image/store-product-image.component';
-import { WarehouseOrderModalComponent }                   from '../../../../@shared/warehouse/+warehouse-order-modal/warehouse-order-modal.component';
+import { LocalDataSource }                                from 'ng2-smart-table';
+import { Subject, forkJoin, Observable }                  from 'rxjs';
+import { first, takeUntil }                               from 'rxjs/operators';
+import Order                                              from '@modules/server.common/entities/Order';
+import OrderProduct                                       from '@modules/server.common/entities/OrderProduct';
+import Product                                            from '@modules/server.common/entities/Product';
+import OrderCarrierStatus                                 from '@modules/server.common/enums/OrderCarrierStatus';
+import OrderWarehouseStatus                               from '@modules/server.common/enums/OrderWarehouseStatus';
+import { ProductLocalesService }                          from '@modules/client.common.angular2/locale/product-locales.service';
+import { OrderRouter }                                    from '@modules/client.common.angular2/routers/order-router.service';
+import { WarehouseOrdersRouter }                          from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { ConfimationModalComponent }                      from '@app/@shared/confirmation-modal/confirmation-modal.component';
+import { StoreOrderProductAmountComponent }               from '@app/@shared/render-component/store-products-table/store-order-product-amount/store-order-product-amount.component';
+import { ProductTitleRedirectComponent }                  from '@app/@shared/render-component/product-title-redirect/product-title-redirect.component';
+import { StoreProductPriceComponent }                     from '@app/@shared/render-component/store-products-table/store-product-price.component';
+import { StoreProductImageComponent }                     from '@app/@shared/render-component/store-products-table/store-product-image/store-product-image.component';
+import { WarehouseOrderModalComponent }                   from '@app/@shared/warehouse/+warehouse-order-modal/warehouse-order-modal.component';
 
 interface OrderProductsViewModel
 {
@@ -30,9 +30,9 @@ interface OrderProductsViewModel
 }
 
 @Component({
-	           selector: 'ea-order-products',
+	           selector:    'ea-order-products',
+	           styleUrls:   ['/order-products.component.scss'],
 	           templateUrl: './order-products.component.html',
-	           styleUrls: ['/order-products.component.scss'],
            })
 export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 {
@@ -72,18 +72,24 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 		return OrderCarrierStatus.DeliveryCompleted;
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.loadDataSmartTable();
 		this._applyTranslationOnSmartTable();
 	}
 	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		this.loadDataSmartTable();
 	}
 	
-	async loadDataSmartTable()
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public async loadDataSmartTable()
 	{
 		const loadData = () =>
 		{
@@ -93,16 +99,16 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 						(product: OrderProduct) =>
 						{
 							return {
-								id: product.product.id,
-								price: product.price,
-								qty: product.count,
-								product: product.product,
-								image: this._productLocalesService.getTranslate(
+								id:                product.product.id,
+								price:             product.price,
+								qty:               product.count,
+								product:           product.product,
+								image:             this._productLocalesService.getTranslate(
 										product.product['images']
 								),
-								disableImg: true,
-								orderId: this.order.id,
-								orderWarehouseId: this.order.warehouseId,
+								disableImg:        true,
+								orderId:           this.order.id,
+								orderWarehouseId:  this.order.warehouseId,
 								warehouseProducts: this.order.warehouse['products'],
 							};
 						}
@@ -115,12 +121,12 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 		loadData();
 	}
 	
-	selectProductTmp(ev)
+	public selectProductTmp(ev)
 	{
 		this.selectedProducts = ev.selected;
 	}
 	
-	addProductsModalTranslates()
+	public addProductsModalTranslates()
 	{
 		const columnTitlePrefix = 'ORDER_VIEW.ORDER_PRODUCT_INFO.';
 		const getTranslatedWords = (name: string): Observable<string | any> =>
@@ -142,21 +148,21 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 				           });
 	}
 	
-	async addProducts()
+	public async addProducts()
 	{
 		if(this.order)
 		{
 			const componentRef = this.modalService.open(
 					WarehouseOrderModalComponent,
 					{
-						size: 'lg',
-						container: 'nb-layout',
+						size:        'lg',
+						container:   'nb-layout',
 						windowClass: 'ng-custom',
-						backdrop: 'static',
+						backdrop:    'static',
 					}
 			);
 			const instance: WarehouseOrderModalComponent =
-					componentRef.componentInstance;
+					      componentRef.componentInstance;
 			
 			instance.warehouseId = this.order.warehouseId;
 			instance.modalTitle = this.modalTitle;
@@ -168,14 +174,14 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 			
 			this.orderRouter
 			    .addProducts(this.order.id, products, this.order.warehouseId)
-			    .then((r) =>
+			    .then(() =>
 			          {
 				          this._toasterService.pop(
 						          `success`,
 						          `${this.toastSuccMsg}!`
 				          );
 			          })
-			    .catch((err) =>
+			    .catch(() =>
 			           {
 				           this._toasterService.pop(`error`, `${this.toastErrMsg}!`);
 			           });
@@ -184,7 +190,7 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	async removeSelectedProducts()
+	public async removeSelectedProducts()
 	{
 		const productsIds = this.selectedProducts.map((res) => res['id']);
 		if(this.order && productsIds.length > 0)
@@ -211,26 +217,26 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	async cancelOrder()
+	public async cancelOrder()
 	{
 		const activeModal = this.modalService.open(ConfimationModalComponent, {
-			size: 'sm',
+			size:      'sm',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 		const modalComponent: ConfimationModalComponent =
-				activeModal.componentInstance;
+				      activeModal.componentInstance;
 		
 		await modalComponent.confirmEvent
 		                    .pipe(takeUntil(modalComponent.ngDestroy$))
-		                    .subscribe((dataEvent) =>
+		                    .subscribe(() =>
 		                               {
 			                               if(this.order)
 			                               {
 				                               try
 				                               {
 					                               this.loading = true;
-					                               const res = this.warehouseOrdersRouter.cancel(
+					                               this.warehouseOrdersRouter.cancel(
 							                               this.order.id
 					                               );
 					                               this.loading = false;
@@ -252,12 +258,6 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 		                               });
 	}
 	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-	}
-	
 	private _loadSmartTableSettings()
 	{
 		const columnTitlePrefix = 'ORDER_VIEW.ORDER_PRODUCT_INFO.SMART_TABLE.';
@@ -269,42 +269,47 @@ export class OrderProductsComponent implements OnInit, OnChanges, OnDestroy
 				getTranslate('IMAGE'),
 				getTranslate('NAME'),
 				getTranslate('QTY'),
-				getTranslate('PRICE')
+				getTranslate('PRICE'),
+				getTranslate('COMMENT')
 		)
 				.pipe(takeUntil(this._ngDestroy$))
-				.subscribe(([id, image, name, qty, price]) =>
+				.subscribe(([id, image, name, qty, price, comment]) =>
 				           {
 					           this.settingsSmartTable = {
-						           actions: false,
+						           actions:    false,
 						           selectMode: 'multi',
-						           columns: {
-							           name: {
-								           title: name,
+						           columns:    {
+							           name:    {
+								           title:           name,
 								           renderComponent: ProductTitleRedirectComponent,
-								           type: 'custom',
+								           type:            'custom',
 							           },
-							           qty: {
-								           title: qty,
-								           class: 'text-center',
-								           type: 'custom',
-								           width: '15%',
+							           qty:     {
+								           title:           qty,
+								           class:           'text-center',
+								           type:            'custom',
+								           width:           '15%',
 								           renderComponent: StoreOrderProductAmountComponent,
 							           },
-							           price: {
-								           title: price,
-								           type: 'custom',
-								           width: '20%',
+							           price:   {
+								           title:           price,
+								           type:            'custom',
+								           width:           '20%',
 								           renderComponent: StoreProductPriceComponent,
 							           },
-							           image: {
-								           title: image,
-								           type: 'custom',
-								           class: 'text-center',
+							           comment: {
+								           title: comment,
+								           width: '15%',
+							           },
+							           image:   {
+								           title:           image,
+								           type:            'custom',
+								           class:           'text-center',
 								           renderComponent: StoreProductImageComponent,
-								           filter: false,
+								           filter:          false,
 							           },
 						           },
-						           pager: {
+						           pager:      {
 							           display: true,
 							           perPage: 5,
 						           },
