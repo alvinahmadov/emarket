@@ -10,6 +10,8 @@ export interface Environment
 	GOOGLE_MAPS_API_KEY: string;
 	YANDEX_MAPS_API_KEY: string;
 	
+	TALKJS_APP_ID: string;
+	
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
 	
