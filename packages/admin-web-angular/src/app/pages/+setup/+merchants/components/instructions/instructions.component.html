@@ -1,43 +1,40 @@
 <nb-card>
-    <nb-card-header>
-        <h5>
-            {{
-            'FAKE_DATA.SETUP_MERCHANTS.HOW_TO_SET_UP.HOW_TO_SET_UP'
-                | translate
-            }}
-            {{ stepper.selected.label }}?
-        </h5>
-    </nb-card-header>
-    <nb-card-body>
-        <div *ngIf="stepper.index === 0">
-            TODO add instructions for Account
-        </div>
-        <div *ngIf="stepper.index === 1">
-            TODO add instructions for Basic info
-        </div>
-        <div *ngIf="stepper.index === 2">
-            TODO add instructions for Contact info
-        </div>
-        <div *ngIf="stepper.index === 3">
-            TODO add instructions for Location
-        </div>
-        <div *ngIf="stepper.index === 4">
-            TODO add instructions for Payments
-        </div>
-        <div *ngIf="stepper.index === 5">
-            TODO add instructions for Manufacturing
-        </div>
-        <div *ngIf="stepper.index === 6">
-            TODO add instructions for Delivery & Takeaway Settings
-        </div>
-        <div *ngIf="stepper.index === 7">
-            TODO add instructions for Orders Settings
-        </div>
-        <div *ngIf="stepper.index === 8">
-            TODO add instructions for Product categories
-        </div>
-        <div *ngIf="stepper.index === 9">
-            TODO add instructions for Products
-        </div>
-    </nb-card-body>
+	<nb-card-header>
+		<h5>
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.TITLE' | translate }}
+			{{ stepper.selected.label }}?
+		</h5>
+	</nb-card-header>
+	<nb-card-body>
+		<div *ngIf="stepper.selectedIndex === 0">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.ACCOUNT' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 1">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.BASIC_INFO' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 2">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.CONTACT_INFO' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 3">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.LOCATION' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 4">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.PAYMENTS' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 5">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.MANUFACTURING' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 6">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.DELIVERY' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 7">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.ORDERS' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 8">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.PRODUCT_CATEGORIES' | translate }}
+		</div>
+		<div *ngIf="stepper.selectedIndex === 9">
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.INSTRUCTIONS.PRODUCTS' | translate }}
+		</div>
+	</nb-card-body>
 </nb-card>
