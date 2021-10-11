@@ -1,5 +1,4 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
-import IUser                                         from '../interfaces/IUser';
 import IGeoLocation, { IGeoLocationCreateObject }    from './IGeoLocation';
 
 export interface ICustomerOrderInitializeObject extends DBCreateObject
@@ -14,7 +13,7 @@ export interface ICustomerOrderInitializeObject extends DBCreateObject
 
 export interface ICustomerOrderCreateObject extends ICustomerOrderInitializeObject
 {
-	name: string;
+	username: string;
 	email: string;
 	geoLocation: IGeoLocationCreateObject;
 	devicesIds?: string[];
