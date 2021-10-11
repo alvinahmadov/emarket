@@ -1,21 +1,18 @@
-import { Apollo }                   from 'apollo-angular';
-import { Injectable }               from '@angular/core';
-import { Observable }               from 'rxjs';
-import Invite                       from '@modules/server.common/entities/Invite';
-import { map, share }               from 'rxjs/operators';
-import {
-	IInviteUpdateObject,
-	IInviteCreateObject,
-}                                   from '@modules/server.common/interfaces/IInvite';
-import { InviteViewModel }          from '../../pages/+customers/+invites/invites.component';
-import { getCountryName }           from '@modules/server.common/entities/GeoLocation';
-import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
-import { countries }                from '@modules/server.common/data/abbreviation-to-country';
-import IPagingOptions
-                                    from '@modules/server.common/interfaces/IPagingOptions';
-import { GQLQueries, GQLMutations } from '@modules/server.common/utilities/graphql';
+import { Apollo }                                    from 'apollo-angular';
+import { Injectable }                                from '@angular/core';
+import { Observable }                                from 'rxjs';
+import { map, share }                                from 'rxjs/operators';
+import { ApolloQueryResult }                         from 'apollo-client';
+import { countries, getCountryName, }                from '@modules/server.common/data/countries';
+import { IInviteCreateObject, IInviteUpdateObject, } from '@modules/server.common/interfaces/IInvite';
+import { IGeoLocationCreateObject, ICoordinate }     from '@modules/server.common/interfaces/IGeoLocation';
+import IPagingOptions                                from '@modules/server.common/interfaces/IPagingOptions';
+import Invite                                        from '@modules/server.common/entities/Invite';
+import { GQLMutations, GQLQueries }                  from '@modules/server.common/utilities/graphql';
+import { environment }                               from 'environments/environment'
+import { InviteViewModel }                           from '../../pages/+customers/+invites/invites.component';
 
-interface RemovedObject
+interface IRemoveInviteResponse
 {
 	n: number;
 	ok: number;
@@ -32,7 +29,7 @@ export class InvitesService
 		                    .watchQuery<{
 			                    invites: Invite[]
 		                    }>({
-			                       query: GQLQueries.InviteAll,
+			                       query:        GQLQueries.InviteAll,
 			                       pollInterval: 2000,
 		                       })
 		                    .valueChanges.pipe(
@@ -41,19 +38,19 @@ export class InvitesService
 				);
 	}
 	
-	getAllInvitesRequests(): Observable<Invite[]>
+	public getAllInvitesRequests(): Observable<Invite[]>
 	{
 		return this.invites$;
 	}
 	
-	getInvites(pagingOptions?: IPagingOptions): Observable<Invite[]>
+	public getInvites(pagingOptions?: IPagingOptions): Observable<Invite[]>
 	{
 		return this.apollo
 		           .watchQuery<{
 			           invites: Invite[]
 		           }>({
-			              query: GQLQueries.InviteByPaging,
-			              variables: { pagingOptions },
+			              query:        GQLQueries.InviteByPaging,
+			              variables:    { pagingOptions },
 			              pollInterval: 2000,
 		              })
 		           .valueChanges.pipe(
@@ -62,13 +59,13 @@ export class InvitesService
 				);
 	}
 	
-	createInvite(createInput: IInviteCreateObject): Observable<Invite>
+	public createInvite(createInput: IInviteCreateObject): Observable<Invite>
 	{
 		return this.apollo
 		           .mutate<{
 			           createInput: IInviteCreateObject
 		           }>({
-			              mutation: GQLMutations.InviteCreate,
+			              mutation:  GQLMutations.InviteCreate,
 			              variables: {
 				              createInput,
 			              },
@@ -79,7 +76,7 @@ export class InvitesService
 		           );
 	}
 	
-	updateInvite(
+	public updateInvite(
 			id: string,
 			updateInput: IInviteUpdateObject
 	): Observable<Invite>
@@ -89,7 +86,7 @@ export class InvitesService
 			           id: string;
 			           updateInput: IInviteUpdateObject
 		           }>({
-			              mutation: GQLMutations.InviteUpdate,
+			              mutation:  GQLMutations.InviteUpdate,
 			              variables: {
 				              id,
 				              updateInput,
@@ -101,11 +98,11 @@ export class InvitesService
 		           );
 	}
 	
-	removeByIds(ids: string[]): Observable<RemovedObject>
+	public removeByIds(ids: string[]): Observable<IRemoveInviteResponse>
 	{
 		return this.apollo
 		           .mutate({
-			                   mutation: GQLMutations.InviteRemoveByIds,
+			                   mutation:  GQLMutations.InviteRemoveByIds,
 			                   variables: { ids },
 		                   })
 		           .pipe(
@@ -114,41 +111,47 @@ export class InvitesService
 		           );
 	}
 	
-	async getCreateInviteObject(data: InviteViewModel)
+	public async getCreateInviteObject(
+			data: InviteViewModel,
+			locale: string = 'en-US'
+	): Promise<IInviteCreateObject>
 	{
-		// noinspection DuplicatedCode
+		const countryId = Object.values(countries)
+		                        .indexOf(data.country)
+		
 		const res = await this._tryFindNewAddress(
 				data.house,
 				data.address,
 				data.city,
-				Object.values(countries)
-				      .indexOf(data.country)
+				countryId,
+				locale
 		);
 		
-		const lat = Number(res['lat']).toFixed(7);
-		const lng = Number(res['lng']).toFixed(7);
+		const lat = Number(Number(res.lat).toFixed(7));
+		const lng = Number(Number(res.lng).toFixed(7));
 		
 		const geoLocation: IGeoLocationCreateObject = {
-			countryId: Object.values(countries).indexOf(data.country),
-			city: data.city,
+			countryId:     countryId,
+			city:          data.city,
 			streetAddress: data.address,
-			house: data.house,
-			loc: {
-				coordinates: [Number(lng), Number(lat)],
-				type: 'Point',
+			house:         data.house,
+			loc:           {
+				coordinates: {
+					lng: lng,
+					lat: lat
+				},
+				type:        'Point',
 			},
 		};
 		
-		const invite: IInviteCreateObject = {
-			code: data.invite,
+		return {
+			code:      data.invite,
 			apartment: data.apartment,
 			geoLocation,
 		};
-		
-		return invite;
 	}
 	
-	async getCountOfInvites()
+	public async getCountOfInvites(): Promise<number>
 	{
 		const res = await this.apollo
 		                      .query({
@@ -159,14 +162,14 @@ export class InvitesService
 		return res.data['getCountOfInvites'];
 	}
 	
-	generate1000InvitesConnectedToInviteRequests(
+	public generate1000InvitesConnectedToInviteRequests(
 			defaultLng: number,
 			defaultLat: number
-	)
+	): Observable<ApolloQueryResult<void>>
 	{
 		return this.apollo
 		           .query({
-			                  query: GQLQueries.InviteFake,
+			                  query:     GQLQueries.InviteFake,
 			                  variables: { defaultLng, defaultLat },
 		                  });
 	}
@@ -176,18 +179,18 @@ export class InvitesService
 			house: string,
 			streetAddress: string,
 			city: string,
-			countryId: number
-	)
+			countryId: number,
+			locale?: string
+	): Promise<ICoordinate>
 	{
-		const countryName = getCountryName(countryId);
-		
+		const countryName = getCountryName(locale, countryId);
 		const geocoder = new google.maps.Geocoder();
 		
-		return new Promise((resolve, reject) =>
+		return new Promise((resolve) =>
 		                   {
 			                   geocoder.geocode(
 					                   {
-						                   address: `${streetAddress} ${house}, ${city}`,
+						                   address:               `${streetAddress} ${house}, ${city}`,
 						                   componentRestrictions: {
 							                   country: countryName,
 						                   },
@@ -202,7 +205,10 @@ export class InvitesService
 						                   }
 						                   else
 						                   {
-							                   resolve({ lat: 0, lng: 0 });
+							                   resolve({
+								                           lng: environment.DEFAULT_LONGITUDE,
+								                           lat: environment.DEFAULT_LATITUDE
+							                           });
 						                   }
 					                   }
 			                   );
