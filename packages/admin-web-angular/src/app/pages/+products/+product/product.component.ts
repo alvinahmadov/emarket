@@ -1,25 +1,25 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Location }                     from '@angular/common';
 import { ActivatedRoute }               from '@angular/router';
-import { ProductsService }              from '../../../@core/data/products.service';
-import { ProductLocalesService }        from '@modules/client.common.angular2/locale/product-locales.service';
+import { TranslateService }             from '@ngx-translate/core';
+import { Subject }                      from 'rxjs';
+import { first, takeUntil }             from 'rxjs/operators';
 import { IProductsCategory }            from '@modules/server.common/interfaces/IProductsCategory';
 import { ILocaleMember }                from '@modules/server.common/interfaces/ILocale';
 import Product                          from '@modules/server.common/entities/Product';
-import { Subject }                      from 'rxjs';
-import { first, takeUntil }             from 'rxjs/operators';
-import { TranslateService }             from '@ngx-translate/core';
-import { ProductsCategoryService }      from '../../../@core/data/productsCategory.service';
-import { Location }                     from '@angular/common';
+import { ProductLocalesService }        from '@modules/client.common.angular2/locale/product-locales.service';
+import { ProductsService }              from '@app/@core/data/products.service';
+import { ProductsCategoryService }      from '@app/@core/data/productsCategory.service';
 
 @Component({
-	           selector: 'ea-product',
+	           selector:    'ea-product',
+	           styleUrls:   ['./product.component.scss'],
 	           templateUrl: './product.component.html',
-	           styleUrls: ['./product.component.scss'],
            })
 export class ProductComponent implements OnInit, OnDestroy
 {
-	product: Product;
-	productLangToShow: string;
+	public product: Product;
+	public productLangToShow: string;
 	public productCategoriesArr = [];
 	public allCategories: any;
 	private _productId: string;
@@ -50,37 +50,31 @@ export class ProductComponent implements OnInit, OnDestroy
 		return this.product && this.product.categories.length > 0;
 	}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this._loadProduct();
 		this._setProductLanguage();
 		this.productCategoriesArr = this.allCategories;
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
 	
-	getLanguageFullName(langAbbreviation: string)
+	public getLanguageFullName(langAbbreviation: string)
 	{
 		switch(langAbbreviation)
 		{
 			case 'en-US':
 				return 'English';
-			case 'bg-BG':
-				return 'Български';
-			case 'he-IL':
-				return 'עברית';
 			case 'ru-RU':
 				return 'Русский';
-			case 'es-ES':
-				return 'Spanish';
 		}
 	}
 	
-	getTranslatedValue(member: ILocaleMember[]): string
+	public getTranslatedValue(member: ILocaleMember[]): string
 	{
 		return this._productLocalesService.getTranslate(
 				member,
@@ -88,14 +82,14 @@ export class ProductComponent implements OnInit, OnDestroy
 		);
 	}
 	
-	getCategories(categories: IProductsCategory[])
+	public getCategories(categories: IProductsCategory[])
 	{
 		return categories
 				.map((c) => this.getTranslatedValue(c.name))
 				.join(', ');
 	}
 	
-	async getAllCategories()
+	public async getAllCategories()
 	{
 		this.allCategories = await this.productsCategoryService
 		                               .getCategories()
@@ -103,24 +97,22 @@ export class ProductComponent implements OnInit, OnDestroy
 		                               .toPromise();
 	}
 	
-	getTranslates(categoryName)
+	public getTranslates(categoryName)
 	{
 		return this._productLocalesService.getTranslate(categoryName);
 	}
 	
-	onProductLangChange(selectedLanguage: string)
+	public onProductLangChange(selectedLanguage: string)
 	{
 		this.productLangToShow = selectedLanguage;
 	}
 	
-	getProductCategories(categoriesID)
+	public getProductCategories(categoriesID)
 	{
-		this.productCategoriesArr = this.allCategories.filter((c) =>
-				                                                      categoriesID.includes(c.id)
-		);
+		this.productCategoriesArr = this.allCategories.filter((c) => categoriesID.includes(c.id));
 	}
 	
-	back()
+	public back()
 	{
 		this._location.back();
 	}
