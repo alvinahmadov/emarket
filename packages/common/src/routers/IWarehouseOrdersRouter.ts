@@ -19,6 +19,7 @@ export interface IOrderCreateInputProduct
 {
 	count: number;
 	productId: Product['id'];
+	comment?: string;
 }
 
 export interface IOrderCreateInput
