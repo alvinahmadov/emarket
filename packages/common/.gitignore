@@ -6,5 +6,9 @@ node_modules
 dist
 build
 
+src/data/countries.ts
+src/data/currencies.ts
+src/data/languages.ts
+
 .env
 .env.prod

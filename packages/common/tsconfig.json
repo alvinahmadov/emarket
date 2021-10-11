@@ -4,7 +4,10 @@
     "baseUrl": "./src",
     "outDir": "./build",
     "rootDir": "./src",
-    "target": "es5",
+    "target": "es2017",
+    "lib": [
+      "es2017"
+    ],
     "types": [
       "node",
       "reflect-metadata",
