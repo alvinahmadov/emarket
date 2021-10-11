@@ -1,10 +1,10 @@
-import { Component, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { NgForm }                                     from '@angular/forms';
 
 @Component({
-	           selector: 'ea-merchants-setup-account',
-	           templateUrl: './account.component.html',
-	           styleUrls: ['./account.component.scss'],
+	           selector:    'ea-merchants-setup-account',
+	           styleUrls:   ['./account.component.scss'],
+	           templateUrl: './account.component.html'
            })
 export class SetupMerchantAccountComponent
 {
@@ -17,9 +17,9 @@ export class SetupMerchantAccountComponent
 	nextStep: EventEmitter<boolean> = new EventEmitter<boolean>();
 	
 	accountModel = {
-		email: '',
-		username: '',
-		password: '',
+		email:          '',
+		username:       '',
+		password:       '',
 		repeatPassword: '',
 	};
 	
@@ -36,12 +36,7 @@ export class SetupMerchantAccountComponent
 		let targetIndex = this.accountModel.email.indexOf('@');
 		if(targetIndex > 0 && this.accountModel.username === '')
 		{
-			let defaultUsername = this.accountModel.email.substring(
-					0,
-					targetIndex
-			);
-			
-			this.accountModel.username = defaultUsername;
+			this.accountModel.username = this.accountModel.email.substring(0, targetIndex);
 		}
 	}
 }
