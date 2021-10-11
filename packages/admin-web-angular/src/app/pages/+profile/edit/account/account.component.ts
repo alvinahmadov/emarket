@@ -5,17 +5,17 @@ import {
 	FormBuilder,
 	Validators,
 }                                              from '@angular/forms';
-import Admin                                   from '@modules/server.common/entities/Admin';
-import { AdminsService }                       from '../../../../@core/data/admins.service';
-import { first, takeUntil, debounceTime }      from 'rxjs/operators';
-import { ToasterService }                      from 'angular2-toaster';
 import { Router }                              from '@angular/router';
 import { Subject }                             from 'rxjs';
+import { first, takeUntil, debounceTime }      from 'rxjs/operators';
+import { ToasterService }                      from 'angular2-toaster';
 import { TranslateService }                    from '@ngx-translate/core';
+import Admin                                   from '@modules/server.common/entities/Admin';
+import { AdminsService }                       from '@app/@core/data/admins.service';
 
 @Component({
-	           selector: 'ea-account',
-	           styleUrls: ['/account.component.scss'],
+	           selector:    'ea-account',
+	           styleUrls:   ['/account.component.scss'],
 	           templateUrl: './account.component.html',
            })
 export class AccountComponent implements OnInit, OnDestroy
@@ -28,8 +28,7 @@ export class AccountComponent implements OnInit, OnDestroy
 	public passwordErrorMsg: string;
 	public repeatPasswordErrorMsg: string;
 	public PASSWORDS_DO_NOT_MATCH: string = 'PASSWORDS_DO_NOT_MATCH';
-	public SUCCESSFULLY_CHANGE_PASSWORD: string =
-			'SUCCESSFULLY_CHANGE_PASSWORD';
+	public SUCCESSFULLY_CHANGE_PASSWORD: string = 'SUCCESSFULLY_CHANGE_PASSWORD';
 	public PREFIX: string = 'PROFILE_VIEW.';
 	public loading: boolean;
 	$password: any;
@@ -38,48 +37,48 @@ export class AccountComponent implements OnInit, OnDestroy
 	private admin: Admin;
 	// Use "errors[0]" because to show messages one by one till all are fixed
 	private validations = {
-		oldPasswordControl: () =>
-		{
-			this.oldPassword.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.oldPasswordErrorMsg =
-						               (this.oldPassword.touched || this.oldPassword.dirty) &&
-						               this.oldPassword.errors
-						               ? Object.keys(this.oldPassword.errors)[0]
-						               : '';
-			               });
-		},
-		passwordControl: () =>
-		{
-			this.password.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.passwordErrorMsg =
-						               (this.password.touched || this.password.dirty) &&
-						               this.password.errors
-						               ? Object.keys(this.password.errors)[0]
-						               : '';
-			               });
-		},
+		oldPasswordControl:    () =>
+		                       {
+			                       this.oldPassword.valueChanges
+			                           .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                           .subscribe(() =>
+			                                      {
+				                                      this.oldPasswordErrorMsg =
+						                                      (this.oldPassword.touched || this.oldPassword.dirty) &&
+						                                      this.oldPassword.errors
+						                                      ? Object.keys(this.oldPassword.errors)[0]
+						                                      : '';
+			                                      });
+		                       },
+		passwordControl:       () =>
+		                       {
+			                       this.password.valueChanges
+			                           .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                           .subscribe(() =>
+			                                      {
+				                                      this.passwordErrorMsg =
+						                                      (this.password.touched || this.password.dirty) &&
+						                                      this.password.errors
+						                                      ? Object.keys(this.password.errors)[0]
+						                                      : '';
+			                                      });
+		                       },
 		repeatPasswordControl: () =>
-		{
-			this.repeatPassword.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.repeatPasswordErrorMsg =
-						               (this.repeatPassword.touched ||
-						                this.repeatPassword.dirty) &&
-						               this.repeatPassword.errors
-						               ? this.repeatPassword.errors.validUrl
-						                 ? this.passwordDoNotMuch()
-						                 : Object.keys(this.repeatPassword.errors)[0]
-						               : '';
-			               });
-		},
+		                       {
+			                       this.repeatPassword.valueChanges
+			                           .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                           .subscribe(() =>
+			                                      {
+				                                      this.repeatPasswordErrorMsg =
+						                                      (this.repeatPassword.touched ||
+						                                       this.repeatPassword.dirty) &&
+						                                      this.repeatPassword.errors
+						                                      ? this.repeatPassword.errors.validUrl
+						                                        ? this.passwordDoNotMuch()
+						                                        : Object.keys(this.repeatPassword.errors)[0]
+						                                      : '';
+			                                      });
+		                       },
 	};
 	
 	constructor(
@@ -98,10 +97,7 @@ export class AccountComponent implements OnInit, OnDestroy
 	
 	ngOnInit(): void
 	{
-		this.$password = this.password.valueChanges.subscribe((res) =>
-		                                                      {
-			                                                      this.repeatPassword.setValue('');
-		                                                      });
+		this.$password = this.password.valueChanges.subscribe(() => this.repeatPassword.setValue(''));
 	}
 	
 	passwordDoNotMuch()
@@ -121,7 +117,7 @@ export class AccountComponent implements OnInit, OnDestroy
 			this.loading = true;
 			const res = await this.adminsService
 			                      .updatePassword(this.admin.id, {
-				                      new: this.password.value,
+				                      new:     this.password.value,
 				                      current: this.oldPassword.value,
 			                      })
 			                      .pipe(first())
@@ -150,8 +146,8 @@ export class AccountComponent implements OnInit, OnDestroy
 	buildForm()
 	{
 		this.accountForm = this.formBuilder.group({
-			                                          oldPassword: ['', Validators.required],
-			                                          password: ['', [Validators.required, Validators.minLength(4)]],
+			                                          oldPassword:    ['', Validators.required],
+			                                          password:       ['', [Validators.required, Validators.minLength(4)]],
 			                                          repeatPassword: [
 				                                          '',
 				                                          [
@@ -186,6 +182,15 @@ export class AccountComponent implements OnInit, OnDestroy
 		this.validations.oldPasswordControl();
 		this.validations.passwordControl();
 		this.validations.repeatPasswordControl();
+	}
+	
+	loadClass(control: AbstractControl)
+	{
+		return control.dirty || control.touched
+		       ? control.errors
+		         ? 'form-control-danger'
+		         : 'form-control-success'
+		       : ''
 	}
 	
 	ngOnDestroy(): void

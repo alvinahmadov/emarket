@@ -6,13 +6,7 @@
                     {{ 'PROFILE_VIEW.OLD_PASSWORD' | translate }}</label
                 >
                 <input
-                        [ngClass]="
-						oldPassword.dirty || oldPassword.touched
-							? oldPassword.errors
-								? 'form-control-danger'
-								: 'form-control-success'
-							: ''
-					"
+                        [ngClass]="loadClass(oldPassword)"
                         class="form-control"
                         formControlName="oldPassword"
                         id="old-password"
@@ -31,13 +25,7 @@
                     'PROFILE_VIEW.NEW_PASSWORD' | translate
                     }}</label>
                 <input
-                        [ngClass]="
-						password.dirty || password.touched
-							? password.errors
-								? 'form-control-danger'
-								: 'form-control-success'
-							: ''
-					"
+                        [ngClass]="loadClass(password)"
                         class="form-control"
                         formControlName="password"
                         id="id-password"
