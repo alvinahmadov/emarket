@@ -1,18 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import { Observable } from 'rxjs';
-import Currency       from '@modules/server.common/entities/Currency';
-import { map, share } from 'rxjs/operators';
-import {
-	GQLQueries,
-	GQLMutations
-}                     from '@modules/server.common/utilities/graphql';
+import { Injectable }               from '@angular/core';
+import { Apollo }                   from 'apollo-angular';
+import { Observable }               from 'rxjs';
+import { map, share }               from 'rxjs/operators';
+import { ICurrencyCreateObject }    from '@modules/server.common/interfaces/ICurrency';
+import Currency                     from '@modules/server.common/entities/Currency';
+import { GQLQueries, GQLMutations } from '@modules/server.common/utilities/graphql';
 
-export type CurrencyQuery = { currencies: Currency[] };
-
-export type CurrencyCreateInput = { currencyCode: string };
-
-export interface CurrencyMutationRespone
+export interface ICurrencyMutationRespone
 {
 	success: boolean;
 	message?: string;
@@ -23,47 +17,38 @@ export interface CurrencyMutationRespone
 export class CurrenciesService
 {
 	private readonly currencies$: Observable<Currency[]>;
+	private static readonly pollInterval: number = 10000;
 	
 	constructor(private readonly apollo: Apollo)
 	{
 		this.currencies$ = this.apollo
-		                       .watchQuery<CurrencyQuery>(
-				                       {
-					                       query: GQLQueries.CurrenciesAll,
-					                       pollInterval: 2000,
-				                       }
-		                       )
+		                       .watchQuery<{
+			                       currencies: Currency[]
+		                       }>({
+			                          query:        GQLQueries.CurrenciesAll,
+			                          pollInterval: CurrenciesService.pollInterval,
+		                          })
 		                       .valueChanges
 		                       .pipe(
 				                       map((result) => result.data.currencies),
 				                       share()
-		                       )
-		
-		if(this.currencies$.isEmpty)
-		{
-			this.create({ currencyCode: "RUB" });
-			this.create({ currencyCode: "EUR" });
-			this.create({ currencyCode: "USD" });
-		}
+		                       );
 	}
 	
-	getCurrencies(): Observable<Currency[]>
+	public getCurrencies(): Observable<Currency[]>
 	{
 		return this.currencies$;
 	}
 	
-	create(createInput: CurrencyCreateInput): Observable<CurrencyMutationRespone>
+	public create(createInput: ICurrencyCreateObject): Observable<ICurrencyMutationRespone>
 	{
 		return this.apollo
 		           .mutate<{
-			           createCurrency: CurrencyMutationRespone
-		           }>(
-				           {
-					           mutation: GQLMutations.CurrencyCreate,
-					           variables: {
-						           createInput,
-					           },
-				           })
+			           createCurrency: ICurrencyMutationRespone
+		           }>({
+			              mutation:  GQLMutations.CurrencyCreate,
+			              variables: { createInput },
+		              })
 		           .pipe(
 				           map((result) => result.data.createCurrency),
 				           share()
