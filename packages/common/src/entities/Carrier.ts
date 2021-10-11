@@ -17,18 +17,29 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 		implements ICarrier
 {
 	/**
+	 * Unique Carrier username, which used for Authentication of the Carrier in the app
+	 *
+	 * @type {string}
+	 * @memberof Carrier
+	 */
+	@Schema({ type: String, unique: true, required: true })
+	@Column()
+	username: string;
+	
+	/**
 	 * First Name (required)
 	 *
 	 * @type {string}
 	 * @memberof Carrier
 	 */
 	@Schema({
-		        type: String,
+		        type:     String,
 		        required: true,
 		        validate: new RegExp(`^[a-z ,.'-]+$`, 'i')
 	        })
 	@Column()
 	firstName: string;
+	
 	/**
 	 * Last Name (required)
 	 *
@@ -36,12 +47,28 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	 * @memberof Carrier
 	 */
 	@Schema({
-		        type: String,
+		        type:     String,
 		        required: true,
 		        validate: new RegExp(`^[a-z ,.'-]+$`, 'i')
 	        })
 	@Column()
 	lastName: string;
+	
+	/**
+	 * Carrier email (optional)
+	 *
+	 * @type {string}
+	 * @memberof Carrier
+	 */
+	@Schema({
+		        type:     String,
+		        required: false,
+		        sparse:   true,
+		        unique:   true
+	        })
+	@Column()
+	email: string;
+	
 	/**
 	 * How many deliveries totally this carrier made
 	 *
@@ -51,6 +78,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.Number(0)
 	@Column()
 	numberOfDeliveries: number;
+	
 	/**
 	 * Current location of the Carrier (updated periodically during carrier movements)
 	 *
@@ -59,6 +87,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	 */
 	@Schema(getSchema(GeoLocation))
 	geoLocation: GeoLocation;
+	
 	/**
 	 * Current Apartment (if carrier located in some appartment at the moment)
 	 *
@@ -68,6 +97,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Schema(String)
 	@Column()
 	apartment?: string;
+	
 	/**
 	 * Is Carrier Active at the moment in the system
 	 * Value 'True' means carrier enabled in system,
@@ -80,6 +110,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isActive: boolean;
+	
 	/**
 	 * Is Carrier removed completely from the system
 	 *
@@ -89,6 +120,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.Boolean(false)
 	@Column()
 	isDeleted: boolean;
+	
 	/**
 	 * Current carrier status (set via his mobile app), e.g. Online or Offline
 	 *
@@ -98,15 +130,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.Number(CarrierStatus.Offline)
 	@Column()
 	status: CarrierStatus;
-	/**
-	 * Unique Carrier username, which used for Authentication of the Carrier in the app
-	 *
-	 * @type {string}
-	 * @memberof Carrier
-	 */
-	@Schema({ type: String, unique: true, required: true })
-	@Column()
-	username: string;
+	
 	/**
 	 * Shows if carrier is shared or assigned to some store
 	 *
@@ -116,6 +140,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Schema({ type: Boolean, required: false })
 	@Column()
 	shared: boolean;
+	
 	/**
 	 * Hashed password
 	 *
@@ -125,6 +150,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Schema({ type: String, required: false, select: false })
 	@Column()
 	hash?: string;
+	
 	/**
 	 * Carrier Phone number (usually mobile phone)
 	 *
@@ -134,6 +160,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.String()
 	@Column()
 	phone: string;
+	
 	/**
 	 * URL for Logo (brand image) or Avatar of the Carrier
 	 *
@@ -141,7 +168,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	 * @memberof Carrier
 	 */
 	@Schema({
-		        type: String,
+		        type:     String,
 		        required: true,
 		        validate: new RegExp(
 				        `(http(s?):)s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))`
@@ -149,23 +176,11 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	        })
 	@Column()
 	logo: string;
-	/**
-	 * Carrier email (optional)
-	 *
-	 * @type {string}
-	 * @memberof Carrier
-	 */
-	@Schema({
-		        type: String,
-		        required: false,
-		        sparse: true,
-		        unique: true
-	        })
-	@Column()
-	email: string;
+	
 	@Schema([String])
 	@Column()
 	skippedOrderIds: string[];
+	
 	/**
 	 * How many deliveries carrier made today
 	 * TODO: implement calculation, useful for stats
@@ -176,6 +191,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.Number(0)
 	@Column()
 	deliveriesCountToday: number;
+	
 	/**
 	 * How much km (or miles) Carrier made today during deliveries
 	 * TODO: implement calculation, useful for stats
@@ -185,6 +201,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	@Types.Number(0)
 	@Column()
 	totalDistanceToday: number;
+	
 	/**
 	 * IDs of Carrier devices (mobiles)
 	 * Used to send Push Notifications to Carrier devices
@@ -195,6 +212,7 @@ class Carrier extends DBObject<ICarrier, ICarrierCreateObject>
 	 */
 	@Schema([String])
 	devicesIds: string[];
+	
 	/**
 	 * Is shared the carrier, i.e if not then only merchant which already has such carrier assigned
 	 * (inside "carriersIds" array on Merchant) can use such carrier and no one else
