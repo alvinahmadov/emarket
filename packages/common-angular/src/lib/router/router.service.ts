@@ -1,10 +1,10 @@
-import { Socket }            from '../socket.service';
+import { InjectionToken }    from '@angular/core';
 import { Observable }        from 'rxjs';
 import { ObservableRequest } from './ObservableRequest';
 import { Request }           from './Request';
 import { RoutersService }    from './routers.service';
+import { Socket }            from '../socket.service';
 import { SocketFactory }     from '../socket.factory';
-import { InjectionToken }    from '@angular/core';
 
 export const API_URL = new InjectionToken<string>('api_url');
 
