@@ -120,18 +120,14 @@ export class PagesComponent
 	getTranslation(prefix: string)
 	{
 		let result = '';
-		this.translate.get(prefix).subscribe((res) =>
-		                                     {
-			                                     result = res;
-		                                     });
+		this.translate.get(prefix)
+		    .subscribe((res) => result = res);
 		return result;
 	}
 	
 	private _applyTranslationOnSmartTable()
 	{
-		this.translate.onLangChange.subscribe(() =>
-		                                      {
-			                                      this.initialize();
-		                                      });
+		this.translate.onLangChange
+		    .subscribe(() => this.initialize());
 	}
 }
