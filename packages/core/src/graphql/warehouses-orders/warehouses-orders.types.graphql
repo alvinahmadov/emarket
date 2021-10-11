@@ -1,6 +1,7 @@
 input OrderProductCreateInput {
     count: Int!
     productId: String!
+    comment: String
 }
 
 input OrderCreateInput {
@@ -25,7 +26,7 @@ type MerchantsOrders {
 }
 
 type RemovedUserOrdersObj {
-    number: Int
+    num: Int
     modified: Int
 }
 
