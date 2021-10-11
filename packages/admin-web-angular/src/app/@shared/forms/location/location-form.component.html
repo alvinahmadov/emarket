@@ -1,179 +1,178 @@
 <div *ngIf="form" [formGroup]="form" class="col-sm-12 pt-0">
-    <fieldset>
-        <div *ngIf="showAutocompleteSearch" class="form-group row">
-            <label class="col-sm-2 control-label"> </label>
-
-            <div class="col-sm-9 input-group">
-                <div class="input-group-prepend p-0">
+	<fieldset>
+		<div *ngIf="showAutocompleteSearch" class="form-group row">
+			<label class="col-sm-2 control-label"> </label>
+			
+			<div class="col-sm-9 input-group">
+				<div class="input-group-prepend p-0">
 					<span class="input-group-text" id="basic-addon1"
-                    ><i class="fa fa-search"></i
-                    ></span>
-                </div>
-                <input
-                    #autocomplete
-                    class="form-control"
-                    placeholder="{{ 'PLACEHOLDER.FIND_ADDRESS' | translate }}"
-                    type="text"
-                />
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label class="col-sm-2 control-label"
-            >* {{ 'WAREHOUSE_VIEW.MUTATION.ADDRESS' | translate }}</label
-            >
-
-            <div class="col-sm-3">
-                <select
-                        (change)="onAddressChanges()"
-                        class="form-control"
-                        formControlName="countryId"
-                >
-                    <option [disabled]="true" [selected]="true"
-                    >{{
-                        'WAREHOUSE_VIEW.MUTATION.COUNTRY' | translate
-                        }}...
-                    </option
-                    >
-                    <option
-                            *ngFor="let country of countries"
-                            value="{{ country.id }}"
-                    >{{ country.name }}</option
-                    >
-                </select>
-
-                <div *ngIf="isCountryValid" class="alert alert-danger">
-                    {{ 'SHARED.FORMS.ERRORS.COUNTRY_REQUIRED' | translate }}!
-                </div>
-            </div>
-
-            <div class="col-sm-3">
-                <input
-                        (blur)="onAddressChanges()"
-                        class="form-control"
-                        formControlName="city"
-                        placeholder="{{ 'PLACEHOLDER.CITY' | translate }}"
-                        type="text"
-                />
-
-                <div *ngIf="isCityValid" class="alert alert-danger">
-                    {{ 'SHARED.FORMS.ERRORS.CITY_REQUIRED' | translate }}!
-                </div>
-            </div>
-
-            <div class="col-sm-3">
-                <input
-                        (blur)="onAddressChanges()"
-                        class="form-control"
-                        formControlName="postcode"
-                        placeholder="{{ 'PLACEHOLDER.ZIP' | translate }}"
-                        type="text"
-                />
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label class="col-sm-2 control-label"></label>
-
-            <div class="col-sm-9">
-                <input
-                        (blur)="onAddressChanges()"
-                        class="form-control"
-                        formControlName="streetAddress"
-                        placeholder="{{ 'PLACEHOLDER.STREET' | translate }}"
-                        type="text"
-                />
-
-                <div *ngIf="isStreetAddressValid" class="alert alert-danger">
-                    {{
-                    'SHARED.FORMS.ERRORS.STREET_ADDRESS_REQUIRED'
-                        | translate
-                    }}!
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <label class="col-sm-2 control-label"></label>
-
-            <div class="col-sm-9">
-                <div class="form-group row">
-                    <div [ngClass]="apartment ? 'col-sm-6' : 'col-sm-12'">
-                        <input
-                                (blur)="onAddressChanges()"
-                                class="form-control"
-                                formControlName="house"
-                                placeholder="{{ 'PLACEHOLDER.HOUSE' | translate }}"
-                                type="text"
-                        />
-
-                        <div *ngIf="isHouseValid" class="alert alert-danger">
-                            {{
-                            'SHARED.FORMS.ERRORS.HOUSE_REQUIRED'
-                                | translate
-                            }}!
-                        </div>
-                    </div>
-
-                    <div
-                            *ngIf="apartment"
-                            [ngClass]="apartment ? 'col-sm-6' : 'col-sm-12'"
-                    >
-                        <input
-                                [formControl]="apartment"
-                                class="form-control"
-                                placeholder="{{
+					><i class="fa fa-search"></i
+					></span>
+				</div>
+				<input
+						#autocomplete
+						class="form-control"
+						placeholder="{{ 'PLACEHOLDER.FIND_ADDRESS' | translate }}"
+						type="text"
+				/>
+			</div>
+		</div>
+		
+		<div class="form-group row">
+			<label class="col-sm-2 control-label"
+			>* {{ 'WAREHOUSE_VIEW.MUTATION.ADDRESS' | translate }}</label
+			>
+			
+			<div class="col-sm-3">
+				<select
+						(change)="onAddressChanges()"
+						class="form-control"
+						formControlName="countryId"
+				>
+					<option disabled selected>
+						{{ 'WAREHOUSE_VIEW.MUTATION.COUNTRY' | translate }}...
+					</option
+					>
+					<option
+							*ngFor="let country of countries"
+							value="{{ country.id }}"
+					>
+						{{ country.name }}
+					</option>
+				</select>
+				
+				<div *ngIf="isCountryValid" class="alert alert-danger">
+					{{ 'SHARED.FORMS.ERRORS.COUNTRY_REQUIRED' | translate }}!
+				</div>
+			</div>
+			
+			<div class="col-sm-3">
+				<input
+						(blur)="onAddressChanges()"
+						class="form-control"
+						formControlName="city"
+						placeholder="{{ 'PLACEHOLDER.CITY' | translate }}"
+						type="text"
+				/>
+				
+				<div *ngIf="isCityValid" class="alert alert-danger">
+					{{ 'SHARED.FORMS.ERRORS.CITY_REQUIRED' | translate }}!
+				</div>
+			</div>
+			
+			<div class="col-sm-3">
+				<input
+						(blur)="onAddressChanges()"
+						class="form-control"
+						formControlName="postcode"
+						placeholder="{{ 'PLACEHOLDER.ZIP' | translate }}"
+						type="text"
+				/>
+			</div>
+		</div>
+		
+		<div class="form-group row">
+			<label class="col-sm-2 control-label"></label>
+			
+			<div class="col-sm-9">
+				<input
+						(blur)="onAddressChanges()"
+						class="form-control"
+						formControlName="streetAddress"
+						placeholder="{{ 'PLACEHOLDER.STREET' | translate }}"
+						type="text"
+				/>
+				
+				<div *ngIf="isStreetAddressValid" class="alert alert-danger">
+					{{
+					'SHARED.FORMS.ERRORS.STREET_ADDRESS_REQUIRED'
+							| translate
+					}}!
+				</div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<label class="col-sm-2 control-label"></label>
+			
+			<div class="col-sm-9">
+				<div class="form-group row">
+					<div [ngClass]="apartment ? 'col-sm-6' : 'col-sm-12'">
+						<input
+								(blur)="onAddressChanges()"
+								class="form-control"
+								formControlName="house"
+								placeholder="{{ 'PLACEHOLDER.HOUSE' | translate }}"
+								type="text"
+						/>
+						
+						<div *ngIf="isHouseValid" class="alert alert-danger">
+							{{
+							'SHARED.FORMS.ERRORS.HOUSE_REQUIRED'
+									| translate
+							}}!
+						</div>
+					</div>
+					
+					<div
+							*ngIf="apartment"
+							[ngClass]="apartment ? 'col-sm-6' : 'col-sm-12'"
+					>
+						<input
+								[formControl]="apartment"
+								class="form-control"
+								placeholder="{{
 								'PLACEHOLDER.APARTMENT' | translate
 							}}"
-                                type="text"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <label class="col-sm-2 control-label">
+								type="text"
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row">
+			<label class="col-sm-2 control-label">
 				<span class="ml-1"
-                >{{ 'WAREHOUSE_VIEW.MUTATION.COORDINATES' | translate }}
+				>{{ 'WAREHOUSE_VIEW.MUTATION.COORDINATES' | translate }}
 				</span>
-            </label>
-            <div class="col-sm-9">
-                <input (change)="toggleShowCoordinates()" type="checkbox"/>
-            </div>
-        </div>
-
-        <div *ngIf="showCoordinates" class="row">
-            <label class="col-sm-2 control-label"></label>
-            <div class="col-sm-9 coordinates-position">
-                <div class="form-group row" formGroupName="loc">
-                    <div class="col-sm-6" formArrayName="coordinates">
-                        <input
-                                (blur)="onCoordinatesChanged()"
-                                class="form-control"
-                                formControlName="0"
-                                placeholder="{{
+			</label>
+			<div class="col-sm-9">
+				<input (change)="toggleShowCoordinates()" type="checkbox"/>
+			</div>
+		</div>
+		
+		<div *ngIf="showCoordinates" class="row">
+			<label class="col-sm-2 control-label"></label>
+			<div class="col-sm-9 coordinates-position">
+				<div class="form-group row" formGroupName="loc">
+					<div class="col-sm-6" formArrayName="coordinates">
+						<input
+								(blur)="onCoordinatesChanged()"
+								class="form-control"
+								formControlName="0"
+								placeholder="{{
 								'PLACEHOLDER.LATITUDE' | translate
 							}}"
-                                step="0.1"
-                                type="number"
-                        />
-                    </div>
-
-                    <div class="col-sm-6" formArrayName="coordinates">
-                        <input
-                                (blur)="onCoordinatesChanged()"
-                                class="form-control"
-                                formControlName="1"
-                                placeholder="{{
+								step="0.1"
+								type="number"
+						/>
+					</div>
+					
+					<div class="col-sm-6" formArrayName="coordinates">
+						<input
+								(blur)="onCoordinatesChanged()"
+								class="form-control"
+								formControlName="1"
+								placeholder="{{
 								'PLACEHOLDER.LONGITUDE' | translate
 							}}"
-                                step="0.1"
-                                type="number"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </fieldset>
+								step="0.1"
+								type="number"
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</fieldset>
 </div>
