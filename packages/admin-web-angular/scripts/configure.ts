@@ -40,6 +40,8 @@ export const environment: Environment = {
 
   GOOGLE_MAPS_API_KEY: '${env.GOOGLE_MAPS_API_KEY}',
   YANDEX_MAPS_API_KEY: '${env.YANDEX_MAPS_API_KEY}',
+  
+  TALKJS_APP_ID: '${env.TALKJS_APP_ID}',
 
   DEFAULT_LATITUDE: ${env.DEFAULT_LATITUDE},
   DEFAULT_LONGITUDE: ${env.DEFAULT_LONGITUDE},

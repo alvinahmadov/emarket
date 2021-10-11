@@ -15,6 +15,8 @@ export type Env = Readonly<{
 	GOOGLE_MAPS_API_KEY: string;
 	YANDEX_MAPS_API_KEY: string;
 	
+	TALKJS_APP_ID: string;
+	
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
 	
@@ -67,6 +69,8 @@ export const env: Env = cleanEnv(
 			
 			GOOGLE_MAPS_API_KEY: str({ default: '' }),
 			YANDEX_MAPS_API_KEY: str({ default: '' }),
+			
+			TALKJS_APP_ID: str({ default: '' }),
 			
 			DEFAULT_LATITUDE:  num({ default: 37.642036 }),
 			DEFAULT_LONGITUDE: num({ default: 55.708215 }),
