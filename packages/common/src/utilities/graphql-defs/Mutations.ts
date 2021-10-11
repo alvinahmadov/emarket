@@ -16,8 +16,8 @@ namespace GQLMutations
 					_id
 					id
 					email
-					name
-					pictureUrl
+					username
+					avatar
 				}
 			}
 		}
@@ -37,7 +37,7 @@ namespace GQLMutations
 					admin:
 					{
 						email: $email
-						name: $fullName
+						username: $fullName
 						avatar: $avatar
 					}
 					password: $password
@@ -47,7 +47,7 @@ namespace GQLMutations
 				_id
 				id
 				email
-				pictureUrl
+				avatar
 			}
 		}
 	`;
@@ -71,9 +71,9 @@ namespace GQLMutations
 			updateAdmin(id: $id, updateInput: $updateInput)
 			{
 				id
-				name
+				username
 				email
-				pictureUrl
+				avatar
 				firstName
 				lastName
 			}
@@ -102,6 +102,27 @@ namespace GQLMutations
 		}
 	`;
 	
+	export const ConversationCreate = gql`
+		mutation CreateConversation($createInput: ConversationCreateInput!)
+		{
+			createConversation(createInput: $createInput)
+			{
+				_id
+				id
+				channelId
+				platform
+				locale
+				participants
+			}
+		}
+	`;
+	export const ConversationRemove = gql`
+		mutation ConversationRemove($channelId: String!)
+		{
+			removeConversation(channelId: $channelId)
+		}
+	`;
+	
 	// #Currencies
 	
 	export const CurrencyCreate = gql`
@@ -111,7 +132,9 @@ namespace GQLMutations
 				success
 				message
 				data {
-					currencyCode
+					name
+					code
+					sign
 				}
 			}
 		}
@@ -494,6 +517,8 @@ namespace GQLMutations
 				warehouse
 				{
 					id
+					name
+					username
 				}
 				token
 			}
@@ -519,12 +544,12 @@ namespace GQLMutations
 	
 	export const WarehouseAddProducts = gql`
 		mutation AddProducts(
-			$warehouseId: String!
+			$storeId: String!
 			$products: [WarehouseProductInput!]!
 		)
 		{
 			addWarehouseProducts(
-				warehouseId: $warehouseId
+				storeId: $storeId
 				products: $products
 			)
 			{
@@ -557,12 +582,12 @@ namespace GQLMutations
 	
 	export const WarehouseRemoveProducts = gql`
 		mutation RemoveProductsByIds(
-			$warehouseId: String!
+			$storeId: String!
 			$productsIds: [String!]!
 		)
 		{
 			removeWarehouseProducts(
-				warehouseId: $warehouseId
+				storeId: $storeId
 				productsIds: $productsIds
 			)
 		}
