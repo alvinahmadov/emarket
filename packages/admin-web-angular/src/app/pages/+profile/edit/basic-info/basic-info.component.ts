@@ -14,10 +14,11 @@ import { CommonUtils }                            from '@modules/server.common/u
 import { ToasterService }                         from 'angular2-toaster';
 import { TranslateService }                       from '@ngx-translate/core';
 import 'rxjs/add/operator/debounceTime';
+import { Store }                                  from '@app/@core/data/store.service';
 
 @Component({
-	           selector: 'ea-basic-info',
-	           styleUrls: ['/basic-info.component.scss'],
+	           selector:    'ea-basic-info',
+	           styleUrls:   ['/basic-info.component.scss'],
 	           templateUrl: './basic-info.component.html',
            })
 export class BasicInfoComponent implements OnChanges, OnDestroy
@@ -27,11 +28,11 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 	
 	uploaderPlaceholder: string;
 	basicInfoForm: FormGroup;
-	username: AbstractControl;
-	email: AbstractControl;
-	picture: AbstractControl;
-	firstName: AbstractControl;
-	lastName: AbstractControl;
+	usernameControl: AbstractControl;
+	emailControl: AbstractControl;
+	avatarControl: AbstractControl;
+	firstNameControl: AbstractControl;
+	lastNameControl: AbstractControl;
 	
 	usernameErrorMsg: string;
 	emailErrorMsg: string;
@@ -46,73 +47,74 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 	private ngDestroy$ = new Subject<void>();
 	// Use "errors[0]" because to show messages one by one till all are fixed
 	private validations = {
-		usernameControl: () =>
-		{
-			this.username.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.usernameErrorMsg = BasicInfoComponent.hasError(this.username)
-				                                       ? Object.keys(this.username.errors)[0]
-				                                       : '';
-			               });
-		},
-		emailControl: () =>
-		{
-			this.email.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.emailErrorMsg = BasicInfoComponent.hasError(this.email)
-				                                    ? this.email.errors.email
-				                                      ? this.invalidEmailAddress()
-				                                      : Object.keys(this.email.errors)[0]
-				                                    : '';
-			               });
-		},
+		usernameControl:  () =>
+		                  {
+			                  this.usernameControl.valueChanges
+			                      .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                      .subscribe(() =>
+			                                 {
+				                                 this.usernameErrorMsg = BasicInfoComponent.hasError(this.usernameControl)
+				                                                         ? Object.keys(this.usernameControl.errors)[0]
+				                                                         : '';
+			                                 });
+		                  },
+		emailControl:     () =>
+		                  {
+			                  this.emailControl.valueChanges
+			                      .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                      .subscribe(() =>
+			                                 {
+				                                 this.emailErrorMsg = BasicInfoComponent.hasError(this.emailControl)
+				                                                      ? this.emailControl.errors.email
+				                                                        ? this.invalidEmailAddress()
+				                                                        : Object.keys(this.emailControl.errors)[0]
+				                                                      : '';
+			                                 });
+		                  },
 		firstNameControl: () =>
-		{
-			this.firstName.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.firstNameErrorMsg = BasicInfoComponent.hasError(this.firstName)
-				                                        ? this.firstName.errors.pattern
-				                                          ? this.nameMustContainOnlyLetters()
-				                                          : Object.keys(this.firstName.errors)[0]
-				                                        : '';
-			               });
-		},
-		lastNameControl: () =>
-		{
-			this.lastName.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               this.lastNameErrorMsg = BasicInfoComponent.hasError(this.lastName)
-				                                       ? this.lastName.errors.pattern
-				                                         ? this.nameMustContainOnlyLetters()
-				                                         : Object.keys(this.lastName.errors)[0]
-				                                       : '';
-			               });
-		},
-		pictureControl: () =>
-		{
-			this.picture.valueChanges
-			    .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
-			    .subscribe((value) =>
-			               {
-				               value !== this.admin.pictureUrl && !this.picture.invalid
-				               ? this.picture.markAsDirty()
-				               : this.picture.markAsPristine();
-			               });
-		},
+		                  {
+			                  this.firstNameControl.valueChanges
+			                      .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                      .subscribe(() =>
+			                                 {
+				                                 this.firstNameErrorMsg = BasicInfoComponent.hasError(this.firstNameControl)
+				                                                          ? this.firstNameControl.errors.pattern
+				                                                            ? this.nameMustContainOnlyLetters()
+				                                                            : Object.keys(this.firstNameControl.errors)[0]
+				                                                          : '';
+			                                 });
+		                  },
+		lastNameControl:  () =>
+		                  {
+			                  this.lastNameControl.valueChanges
+			                      .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                      .subscribe(() =>
+			                                 {
+				                                 this.lastNameErrorMsg = BasicInfoComponent.hasError(this.lastNameControl)
+				                                                         ? this.lastNameControl.errors.pattern
+				                                                           ? this.nameMustContainOnlyLetters()
+				                                                           : Object.keys(this.lastNameControl.errors)[0]
+				                                                         : '';
+			                                 });
+		                  },
+		avatarControl:    () =>
+		                  {
+			                  this.avatarControl.valueChanges
+			                      .pipe(debounceTime(500), takeUntil(this.ngDestroy$))
+			                      .subscribe((value) =>
+			                                 {
+				                                 value !== this.admin.avatar && !this.avatarControl.invalid
+				                                 ? this.avatarControl.markAsDirty()
+				                                 : this.avatarControl.markAsPristine();
+			                                 });
+		                  }
 	};
 	
 	constructor(
 			private formBuilder: FormBuilder,
 			private adminsService: AdminsService,
 			private toasterService: ToasterService,
+			private storageService: Store,
 			private _translateService: TranslateService
 	)
 	{
@@ -126,9 +128,9 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 	
 	get pictureUrlErrorMsg()
 	{
-		return this.picture.errors.pattern
+		return this.avatarControl.errors.pattern
 		       ? this.invalidURL()
-		       : Object.keys(this.picture.errors)[0];
+		       : Object.keys(this.avatarControl.errors)[0];
 	}
 	
 	ngOnChanges(): void
@@ -136,11 +138,11 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		this._applyTranslationOnSmartTable();
 		if(this.admin)
 		{
-			this.username.setValue(this.admin.name);
-			this.email.setValue(this.admin.email);
-			this.picture.setValue(this.admin.pictureUrl);
-			this.firstName.setValue(this.admin.firstName);
-			this.lastName.setValue(this.admin.lastName);
+			this.usernameControl.setValue(this.admin.username);
+			this.emailControl.setValue(this.admin.email);
+			this.avatarControl.setValue(this.admin.avatar);
+			this.firstNameControl.setValue(this.admin.firstName);
+			this.lastNameControl.setValue(this.admin.lastName);
 		}
 	}
 	
@@ -172,10 +174,10 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		try
 		{
 			this.loading = true;
-			const res = await this.adminsService
-			                      .updateById(this.admin.id, this.getAdminCreateObj())
-			                      .pipe(first())
-			                      .toPromise();
+			await this.adminsService
+			          .updateById(this.admin.id, this.getAdminCreateObj())
+			          .pipe(first())
+			          .toPromise();
 			this.loading = false;
 			this.basicInfoForm.markAsPristine();
 			this.toasterService.pop('success', 'Successfully updated data');
@@ -193,22 +195,24 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		);
 		const nameRegex: RegExp = new RegExp(`^[a-z ,.'-]+$`, 'i');
 		
-		this.basicInfoForm = this.formBuilder.group({
-			                                            username: ['', Validators.required],
-			                                            email: ['', [Validators.required, Validators.email]],
-			                                            picture: ['', [Validators.pattern(imgUrlRegex)]],
-			                                            firstName: ['', Validators.pattern(nameRegex)],
-			                                            lastName: ['', Validators.pattern(nameRegex)],
-		                                            });
+		this.basicInfoForm = this.formBuilder.group(
+				{
+					username:  ['', Validators.required],
+					email:     ['', [Validators.required, Validators.email]],
+					picture:   ['', [Validators.pattern(imgUrlRegex)]],
+					firstName: ['', Validators.pattern(nameRegex)],
+					lastName:  ['', Validators.pattern(nameRegex)],
+				}
+		);
 	}
 	
 	bindFormControls()
 	{
-		this.username = this.basicInfoForm.get('username');
-		this.email = this.basicInfoForm.get('email');
-		this.picture = this.basicInfoForm.get('picture');
-		this.firstName = this.basicInfoForm.get('firstName');
-		this.lastName = this.basicInfoForm.get('lastName');
+		this.usernameControl = this.basicInfoForm.get('username');
+		this.emailControl = this.basicInfoForm.get('email');
+		this.avatarControl = this.basicInfoForm.get('picture');
+		this.firstNameControl = this.basicInfoForm.get('firstName');
+		this.lastNameControl = this.basicInfoForm.get('lastName');
 	}
 	
 	loadControls()
@@ -217,13 +221,22 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		this.validations.emailControl();
 		this.validations.firstNameControl();
 		this.validations.lastNameControl();
-		this.validations.pictureControl();
+		this.validations.avatarControl();
 	}
 	
 	deleteImg()
 	{
-		this.picture.setValue('');
+		this.avatarControl.setValue('');
 		this.basicInfoForm.markAsDirty();
+	}
+	
+	loadClass(control: AbstractControl)
+	{
+		return control.dirty || control.touched
+		       ? control.errors
+		         ? 'form-control-danger'
+		         : 'form-control-success'
+		       : ''
 	}
 	
 	private _applyTranslationOnSmartTable()
@@ -241,17 +254,17 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 	
 	private getAdminCreateObj(): IAdminUpdateObject
 	{
-		if(!this.picture.value)
+		if(!this.avatarControl.value)
 		{
-			const letter = this.username.value.charAt(0).toUpperCase();
-			this.picture.setValue(CommonUtils.getDummyImage(300, 300, letter));
+			const letter = this.usernameControl.value.charAt(0).toUpperCase();
+			this.avatarControl.setValue(CommonUtils.getDummyImage(300, 300, letter));
 		}
 		return {
-			name: this.username.value,
-			email: this.email.value,
-			firstName: this.firstName.value,
-			lastName: this.lastName.value,
-			pictureUrl: this.picture.value,
+			username:  this.usernameControl.value,
+			email:     this.emailControl.value,
+			firstName: this.firstNameControl.value,
+			lastName:  this.lastNameControl.value,
+			avatar:    this.avatarControl.value,
 		};
 	}
 	
