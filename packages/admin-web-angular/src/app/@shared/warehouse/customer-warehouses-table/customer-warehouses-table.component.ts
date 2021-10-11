@@ -15,44 +15,46 @@ import { TranslateService }              from '@ngx-translate/core';
 import { takeUntil }                     from 'rxjs/operators';
 
 @Component({
-	           selector: 'ea-customer-warehouses-table',
-	           styleUrls: ['./customer-warehouses-table.component.scss'],
+	           selector:    'ea-customer-warehouses-table',
+	           styleUrls:   ['./customer-warehouses-table.component.scss'],
 	           templateUrl: './customer-warehouses-table.component.html',
            })
 export class CustomerWarehousesTableComponent
 		implements OnInit, AfterViewInit, OnDestroy
 {
 	@Input()
-	sourceEvent: EventEmitter<WarehouseViewModel[]>;
+	public sourceEvent: EventEmitter<WarehouseViewModel[]>;
 	@Input()
-	selectWarehouseTmp: (ev) => void;
-	protected settingsSmartTable: any;
-	protected sourceSmartTable = new LocalDataSource();
+	public selectWarehouseTmp: (ev) => void;
+	public settingsSmartTable: any;
+	public sourceSmartTable = new LocalDataSource();
 	private ngDestroy$ = new Subject<void>();
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(private _translateService: TranslateService) {}
 	
-	ngOnInit()
+	public ngOnInit(): void
 	{
 		this._loadSettingsSmartTable();
 		this._loadDataSmartTable();
 		this._applyTranslationOnSmartTable();
 	}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
-		this._addCustomHTMLElements();
+		CustomerWarehousesTableComponent._addCustomHTMLElements();
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy(): void
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
 	
-	// This is just workaround to show some search icon on smart table, in the future maybe we must find better solution.
-	private _addCustomHTMLElements(): any
+	// This is just workaround to show some search
+	// icon on smart table, in the future maybe we
+	// must find better solution.
+	private static _addCustomHTMLElements(): void
 	{
 		const target = document.querySelector(
 				'#nearby-stores ng2-smart-table .ng2-smart-filters > th:nth-child(1)'
@@ -64,15 +66,14 @@ export class CustomerWarehousesTableComponent
 		}
 	}
 	
-	private _applyTranslationOnSmartTable()
+	private _applyTranslationOnSmartTable(): void
 	{
-		this._translateService.onLangChange.subscribe(() =>
-		                                              {
-			                                              this._loadSettingsSmartTable();
-		                                              });
+		this._translateService
+		    .onLangChange
+		    .subscribe(() => this._loadSettingsSmartTable());
 	}
 	
-	private _loadSettingsSmartTable()
+	private _loadSettingsSmartTable(): void
 	{
 		const columnTitlePrefix = 'CUSTOMERS_VIEW.SMART_TABLE_COLUMNS.';
 		const getTranslate = (name: string): Observable<string | any> =>
@@ -102,37 +103,37 @@ export class CustomerWarehousesTableComponent
 						 ]) =>
 						{
 							this.settingsSmartTable = {
-								actions: false,
+								actions:    false,
 								selectMode: 'multi',
-								columns: {
-									name: {
-										title: name,
-										type: 'custom',
-										renderComponent: RedirectNameComponent,
+								columns:    {
+									name:      {
+										title:                   name,
+										type:                    'custom',
+										renderComponent:         RedirectNameComponent,
 										onComponentInitFunction: (instance) =>
-										{
-											instance.redirectPage = 'stores';
-										},
+										                         {
+											                         instance.redirectPage = 'stores';
+										                         },
 									},
-									email: { title: email },
-									phone: { title: phone },
-									city: { title: city },
-									address: { title: address },
+									email:     { title: email },
+									phone:     { title: phone },
+									city:      { title: city },
+									address:   { title: address },
 									ordersQty: {
-										title: orderQTY,
-										type: 'html',
-										filter: false,
+										title:                orderQTY,
+										type:                 'html',
+										filter:               false,
 										valuePrepareFunction: (_, vm) =>
-												`<span class="badge badge-secondary">${vm.ordersQty}</span>`,
+												                      `<span class="badge badge-secondary">${vm.ordersQty}</span>`,
 									},
-									actions: {
-										title: actions,
-										filter: false,
-										type: 'custom',
+									actions:   {
+										title:           actions,
+										filter:          false,
+										type:            'custom',
 										renderComponent: WarehouseOrderComponent,
 									},
 								},
-								pager: {
+								pager:      {
 									display: true,
 									perPage: 3,
 								},
@@ -141,7 +142,7 @@ export class CustomerWarehousesTableComponent
 				);
 	}
 	
-	private _loadDataSmartTable()
+	private _loadDataSmartTable(): void
 	{
 		this.sourceEvent
 		    .pipe(takeUntil(this._ngDestroy$))
