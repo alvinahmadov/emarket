@@ -11,6 +11,7 @@ import { Subject }                      from 'rxjs';
 import { WarehouseProductsRouter }      from '@modules/client.common.angular2/routers/warehouse-products-router.service';
 import WarehouseProduct                 from '@modules/server.common/entities/WarehouseProduct';
 import { WarehouseOrderInputComponent } from './warehouse-order-input.component';
+import { MakeOrderCommentComponent }    from './make-order-comment.component';
 import { IOrderCreateInputProduct }     from '@modules/server.common/routers/IWarehouseOrdersRouter';
 import { TranslateService }             from '@ngx-translate/core';
 import { ProductLocalesService }        from '@modules/client.common.angular2/locale/product-locales.service';
@@ -81,6 +82,7 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 					PRICE: `${basePrefix}.${smartTableTitlesPrefix}.PRICE`,
 					AVAILABLE: `${basePrefix}.${smartTableTitlesPrefix}.AVAILABLE`,
 					AMOUNT: `${basePrefix}.${smartTableTitlesPrefix}.AMOUNT`,
+					COMMENT: `${basePrefix}.${smartTableTitlesPrefix}.COMMENT`,
 				},
 			},
 		};
@@ -163,6 +165,7 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 					return {
 						productId: wp.productId,
 						count: 0,
+						comment: '',
 					};
 				}
 		);
@@ -172,7 +175,7 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 				{
 					return {
 						img: `
-						<img src="${this._getTranslate(wp.product['images'])}" height="68px"/>
+						<img src="${this._getTranslate(wp.product['images'])}" height="50px"/>
 					`,
 						product: `
 						<span class="float-left">${this._getTranslate(wp.product['title'])}</span>
@@ -182,15 +185,16 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 						<div class="badge badge-pill badge-secondary">${wp.count}</div>
 					`,
 						amount: { productId: wp.productId, available: wp.count },
+						comment: { productId: wp.productId },
 					};
 				}
 		);
 		
 		this.sourceSmartTable.setSort([
 			                              {
-				                              field: 'available',
+				                              field:     'available',
 				                              direction: 'desc',
-				                              compare: this._compareByAvailableProducts,
+				                              compare:   WarehouseOrderModalComponent._compareByAvailableProducts,
 			                              },
 		                              ]);
 		this.sourceSmartTable.load(productsData);
@@ -201,7 +205,7 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 		return this._productLocaleService.getTranslate(members);
 	}
 	
-	private _compareByAvailableProducts(_, first, second)
+	private static _compareByAvailableProducts(_, first, second)
 	{
 		const regex = /<div class="badge badge-pill badge-secondary">([0-9]+)<\/div>/gm;
 		
@@ -241,6 +245,9 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 		const amount = this._translate(
 				this.TRANSLATE_PREFIXES.SMART_TABLE.TITLES.AMOUNT
 		);
+		const comment = this._translate(
+				this.TRANSLATE_PREFIXES.SMART_TABLE.TITLES.COMMENT
+		);
 		
 		this.settingsSmartTable = {
 			actions: false,
@@ -269,10 +276,10 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 					},
 				},
 				available: {
-					title: available,
-					type: 'html',
-					filter: false,
-					compareFunction: this._compareByAvailableProducts,
+					title:           available,
+					type:            'html',
+					filter:          false,
+					compareFunction: WarehouseOrderModalComponent._compareByAvailableProducts,
 				},
 				amount: {
 					title: amount,
@@ -299,6 +306,28 @@ export class WarehouseOrderModalComponent implements OnInit, OnDestroy
 										                        this.canOrder
 								                        );
 							                        }
+						                        });
+					},
+				},
+				comment: {
+					title: comment,
+					filter: false,
+					type: 'custom',
+					renderComponent: MakeOrderCommentComponent,
+					onComponentInitFunction: (
+							childInstance: MakeOrderCommentComponent
+					) =>
+					{
+						childInstance.comment
+						             .pipe(takeUntil(this._ngDestroy$))
+						             .subscribe((comment) =>
+						                        {
+							                        const wProduct = this._orderProducts.find(
+									                        ({ productId }) =>
+											                        productId === childInstance.productId
+							                        );
+							
+							                        wProduct.comment = comment;
 						                        });
 					},
 				},
