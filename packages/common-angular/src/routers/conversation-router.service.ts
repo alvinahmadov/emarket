@@ -4,7 +4,7 @@ import * as rxops                from 'rxjs/operators';
 import {
 	IConversation,
 	IConversationCreateObject,
-	TConversationFindInput,
+	IConversationFindInput,
 }                                from '@modules/server.common/interfaces/IConversation';
 import Conversation              from '@modules/server.common/entities/Conversation';
 import IConversationRouter       from '@modules/server.common/routers/IConversationRouter';
@@ -20,10 +20,20 @@ export class ConversationRouter implements IConversationRouter
 		this.router = routerFactory.create('conversation');
 	}
 	
-	public getAll(findInput?: TConversationFindInput): Observable<Conversation[]>
+	public async getConversation(channelId: string): Promise<Conversation>
 	{
+		return this._conversationFactory(
+				await this.router.run<IConversation>(
+						'getConversation',
+						channelId
+				));
+	}
+	
+	public getConversations(findInput: IConversationFindInput = {}): Observable<Conversation[]>
+	{
+		console.warn(findInput);
 		return this.router
-		           .runAndObserve<IConversation[]>('getAll', findInput)
+		           .runAndObserve<IConversation[]>('getConversations', findInput)
 		           .pipe(
 				           rxops.map(
 						           conversations =>
@@ -32,15 +42,6 @@ export class ConversationRouter implements IConversationRouter
 				           ),
 				           rxops.share()
 		           );
-	}
-	
-	public async getConversation(channelId: string): Promise<Conversation>
-	{
-		return this._conversationFactory(
-				await this.router.run<IConversation>(
-						'getConversation',
-						channelId
-				));
 	}
 	
 	public async createConversation(conversation: IConversationCreateObject): Promise<Conversation>
@@ -62,6 +63,6 @@ export class ConversationRouter implements IConversationRouter
 	
 	protected _conversationFactory(conversation: IConversation): Conversation
 	{
-		return conversation == null ? null : new Conversation(conversation);
+		return conversation == undefined ? null : new Conversation(conversation);
 	}
 }
