@@ -11,7 +11,7 @@ import { environment }      from 'environments/environment';
            })
 export class PagesComponent
 {
-	menu: NbMenuItem[];
+	public menu: NbMenuItem[];
 	
 	constructor(
 			private translate: TranslateService,
@@ -35,7 +35,15 @@ export class PagesComponent
 		this._applyTranslationOnSmartTable();
 	}
 	
-	initialize()
+	public getTranslation(prefix: string)
+	{
+		let result = '';
+		this.translate.get(prefix)
+		    .subscribe((res) => result = res);
+		return result;
+	}
+	
+	private initialize()
 	{
 		this.menu = [
 			{
@@ -115,14 +123,6 @@ export class PagesComponent
 			               link:      '/setup',
 			               pathMatch: 'prefix',
 		               });
-	}
-	
-	getTranslation(prefix: string)
-	{
-		let result = '';
-		this.translate.get(prefix)
-		    .subscribe((res) => result = res);
-		return result;
 	}
 	
 	private _applyTranslationOnSmartTable()
