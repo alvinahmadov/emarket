@@ -1,13 +1,13 @@
 import { Injectable }                    from '@angular/core';
-import { IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
-import faker                             from 'faker';
 import _                                 from 'lodash';
+import faker                             from 'faker';
+import { IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
 
 enum IsDeliveryTakeawayStatus
 {
-	Takeaway = 0,
+	Takeaway           = 0,
 	IsDeliveryRequired = 1,
-	Both = 2,
+	Both               = 2,
 }
 
 interface IIsDeliveryTakeawayStates
@@ -27,7 +27,7 @@ interface IIsDeliveryTakeaway
 export default class FakeDataWarehousesProducts
 {
 	private _currentTakeawayDeliveryStatus: IsDeliveryTakeawayStatus =
-			IsDeliveryTakeawayStatus.Takeaway;
+			        IsDeliveryTakeawayStatus.Takeaway;
 	
 	private _takeawayDeliveryOrBoth: IIsDeliveryTakeawayStates = {
 		0: { isDeliveryRequired: false, isTakeAway: true },
@@ -35,7 +35,7 @@ export default class FakeDataWarehousesProducts
 		2: { isDeliveryRequired: true, isTakeAway: true },
 	};
 	
-	private get getRandomPrice(): number
+	private static get getRandomPrice(): number
 	{
 		return 5 + faker.random.number(150);
 	}
@@ -43,17 +43,17 @@ export default class FakeDataWarehousesProducts
 	getCreateObject(productId: string): IWarehouseProductCreateObject
 	{
 		const currentTakeawayDeliveryState: IIsDeliveryTakeaway = this._getCurrentWarehouseProductIsDeliveryTakeawayState();
-		const price = this.getRandomPrice;
+		const price = FakeDataWarehousesProducts.getRandomPrice;
 		
 		return {
-			product: productId,
-			initialPrice: price,
+			product:            productId,
+			initialPrice:       price,
 			price,
-			isCarrierRequired: true,
-			isManufacturing: true,
-			count: faker.random.number({ min: 1, max: 10 }),
+			isCarrierRequired:  true,
+			isManufacturing:    true,
+			count:              faker.random.number({ min: 1, max: 10 }),
 			isDeliveryRequired: currentTakeawayDeliveryState.isDeliveryRequired,
-			isTakeaway: currentTakeawayDeliveryState.isTakeAway,
+			isTakeaway:         currentTakeawayDeliveryState.isTakeAway,
 		};
 	}
 	
@@ -63,18 +63,18 @@ export default class FakeDataWarehousesProducts
 				(id) =>
 				{
 					const currentTakeawayDeliveryState: IIsDeliveryTakeaway = this._getCurrentWarehouseProductIsDeliveryTakeawayState();
-					const price = this.getRandomPrice;
+					const price = FakeDataWarehousesProducts.getRandomPrice;
 					
 					return {
-						product: id,
-						initialPrice: price + _.random(20),
+						product:           id,
+						initialPrice:      price + _.random(20),
 						price,
 						isCarrierRequired: true,
-						isManufacturing: true,
-						count: 5,
+						isManufacturing:   true,
+						count:             5,
 						isDeliveryRequired:
-						currentTakeawayDeliveryState.isDeliveryRequired,
-						isTakeaway: currentTakeawayDeliveryState.isTakeAway,
+						                   currentTakeawayDeliveryState.isDeliveryRequired,
+						isTakeaway:        currentTakeawayDeliveryState.isTakeAway,
 					};
 				}
 		);
