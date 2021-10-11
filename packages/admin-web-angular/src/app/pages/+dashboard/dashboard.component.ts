@@ -20,37 +20,37 @@ import { IExistingCustomersViewModel }    from '@app/models/IExistingCustomersVi
            })
 export class DashboardComponent implements OnInit, OnDestroy
 {
-	stores: Warehouse[] = [];
-	currencies: Currency[] = [];
+	public stores: Warehouse[] = [];
+	public currencies: Currency[] = [];
 	
-	loading = new DashboardLoadingIndicatorState();
+	public loading = new DashboardLoadingIndicatorState();
 	
-	totalInfo = new DashboardInfoViewModel();
-	todayInfo = new DashboardInfoViewModel();
+	public totalInfo = new DashboardInfoViewModel();
+	public todayInfo = new DashboardInfoViewModel();
 	
-	existingCustomers: IExistingCustomersViewModel;
-	existingCustomersToday: IExistingCustomersViewModel;
+	public existingCustomers: IExistingCustomersViewModel;
+	public existingCustomersToday: IExistingCustomersViewModel;
 	
-	completedOrders: Order[] = [];
-	completedOrdersToday: Order[] = [];
-	chartPanelOrders: Order[] = [];
+	public completedOrders: Order[] = [];
+	public completedOrdersToday: Order[] = [];
+	public chartPanelOrders: Order[] = [];
 	
-	hasSelectedStore: boolean = false;
-	selectedStoreId: string;
-	selectedCurrency: Currency;
-	isChartPanelOrdersLoad: boolean = true;
+	public hasSelectedStore: boolean = false;
+	public selectedStoreId: string;
+	public selectedCurrency: Currency;
+	public isChartPanelOrdersLoad: boolean = true;
 	
-	averageRateCustomersToday = {
+	public averageRateCustomersToday = {
 		value:     0,
 		allStores: 0,
 		perStore:  {}, // => perStore[storeId]
 	};
-	averageRateOrdersToday = {
+	public averageRateOrdersToday = {
 		value:     0,
 		allStores: 0,
 		perStore:  {},
 	};
-	averageRateRevenueToday = {
+	public averageRateRevenueToday = {
 		value:     0,
 		allStores: 0,
 		perStore:  {},
@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	get labelAvgPercent()
+	public get labelAvgPercent()
 	{
 		const maxPercentRate = 100;
 		return {
@@ -119,7 +119,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 		};
 	}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this._currenciesService
 		    .getCurrencies()
@@ -128,12 +128,25 @@ export class DashboardComponent implements OnInit, OnDestroy
 		this.loadAllStoresData();
 	}
 	
-	async onSelectStore(storeId: string)
+	public ngOnDestroy()
 	{
-		if(storeId)
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+		
+		if(this._dashboardOrdersChartOrdersSubscription)
+		{
+			this._dashboardOrdersChartOrdersSubscription.unsubscribe();
+		}
+	}
+	
+	public async onSelectStore(storeOrId: Warehouse | string)
+	{
+		if(storeOrId)
 		{
 			this.hasSelectedStore = true;
-			this.selectedStoreId = storeId;
+			this.selectedStoreId = storeOrId instanceof Warehouse
+			                       ? storeOrId.id
+			                       : storeOrId;
 			
 			this._toggleLoadingDashboardMetrics(true);
 			
@@ -152,17 +165,6 @@ export class DashboardComponent implements OnInit, OnDestroy
 		{
 			this.hasSelectedStore = false;
 			this.loadAllStoresData();
-		}
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-		
-		if(this._dashboardOrdersChartOrdersSubscription)
-		{
-			this._dashboardOrdersChartOrdersSubscription.unsubscribe();
 		}
 	}
 	
