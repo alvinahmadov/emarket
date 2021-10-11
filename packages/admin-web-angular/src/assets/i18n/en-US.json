@@ -1169,6 +1169,8 @@
 	"BULGARIAN": "Bulgarian",
 	"SPANISH": "Spanish",
 	"SELECT": "Select",
+	"LOGIN": "Login",
+	"INVITE_CODE": "Invite code",
 	"Name": "Name",
 	"Id": "Id",
 	"Warehouse name is required": "Warehouse name is required",
