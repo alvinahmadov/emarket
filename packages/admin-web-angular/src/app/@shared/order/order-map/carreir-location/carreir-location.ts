@@ -11,50 +11,56 @@ import { environment } from 'environments/environment';
 
 @Component({
 	           selector: 'ea-carrier-location',
-	           template: ` <div style="height:100%" #gmap></div> `,
+	           template: `
+		                     <div style="height:100%" #gmap></div>
+	                     `,
            })
 export class CarrierLocationComponent implements OnInit, OnDestroy
 {
 	@ViewChild('gmap', { static: true })
 	gmapElement: ElementRef;
+	
 	public map: google.maps.Map;
+	
 	@Input()
 	order: Order;
+	
 	private directionsDisplay = new google.maps.DirectionsRenderer();
 	private directionsService = new google.maps.DirectionsService();
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.loadMap();
 		
 		this.loadRoot();
 	}
 	
-	loadMap()
+	public ngOnDestroy(): void
+	{
+		this.directionsDisplay.setMap(null);
+	}
+	
+	public loadMap(): void
 	{
 		const mapProp = {
-			center: new google.maps.LatLng(
+			center:            new google.maps.LatLng(
 					environment.DEFAULT_LATITUDE,
 					environment.DEFAULT_LONGITUDE
 			),
-			zoom: 15,
-			mapTypeId: google.maps.MapTypeId.ROADMAP,
-			mapTypeControl: false,
+			zoom:              15,
+			mapTypeId:         google.maps.MapTypeId.ROADMAP,
+			mapTypeControl:    false,
 			streetViewControl: false,
 		};
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 	}
 	
-	loadRoot()
+	public loadRoot(): void
 	{
 		if(this.order)
 		{
-			const [carrierLng, carrierLat] = this.order.carrier[
-					'geoLocation'
-					].loc.coordinates;
-			const [userLng, userLat] = this.order.user[
-					'geoLocation'
-					].loc.coordinates;
+			const [carrierLng, carrierLat] = this.order.carrier['geoLocation'].coordinatesArray;
+			const [userLng, userLat] = this.order.customer['geoLocation'].coordinatesArray;
 			const origin = new google.maps.LatLng(carrierLat, carrierLng);
 			const destination = new google.maps.LatLng(userLat, userLng);
 			
@@ -74,10 +80,5 @@ export class CarrierLocationComponent implements OnInit, OnDestroy
 			
 			this.directionsDisplay.setMap(this.map);
 		}
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.directionsDisplay.setMap(null);
 	}
 }
