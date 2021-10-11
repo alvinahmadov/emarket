@@ -15,7 +15,7 @@ export class CustomerOrdersRouter implements ICustomerOrdersRouter
 	
 	constructor(routerFactory: RouterFactory)
 	{
-		this.router = routerFactory.create('user-orders');
+		this.router = routerFactory.create('customer-orders');
 	}
 	
 	get(userId: string): Observable<Order[]>
