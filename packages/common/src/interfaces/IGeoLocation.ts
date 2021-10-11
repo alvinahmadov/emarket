@@ -1,10 +1,16 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '../@pyro/db';
 import Country                                       from '../enums/Country';
 
+export interface ICoordinate
+{
+	lng: number;
+	lat: number;
+}
+
 export interface ILocation
 {
 	type: 'Point';
-	coordinates: [number, number];
+	coordinates: ICoordinate;
 }
 
 export interface IAddress
@@ -20,12 +26,12 @@ export interface IAddress
 export function getEmptyAddress(): IAddress
 {
 	return {
-		countryId: null,
-		city: '',
-		postcode: '',
-		notes: '',
+		countryId:     null,
+		city:          '',
+		postcode:      '',
+		notes:         '',
 		streetAddress: '',
-		house: ''
+		house:         ''
 	};
 }
 
