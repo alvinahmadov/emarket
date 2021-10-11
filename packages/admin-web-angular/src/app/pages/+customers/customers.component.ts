@@ -1,25 +1,25 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { Router }                              from '@angular/router';
-import { TranslateService }                    from '@ngx-translate/core';
-import { NgbModal }                            from '@ng-bootstrap/ng-bootstrap';
-import { Observable, Subject, forkJoin }       from 'rxjs';
-import { takeUntil, first }                    from 'rxjs/operators';
-import { LocalDataSource }                     from 'ng2-smart-table';
-import Customer                                from '@modules/server.common/entities/Customer';
-import Order                                   from '@modules/server.common/entities/Order';
-import { getDefaultCountryName }               from '@modules/server.common/data/countries';
-import { CustomersService }                    from '@app/@core/data/customers.service';
-import { OrdersService }                       from '@app/@core/data/orders.service';
-import { NotifyService }                       from '@app/@core/services/notify/notify.service';
-import { RedirectNameComponent }               from '@app/@shared/render-component/name-redirect/name-redirect.component';
-import { RedirectChatComponent }               from '@app/@shared/render-component/chat-redirect/chat-redirect.component';
-import { CustomerImageComponent }              from '@app/@shared/render-component/customer-table/customer-table/customer-image.component';
-import { CustomerOrdersNumberComponent }       from '@app/@shared/render-component/customer-table/customer-orders-number/customer-orders-number.component';
-import { CustomerEmailComponent }              from '@app/@shared/render-component/customer-email/customer-email.component';
-import { CustomerPhoneComponent }              from '@app/@shared/render-component/customer-phone/customer-phone.component';
-import { UserMutationComponent }               from '@app/@shared/user/user-mutation';
-import { BanConfirmComponent }                 from '@app/@shared/user/ban-confirm';
-import { CountryRenderComponent }              from './+invites/country-render/country-render.component';
+import { AfterViewInit, Component, OnDestroy }         from '@angular/core';
+import { Router }                                      from '@angular/router';
+import { TranslateService }                            from '@ngx-translate/core';
+import { NgbModal }                                    from '@ng-bootstrap/ng-bootstrap';
+import { Observable, Subject, forkJoin, Subscription } from 'rxjs';
+import { takeUntil, first }                            from 'rxjs/operators';
+import { LocalDataSource }                             from 'ng2-smart-table';
+import Customer                                        from '@modules/server.common/entities/Customer';
+import Order                                           from '@modules/server.common/entities/Order';
+import { getDefaultCountryName }                       from '@modules/server.common/data/countries';
+import { CustomersService }                            from '@app/@core/data/customers.service';
+import { OrdersService }                               from '@app/@core/data/orders.service';
+import { NotifyService }                               from '@app/@core/services/notify/notify.service';
+import { RedirectNameComponent }                       from '@app/@shared/render-component/name-redirect/name-redirect.component';
+import { RedirectChatComponent }                       from '@app/@shared/render-component/chat-redirect/chat-redirect.component';
+import { CustomerImageComponent }                      from '@app/@shared/render-component/customer-table/customer-table/customer-image.component';
+import { CustomerOrdersNumberComponent }               from '@app/@shared/render-component/customer-table/customer-orders-number/customer-orders-number.component';
+import { CustomerEmailComponent }                      from '@app/@shared/render-component/customer-email/customer-email.component';
+import { CustomerPhoneComponent }                      from '@app/@shared/render-component/customer-phone/customer-phone.component';
+import { UserMutationComponent }                       from '@app/@shared/user/user-mutation';
+import { BanConfirmComponent }                         from '@app/@shared/user/ban-confirm';
+import { CountryRenderComponent }                      from './+invites/country-render/country-render.component';
 
 export interface CustomerViewModel
 {
@@ -35,7 +35,7 @@ export interface CustomerViewModel
 	isBanned: boolean;
 }
 
-const perPage = 7;
+const perPage = 10;
 
 @Component({
 	           selector:    'ea-customers',
@@ -47,14 +47,15 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 	static noInfoSign = '';
 	public loading: boolean;
 	public showBanLoading = false;
-	protected customers: Customer[] = [];
-	protected orders: Order[] = [];
 	public settingsSmartTable: object;
 	public sourceSmartTable = new LocalDataSource();
-	private ngDestroy$ = new Subject<void>();
 	public selectedCustomers: CustomerViewModel[] = [];
+	protected customers: Customer[] = [];
+	protected orders: Order[] = [];
+	private ngDestroy$ = new Subject<void>();
 	private dataCount: number;
-	private $customers;
+	private $customers: Subscription;
+	private _showOnlyBanned: boolean;
 	
 	constructor(
 			private readonly _router: Router,
@@ -68,7 +69,19 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		this._loadSettingsSmartTable();
 	}
 	
-	public _showOnlyBanned: boolean;
+	public ngAfterViewInit(): void
+	{
+		CustomersComponent._addCustomHTMLElements();
+		this._applyTranslationOnSmartTable();
+		this.smartTableChange();
+		this._loadDataSmartTable();
+	}
+	
+	public ngOnDestroy(): void
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
 	
 	public get showOnlyBanned(): boolean
 	{
@@ -86,7 +99,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		return this.selectedCustomers.length === 1;
 	}
 	
-	public get isCustomerBanned()
+	public get isCustomerBanned(): boolean
 	{
 		return (
 				this.selectedCustomers[0] && this.selectedCustomers[0].isBanned
@@ -98,27 +111,13 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		return this.selectedCustomers.length > 0;
 	}
 	
-	ngAfterViewInit()
-	{
-		CustomersComponent._addCustomHTMLElements();
-		this._applyTranslationOnSmartTable();
-		this.smartTableChange();
-		this._loadDataSmartTable();
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-	}
-	
-	protected selectUser(ev)
+	protected selectUser(ev): void
 	{
 		const customerId: string = ev.data.id;
 		this._router.navigate(['/customers/list' + customerId]);
 	}
 	
-	public showCreateUserModal()
+	public showCreateUserModal(): void
 	{
 		this._modalService.open(UserMutationComponent, {
 			size:        'lg',
@@ -128,12 +127,12 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		});
 	}
 	
-	public selectCustomerTmp(ev)
+	public selectCustomerTmp(ev): void
 	{
 		this.selectedCustomers = ev.selected;
 	}
 	
-	public deleteSelectedRows()
+	public deleteSelectedRows(): void
 	{
 		const idsForDelete: string[] = this.selectedCustomers.map((w) => w.id);
 		
@@ -161,7 +160,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		}
 	}
 	
-	public banSelectedRows()
+	public banSelectedRows(): void
 	{
 		if(this.isCustomerBanned)
 		{
@@ -173,7 +172,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		}
 	}
 	
-	private showUnbanPopup()
+	private showUnbanPopup(): void
 	{
 		const modal = this._modalService.open(BanConfirmComponent, {
 			size:        'lg',
@@ -194,7 +193,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		     .catch((_) => {});
 	}
 	
-	private showBanPopup()
+	private showBanPopup(): void
 	{
 		const modal = this._modalService.open(BanConfirmComponent, {
 			size:        'lg',
@@ -215,7 +214,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		     .catch((_) => {});
 	}
 	
-	private _loadSettingsSmartTable()
+	private _loadSettingsSmartTable(): void
 	{
 		const columnTitlePrefix = 'CUSTOMERS_VIEW.SMART_TABLE_COLUMNS.';
 		const getTranslate = (name: string): Observable<any> =>
@@ -298,11 +297,13 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 							chat:      {
 								title:                   chat,
 								type:                    'custom',
+								width:                   '20px',
 								renderComponent:         RedirectChatComponent,
 								onComponentInitFunction: (instance: RedirectChatComponent) =>
 								                         {
-									                         instance.redirectPage = 'chats/user';
+									                         instance.redirectPage = 'chats';
 								                         },
+								filter:                  false,
 							},
 						},
 						pager:      {
@@ -314,15 +315,13 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		);
 	}
 	
-	private async _loadDataSmartTable(page = 1)
+	private async _loadDataSmartTable(page = 1): Promise<void>
 	{
 		if(this.$customers)
 		{
 			await this.$customers.unsubscribe();
 		}
-		let customers: Customer[] = [];
-		
-		const loadData = async() =>
+		const loadData = async(customers: Customer[]) =>
 		{
 			const customerIds = customers.map((u) => u?.id);
 			
@@ -354,10 +353,10 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 							           CustomersComponent.noInfoSign,
 							city:
 							           customer.geoLocation.city || CustomersComponent.noInfoSign,
-							address:   `st. ${
+							address:   ` ${
 									customer.geoLocation.streetAddress ||
 									CustomersComponent.noInfoSign
-							}, hse. № ${
+							}, № ${
 									customer.geoLocation.house || CustomersComponent.noInfoSign
 							}`,
 							ordersQty: customerOrders ? customerOrders.ordersCount : 0,
@@ -386,14 +385,10 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			                                    limit: perPage,
 		                                    })
 		                      .pipe(takeUntil(this.ngDestroy$))
-		                      .subscribe(async(c: Customer[]) =>
-		                                 {
-			                                 customers = c;
-			                                 await loadData();
-		                                 });
+		                      .subscribe(async(customers: Customer[]) => await loadData(customers));
 	}
 	
-	private _applyTranslationOnSmartTable()
+	private _applyTranslationOnSmartTable(): void
 	{
 		this._translateService.onLangChange
 		    .pipe(takeUntil(this.ngDestroy$))
@@ -403,7 +398,9 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		               });
 	}
 	
-	// This is just workaround to show some search icon on smart table, in the future maybe we must find better solution.
+	// This is just workaround to show some search
+	// icon on smart table, in the future maybe we
+	// must find better solution.
 	private static _addCustomHTMLElements(): any
 	{
 		document.querySelector(
@@ -411,7 +408,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		).innerHTML = '<i class="fa fa-search" style="font-size: 1.3em"/>';
 	}
 	
-	private async smartTableChange()
+	private async smartTableChange(): Promise<void>
 	{
 		this.sourceSmartTable
 		    .onChanged()
@@ -421,12 +418,12 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			               if(event.action === 'page')
 			               {
 				               const page = event.paging.page;
-				               this._loadDataSmartTable(page);
+				               await this._loadDataSmartTable(page);
 			               }
 		               });
 	}
 	
-	private async loadDataCount()
+	private async loadDataCount(): Promise<void>
 	{
 		this.dataCount = await this._customersService.getCountOfCustomers();
 	}
