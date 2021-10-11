@@ -1,7 +1,5 @@
 import { sample } from 'lodash';
-import Order from '../entities/Order';
-import { Observable } from 'rxjs';
-import fs from 'fs';
+import Order      from '../entities/Order';
 
 namespace CommonUtils
 {
@@ -9,7 +7,7 @@ namespace CommonUtils
 	
 	export const generateObjectIdString = (
 			m = Math, d = Date,
-			h           = 16, s   = (x) => m.floor(x).toString(h)
+			h           = 16, s = (x) => m.floor(x).toString(h)
 	) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
 	
 	export function toDate(date: string | Date)
@@ -109,34 +107,6 @@ namespace CommonUtils
 	{
 		const re = /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i;
 		return re.test(String(email).toLowerCase());
-	}
-	
-	export function observeFile(fileName: string): Observable<string>
-	{
-		return Observable.create((observer) =>
-		                         {
-			                         const fetchTranslations = () =>
-			                         {
-				                         fs.readFile(fileName, 'utf-8', (err, content) =>
-				                         {
-					                         observer.next(content);
-					
-					                         if(err)
-					                         {
-						                         observer.error(err);
-					                         }
-				                         });
-			                         };
-			
-			                         fetchTranslations();
-			
-			                         fs.watchFile(fileName, fetchTranslations);
-			
-			                         return () =>
-			                         {
-				                         fs.unwatchFile(fileName, fetchTranslations);
-			                         };
-		                         });
 	}
 	
 	/**
