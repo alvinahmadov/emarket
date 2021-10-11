@@ -1,71 +1,94 @@
 import {
 	Component,
-	Input,
+	ElementRef,
 	EventEmitter,
+	Input,
 	Output,
 	ViewChild,
-	ElementRef,
-	AfterViewInit,
-} from '@angular/core';
+	AfterViewInit
+}                                   from '@angular/core';
 import {
 	AbstractControl,
 	FormArray,
 	FormBuilder,
 	FormGroup,
 	Validators,
-} from '@angular/forms';
-
+}                                   from '@angular/forms';
 import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
 import {
-	Country,
-	CountryName,
-	getCountryName,
 	countriesIdsToNamesArray,
-}                                   from '@modules/server.common/entities/GeoLocation';
+	TCountryData,
+	countriesIdsToNamesArrayFn,
+	getCountryName
+}                                   from '@modules/server.common/data/countries';
+import Country                      from '@modules/server.common/enums/Country';
 import { FormHelpers }              from '../helpers';
-
-import { pick, isEmpty }  from 'lodash';
-import { ToasterService } from 'angular2-toaster';
-
-import { countries }   from '@modules/server.common/data/abbreviation-to-country';
-import { environment } from 'environments/environment';
+import { isEmpty, pick }            from 'lodash';
+import { ToasterService }           from 'angular2-toaster';
+import { TranslateService }         from '@ngx-translate/core'
+import { environment }              from 'environments/environment';
 
 @Component({
-	           selector: 'ea-location-form',
-	           styleUrls: ['./location-form.component.scss'],
-	           templateUrl: 'location-form.component.html',
+	           selector:    'ea-location-form',
+	           styleUrls:   ['./location-form.component.scss'],
+	           templateUrl: './location-form.component.html',
            })
 export class LocationFormComponent implements AfterViewInit
 {
-	static COUNTRIES: Array<{
-		id: Country;
-		name: CountryName;
-	}> = countriesIdsToNamesArray;
 	@Input()
-	readonly form: FormGroup;
+	public readonly form: FormGroup;
+	
 	@Input()
-	readonly apartment?: AbstractControl;
+	public readonly apartment?: AbstractControl;
+	
 	@Input()
-	showAutocompleteSearch: boolean = false;
+	public showAutocompleteSearch: boolean = false;
+	
 	@Output()
-	mapCoordinatesEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
+	public mapCoordinatesEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
+	
 	@Output()
-	mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
+	
 	@ViewChild('autocomplete')
 	searchElement: ElementRef;
+	
+	public readonly defaultCountryId: Country = Country.RU;
 	public showCoordinates: boolean = false;
+	
+	private readonly _countries: TCountryData[];
 	private _lastUsedAddressText: string;
 	private _lat: number;
 	private _lng: number;
 	
-	constructor(private readonly toasterService: ToasterService) {}
-	
-	get countries()
+	constructor(
+			private readonly toasterService: ToasterService,
+			private readonly _translateService: TranslateService
+	)
 	{
-		return LocationFormComponent.COUNTRIES;
+		if(!this._translateService.getLangs().length)
+		{
+			this._translateService.addLangs(environment.AVAILABLE_LOCALES.split('|'))
+		}
+		if(!this._translateService.currentLang)
+		{
+			this._translateService.use(environment.DEFAULT_LANGUAGE);
+		}
+		
+		this._countries = countriesIdsToNamesArrayFn(this._translateService.currentLang);
 	}
 	
-	get isCountryValid(): boolean
+	public ngAfterViewInit()
+	{
+		this._initGoogleAutocompleteApi();
+	}
+	
+	public get countries(): TCountryData[]
+	{
+		return this._countries;
+	}
+	
+	public get isCountryValid(): boolean
 	{
 		return (
 				this.countryId.errors &&
@@ -73,12 +96,12 @@ export class LocationFormComponent implements AfterViewInit
 		);
 	}
 	
-	get isCityValid(): boolean
+	public get isCityValid(): boolean
 	{
 		return this.city.errors && (this.city.dirty || this.city.touched);
 	}
 	
-	get isStreetAddressValid(): boolean
+	public get isStreetAddressValid(): boolean
 	{
 		return (
 				this.streetAddress.errors &&
@@ -86,12 +109,12 @@ export class LocationFormComponent implements AfterViewInit
 		);
 	}
 	
-	get isHouseValid(): boolean
+	public get isHouseValid(): boolean
 	{
 		return this.house.errors && (this.house.dirty || this.house.touched);
 	}
 	
-	get isLocationValid(): boolean
+	public get isLocationValid(): boolean
 	{
 		return (
 				this.coordinates.errors &&
@@ -99,73 +122,66 @@ export class LocationFormComponent implements AfterViewInit
 		);
 	}
 	
-	get countryId()
+	public get countryId(): AbstractControl
 	{
 		return this.form.get('countryId');
 	}
 	
-	get city()
+	public get city(): AbstractControl
 	{
 		return this.form.get('city');
 	}
 	
-	get streetAddress()
+	public get streetAddress(): AbstractControl
 	{
 		return this.form.get('streetAddress');
 	}
 	
-	get house()
+	public get house(): AbstractControl
 	{
 		return this.form.get('house');
 	}
 	
-	get postcode()
+	public get postcode(): AbstractControl
 	{
 		return this.form.get('postcode');
 	}
 	
-	get coordinates()
+	public get coordinates(): FormArray
 	{
 		return this.form.get('loc').get('coordinates') as FormArray;
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
-		const form = formBuilder.group({
-			                               countryId: [
-				                               Country.US,
-				                               [
-					                               (ctrl) =>
-							                               LocationFormComponent.COUNTRIES.map(
-									                               (c) => c.id
-							                               ).includes(ctrl.value),
-				                               ],
-			                               ],
-			                               city: ['', [Validators.required]],
-			                               streetAddress: ['', [Validators.required]],
-			                               house: ['', [Validators.required]],
-			                               postcode: [''],
+		return formBuilder.group({
+			                         countryId:     [
+				                         Country.RU,
+				                         [
+					                         (ctrl) =>
+							                         countriesIdsToNamesArray.map(
+									                         (c) => c.id
+							                         ).includes(ctrl.value),
+				                         ],
+			                         ],
+			                         city:          ['', [Validators.required]],
+			                         streetAddress: ['', [Validators.required]],
+			                         house:         ['', [Validators.required]],
+			                         postcode:      [''],
 			
-			                               loc: formBuilder.group({
-				                                                      type: ['Point'],
-				                                                      coordinates: formBuilder.array([null, null]),
-			                                                      }),
-		                               });
-		
-		return form;
+			                         loc: formBuilder.group({
+				                                                type:        ['Point'],
+				                                                coordinates: formBuilder.array([null, null]),
+			                                                }),
+		                         });
 	}
 	
-	static buildApartmentForm(formBuilder: FormBuilder): AbstractControl
+	public static buildApartmentForm(formBuilder: FormBuilder): AbstractControl
 	{
 		return formBuilder.control('');
 	}
 	
-	ngAfterViewInit()
-	{
-		this._initGoogleAutocompleteApi();
-	}
-	
-	onAddressChanges()
+	public onAddressChanges()
 	{
 		if(this.showAutocompleteSearch)
 		{
@@ -173,7 +189,7 @@ export class LocationFormComponent implements AfterViewInit
 		}
 	}
 	
-	onCoordinatesChanged()
+	public onCoordinatesChanged()
 	{
 		if(this.showAutocompleteSearch)
 		{
@@ -181,7 +197,7 @@ export class LocationFormComponent implements AfterViewInit
 		}
 	}
 	
-	getValue(): IGeoLocationCreateObject
+	public getValue(): IGeoLocationCreateObject
 	{
 		const location = this.form.getRawValue() as IGeoLocationCreateObject;
 		if(!location.postcode)
@@ -191,7 +207,7 @@ export class LocationFormComponent implements AfterViewInit
 		return location;
 	}
 	
-	getApartment(): string
+	public getApartment(): string
 	{
 		// apartment is not part of geo location
 		if(!this.apartment)
@@ -201,7 +217,7 @@ export class LocationFormComponent implements AfterViewInit
 		return this.apartment.value as string;
 	}
 	
-	setValue<T extends IGeoLocationCreateObject>(geoLocation: T)
+	public setValue<T extends IGeoLocationCreateObject>(geoLocation: T)
 	{
 		FormHelpers.deepMark(this.form, 'dirty');
 		
@@ -214,17 +230,17 @@ export class LocationFormComponent implements AfterViewInit
 		this._tryFindNewCoordinates();
 	}
 	
-	setApartment(apartment: string)
+	public setApartment(apartment: string)
 	{
 		this.apartment.setValue(apartment);
 	}
 	
-	toggleShowCoordinates()
+	public toggleShowCoordinates()
 	{
 		this.showCoordinates = !this.showCoordinates;
 	}
 	
-	setDefaultCoords()
+	public setDefaultCoords()
 	{
 		const lat = environment.DEFAULT_LATITUDE;
 		const lng = environment.DEFAULT_LONGITUDE;
@@ -249,7 +265,10 @@ export class LocationFormComponent implements AfterViewInit
 		const house = this.house.value;
 		const streetAddress = this.streetAddress.value;
 		const city = this.city.value;
-		const countryName = getCountryName(+this.countryId.value);
+		const countryName = getCountryName(
+				this._translateService.currentLang,
+				+this.countryId.value
+		);
 		
 		if(
 				isEmpty(streetAddress) ||
@@ -271,7 +290,7 @@ export class LocationFormComponent implements AfterViewInit
 			
 			geocoder.geocode(
 					{
-						address: `${streetAddress} ${house}, ${city}`,
+						address:               `${streetAddress} ${house}, ${city}`,
 						componentRestrictions: {
 							country: countryName,
 						},
@@ -341,7 +360,7 @@ export class LocationFormComponent implements AfterViewInit
 		);
 	}
 	
-	private _setupGoogleAutocompleteOptions(
+	private static _setupGoogleAutocompleteOptions(
 			autocomplete: google.maps.places.Autocomplete
 	)
 	{
@@ -395,14 +414,14 @@ export class LocationFormComponent implements AfterViewInit
 		const shortName = 'short_name';
 		
 		const neededAddressTypes = {
-			country: shortName,
+			country:  shortName,
 			locality: longName,
 			// 'neighborhood' is not need for now
 			// neighborhood: longName,
-			route: longName,
-			intersection: longName,
-			street_number: longName,
-			postal_code: longName,
+			route:                       longName,
+			intersection:                longName,
+			street_number:               longName,
+			postal_code:                 longName,
 			administrative_area_level_1: shortName,
 			administrative_area_level_2: shortName,
 			administrative_area_level_3: shortName,
@@ -472,7 +491,7 @@ export class LocationFormComponent implements AfterViewInit
 					this.searchElement.nativeElement
 			);
 			
-			this._setupGoogleAutocompleteOptions(autocomplete);
+			LocationFormComponent._setupGoogleAutocompleteOptions(autocomplete);
 			
 			this._listenForGoogleAutocompleteAddressChanges(autocomplete);
 		}
