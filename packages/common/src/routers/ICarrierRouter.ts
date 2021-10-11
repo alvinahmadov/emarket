@@ -18,11 +18,6 @@ export interface ICarrierLoginResponse
 
 interface ICarrierRouter
 {
-	login(
-			username: string,
-			password: string
-	): Promise<ICarrierLoginResponse | null>;
-	
 	get(id: Carrier['id']): Observable<Carrier | null>;
 	
 	getAllActive(): Observable<Carrier[]>;
@@ -38,13 +33,6 @@ interface ICarrierRouter
 			carrierId: Carrier['id'],
 			geoLocation: GeoLocation
 	): Promise<Carrier>;
-	
-	register(input: ICarrierRegistrationInput): Promise<Carrier>;
-	
-	updatePassword(
-			id: Carrier['id'],
-			password: { current?: string; new: string }
-	): Promise<void>;
 	
 	updateById(
 			id: Carrier['id'],
