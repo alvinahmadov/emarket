@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 import { NbMenuItem }       from '@nebular/theme';
-import { Store }            from '@app/@core/data/store.service';
-import { environment }      from 'environments/environment.prod';
+import { StorageService }   from '@app/@core/data/store.service';
+import { environment }      from 'environments/environment';
 
 @Component({
 	           selector:    'ea-pages',
@@ -15,7 +15,7 @@ export class PagesComponent
 	
 	constructor(
 			private translate: TranslateService,
-			private storage: Store
+			private storage: StorageService
 	)
 	{
 		if(this.storage.locale)
@@ -96,20 +96,25 @@ export class PagesComponent
 				link:      '/carriers',
 				pathMatch: 'prefix',
 			},
-			{
-				title:     this.getTranslation('MENU_VIEW.SIMULATION'),
-				icon:      'star-outline',
-				link:      '/simulation',
-				pathMatch: 'prefix',
-				home:      true,
-			},
-			{
-				title:     this.getTranslation('MENU_VIEW.SETUP'),
-				icon:      'settings-2-outline',
-				link:      '/setup',
-				pathMatch: 'prefix',
-			},
 		];
+		
+		if(!environment.production)
+		{
+			this.menu.push({
+				               title:     this.getTranslation('MENU_VIEW.SIMULATION'),
+				               icon:      'star-outline',
+				               link:      '/simulation',
+				               pathMatch: 'prefix',
+				               home:      true,
+			               })
+		}
+		
+		this.menu.push({
+			               title:     this.getTranslation('MENU_VIEW.SETUP'),
+			               icon:      'settings-2-outline',
+			               link:      '/setup',
+			               pathMatch: 'prefix',
+		               });
 	}
 	
 	getTranslation(prefix: string)
