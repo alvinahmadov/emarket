@@ -11,37 +11,37 @@ export const createSubscriptionProviders = (
 				provide: SUBSCRIPTION_SERVER,
 				
 				useFactory: () =>
-				{
-					const server = createServer();
+				            {
+					            const server = createServer();
 					
-					const closeServer = () =>
-					{
-						try
-						{
-							if(server != null)
-							{
-								server.close(() =>
-								             {
-									             process.exit(0);
-								             });
-							}
-						} catch(err)
-						{
-							process.exit(0);
-						}
-					};
+					            const closeServer = () =>
+					            {
+						            try
+						            {
+							            if(server != null)
+							            {
+								            server.close(() =>
+								                         {
+									                         process.exit(0);
+								                         });
+							            }
+						            } catch(err)
+						            {
+							            process.exit(0);
+						            }
+					            };
 					
-					process
-							.on('SIGINT', () => closeServer())
-							.on('SIGTERM', () => closeServer());
+					            process
+							            .on('SIGINT', () => closeServer())
+							            .on('SIGTERM', () => closeServer());
 					
-					return new Promise((resolve) =>
-							                   server.listen(
-									                   port ?? 5050,
-									                   host ?? "http://localhost",
-									                   () => resolve(server)
-							                   )
-					);
-				}
+					            return new Promise((resolve) =>
+							                               server.listen(
+									                               port ?? 5050,
+									                               host ?? "http://localhost",
+									                               () => resolve(server)
+							                               )
+					            );
+				            }
 			}
 		];
