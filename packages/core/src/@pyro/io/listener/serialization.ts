@@ -18,9 +18,9 @@ export const serialization = <T, R>(
 		Reflect.defineMetadata(listenerMetadata.serializers, [], listener);
 	}
 	
-	Reflect.getMetadata(listenerMetadata.serializers, listener)[
-			parameterIndex
-			] = serializeFunction;
+	Reflect.getMetadata(
+			listenerMetadata.serializers,
+			listener)[parameterIndex] = serializeFunction;
 };
 
 export const getListenerSerializer = <T>(
