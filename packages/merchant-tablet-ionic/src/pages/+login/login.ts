@@ -1,40 +1,44 @@
 import { Component }   from '@angular/core';
-import { AuthService } from '../../services/auth.service';
-import { first }       from 'rxjs/operators';
-import { Store }       from '../../services/store.service';
-import { environment } from '../../environments/environment';
 import { Router }      from '@angular/router';
+import { first }       from 'rxjs/operators';
+import { Storage }     from 'services/storage.service';
+import { AuthService } from 'services/auth.service';
+import { environment } from 'environments/environment';
 
 @Component({
-	           selector: 'page-login',
-	           templateUrl: 'login.html',
-	           styleUrls: ['./login.scss'],
+	           selector:    'page-login',
+	           styleUrls:   ['./login.scss'],
+	           templateUrl: './login.html',
            })
 export class LoginPage
 {
-	username: string = '';
-	password: string = '';
-	loginLogo: string;
+	public username: string = '';
+	public password: string = '';
+	public loginLogo: string;
+	public remember: boolean = false;
 	
 	constructor(
 			private authService: AuthService,
-			private store: Store,
+			private store: Storage,
 			private router: Router
 	)
 	{
-		localStorage.removeItem('_warehouseId');
-		localStorage.removeItem('_language');
-		localStorage.removeItem('token');
+		if(!this.remember)
+		{
+			localStorage.removeItem('_warehouseId');
+			localStorage.removeItem('_language');
+			localStorage.removeItem('token');
+		}
 		
 		if(!environment.production)
 		{
-			this.username = environment.DEFAULT_LOGIN_USERNAME;
-			this.password = environment.DEFAULT_LOGIN_PASSWORD;
+			this.username = environment.FAKE_MERCHANT_NAME;
+			this.password = environment.FAKE_MERCHANT_PASSWORD;
 			this.loginLogo = environment.LOGIN_LOGO;
 		}
 	}
 	
-	async login()
+	public async login()
 	{
 		const res = await this.authService
 		                      .login(this.username, this.password)
@@ -57,5 +61,10 @@ export class LoginPage
 		
 		this.router.navigate(['warehouse'])
 		    .catch(console.error);
+	}
+	
+	public remeberMe()
+	{
+		this.remember = !this.remember;
 	}
 }
