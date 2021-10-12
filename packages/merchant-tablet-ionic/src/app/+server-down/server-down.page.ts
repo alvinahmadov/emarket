@@ -1,8 +1,8 @@
 import { Component, OnDestroy }    from '@angular/core';
-import { environment }             from '../../environments/environment';
 import { Storage }                 from 'services/storage.service';
 import { Location }                from '@angular/common';
 import { ServerConnectionService } from '@modules/client.common.angular2/services/server-connection.service';
+import { environment }             from '../../environments/environment';
 
 @Component({
 	           styleUrls:   ['./server-down.page.scss'],
