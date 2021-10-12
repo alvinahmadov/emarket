@@ -36,6 +36,10 @@ type Order {
     # Used for quick destinction between orders made in the same day (For packaging and etc)
     orderNumber: Int!
 
+    orderCurrency: Int
+
+    orderNotes: String
+
     carrierStatusText: String!
     warehouseStatusText: String!
 
@@ -57,6 +61,7 @@ type OrderProduct {
     initialPrice: Float!
     price: Float!
     product: Product!
+    comment: String
 }
 
 input OrdersFindInput {
