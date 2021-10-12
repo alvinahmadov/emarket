@@ -1,54 +1,51 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { OrderRouter }              from '@modules/client.common.angular2/routers/order-router.service';
 import DeliveryType                 from '@modules/server.common/enums/DeliveryType';
-import { Store }                    from 'services/store.service';
+import { Storage }                  from 'services/storage.service';
 import { WarehousesService }        from 'services/warehouses.service';
 import { map }                      from 'rxjs/operators';
 
 @Component({
 	           selector: 'order-control-buttons',
-	           templateUrl: 'order-control-buttons.html',
 	           styleUrls: ['./order-control-buttons.scss'],
+	           templateUrl: 'order-control-buttons.html',
            })
 export class OrderControlButtonsComponent implements OnInit
 {
 	@Input()
-	orderId: string;
+	public orderId: string;
 	
 	@Input()
-	warehouseStatus: number;
+	public warehouseStatus: number;
 	
 	@Input()
-	carrierStatus: number;
+	public carrierStatus: number;
 	
 	@Input()
-	onUpdateWarehouseStatus: any;
+	public onUpdateWarehouseStatus: any;
 	
 	@Input()
-	orderType: DeliveryType;
+	public orderType: DeliveryType;
 	
-	orderTypeDelivery: DeliveryType = DeliveryType.Delivery;
-	orderTypeTakeaway: DeliveryType = DeliveryType.Takeaway;
+	public orderTypeDelivery: DeliveryType = DeliveryType.Delivery;
+	public orderTypeTakeaway: DeliveryType = DeliveryType.Takeaway;
 	
-	ordersShortProcess: boolean;
-	_storeID: string;
+	public ordersShortProcess: boolean;
+	public _storeID: string;
 	
 	constructor(
 			private orderRouter: OrderRouter,
-			private store: Store,
+			private storage: Storage,
 			private warehousesService: WarehousesService
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
-		this._storeID = this.store.warehouseId;
+		this._storeID = this.storage.warehouseId;
 		this.warehousesService
 		    .getWarehouseOrderProcess(this._storeID)
 		    .pipe(map((store) => store.ordersShortProcess))
-		    .subscribe((isShortProcess) =>
-		               {
-			               this.ordersShortProcess = isShortProcess;
-		               });
+		    .subscribe((isShortProcess) => this.ordersShortProcess = isShortProcess);
 	}
 }
