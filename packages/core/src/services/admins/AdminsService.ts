@@ -9,6 +9,7 @@ import {
 	routerName
 }                                          from '@pyro/io';
 import { DBService }                       from '@pyro/db-server';
+import { IAdminFindInput }                 from '@modules/server.common/interfaces/IAdmin';
 import IAdminRouter,
 {
 	IAdminLoginResponse,
@@ -143,6 +144,18 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter, ISe
 	{
 		await this.throwIfNotExists(id);
 		return super.update(id, updateObject);
+	}
+	
+	@asyncListener()
+	async findAdmin(adminFindInput: IAdminFindInput): Promise<Admin | null>
+	{
+		return this.findOne(adminFindInput);
+	}
+	
+	@asyncListener()
+	async getAdmins(): Promise<Admin[]>
+	{
+		return this.find({ role: "admin" });
 	}
 	
 	async throwIfNotExists(adminId: string): Promise<void>
