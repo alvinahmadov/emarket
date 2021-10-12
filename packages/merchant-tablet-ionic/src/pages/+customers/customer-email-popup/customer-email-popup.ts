@@ -1,18 +1,19 @@
 import { Component, Input, OnInit }           from '@angular/core';
 import { EmailComposer }                      from '@ionic-native/email-composer/ngx';
 import { LoadingController, ModalController } from '@ionic/angular';
+import Customer                               from '@modules/server.common/entities/Customer';
 
 @Component({
-	           selector: 'customer-email-popup',
-	           templateUrl: 'customer-email-popup.html',
-	           styleUrls: ['./customer-email-popup.scss'],
+	           selector:    'customer-email-popup',
+	           styleUrls:   ['./customer-email-popup.scss'],
+	           templateUrl: './customer-email-popup.html',
            })
 export class CustomerEmailPopupPage implements OnInit
 {
 	@Input()
-	user: any;
+	public customer: Customer;
 	
-	email: any;
+	public email: string;
 	
 	constructor(
 			public loadingCtrl: LoadingController,
@@ -21,29 +22,31 @@ export class CustomerEmailPopupPage implements OnInit
 	)
 	{}
 	
-	attemptSendMail()
+	public attemptSendMail()
 	{
 		if(this.emailComposer.isAvailable())
 		{
-			this.emailComposer.isAvailable().then((available: boolean) =>
-			                                      {
-				                                      if(available)
-				                                      {
-					                                      const email = {
-						                                      to: this.email,
-					                                      };
-					                                      this.emailComposer.open(email);
-				                                      }
-			                                      });
+			this.emailComposer
+			    .isAvailable()
+			    .then((available: boolean) =>
+			          {
+				          if(available)
+				          {
+					          const emailComposerOption = {
+						          to: this.email,
+					          };
+					          this.emailComposer.open(emailComposerOption);
+				          }
+			          });
 		}
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.email = this.user.email;
+		this.email = this.customer.email;
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.modalController.dismiss();
 	}
