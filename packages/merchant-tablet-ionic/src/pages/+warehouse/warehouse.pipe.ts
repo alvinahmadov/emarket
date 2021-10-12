@@ -13,7 +13,6 @@ export class OrderStatusFilterPipe implements PipeTransform
 			return items;
 		}
 		
-		let restOf = items;
-		return items.splice(0, 1).concat(restOf.splice(3));
+		return items.splice(0, 1).concat(items.splice(3));
 	}
 }
