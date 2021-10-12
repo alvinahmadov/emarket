@@ -3,8 +3,9 @@ import { map }                   from 'rxjs/operators';
 import { Router, RouterFactory } from '../lib/router';
 import _                         from 'lodash';
 import { Injectable }            from '@angular/core';
+import IComment                  from '@modules/server.common/interfaces/IComment';
 import IWarehouseProduct, {
-	IWarehouseProductCreateObject,
+	IWarehouseProductCreateObject
 }                                from '@modules/server.common/interfaces/IWarehouseProduct';
 import WarehouseProduct          from '@modules/server.common/entities/WarehouseProduct';
 import IWarehouseProductsRouter  from '@modules/server.common/routers/IWarehouseProductsRouter';
@@ -19,33 +20,33 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 		this.router = routerFactory.create('warehouse-products');
 	}
 	
-	get(id: string, fullProducts = true): Observable<WarehouseProduct[]>
+	public get(id: string, fullProducts = true): Observable<WarehouseProduct[]>
 	{
 		return this.router
 		           .runAndObserve<IWarehouseProduct[]>('get', id, fullProducts)
 		           .pipe(
 				           map((warehouseProducts) =>
 						               _.map(warehouseProducts, (warehouseProduct) =>
-								               this._warehouseProductFactory(warehouseProduct)
+								               this._factory(warehouseProduct)
 						               )
 				           )
 		           );
 	}
 	
-	getAvailable(warehouseId: string): Observable<WarehouseProduct[]>
+	public getAvailable(warehouseId: string): Observable<WarehouseProduct[]>
 	{
 		return this.router
 		           .runAndObserve<IWarehouseProduct[]>('getAvailable', warehouseId)
 		           .pipe(
 				           map((warehouseProducts) =>
 						               _.map(warehouseProducts, (warehouseProduct) =>
-								               this._warehouseProductFactory(warehouseProduct)
+								               this._factory(warehouseProduct)
 						               )
 				           )
 		           );
 	}
 	
-	async add(
+	public async add(
 			warehouseId: string,
 			products: IWarehouseProductCreateObject[]
 	): Promise<WarehouseProduct[]>
@@ -56,24 +57,24 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				products
 		);
 		return _.map(warehouseProducts, (warehouseProduct) =>
-				this._warehouseProductFactory(warehouseProduct)
+				this._factory(warehouseProduct)
 		);
 	}
 	
-	async saveUpdated(
+	public async update(
 			warehouseId: string,
 			updatedWarehouseProduct: IWarehouseProduct
 	): Promise<WarehouseProduct>
 	{
 		const warehouseProduct = await this.router.run<IWarehouseProduct>(
-				'saveUpdated',
+				'update',
 				warehouseId,
 				updatedWarehouseProduct
 		);
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async changePrice(
+	public async changePrice(
 			warehouseId: string,
 			productId: string,
 			price: number
@@ -85,10 +86,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				productId,
 				price
 		);
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async decreaseCount(
+	public async decreaseCount(
 			warehouseId: string,
 			productId: string,
 			count: number
@@ -100,10 +101,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				productId,
 				count
 		);
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async increaseCount(
+	public async increaseCount(
 			warehouseId: string,
 			productId: string,
 			count: number
@@ -115,10 +116,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				productId,
 				count
 		);
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async changeProductAvailability(
+	public async changeProductAvailability(
 			warehouseId: string,
 			productId: string,
 			isAvailable: boolean
@@ -131,10 +132,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				isAvailable
 		);
 		
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async changeProductTakeaway(
+	public async changeProductTakeaway(
 			warehouseId: string,
 			productId: string,
 			isTakeaway: boolean
@@ -147,10 +148,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				isTakeaway
 		);
 		
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async changeProductDelivery(
+	public async changeProductDelivery(
 			warehouseId: string,
 			productId: string,
 			isDelivery: boolean
@@ -163,10 +164,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				isDelivery
 		);
 		
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async increaseSoldCount(
+	public async increaseSoldCount(
 			warehouseId: string,
 			productId: string,
 			count: number
@@ -178,10 +179,10 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				productId,
 				count
 		);
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
 	}
 	
-	async decreaseSoldCount(
+	public async decreaseSoldCount(
 			warehouseId: string,
 			productId: string,
 			count: number
@@ -193,7 +194,81 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				productId,
 				count
 		);
-		return this._warehouseProductFactory(warehouseProduct);
+		return this._factory(warehouseProduct);
+	}
+	
+	public async increaseViewsCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		const warehouseProduct = await this.router.run<IWarehouseProduct>(
+				'increaseViewsCount',
+				warehouseId,
+				productId,
+				count
+		);
+		return this._factory(warehouseProduct);
+	}
+	
+	public async decreaseViewsCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		const warehouseProduct = await this.router.run<IWarehouseProduct>(
+				'decreaseViewsCount',
+				warehouseId,
+				productId,
+				count
+		);
+		return this._factory(warehouseProduct);
+	}
+	
+	public async increaseLikesCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		const warehouseProduct = await this.router.run<IWarehouseProduct>(
+				'increaseLikesCount',
+				warehouseId,
+				productId,
+				count
+		);
+		return this._factory(warehouseProduct);
+	}
+	
+	public async decreaseLikesCount(
+			warehouseId: string,
+			productId: string,
+			count: number
+	): Promise<WarehouseProduct>
+	{
+		const warehouseProduct = await this.router.run<IWarehouseProduct>(
+				'decreaseLikesCount',
+				warehouseId,
+				productId,
+				count
+		);
+		return this._factory(warehouseProduct);
+	}
+	
+	public async addComment(
+			warehouseId: string,
+			productId: string,
+			comment: IComment
+	): Promise<void>
+	{
+		return await this.router.run<void>(
+				'addComment',
+				warehouseId,
+				productId,
+				comment
+		);
 	}
 	
 	getTopProducts(
@@ -210,13 +285,13 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 		           .pipe(
 				           map((warehouseProducts) =>
 						               _.map(warehouseProducts, (warehouseProduct) =>
-								               this._warehouseProductFactory(warehouseProduct)
+								               this._factory(warehouseProduct)
 						               )
 				           )
 		           );
 	}
 	
-	protected _warehouseProductFactory(warehouseProduct: IWarehouseProduct)
+	protected _factory(warehouseProduct: IWarehouseProduct)
 	{
 		return warehouseProduct == null
 		       ? null
