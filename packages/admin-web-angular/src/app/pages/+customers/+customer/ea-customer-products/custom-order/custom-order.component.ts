@@ -8,31 +8,34 @@ import {
 	Validators,
 }                                              from '@angular/forms';
 import { NgbActiveModal }                      from '@ng-bootstrap/ng-bootstrap';
+import { Subject }                             from 'rxjs';
+import { ToasterService }                      from 'angular2-toaster';
 import 'rxjs/operators/map';
 import Warehouse                               from '@modules/server.common/entities/Warehouse';
-import { WarehouseOrdersRouter }               from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import User                                    from '@modules/server.common/entities/User';
-import { WarehousesService }                   from '../../../../../@core/data/warehouses.service';
-import { ToasterService }                      from 'angular2-toaster';
-import { WarehouseRouter }                     from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { Subject }                             from 'rxjs';
-import { CommonUtils }                         from '@modules/server.common/utilities';
+import Customer                                from '@modules/server.common/entities/Customer';
 import Order                                   from '@modules/server.common/entities/Order';
 import { IOrderCreateInput }                   from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import { CommonUtils }                         from '@modules/server.common/utilities';
+import { WarehouseOrdersRouter }               from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { WarehouseRouter }                     from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehousesService }                   from '@app/@core/data/warehouses.service';
 
 @Component({
-	           selector: 'ea-custom-order',
+	           selector:    'ea-custom-order',
+	           styleUrls:   ['./custom-order.component.scss'],
 	           templateUrl: './custom-order.component.html',
-	           styleUrls: ['./custom-order.component.scss'],
            })
 export class CustomOrderComponent implements OnInit, OnDestroy
 {
 	@Input()
-	warehouseId: Warehouse['id'];
+	public warehouseId: Warehouse['id'];
+	
 	@Input()
-	currentProduct: any;
+	public currentProduct: any;
+	
 	@Input()
-	userId: User['id'];
+	public customerId: Customer['id'];
+	
 	readonly form: FormGroup = this.fb.group({
 		                                         count: [
 			                                         0,
@@ -68,31 +71,37 @@ export class CustomOrderComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	get count(): AbstractControl
+	public ngOnInit() {}
+	
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public get count(): AbstractControl
 	{
 		return this.form.get('count');
 	}
 	
-	ngOnInit() {}
-	
-	cancel()
+	public cancel()
 	{
 		this.activeModal.dismiss('canceled');
 	}
 	
-	async createOrder()
+	public async createOrder()
 	{
 		try
 		{
 			const orderCreateInput: IOrderCreateInput = {
-				userId: this.userId,
+				customerId:  this.customerId,
 				warehouseId: this.warehouseId,
-				products: [
+				products:    [
 					{
-						count: this.count.value,
+						count:     this.count.value,
 						productId: this.currentProduct.warehouseProduct.product[
-								'id'
-								],
+								           'id'
+								           ],
 					},
 				],
 			};
@@ -114,11 +123,5 @@ export class CustomOrderComponent implements OnInit, OnDestroy
 					`Error in creating order: "${err.message}"`
 			);
 		}
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 }
