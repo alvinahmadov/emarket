@@ -21,7 +21,7 @@ import {
 	serialization
 }                                   from '@pyro/io';
 import { DBService }                from '@pyro/db-server';
-import { CreateObject }             from "@pyro/db/db-create-object";
+import { CreateObject }             from '@pyro/db/db-create-object';
 import IWarehouse                   from '@modules/server.common/interfaces/IWarehouse';
 import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
 import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
@@ -171,7 +171,7 @@ export class WarehousesService extends DBService<Warehouse>
 	}
 	
 	/**
-	 * Get Merchant
+	 * Get Warehouse
 	 *
 	 * @param {string} id
 	 * @param {boolean} [fullProducts=true]
