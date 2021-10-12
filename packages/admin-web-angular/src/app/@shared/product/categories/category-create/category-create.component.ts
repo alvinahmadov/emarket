@@ -1,25 +1,24 @@
-import { Component, OnDestroy } from '@angular/core';
-import { NgbActiveModal }       from '@ng-bootstrap/ng-bootstrap';
-import { Subject }              from 'rxjs';
-
-import { ProductLocalesService }   from '@modules/client.common.angular2/locale/product-locales.service';
-import { ILocaleMember }           from '@modules/server.common/interfaces/ILocale';
+import { Component, OnDestroy }    from '@angular/core';
+import { NgbActiveModal }          from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService }        from '@ngx-translate/core';
-import { NotifyService }           from '@app/@core/services/notify/notify.service';
+import { Subject }                 from 'rxjs';
 import { first }                   from 'rxjs/operators';
+import { ILocaleMember }           from '@modules/server.common/interfaces/ILocale';
+import { ProductLocalesService }   from '@modules/client.common.angular2/locale/product-locales.service';
 import { ProductsCategoryService } from '@app/@core/data/productsCategory.service';
+import { NotifyService }           from '@app/@core/services/notify/notify.service';
 
 @Component({
-	           selector: 'ea-category-create',
+	           selector:    'ea-category-create',
+	           styleUrls:   ['./category-create.component.scss'],
 	           templateUrl: './category-create.component.html',
-	           styleUrls: ['./category-create.component.scss'],
            })
 export class CategoryCreateComponent implements OnDestroy
 {
-	productId: any;
-	userId: any;
-	loading: boolean;
-	storybookVersion: boolean;
+	public productId: any;
+	public customerId: any;
+	public loading: boolean;
+	public storybookVersion: boolean;
 	
 	private _ngDestroy$ = new Subject<void>();
 	
@@ -32,18 +31,18 @@ export class CategoryCreateComponent implements OnDestroy
 	)
 	{}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
 	
-	cancel()
+	public cancel()
 	{
 		this.activeModal.dismiss('canceled');
 	}
 	
-	async createCategory(createObject)
+	public async createCategory(createObject): Promise<boolean>
 	{
 		if(this.storybookVersion)
 		{
@@ -75,7 +74,7 @@ export class CategoryCreateComponent implements OnDestroy
 		}
 	}
 	
-	localeTranslate(member: ILocaleMember[])
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._productLocalesService.getTranslate(member);
 	}
