@@ -1,19 +1,19 @@
 import { Component, Input }      from '@angular/core';
 import Order                     from '@modules/server.common/entities/Order';
-import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
 import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale';
+import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
 
 @Component({
 	           selector: 'order-delivery-problem',
-	           templateUrl: 'order-delivery-problem.html',
+	           templateUrl: './order-delivery-problem.html',
            })
 export class OrderDeliveryProblemComponent
 {
 	@Input()
-	getWarehouseStatus: () => void;
+	public getWarehouseStatus: () => void;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
 	constructor(private _translateProductLocales: ProductLocalesService) {}
 	
