@@ -1,21 +1,21 @@
 import { Component }          from '@angular/core';
-import { environment }        from '../../../src/environments/environment';
 import { MaintenanceService } from '@modules/client.common.angular2/services/maintenance.service';
-import { Store }              from '../../../src/services/store.service';
 import { Router }             from '@angular/router';
+import { Storage }            from 'services/storage.service';
+import { environment }        from 'environments/environment';
 
 @Component({
-	           selector: 'page-maintenance-info',
+	           selector:    'page-maintenance-info',
 	           templateUrl: 'maintenance-info.html',
            })
 export class MaintenanceInfoPage
 {
-	message: string;
-	interval: any;
+	public message: string;
+	public interval: any;
 	
 	constructor(
 			private maintenanceService: MaintenanceService,
-			private store: Store,
+			private store: Storage,
 			private router: Router
 	)
 	{
@@ -23,12 +23,12 @@ export class MaintenanceInfoPage
 		this.getStatus();
 	}
 	
-	get maintenanceMode()
+	public get maintenanceMode(): string
 	{
 		return this.store.maintenanceMode;
 	}
 	
-	async getMessage()
+	public async getMessage()
 	{
 		this.message = await this.maintenanceService.getMessage(
 				this.maintenanceMode,
@@ -54,6 +54,6 @@ export class MaintenanceInfoPage
 				                            this.store.clearMaintenanceMode();
 				                            this.router.navigateByUrl('');
 			                            }
-		                            }, 5000);
+		                            }, 10000);
 	}
 }
