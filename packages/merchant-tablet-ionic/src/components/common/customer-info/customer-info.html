@@ -1,20 +1,21 @@
-<div *ngIf="user" class="customer-info">
-    <div class="header">
-        <h5>
-            <ion-icon ios="ios-person" md="md-person"></ion-icon>
-            <span> {{ 'TRACK_ORDER_POP_UP.CUSTOMER' | translate }} </span>
-        </h5>
-    </div>
-    <div class="body">
-        <div *ngIf="user.image" class="customer-image">
-            <img src="{{ user.image }}" alt=""/>
-        </div>
-        <div class="customer-details">
-            <div>{{ userFullName }}</div>
-            <user-phone [user]="user"></user-phone>
-            <div>{{ user.email }}</div>
-            <div>{{ fullAddress }}</div>
-            <div>Notes: {{ user.geoLocation.notes }}</div>
-        </div>
-    </div>
+<div *ngIf="customer" class="customer-info">
+	<div class="header">
+		<h5>
+			<ion-icon ios="ios-person" md="md-person"></ion-icon>
+			<span> {{ 'TRACK_ORDER_POP_UP.CUSTOMER' | translate }} </span>
+		</h5>
+	</div>
+	<div class="body">
+		<div *ngIf="customer.avatar" class="customer-image">
+			<img src="{{ customer.avatar }}" alt=""/>
+		</div>
+		<div class="customer-details">
+			<div>{{ customer.fullName.trim() }}</div>
+			<user-phone [customer]="customer"></user-phone>
+			<div>{{ customer.email }}</div>
+			<div>{{ customer.fullAddress }}</div>
+			<div> {{ 'CUSTOMERS_VIEW.NOTES' | translate }} : {{ customer.geoLocation.notes }}
+			</div>
+		</div>
+	</div>
 </div>
