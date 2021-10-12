@@ -18,6 +18,8 @@ import { CustomersService }                        from '../../services/customer
 import { ProductsService }                         from '../../services/products';
 import { FakeOrdersService }                       from '../../services/fake-data/FakeOrdersService';
 
+type OrderInfo = { id: string, ordersCount: number }
+
 @Resolver('Order')
 export class OrderResolver
 {
@@ -36,12 +38,12 @@ export class OrderResolver
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
-		const users: Customer[] = await this._customersService
-		                                    .Model
-		                                    .find(commonOptionsFlag)
-		                                    .select({ __v: 0 })
-		                                    .lean()
-		                                    .exec();
+		const customers: Customer[] = await this._customersService
+		                                        .Model
+		                                        .find(commonOptionsFlag)
+		                                        .select({ __v: 0 })
+		                                        .lean()
+		                                        .exec();
 		
 		const stores: Warehouse[] = await this._warehousesService
 		                                      .Model
@@ -60,7 +62,7 @@ export class OrderResolver
 		const ordersRaw = this._setupAvailableOrdersToCreate(
 				stores,
 				products,
-				users
+				customers
 		);
 		
 		await this._ordersService.Model.insertMany(ordersRaw);
@@ -71,12 +73,12 @@ export class OrderResolver
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
-		const users: Customer[] = await this._customersService
-		                                    .Model
-		                                    .find(commonOptionsFlag)
-		                                    .select({ __v: 0 })
-		                                    .lean()
-		                                    .exec();
+		const customers: Customer[] = await this._customersService
+		                                        .Model
+		                                        .find(commonOptionsFlag)
+		                                        .select({ __v: 0 })
+		                                        .lean()
+		                                        .exec();
 		
 		const stores: Warehouse[] = await this._warehousesService
 		                                      .Model
@@ -107,7 +109,7 @@ export class OrderResolver
 			                   const ordersRaw = this._setupHistoryOrdersToCreate(
 					                   stores,
 					                   products,
-					                   users,
+					                   customers,
 					                   carrierId,
 					                   index
 			                   );
@@ -182,7 +184,7 @@ export class OrderResolver
 					                                       warehouseStatus:        OrderWarehouseStatus.PackagingFinished,
 					                                       carrierStatus:          OrderCarrierStatus.DeliveryCompleted,
 					                                       orderNumber,
-					                                       user:                   this._getRandomCustomer(orderNumber, customers),
+					                                       customer:               this._getRandomCustomer(orderNumber, customers),
 					                                       warehouse:              stores[orderNumber % stores.length].id,
 					                                       products:               orderProducts,
 					                                       _createdAt:             createdAt,
@@ -248,7 +250,7 @@ export class OrderResolver
 					                    warehouseStatus:      OrderWarehouseStatus.PackagingFinished,
 					                    carrierStatus:        OrderCarrierStatus.NoCarrier,
 					                    orderNumber,
-					                    user:                 this._getRandomCustomer(orderNumber, customers),
+					                    customer:             this._getRandomCustomer(orderNumber, customers),
 					                    warehouse:            stores[orderNumber % stores.length].id,
 					                    products:             orderProducts,
 					                    _createdAt:           createdAt
@@ -346,10 +348,10 @@ export class OrderResolver
 				commonOptionsFlag
 		);
 		
-		const user = await this._customersService
-		                       .get(customerId)
-		                       .pipe(first())
-		                       .toPromise();
+		const customer = await this._customersService
+		                           .get(customerId)
+		                           .pipe(first())
+		                           .toPromise();
 		
 		if(products.length > 0)
 		{
@@ -410,7 +412,7 @@ export class OrderResolver
 					               warehouseStatus:        OrderWarehouseStatus.PackagingFinished,
 					               carrierStatus:          OrderCarrierStatus.DeliveryCompleted,
 					               orderNumber,
-					               user,
+					               customer:               customer,
 					               warehouse:              stores[orderNumber % stores.length].id,
 					               products:               orderProducts,
 					               _createdAt:             orderDate,
@@ -485,34 +487,34 @@ export class OrderResolver
 	async getUsersOrdersCountInfo(
 			_context,
 			{ usersIds }: { usersIds: string[] }
-	)
+	): Promise<OrderInfo[]>
 	{
-		const ordersInfo = await this._ordersService
-		                             .Model
-		                             .aggregate([
-			                                        {
-				                                        $match: {
-					                                        $and: [
-						                                        { 'user._id': { $ne: null } },
-						                                        usersIds
-						                                        ? {
-									                                        'user._id': {
-										                                        $in: usersIds.map(
-												                                        (i) => new ObjectId(i)
-										                                        )
-									                                        }
-								                                        }
-						                                        : {}
-					                                        ]
-				                                        }
-			                                        },
-			                                        {
-				                                        $group: {
-					                                        _id:         '$user._id',
-					                                        ordersCount: { $sum: 1 }
-				                                        }
-			                                        }
-		                                        ]);
+		const ordersInfo: { _id: string, ordersCount: number }[] =
+				      await this._ordersService.Model.aggregate(
+						      [
+							      {
+								      $match: {
+									      $and: [
+										      { 'customer._id': { $ne: null } },
+										      usersIds
+										      ? {
+													      'customer._id': {
+														      $in: usersIds.map(
+																      (i) => new ObjectId(i)
+														      )
+													      }
+												      }
+										      : {}
+									      ]
+								      }
+							      },
+							      {
+								      $group: {
+									      _id:         '$customer._id',
+									      ordersCount: { $sum: 1 }
+								      }
+							      }
+						      ]);
 		
 		return ordersInfo.map((o) => ({
 			id:          o._id,
@@ -526,24 +528,26 @@ export class OrderResolver
 			{ merchantsIds }: { merchantsIds: string[] }
 	)
 	{
-		const ordersInfo = await this._ordersService.Model.aggregate([
-			                                                             {
-				                                                             $match: {
-					                                                             $and: [
-						                                                             { warehouse: { $ne: null } },
-						                                                             merchantsIds
-						                                                             ? { warehouse: { $in: merchantsIds } }
-						                                                             : {}
-					                                                             ]
-				                                                             }
-			                                                             },
-			                                                             {
-				                                                             $group: {
-					                                                             _id:         '$warehouse',
-					                                                             ordersCount: { $sum: 1 }
-				                                                             }
-			                                                             }
-		                                                             ]);
+		const ordersInfo = await this._ordersService.Model.aggregate(
+				[
+					{
+						$match: {
+							$and: [
+								{ warehouse: { $ne: null } },
+								merchantsIds
+								? { warehouse: { $in: merchantsIds } }
+								: {}
+							]
+						}
+					},
+					{
+						$group: {
+							_id:         '$warehouse',
+							ordersCount: { $sum: 1 }
+						}
+					}
+				]
+		);
 		
 		return ordersInfo.map((o) => ({
 			id:          o._id,
@@ -733,7 +737,7 @@ export class OrderResolver
 	private _setupAvailableOrdersToCreate = (
 			stores: Warehouse[],
 			products: Product[],
-			users: Customer[]
+			customers: Customer[]
 	) =>
 	{
 		const orders = [];
@@ -747,7 +751,7 @@ export class OrderResolver
 			const createdAt = OrderResolver.getCloseDate(new Date());
 			
 			orders.push({
-				            user:            users[_.random(users.length - 1)],
+				            customer:        customers[_.random(customers.length - 1)],
 				            warehouse:       orderStore._id.toString(),
 				            products:        orderProducts,
 				            isConfirmed:     true,
@@ -765,12 +769,12 @@ export class OrderResolver
 	private _setupHistoryOrdersToCreate = (
 			stores: Warehouse[],
 			products: Product[],
-			users: Customer[],
+			customers: Customer[],
 			carrierId: string,
 			orderNumber: number
 	) =>
 	{
-		const orders = [];
+		const orders: any[] = [];
 		
 		const availableStatuses: OrderCarrierStatus[] = [
 			OrderCarrierStatus.DeliveryCompleted,
@@ -792,7 +796,7 @@ export class OrderResolver
 			const startDeliveryTime = OrderResolver.getFinishedTime(createdAt);
 			
 			orders.push({
-				            user:            users[_.random(users.length - 1)],
+				            customer:        customers[_.random(customers.length - 1)],
 				            warehouse:       orderStore._id.toString(),
 				            products:        orderProducts,
 				            isConfirmed:     true,
