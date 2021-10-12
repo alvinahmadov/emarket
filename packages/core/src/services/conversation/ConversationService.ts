@@ -11,7 +11,7 @@ import {
 }                                                     from '@pyro/io';
 import { DBService }                                  from '@pyro/db-server';
 import IConversation,
-{ IConversationCreateObject, TConversationFindInput } from '@modules/server.common/interfaces/IConversation';
+{ IConversationCreateObject, IConversationFindInput } from '@modules/server.common/interfaces/IConversation';
 import Conversation                                   from '@modules/server.common/entities/Conversation';
 import IConversationRouter                            from '@modules/server.common/routers/IConversationRouter';
 import IService                                       from '../IService';
@@ -25,8 +25,36 @@ export class ConversationsService extends DBService<Conversation>
 	public readonly DBObject: any = Conversation;
 	protected readonly log: Logger = createLogger({ name: 'conversationsService' });
 	
+	@asyncListener()
+	public async getConversation(channelId: string): Promise<Conversation | null>
+	{
+		const callId = uuid();
+		
+		this.log.info(
+				{ callId },
+				'.getConversation(channelId) called'
+		);
+		
+		const conversation: Conversation =
+				      await this.Model
+				                .findOne({ channelId: channelId, isDeleted: { $eq: false } })
+				                .lean()
+				                .exec();
+		
+		this.log.info(
+				{
+					callId,
+					channelId:    channelId,
+					conversation: conversation
+				},
+				'.getConversation(channelId) with result'
+		);
+		
+		return conversation;
+	}
+	
 	@observableListener()
-	public getAll(findInput?: TConversationFindInput): Observable<Conversation[]>
+	public getConversations(findInput: IConversationFindInput = {}): Observable<Conversation[]>
 	{
 		const callId = uuid();
 		
@@ -59,31 +87,73 @@ export class ConversationsService extends DBService<Conversation>
 	}
 	
 	@asyncListener()
-	public async getConversation(channelId: string): Promise<Conversation | null>
+	public async createConversation(conversation: IConversationCreateObject): Promise<Conversation>
 	{
 		const callId = uuid();
 		
-		this.log.info(
-				{ callId },
-				'.getConversation(channelId) called'
-		);
-		return await (this.Model
-		                  .findOne({ channelId: channelId, isDeleted: { $eq: false } })
-		                  .lean()
-		                  .exec()) as Conversation;
-	}
-	
-	@asyncListener()
-	public async createConversation(conversation: IConversationCreateObject): Promise<Conversation>
-	{
-		return await super.create(conversation);
+		try
+		{
+			this.log.info(
+					{ callId },
+					'.createConversation(conversation) called'
+			);
+			if(!conversation)
+			{
+				this.log.info(
+						{
+							callId,
+							conversation: conversation
+						},
+						'.createConversation(conversation) got null/undefined'
+				);
+				return null;
+			}
+			return super.create(conversation);
+		} catch(err)
+		{
+			this.log.error(
+					{
+						callId,
+						error: err
+					},
+					'.createConversation(conversation) thrown error'
+			);
+			return null;
+		}
 	}
 	
 	@asyncListener()
 	public async removeConversation(channelId: string): Promise<void>
 	{
-		const conversation = await this.throwIfNotExists(channelId);
-		await super.delete(conversation.id);
+		const callId = uuid();
+		
+		try
+		{
+			this.log.info(
+					{ callId },
+					'.removeConversation(channelId) called'
+			);
+			const conversation = await this.throwIfNotExists(channelId);
+			
+			this.log.info(
+					{
+						callId,
+						conversation: conversation
+					},
+					'.removeConversation(channelId) has conversation'
+			);
+			return await super.delete(conversation.id);
+		} catch(err)
+		{
+			this.log.error(
+					{
+						callId,
+						error: err
+					},
+					'.removeConversation(channelId) thrown error'
+			);
+			return null;
+		}
 	}
 	
 	public async throwIfNotExists(channelId: string)
@@ -97,21 +167,23 @@ export class ConversationsService extends DBService<Conversation>
 		return ex;
 	}
 	
-	private async _getConversations(findInput?: TConversationFindInput): Promise<Conversation[]>
+	private async _getConversations(findInput?: IConversationFindInput): Promise<Conversation[]>
 	{
-		let findObject = _.assign(
-				{ isDeleted: { $eq: false } },
-				findInput.locale
-				? { locale: findInput.locale }
-				: {},
-				findInput.platform
-				? { platform: findInput.platform }
-				: {},
-				findInput.participants ?
-				{ participants: findInput.participants }
-				                       :
-				{}
-		)
+		let findObject = { isDeleted: { $eq: false } };
+		
+		if(findInput)
+			findObject = _.assign(findObject,
+			                      findInput.locale
+			                      ? { locale: findInput.locale }
+			                      : {},
+			                      findInput.platform
+			                      ? { platform: findInput.platform }
+			                      : {},
+			                      findInput.participants
+			                      ?
+			                      { participants: findInput.participants }
+			                      : {}
+			)
 		
 		return _.map(
 				(await this.Model
