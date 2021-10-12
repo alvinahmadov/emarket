@@ -1,12 +1,14 @@
-import { Observable }                       from 'rxjs';
-import { map }                              from 'rxjs/operators';
-import { cards }                            from 'stripe';
-import { Injectable }                       from '@angular/core';
-import ICustomer, { ICustomerUpdateObject } from '@modules/server.common/interfaces/ICustomer';
-import Customer                             from '@modules/server.common/entities/Customer';
-import GeoLocation                          from '@modules/server.common/entities/GeoLocation';
-import ICustomerRouter                      from '@modules/server.common/routers/ICustomerRouter';
-import { Router, RouterFactory }            from '../lib/router';
+import { Observable }                         from 'rxjs';
+import { map }                                from 'rxjs/operators';
+import { cards }                              from 'stripe';
+import { Injectable }                         from '@angular/core';
+import ICustomer,
+{ ICustomerUpdateObject, ICustomerFindInput } from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions                         from '@modules/server.common/interfaces/IPagingOptions';
+import Customer                               from '@modules/server.common/entities/Customer';
+import GeoLocation                            from '@modules/server.common/entities/GeoLocation';
+import ICustomerRouter                        from '@modules/server.common/routers/ICustomerRouter';
+import { Router, RouterFactory }              from '../lib/router';
 
 @Injectable()
 export class CustomerRouter implements ICustomerRouter
@@ -15,7 +17,7 @@ export class CustomerRouter implements ICustomerRouter
 	
 	constructor(routerFactory: RouterFactory)
 	{
-		this.router = routerFactory.create('user');
+		this.router = routerFactory.create('customer');
 	}
 	
 	get(id: string): Observable<Customer>
@@ -25,10 +27,21 @@ export class CustomerRouter implements ICustomerRouter
 		           .pipe(map((user) => this._customerFactory(user)));
 	}
 	
+	getCustomers(findObj: ICustomerFindInput, pagingOptions?: IPagingOptions): Observable<Customer>
+	{
+		return this.router.runAndObserve<Customer>(
+				'getCustomers',
+				findObj,
+				pagingOptions
+		).pipe(
+				map((customer) => this._customerFactory(customer))
+		)
+	}
+	
 	async updateCustomer(
 			id: string,
 			customerUpdateObject: ICustomerUpdateObject
-	): Promise<Customer | any>
+	): Promise<Customer>
 	{
 		const user = await this.router.run<Customer>(
 				'updateCustomer',
