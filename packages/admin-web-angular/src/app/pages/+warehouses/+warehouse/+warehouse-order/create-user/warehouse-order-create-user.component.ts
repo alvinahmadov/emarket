@@ -1,5 +1,4 @@
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
-
 import {
 	Component,
 	EventEmitter,
@@ -7,18 +6,17 @@ import {
 	OnDestroy,
 	Output,
 	AfterViewInit,
-} from '@angular/core';
-
-import { BasicInfoFormComponent } from '../../../../../@shared/user/forms';
-import { LocationFormComponent }  from '../../../../../@shared/forms/location';
-import { UsersService }           from '../../../../../@core/data/users.service';
-import { Observable, Subject }    from 'rxjs';
-import { takeUntil }              from 'rxjs/operators';
-import { ToasterService }         from 'angular2-toaster';
+}                                              from '@angular/core';
+import { Observable, Subject }                 from 'rxjs';
+import { takeUntil }                           from 'rxjs/operators';
+import { ToasterService }                      from 'angular2-toaster';
+import { BasicInfoFormComponent }              from '@app/@shared/user/forms';
+import { LocationFormComponent }               from '@app/@shared/forms/location';
+import { CustomersService }                    from '@app/@core/data/customers.service';
 
 @Component({
-	           selector: 'ea-warehouse-order-create-user',
-	           styleUrls: ['./warehouse-order-create-user.component.scss'],
+	           selector:    'ea-warehouse-order-create-user',
+	           styleUrls:   ['./warehouse-order-create-user.component.scss'],
 	           templateUrl: './warehouse-order-create-user.component.html',
            })
 export class WarehouseOrderCreateUserComponent
@@ -27,7 +25,7 @@ export class WarehouseOrderCreateUserComponent
 	readonly form: FormGroup = this._formBuilder.group({
 		                                                   basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
 		                                                   apartment: LocationFormComponent.buildApartmentForm(this._formBuilder),
-		                                                   location: LocationFormComponent.buildForm(this._formBuilder),
+		                                                   location:  LocationFormComponent.buildForm(this._formBuilder),
 	                                                   });
 	
 	readonly basicInfo = this.form.get('basicInfo') as FormControl;
@@ -35,49 +33,49 @@ export class WarehouseOrderCreateUserComponent
 	readonly location = this.form.get('location') as FormControl;
 	
 	@Input()
-	createUserEvent: Observable<void>;
+	public createUserEvent: Observable<void>;
 	
-	mapCoordEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
+	public mapCoordEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
 	
-	mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
 	
 	@Output()
-	newUserEmitter = new EventEmitter<any>();
+	public newUserEmitter = new EventEmitter<any>();
 	
 	private readonly _ngDestroy$ = new Subject<void>();
 	
 	constructor(
 			private readonly _formBuilder: FormBuilder,
-			private readonly _usersService: UsersService,
+			private readonly _customersService: CustomersService,
 			private readonly _toasterService: ToasterService
 	)
 	{}
 	
-	ngAfterViewInit()
+	public ngAfterViewInit()
 	{
 		this._listenForNewUser();
 	}
 	
-	onCoordinatesChanges(
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public onCoordinatesChanges(
 			location: google.maps.LatLng | google.maps.LatLngLiteral
 	)
 	{
 		this.mapCoordEmitter.emit(location);
 	}
 	
-	onGeometrySend(
+	public onGeometrySend(
 			geometry:
 					| google.maps.places.PlaceGeometry
 					| google.maps.GeocoderGeometry
 	)
 	{
 		this.mapGeometryEmitter.emit(geometry);
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
 	}
 	
 	private _listenForNewUser()
@@ -95,7 +93,7 @@ export class WarehouseOrderCreateUserComponent
 	{
 		const rawData = {
 			...this.basicInfo.value,
-			apartment: this.apartment.value,
+			apartment:   this.apartment.value,
 			geoLocation: this.location.value,
 		};
 		
@@ -105,11 +103,12 @@ export class WarehouseOrderCreateUserComponent
 		
 		try
 		{
-			const user = await this._usersService.registerUser({
-				                                                   user: rawData,
-			                                                   });
-			const userFirstname = user.firstName;
-			this.newUserEmitter.emit(user);
+			const customer = await this._customersService
+			                       .registerCustomer({
+				                                         user: rawData,
+			                                         });
+			const userFirstname = customer.firstName;
+			this.newUserEmitter.emit(customer);
 			this.form.reset();
 			this._toasterService.pop(
 					'success',
