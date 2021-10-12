@@ -1,15 +1,15 @@
 import Logger                                            from 'bunyan';
 import { injectable }                                    from 'inversify';
-import { createLogger }                                  from '../../helpers/Log';
-import { DBService }                                     from '@pyro/db-server';
-import IProductsCategoryRouter                           from '@modules/server.common/routers/IProductsCategoryRouter';
 import { Observable }                                    from 'rxjs';
-import { asyncListener, observableListener, routerName } from '@pyro/io';
-import IService                                          from '../IService';
-import ProductsCategory                                  from '@modules/server.common/entities/ProductsCategory';
-import { UpdateObject }                                  from '@pyro/db/db-update-object';
-import { CreateObject }                                  from '@pyro/db/db-create-object';
 import { first, switchMap, map }                         from 'rxjs/operators';
+import { asyncListener, observableListener, routerName } from '@pyro/io';
+import { DBService }                                     from '@pyro/db-server';
+import { CreateObject }                                  from '@pyro/db/db-create-object';
+import { UpdateObject }                                  from '@pyro/db/db-update-object';
+import ProductsCategory                                  from '@modules/server.common/entities/ProductsCategory';
+import IProductsCategoryRouter                           from '@modules/server.common/routers/IProductsCategoryRouter';
+import IService                                          from '../IService';
+import { createLogger }                                  from '../../helpers/Log';
 
 @injectable()
 @routerName('products-category')
@@ -19,7 +19,7 @@ export class ProductsCategoriesService extends DBService<ProductsCategory>
 	public readonly DBObject: any = ProductsCategory;
 	
 	protected readonly log: Logger = createLogger({
-		                                              name: 'productsCategoriesService'
+		                                              name: ProductsCategoriesService.name
 	                                              });
 	
 	/**
