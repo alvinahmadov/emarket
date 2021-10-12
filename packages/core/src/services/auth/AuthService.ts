@@ -28,7 +28,7 @@ interface IAuthableRawObject extends DBRawObject, IAuthableCreateObject
 	hash?: string;
 }
 
-interface IAuthable
+export interface IAuthable
 		extends DBObject<IAuthableRawObject, IAuthableCreateObject>
 {
 	hash?: string;
