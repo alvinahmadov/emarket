@@ -1,43 +1,43 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ViewCell }                 from 'ng2-smart-table';
-import { Store }                    from '../../services/store.service';
 import { CallNumber }               from '@ionic-native/call-number/ngx';
-import User                         from '@modules/server.common/entities/User';
+import Customer                     from '@modules/server.common/entities/Customer';
+import { Storage }                  from '../../services/storage.service';
 
 @Component({
 	           selector: 'user-phone',
 	           template: `
-		<ion-icon
-			*ngIf="user.phone"
-			name="call"
-			class="call-icon icon icon-md ion-md-call"
-			(click)="attemptCall(user.phone)"
-			[ngClass]="canCall ? 'can-call' : 'can-not-call'"
-		>
-		</ion-icon>
-
-		<span>{{ user.phone || '' }}</span>
-	`,
+		                     <ion-icon
+				                     *ngIf="customer.phone"
+				                     name="call"
+				                     class="call-icon icon icon-md ion-md-call"
+				                     (click)="attemptCall(customer.phone)"
+				                     [ngClass]="canCall ? 'can-call' : 'can-not-call'"
+		                     >
+		                     </ion-icon>
+		
+		                     <span>{{ customer.phone || '' }}</span>
+	                     `,
            })
 export class UserPhoneComponent implements ViewCell, OnInit
 {
-	value: string | number;
-	rowData: any;
+	public value: string | number;
+	public rowData: any;
 	
 	@Input()
-	user: User;
+	public customer: Customer;
 	
-	constructor(private store: Store, public callNumber: CallNumber) {}
+	constructor(private store: Storage, public callNumber: CallNumber) {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		if(this.rowData)
 		{
-			this.user = this.rowData.user;
+			this.customer = this.rowData.customer;
 		}
 	}
 	
-	get canCall()
+	public get canCall(): boolean
 	{
 		if(this.store.platform)
 		{
@@ -49,7 +49,7 @@ export class UserPhoneComponent implements ViewCell, OnInit
 		return false;
 	}
 	
-	attemptCall(phone: string)
+	public attemptCall(phone: string)
 	{
 		if(this.canCall)
 		{
