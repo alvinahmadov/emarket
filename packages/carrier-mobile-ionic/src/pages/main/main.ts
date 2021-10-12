@@ -1,23 +1,16 @@
-import {
-	Component,
-	ViewChild,
-	ElementRef,
-	OnInit,
-	OnDestroy,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, } from '@angular/core';
 
-import { CarrierRouter }          from '@modules/client.common.angular2/routers/carrier-router.service';
-import { Geolocation }            from '@ionic-native/geolocation/ngx';
-import CarrierStatus              from '@modules/server.common/enums/CarrierStatus';
-import { generateObjectIdString } from '@modules/server.common/utils';
-import GeoLocation                from '@modules/server.common/entities/GeoLocation';
-import { Store }                  from '../../services/store.service';
-import IGeoLocation               from '@modules/server.common/interfaces/IGeoLocation';
-import { GeoLocationService }     from '../../services/geo-location.service';
-import { Platform }               from '@ionic/angular';
-import IOrder                     from '@modules/server.common/interfaces/IOrder';
-import { Subject }                from 'rxjs';
-import { takeUntil }              from 'rxjs/operators';
+import { Subject }            from 'rxjs';
+import { takeUntil }          from 'rxjs/operators';
+import { Platform }           from '@ionic/angular';
+import { Geolocation }        from '@ionic-native/geolocation/ngx';
+import IOrder                 from '@modules/server.common/interfaces/IOrder';
+import CarrierStatus          from '@modules/server.common/enums/CarrierStatus';
+import GeoLocation            from '@modules/server.common/entities/GeoLocation';
+import { CommonUtils }        from '@modules/server.common/utilities';
+import { CarrierRouter }      from '@modules/client.common.angular2/routers/carrier-router.service';
+import { Store }              from '../../services/store.service';
+import { GeoLocationService } from '../../services/geo-location.service';
 
 @Component({
 	           selector:    'page-main',
@@ -26,8 +19,8 @@ import { takeUntil }              from 'rxjs/operators';
            })
 export class MainPage implements OnInit, OnDestroy
 {
-	selectedOrder: IOrder;
-	isTakenFromAnotherCarrier: boolean = false;
+	public selectedOrder: IOrder;
+	public isTakenFromAnotherCarrier: boolean = false;
 	private watch: any;
 	private isOnline: boolean;
 	private isMapRendered: boolean;
@@ -42,17 +35,24 @@ export class MainPage implements OnInit, OnDestroy
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.platform.ready().then(() =>
-		                           {
-			                           console.warn('MainPage Loaded');
-			                           this.watchLocation();
-			                           this.watchOrderStatus();
-		                           });
+		this.platform.ready()
+		    .then(() =>
+		          {
+			          console.warn('MainPage Loaded');
+			          this.watchLocation();
+			          this.watchOrderStatus();
+		          });
 	}
 	
-	watchLocation()
+	public ngOnDestroy(): void
+	{
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
+	
+	public watchLocation()
 	{
 		setInterval(() =>
 		            {
@@ -89,7 +89,8 @@ export class MainPage implements OnInit, OnDestroy
 										                                                          new GeoLocation({
 											                                                                          _createdAt: new Date().toString(),
 											                                                                          _updatedAt: new Date().toString(),
-											                                                                          _id:        generateObjectIdString(),
+											                                                                          _id:        CommonUtils
+													                                                                                      .generateObjectIdString(),
 											                                                                          city:
 											                                                                                      carrier.geoLocation
 													                                                                                      .city,
@@ -109,10 +110,10 @@ export class MainPage implements OnInit, OnDestroy
 											                                                                                      : '',
 											                                                                          loc:        {
 												                                                                          type:        'Point',
-												                                                                          coordinates: [
-													                                                                          currentLong,
-													                                                                          currentLat,
-												                                                                          ],
+												                                                                          coordinates: {
+													                                                                          lat: currentLat,
+													                                                                          lng: currentLong
+												                                                                          },
 											                                                                          },
 										                                                                          })
 								                                                          )
@@ -143,7 +144,7 @@ export class MainPage implements OnInit, OnDestroy
 		            }, 3000);
 	}
 	
-	watchOrderStatus()
+	public watchOrderStatus()
 	{
 		this.store.selectedOrder$
 		    .pipe(takeUntil(this.destroy$))
@@ -153,11 +154,5 @@ export class MainPage implements OnInit, OnDestroy
 					               !!o && !!o.carrier && o.carrier !== this.store.carrierId;
 			               this.selectedOrder = o;
 		               });
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 }
