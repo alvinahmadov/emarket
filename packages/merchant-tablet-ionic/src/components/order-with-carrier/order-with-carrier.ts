@@ -5,24 +5,24 @@ import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale
 import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
 
 @Component({
-	           selector: 'order-with-carrier',
-	           templateUrl: 'order-with-carrier.html',
-	           styleUrls: ['./order-with-carrier.scss'],
+	           selector:    'order-with-carrier',
+	           styleUrls:   ['./order-with-carrier.scss'],
+	           templateUrl: './order-with-carrier.html',
            })
 export class OrderWithCarrierComponent
 {
 	@Input()
-	getWarehouseStatus: () => void;
+	public getWarehouseStatus: () => void;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
 	@Input()
-	onUpdateWarehouseStatus: any;
+	public onUpdateWarehouseStatus: any;
 	
 	constructor(private _translateProductLocales: ProductLocalesService) {}
 	
-	isGivenToCarrier()
+	public isGivenToCarrier(): boolean
 	{
 		return (
 				this.order.warehouseStatus === OrderWarehouseStatus.GivenToCarrier
