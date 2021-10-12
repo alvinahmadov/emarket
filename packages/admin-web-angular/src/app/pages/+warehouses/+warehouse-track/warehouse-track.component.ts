@@ -1,32 +1,31 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
 import { WarehousesService }            from '@app/@core/data/warehouses.service';
 import { environment }                  from 'environments/environment';
-import { Marker }                       from '@agm/core/services/google-maps-types';
 import Warehouse                        from '@modules/server.common/entities/Warehouse';
 import {
-	getCountryName,
-	CountryName,
-}                                       from '@modules/server.common/entities/GeoLocation';
+	getDefaultCountryName,
+	TCountryName,
+}                                       from '@modules/server.common/data/countries';
 import { Location }                     from '@angular/common';
 
 @Component({
 	           templateUrl: './warehouse-track.component.html',
-	           styleUrls: ['./warehouse-track.component.scss'],
+	           styleUrls:   ['./warehouse-track.component.scss'],
            })
 export class WarehouseTrackComponent implements OnInit
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: any;
-	map: google.maps.Map;
+	public gmapElement: any;
+	public map: google.maps.Map;
 	
-	merchantMarkers: any[] = [];
-	merchants: Warehouse[] = [];
-	listOfCities: string[] = [];
-	listOfCountries: CountryName[] = [];
-	listOfMerchants: string[];
-	merchantCity: string;
-	merchantName: string;
-	merchantCountry: CountryName;
+	public merchantMarkers: any[] = [];
+	public merchants: Warehouse[] = [];
+	public listOfCities: string[] = [];
+	public listOfCountries: TCountryName[] = [];
+	public listOfMerchants: string[];
+	public merchantCity: string;
+	public merchantName: string;
+	public merchantCountry: TCountryName;
 	
 	constructor(
 			private warehouseService: WarehousesService,
@@ -34,63 +33,64 @@ export class WarehouseTrackComponent implements OnInit
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.showMap();
 		
-		const warehouseService = this.warehouseService
-		                             .getStoreLivePosition()
-		                             .subscribe((store) =>
-		                                        {
-			                                        this.merchants = store;
+		this.warehouseService
+		    .getStoreLivePosition()
+		    .subscribe((store) =>
+		               {
+			               this.merchants = store;
 			
-			                                        if(this.merchantMarkers.length === 0)
-			                                        {
-				                                        this.listOfCities = Array.from(
-						                                        new Set(store.map((mer) => mer.geoLocation.city))
-				                                        ).sort();
-				                                        this.listOfCountries = Array.from(
-						                                        new Set(
-								                                        store.map((mer) =>
-										                                                  getCountryName(mer.geoLocation.countryId)
-								                                        )
-						                                        )
-				                                        ).sort();
-				                                        this.listOfMerchants = this.setSort(
-						                                        store.map((mer) => mer.name)
-				                                        );
-				                                        this.populateMarkers(store, this.merchantMarkers);
-			                                        }
-			                                        else if(store.length === this.merchantMarkers.length)
-			                                        {
-				                                        this.updateMarkers(store);
-			                                        }
-			                                        else
-			                                        {
-				                                        this.updateMarkers(store);
-			                                        }
-		                                        });
+			               if(this.merchantMarkers.length === 0)
+			               {
+				               this.listOfCities = Array.from(
+						               new Set(store.map((mer) => mer.geoLocation.city))
+				               ).sort();
+				               this.listOfCountries = Array.from(
+						               new Set(
+								               store.map(
+										               (mer) =>
+												               getDefaultCountryName(mer.geoLocation.countryId)
+								               )
+						               )
+				               ).sort();
+				               this.listOfMerchants = this.setSort(
+						               store.map((mer) => mer.name)
+				               );
+				               this.populateMarkers(store, this.merchantMarkers);
+			               }
+			               else if(store.length === this.merchantMarkers.length)
+			               {
+				               this.updateMarkers(store);
+			               }
+			               else
+			               {
+				               this.updateMarkers(store);
+			               }
+		               });
 	}
 	
-	setSort(arr: any): any[]
+	public setSort(arr: any): any[]
 	{
 		return Array.from(new Set(arr)).sort();
 	}
 	
-	showMap()
+	public showMap()
 	{
 		const lat = environment.DEFAULT_LATITUDE;
 		const lng = environment.DEFAULT_LONGITUDE;
 		
 		const mapProp = {
-			center: new google.maps.LatLng(lat, lng),
-			zoom: 15,
+			center:    new google.maps.LatLng(lat, lng),
+			zoom:      15,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 	}
 	
-	filterByName(event)
+	public filterByName(event)
 	{
 		if(event)
 		{
@@ -109,7 +109,7 @@ export class WarehouseTrackComponent implements OnInit
 		}
 	}
 	
-	filterByCity(event)
+	public filterByCity(event)
 	{
 		if(event)
 		{
@@ -131,7 +131,7 @@ export class WarehouseTrackComponent implements OnInit
 		}
 	}
 	
-	filterByCountry(event)
+	public filterByCountry(event)
 	{
 		if(event)
 		{
@@ -141,7 +141,7 @@ export class WarehouseTrackComponent implements OnInit
 			this.deleteMarkerStorage();
 			const filteredMerchants = this.merchants.filter(
 					(mer) =>
-							getCountryName(mer.geoLocation.countryId) ===
+							getDefaultCountryName(mer.geoLocation.countryId) ===
 							this.merchantCountry
 			);
 			this.listOfCities = this.setSort(
@@ -159,7 +159,7 @@ export class WarehouseTrackComponent implements OnInit
 		}
 	}
 	
-	populateMarkers(merchantArray, markerStorage)
+	public populateMarkers(merchantArray, markerStorage)
 	{
 		const latlngbounds = new google.maps.LatLngBounds();
 		
@@ -178,7 +178,7 @@ export class WarehouseTrackComponent implements OnInit
 		this.map.fitBounds(latlngbounds);
 	}
 	
-	updateMarkers(merchantArray: Warehouse[])
+	public updateMarkers(merchantArray: Warehouse[])
 	{
 		merchantArray.forEach((mer, index) =>
 		                      {
@@ -211,7 +211,7 @@ export class WarehouseTrackComponent implements OnInit
 		                      });
 	}
 	
-	deleteMarkerStorage()
+	public deleteMarkerStorage()
 	{
 		this.merchantMarkers.forEach((mar) =>
 		                             {
@@ -220,7 +220,7 @@ export class WarehouseTrackComponent implements OnInit
 		this.merchantMarkers = [];
 	}
 	
-	addMarker(position, map, icon)
+	public addMarker(position, map, icon)
 	{
 		return new google.maps.Marker({
 			                              position,
@@ -229,7 +229,7 @@ export class WarehouseTrackComponent implements OnInit
 		                              });
 	}
 	
-	goBack()
+	public goBack()
 	{
 		this.location.back();
 	}
