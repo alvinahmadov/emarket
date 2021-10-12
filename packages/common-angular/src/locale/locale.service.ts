@@ -1,13 +1,15 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable }         from '@angular/core';
 import { TranslateService }   from '@ngx-translate/core';
-import {
-	getCountryName,
-	countriesIdsToNamesArrayFn
-}                             from '@modules/server.common/entities/GeoLocation';
 import Country                from '@modules/server.common/enums/Country';
 import { environment as env } from '../environments/environment';
+import {
+	countriesIdsToNamesArrayFn,
+	getCountryName
+}                             from '@modules/server.common/data/countries';
 
-@Injectable()
+@Injectable({
+	            providedIn: 'root'
+            })
 export class LocaleService
 {
 	private readonly _defaultLang: string = env.DEFAULT_LANGUAGE.split('-')[0];
