@@ -1,8 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
-import User                     from '@modules/server.common/entities/User';
 import { ActivatedRoute }       from '@angular/router';
 import { Subscription }         from 'apollo-client/util/Observable';
-import { UsersService }         from '@app/@core/data/users.service';
+import Customer                 from '@modules/server.common/entities/Customer';
+import { CustomersService }     from '@app/@core/data/customers.service';
 
 type UserMetrics = {
 	totalOrders: number;
@@ -11,19 +11,19 @@ type UserMetrics = {
 }
 
 @Component({
-	           selector: 'ea-customer-metrics',
+	           selector:    'ea-customer-metrics',
 	           templateUrl: './ea-customer-metrics.component.html',
            })
 export class CustomerMetricsComponent implements OnDestroy
 {
-	showCode: boolean = false;
-	params$: Subscription;
-	user: User;
-	userMetrics: UserMetrics;
+	public showCode: boolean = false;
+	public params$: Subscription;
+	public customer: Customer;
+	public userMetrics: UserMetrics;
 	
 	constructor(
 			private readonly _router: ActivatedRoute,
-			private userService: UsersService
+			private userService: CustomersService
 	)
 	{
 		this.params$ = this._router
@@ -34,7 +34,7 @@ export class CustomerMetricsComponent implements OnDestroy
 		                              });
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		if(this.params$)
 		{
