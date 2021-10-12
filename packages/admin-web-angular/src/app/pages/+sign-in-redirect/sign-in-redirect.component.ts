@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component }         from '@angular/core';
 import { WarehousesService } from '@app/@core/data/warehouses.service';
 import { Router }            from '@angular/router';
-import { first }             from 'rxjs/operators';
 
 @Component({
-	           template: ` <h1>Please wait a second...</h1> `,
+	           template: ` <h1>{{ 'SIGN_IN_REDIRECT' | translate }}</h1> `,
            })
 export class SignInRedirectComponent
 {
