@@ -1,15 +1,17 @@
 import { NgModule }                from '@angular/core';
 import { RouterModule }            from '@angular/router';
-import { SignInRedirectComponent } from './sign-in-redirect.component';
+import { TranslateModule }         from '@ngx-translate/core';
 import { WarehousesService }       from '@app/@core/data/warehouses.service';
+import { SignInRedirectComponent } from './sign-in-redirect.component';
 
 @NgModule({
-	          imports: [
+	          imports:      [
 		          RouterModule.forChild([
 			                                { path: '', component: SignInRedirectComponent },
 		                                ]),
+		          TranslateModule,
 	          ],
 	          declarations: [SignInRedirectComponent],
-	          providers: [WarehousesService],
+	          providers:    [WarehousesService],
           })
 export class SignInRedirectModule {}
