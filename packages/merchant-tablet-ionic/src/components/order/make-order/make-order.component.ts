@@ -8,42 +8,43 @@ import {
 }                                        from '@angular/core';
 import { LocalDataSource }               from 'ng2-smart-table';
 import { Subject, Observable, forkJoin } from 'rxjs';
-import { MakeOrderInputComponent }       from './make-order-input.component';
+import { takeUntil }                     from 'rxjs/operators';
 import { IOrderCreateInputProduct }      from '@modules/server.common/routers/IWarehouseOrdersRouter';
 import { WarehouseProductsRouter }       from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { takeUntil }                     from 'rxjs/operators';
 import WarehouseProduct                  from '@modules/server.common/entities/WarehouseProduct';
 import { ILocaleMember }                 from '@modules/server.common/interfaces/ILocale';
 import { ProductLocalesService }         from '@modules/client.common.angular2/locale/product-locales.service';
-import { WarehouseOrdersService }        from '../../../services/warehouse-orders.service';
 import { TranslateService }              from '@ngx-translate/core';
 import { AlertController }               from '@ionic/angular';
 import DeliveryType                      from '@modules/server.common/enums/DeliveryType';
+import { MakeOrderInputComponent }       from './make-order-input.component';
+import { MakeOrderCommentComponent }     from './order-comment/make-order-comment.component';
+import { WarehouseOrdersService }        from '../../../services/warehouse-orders.service';
 
 @Component({
-	           selector: 'make-order',
+	           selector:    'make-order',
 	           templateUrl: './make-order.component.html',
-	           styleUrls: ['./make-order.component.scss'],
+	           styleUrls:   ['./make-order.component.scss'],
            })
 export class MakeOrderComponent implements OnInit, OnDestroy
 {
 	private ngDestroy$ = new Subject<void>();
 	
 	@Input()
-	customerId: string;
+	public customerId: string;
 	
 	@Input()
-	orderType: DeliveryType;
+	public orderType: DeliveryType;
 	
 	@Input()
-	orderFinishedEmitter: EventEmitter<void>;
+	public orderFinishedEmitter: EventEmitter<void>;
 	
 	@Output()
-	isOrderAllowedEmitter = new EventEmitter<boolean>();
+	public isOrderAllowedEmitter = new EventEmitter<boolean>();
 	
-	settingsSmartTable: any;
-	sourceSmartTable = new LocalDataSource();
-	errorMsg: string = 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.ERROR_MSG';
+	public settingsSmartTable: any;
+	public sourceSmartTable = new LocalDataSource();
+	public errorMsg: string = 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.ERROR_MSG';
 	
 	private _orderProducts: IOrderCreateInputProduct[] = [];
 	
@@ -60,23 +61,29 @@ export class MakeOrderComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	get canOrder(): boolean
-	{
-		return this._orderProducts.some((product) => product.count > 0);
-	}
-	
-	get warehouseId()
-	{
-		return localStorage.getItem('_warehouseId');
-	}
-	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this._loadSettingsSmartTable();
 		this._loadWarehouseProducts();
 	}
 	
-	makeOrder()
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public get canOrder(): boolean
+	{
+		return this._orderProducts.some((product) => product.count > 0);
+	}
+	
+	public get warehouseId()
+	{
+		return localStorage.getItem('_warehouseId');
+	}
+	
+	public makeOrder()
 	{
 		const orderProducts = this._orderProducts.filter(
 				({ count }) => count > 0
@@ -84,10 +91,10 @@ export class MakeOrderComponent implements OnInit, OnDestroy
 		
 		this._warehouseOrdersService
 		    .createOrder({
-			                 userId: this.customerId,
-			                 orderType: this.orderType,
+			                 customerId:  this.customerId,
+			                 orderType:   this.orderType,
 			                 warehouseId: this.warehouseId,
-			                 products: orderProducts,
+			                 products:    orderProducts,
 		                 })
 		    .pipe(takeUntil(this._ngDestroy$))
 		    .subscribe(
@@ -102,7 +109,7 @@ export class MakeOrderComponent implements OnInit, OnDestroy
 		    );
 	}
 	
-	private _compareByAvailableProducts(_, first, second)
+	private static _compareByAvailableProducts(_, first, second)
 	{
 		const regex = /<div class="text-center"><div class="badge badge-pill badge-secondary text-center">([0-9]+)<\/div><\/div>/gm;
 		
@@ -141,7 +148,8 @@ export class MakeOrderComponent implements OnInit, OnDestroy
 				{
 					return {
 						productId: wp.productId,
-						count: 0,
+						count:     0,
+						comment:   '',
 					};
 				}
 		);
@@ -150,26 +158,27 @@ export class MakeOrderComponent implements OnInit, OnDestroy
 				(wp: WarehouseProduct) =>
 				{
 					return {
-						img: `
+						img:       `
 						<img src="${this._getTranslate(wp.product['images'])}" height="68px"/>
 					`,
-						product: `
+						product:   `
 						<span class="float-left">${this._getTranslate(wp.product['title'])}</span>
 					`,
-						price: `<div class="text-center">$${wp.price}</div>`,
+						price:     `<div class="text-center">$${wp.price}</div>`,
 						available: `
 						<div class="text-center"><div class="badge badge-pill badge-secondary text-center">${wp.count}</div></div>
 					`,
-						amount: { productId: wp.productId, available: wp.count },
+						amount:    { productId: wp.productId, available: wp.count },
+						comment:   { productId: wp.productId },
 					};
 				}
 		);
 		
 		this.sourceSmartTable.setSort([
 			                              {
-				                              field: 'available',
+				                              field:     'available',
 				                              direction: 'desc',
-				                              compare: this._compareByAvailableProducts,
+				                              compare:   MakeOrderComponent._compareByAvailableProducts,
 			                              },
 		                              ]);
 		this.sourceSmartTable.load(productsData);
@@ -192,77 +201,95 @@ export class MakeOrderComponent implements OnInit, OnDestroy
 				getTranslate('PRODUCT'),
 				getTranslate('PRICE'),
 				getTranslate('AVAILABLE'),
-				getTranslate('AMOUNT')
+				getTranslate('AMOUNT'),
+				getTranslate('COMMENT')
 		)
 				.pipe(takeUntil(this.ngDestroy$))
-				.subscribe(([id, image, product, price, available, amount]) =>
+				.subscribe(([id, image, product, price, available, amount, comment]) =>
 				           {
 					           this.settingsSmartTable = {
 						           actions: false,
-						           pager: { perPage: 3 },
+						           pager:   { perPage: 3 },
 						           columns: {
-							           img: {
-								           title: image,
+							           img:       {
+								           title:  image,
 								           filter: false,
-								           type: 'html',
-								           width: '50px',
+								           type:   'html',
+								           width:  '50px',
 							           },
-							           product: {
+							           product:   {
 								           title: product,
-								           type: 'html',
+								           type:  'html',
 							           },
-							           price: {
-								           title: price,
-								           filter: false,
-								           type: 'html',
+							           price:     {
+								           title:           price,
+								           filter:          false,
+								           type:            'html',
 								           compareFunction: (_, first, second) =>
-								           {
-									           const matchFirst = +first.replace('$', '');
-									           const matchSecond = +second.replace('$', '');
-									           return _ > 0
-									                  ? matchFirst - matchSecond
-									                  : matchSecond - matchFirst;
-								           },
+								                            {
+									                            const matchFirst = +first.replace('$', '');
+									                            const matchSecond = +second.replace('$', '');
+									                            return _ > 0
+									                                   ? matchFirst - matchSecond
+									                                   : matchSecond - matchFirst;
+								                            },
 							           },
 							           available: {
-								           title: available,
-								           type: 'html',
-								           filter: false,
-								           compareFunction: this._compareByAvailableProducts,
+								           title:           available,
+								           type:            'html',
+								           filter:          false,
+								           compareFunction: MakeOrderComponent._compareByAvailableProducts,
 							           },
-							           amount: {
-								           title: amount,
-								           filter: false,
-								           type: 'custom',
-								           renderComponent: MakeOrderInputComponent,
+							           amount:    {
+								           title:                   amount,
+								           filter:                  false,
+								           type:                    'custom',
+								           renderComponent:         MakeOrderInputComponent,
 								           onComponentInitFunction: (
-										           childInstance: MakeOrderInputComponent
-								           ) =>
-								           {
-									           childInstance.amount
-									                        .pipe(takeUntil(this._ngDestroy$))
-									                        .subscribe((count) =>
-									                                   {
-										                                   const wProduct = this._orderProducts.find(
-												                                   ({ productId }) =>
-														                                   productId ===
-														                                   childInstance.productId
-										                                   );
-										                                   wProduct.count = count;
-										                                   this.isOrderAllowedEmitter.emit(
-												                                   this.canOrder
-										                                   );
-									                                   });
-								           },
+										                                    childInstance: MakeOrderInputComponent
+								                                    ) =>
+								                                    {
+									                                    childInstance.amount
+									                                                 .pipe(takeUntil(this._ngDestroy$))
+									                                                 .subscribe((count) =>
+									                                                            {
+										                                                            const wProduct = this._orderProducts.find(
+												                                                            ({ productId }) =>
+														                                                            productId ===
+														                                                            childInstance.productId
+										                                                            );
+										                                                            wProduct.count = count;
+										                                                            this.isOrderAllowedEmitter.emit(
+												                                                            this.canOrder
+										                                                            );
+									                                                            });
+								                                    },
+							           },
+							           comment:   {
+								           title:                   comment,
+								           filter:                  false,
+								           type:                    'custom',
+								           renderComponent:         MakeOrderCommentComponent,
+								           onComponentInitFunction: (
+										                                    childInstance: MakeOrderCommentComponent
+								                                    ) =>
+								                                    {
+									                                    childInstance.comment
+									                                                 .pipe(takeUntil(this._ngDestroy$))
+									                                                 .subscribe((comment) =>
+									                                                            {
+										                                                            const wProduct = this._orderProducts.find(
+												                                                            ({ productId }) =>
+														                                                            productId ===
+														                                                            childInstance.productId
+										                                                            );
+										
+										                                                            wProduct.comment = comment;
+									                                                            });
+								                                    },
 							           },
 						           },
 					           };
 				           });
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 }
