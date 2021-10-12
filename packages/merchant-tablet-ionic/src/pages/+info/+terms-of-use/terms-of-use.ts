@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { UserRouter }                   from '@modules/client.common.angular2/routers/user-router.service';
 import { Subscription }                 from 'rxjs';
+import { Storage }                      from 'services/storage.service'
+import { CustomerRouter }               from '@modules/client.common.angular2/routers/customer-router.service';
 
 @Component({
-	           selector: 'page-terms-of-use',
-	           templateUrl: 'terms-of-use.html',
+	           selector:    'page-terms-of-use',
+	           templateUrl: './terms-of-use.html',
            })
 export class TermsOfUsePage implements OnInit, OnDestroy
 {
@@ -14,16 +15,20 @@ export class TermsOfUsePage implements OnInit, OnDestroy
 	public deviceId: string;
 	public userId: string;
 	
-	constructor(private userRouter: UserRouter)
+	constructor(
+			private customerRouter: CustomerRouter,
+			private storage: Storage
+	)
 	{
-		this.selectedLanguage = localStorage.getItem('_language') || 'en-US';
-		this.deviceId = localStorage.getItem('_deviceId');
-		this.userId = localStorage.getItem('_userId');
+		
+		this.selectedLanguage = this.storage.language || 'en-US';
+		this.deviceId = this.storage.deviceId;
+		this.userId = this.storage.merchantId;
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.sub = this.userRouter
+		this.sub = this.customerRouter
 		               .getTermsOfUse(this.userId, this.deviceId, this.selectedLanguage)
 		               .subscribe((html) =>
 		                          {
@@ -31,7 +36,7 @@ export class TermsOfUsePage implements OnInit, OnDestroy
 		                          });
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.sub.unsubscribe();
 	}
