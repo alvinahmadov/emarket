@@ -46,7 +46,6 @@ import { CustomersAuthService }                     from './customers/CustomersA
 import { WarehousesAuthService, WarehousesService } from './warehouses';
 import { createLogger }                             from '../helpers/Log';
 import { ConfigService }                            from '../config/config.service';
-import { getHostAndPort }                           from '../utils';
 import { env }                                      from '../env';
 
 // local IPs
@@ -502,8 +501,8 @@ export class ServicesApp
 		
 		this.httpServer.setTimeout(timeout);
 		
-		const [httpsHost, httpsPort] = getHostAndPort(env.HTTPS_SERVICES_ENDPOINT);
-		const [httpHost, httpPort] = getHostAndPort(env.SERVICES_ENDPOINT);
+		const [httpsHost, httpsPort] = CommonUtils.getHostAndPort(env.HTTPS_SERVICES_ENDPOINT);
+		const [httpHost, httpPort] = CommonUtils.getHostAndPort(env.SERVICES_ENDPOINT);
 		
 		this.expressApp.set('httpsHost', httpsHost);
 		this.expressApp.set('httpsPort', httpsPort);
@@ -524,7 +523,18 @@ export class ServicesApp
 		}
 		
 		const corsOptions = {
-			origin:      origins,
+			origin:      (origin, cb) =>
+			             {
+				             if(origins.indexOf(origin) !== -1)
+				             {
+					             cb(null, true)
+				             }
+				             else
+				             {
+					             cb(new Error('Not allowed by CORS'))
+				             }
+			             },
+			allowedHeader: ['Access-Control-Allow-Origin'],
 			credentials: true
 		};
 		
