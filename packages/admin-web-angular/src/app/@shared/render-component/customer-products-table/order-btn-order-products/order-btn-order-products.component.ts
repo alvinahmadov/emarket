@@ -1,53 +1,52 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ViewCell }                 from 'ng2-smart-table';
-import { CustomOrderComponent }     from '../../../../pages/+customers/+customer/ea-customer-products/custom-order';
 import { NgbModal }                 from '@ng-bootstrap/ng-bootstrap';
+import { ViewCell }                 from 'ng2-smart-table';
 import Product                      from '@modules/server.common/entities/Product';
+import { CustomOrderComponent }     from '@app/pages/+customers/+customer/ea-customer-products/custom-order';
 
 @Component({
 	           templateUrl: './order-btn-order-products.component.html',
            })
 export class OrderBtnOrderProductsComponent implements ViewCell, OnInit
 {
-	value: string | number;
+	public value: string | number;
 	
 	@Input()
-	rowData: any;
+	public rowData: any;
 	
 	@Input()
-	availableProducts: Product[];
+	public availableProducts: Product[];
 	
 	@Input()
-	userId: string;
+	public customerId: string;
 	
 	private productId: string;
 	
 	constructor(private readonly modalService: NgbModal) {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.productId = this.rowData.warehouseProduct.product.id;
 	}
 	
-	openModal()
+	public openModal()
 	{
 		const productsArray: any = this.availableProducts;
 		if(productsArray)
 		{
 			localStorage.setItem('ever_customOrderProductId', this.productId);
-			const currProduct = productsArray.find((x) =>
-			                                       {
-				                                       return x.warehouseProduct.product.id === this.productId;
-			                                       });
+			const currProduct = productsArray.find(
+					(x) => x.warehouseProduct.product.id === this.productId
+			);
 			const activeModal = this.modalService.open(CustomOrderComponent, {
-				size: 'lg',
+				size:      'lg',
 				container: 'nb-layout',
 			});
 			
 			const modalComponent: CustomOrderComponent =
-					activeModal.componentInstance;
+					      activeModal.componentInstance;
 			modalComponent.warehouseId = currProduct.warehouseId;
-			modalComponent.userId = this.userId;
+			modalComponent.customerId = this.customerId;
 			modalComponent.currentProduct = currProduct;
 		}
 	}
