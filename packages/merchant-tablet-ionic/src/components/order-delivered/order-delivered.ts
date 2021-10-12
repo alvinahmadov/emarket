@@ -5,15 +5,15 @@ import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale
 
 @Component({
 	           selector: 'order-delivered',
-	           templateUrl: 'order-delivered.html',
+	           templateUrl: './order-delivered.html',
            })
 export class OrderDeliveredComponent
 {
 	@Input()
-	getWarehouseStatus: () => void;
+	public getWarehouseStatus: () => void;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
 	constructor(private _translateProductLocales: ProductLocalesService) {}
 	
