@@ -1,8 +1,8 @@
+import { Column }                                        from 'typeorm';
 import Product                                           from './Product';
 import { Schema, DBObject, ModelName, getSchema, Types } from '../@pyro/db';
 import IOrderProduct                                     from '../interfaces/IOrderProduct';
 import { IOrderProductCreateObject }                     from '../interfaces/IOrderProduct';
-import { Column }                                        from 'typeorm';
 
 /**
  * Store Product information inside Order (similar to OrderLineItem concept)
@@ -15,16 +15,28 @@ import { Column }                                        from 'typeorm';
 class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 		implements IOrderProduct
 {
-	// current price of the Product (could be lower or higher compared to initial price)
+	/**
+	 * Current price of the Product (could be lower or higher compared to initial price)
+	 *
+	 * @type {number}
+	 * @memberOf OrderProduct
+	 * */
 	@Types.Number()
 	@Column()
 	price: number;
-	// initial price of the Product
+	
+	/**
+	 * Initial price of the Product
+	 *
+	 * @type {number}
+	 * @memberOf OrderProduct
+	 * */
 	@Types.Number()
 	@Column()
 	initialPrice: number;
+	
 	/**
-	 * Qty of purchased products
+	 * Quantity of purchased products
 	 *
 	 * @type {number}
 	 * @memberof OrderProduct
@@ -32,6 +44,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	@Types.Number(0)
 	@Column()
 	count: number;
+	
 	/**
 	 * Product (not ref)
 	 *
@@ -40,6 +53,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	 */
 	@Schema(getSchema(Product))
 	product: Product;
+	
 	/**
 	 * Is product(s) require manufacturing
 	 *
@@ -49,6 +63,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isManufacturing: boolean;
+	
 	/**
 	 * Is product(s) becomes available for purchase only when carrier found
 	 *
@@ -58,6 +73,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isCarrierRequired: boolean;
+	
 	/**
 	 * Should product be delivered by carrier or it's pickup (takeaway)
 	 *
@@ -67,6 +83,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	@Types.Boolean(true)
 	@Column()
 	isDeliveryRequired: boolean;
+	
 	/**
 	 * Is it Takeaway order (including in-store purchase)
 	 *
@@ -76,6 +93,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	@Schema({ required: false, type: Boolean })
 	@Column()
 	isTakeaway?: boolean;
+	
 	/**
 	 * Min delivery time (in minutes)
 	 *
@@ -85,6 +103,7 @@ class OrderProduct extends DBObject<IOrderProduct, IOrderProductCreateObject>
 	@Schema({ required: false, type: Number })
 	@Column()
 	deliveryTimeMin?: number;
+	
 	/**
 	 * Max delivery time (in minutes)
 	 *
