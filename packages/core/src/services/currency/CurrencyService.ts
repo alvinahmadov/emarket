@@ -48,8 +48,6 @@ export class CurrenciesService extends DBService<Currency> implements IService
 	
 	async getAllCurrencies(): Promise<Currency[]>
 	{
-		return await this.find({
-			                       isDeleted: { $eq: false }
-		                       });
+		return this.find({ isDeleted: { $eq: false } });
 	}
 }
