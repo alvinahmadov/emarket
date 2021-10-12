@@ -35,7 +35,7 @@ export interface JwtPayload
 export function createToken(id: string, appName: JwtAppType)
 {
 	const user: JwtPayload = { id, appName };
-	return jwt.sign(user, 'secretKey', {
+	return jwt.sign(user, env.JWT_SECRET, {
 		expiresIn: jwtExpires
 	});
 }
