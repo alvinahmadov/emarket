@@ -12,9 +12,9 @@ import { CustomersService }             from '@app/@core/data/customers.service'
            })
 export class CustomerComponent implements OnInit, OnDestroy
 {
-	customer$: Observable<Customer>;
-	customers: Customer[] = [];
-	selectedCustomer: Customer;
+	public customer$: Observable<Customer>;
+	public customers: Customer[] = [];
+	public selectedCustomer: Customer;
 	
 	private _ngDestroy$ = new Subject<void>();
 	
@@ -25,7 +25,7 @@ export class CustomerComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.customer$ = this._router.params.pipe(
 				switchMap((p) =>
@@ -40,13 +40,13 @@ export class CustomerComponent implements OnInit, OnDestroy
 		})();
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
 	
-	async loadUsers()
+	public async loadUsers()
 	{
 		this._customersService
 		    .getCustomers()
@@ -58,7 +58,7 @@ export class CustomerComponent implements OnInit, OnDestroy
 		               });
 	}
 	
-	async customerSelect(e)
+	public async customerSelect(e)
 	{
 		this._route.navigate([`/customers/list/${e.id}`]);
 		await this.loadUsers();
