@@ -1,3 +1,15 @@
+input GetGeoLocationWarehousesOptions {
+	activeOnly: Boolean
+	maxDistance: Int
+	inStoreMode: Boolean
+	fullProducts: Boolean
+}
+
 type Query {
-    getCloseMerchants(geoLocation: GeoLocationFindInput!): [Warehouse]!
+	getCloseMerchants(geoLocation: GeoLocationFindInput!): [Warehouse]!
+
+	getNearMerchants(
+		geoLocation: GeoLocationFindInput,
+		options: GetGeoLocationWarehousesOptions
+	): [Warehouse]!
 }
