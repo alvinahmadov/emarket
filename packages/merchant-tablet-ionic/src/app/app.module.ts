@@ -26,23 +26,21 @@ import { Intercom }                         from '@ionic-native/intercom/ngx';
 import { ScreenOrientation }                from '@ionic-native/screen-orientation/ngx';
 import { GraphQLModule }                    from '../graphql/apollo.config';
 import { Camera }                           from '@ionic-native/camera/ngx';
-import { Store }                            from '../services/store.service';
+import { Storage }                          from 'services/storage.service';
 import { UserMutationModule }               from '../@shared/user/mutation/user-mutation.module';
 import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/googlemaps-loader';
 import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
+import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
 import { BarcodeScanner }                   from '@ionic-native/barcode-scanner/ngx';
 import { PagesModuleGuard }                 from '../pages/pages.module.guard';
 import { MaintenanceModuleGuard }           from './+maintenance-info/maintenance-info.module.guard';
 import { ServiceWorkerModule }              from '@angular/service-worker';
 import { Network }                          from '@ionic-native/network/ngx';
 import { Device }                           from '@ionic-native/device/ngx';
-import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
-import { ToastrModule }                     from 'ngx-toastr';
 
 @NgModule({
-	          declarations: [AppComponent],
-	          imports: [
-		          ToastrModule.forRoot(),
+	          declarations:    [AppComponent],
+	          imports:         [
 		          BrowserModule,
 		          AppRoutingModule,
 		          HttpClientModule,
@@ -54,9 +52,9 @@ import { ToastrModule }                     from 'ngx-toastr';
 		          GraphQLModule,
 		          TranslateModule.forRoot({
 			                                  loader: {
-				                                  provide: TranslateLoader,
+				                                  provide:    TranslateLoader,
 				                                  useFactory: HttpLoaderFactory,
-				                                  deps: [HttpClient],
+				                                  deps:       [HttpClient],
 			                                  },
 		                                  }),
 		          CommonModule.forRoot({
@@ -69,7 +67,7 @@ import { ToastrModule }                     from 'ngx-toastr';
 		          }),
 	          ],
 	          entryComponents: [AppComponent],
-	          providers: [
+	          providers:       [
 		          InAppBrowser,
 		          SplashScreen,
 		          StatusBar,
@@ -77,30 +75,30 @@ import { ToastrModule }                     from 'ngx-toastr';
 		          Device,
 		          GoogleMapsLoader,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: googleMapsLoaderFactory,
-			          deps: [GoogleMapsLoader],
-			          multi: true,
+			          deps:       [GoogleMapsLoader],
+			          multi:      true,
 		          },
 		          ServerConnectionService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: serverConnectionFactory,
-			          deps: [ServerConnectionService, Store],
-			          multi: true,
+			          deps:       [ServerConnectionService, Storage],
+			          multi:      true,
 		          },
 		          MaintenanceService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: maintenanceFactory,
-			          deps: [MaintenanceService],
-			          multi: true,
+			          deps:       [MaintenanceService],
+			          multi:      true,
 		          },
 		          // { provide: ErrorHandler, useClass: IonicErrorHandler },
 		          { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		          PagesModuleGuard,
 		          MaintenanceModuleGuard,
-		          Store,
+		          Storage,
 		          CallNumber,
 		          EmailComposer,
 		          Globalization,
@@ -111,7 +109,7 @@ import { ToastrModule }                     from 'ngx-toastr';
 		          Camera,
 		          BarcodeScanner,
 	          ],
-	          bootstrap: [AppComponent],
+	          bootstrap:       [AppComponent],
           })
 export class AppModule
 {
@@ -130,7 +128,7 @@ export function googleMapsLoaderFactory(provider: GoogleMapsLoader)
 
 export function serverConnectionFactory(
 		provider: ServerConnectionService,
-		store: Store
+		store: Storage
 )
 {
 	return () => provider.load(environment.SERVICES_ENDPOINT, store);
