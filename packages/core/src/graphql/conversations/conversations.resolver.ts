@@ -1,8 +1,11 @@
 import { Mutation, Query, Resolver } from '@nestjs/graphql';
-import { UseGuards }                 from '@nestjs/common';
-import { AuthGuard }                 from '@nestjs/passport';
+// import { UseGuards }                 from '@nestjs/common';
+// import { AuthGuard }                 from '@nestjs/passport';
 import { first }                     from 'rxjs/operators';
-import { IConversationCreateObject } from '@modules/server.common/interfaces/IConversation';
+import {
+	IConversationCreateObject,
+	IConversationFindInput
+}                                    from '@modules/server.common/interfaces/IConversation';
 import { ConversationsService }      from '../../services/conversation';
 
 @Resolver('Conversation')
@@ -17,18 +20,22 @@ export class ConversationsResolver
 	}
 	
 	@Query('conversations')
-	async getConversations(_, { findInput })
+	async getConversations(
+			_,
+			{ findInput }: { findInput: IConversationFindInput }
+	)
 	{
-		return this._conversationsService.getAll(findInput).toPromise();
+		return this._conversationsService.getConversations(findInput).toPromise();
 	}
 	
 	@Mutation()
-	@UseGuards(AuthGuard('jwt'))
+	// @UseGuards(AuthGuard('jwt'))
 	async createConversation(
 			_,
 			{ createInfo }: { createInfo: IConversationCreateObject }
 	)
 	{
+		console.log(createInfo)
 		return this._conversationsService.createConversation(createInfo);
 	}
 	

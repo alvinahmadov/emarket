@@ -28,11 +28,10 @@ type Query {
 
 input ConversationCreateInput {
 	channelId: String!
-
 	participants: [String]
 	# default ru-RU
-	language: String
-	type: String
+	platform: String
+	locale: String
 }
 
 type Mutation {
