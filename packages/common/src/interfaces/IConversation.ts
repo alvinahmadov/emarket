@@ -13,6 +13,11 @@ export interface IConversationCreateObject extends DBCreateObject
 	channelId: string;
 	
 	/**
+	 * Ids of users participating in conversation
+	 * */
+	participants?: string[];
+	
+	/**
 	 * Platform of owner
 	 *
 	 * @default browser
@@ -29,6 +34,14 @@ export interface IConversationCreateObject extends DBCreateObject
 	 * @type {string}
 	 * @memberOf IConversationCreateObject
 	 * */
+	locale?: string;
+}
+
+export interface IConversationFindInput
+{
+	channelId?: string;
+	participants?: string[];
+	platform?: IPlatform;
 	locale?: string;
 }
 
