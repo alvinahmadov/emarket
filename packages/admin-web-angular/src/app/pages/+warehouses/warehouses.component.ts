@@ -22,6 +22,7 @@ import { WarehouseViewModel }                  from '@app/models/WarehouseViewMo
 
 const perPage = 5;
 
+// noinspection JSMismatchedCollectionQueryUpdate,JSUnusedLocalSymbols
 @Component({
 	           selector:    'ea-warehouses',
 	           templateUrl: './warehouses.component.html',
@@ -60,7 +61,7 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 	
 	public ngAfterViewInit()
 	{
-		this._addCustomHTMLElements();
+		WarehousesComponent._addCustomHTMLElements();
 		this._applyTranslationOnSmartTable();
 		this.smartTableChange();
 		this._loadDataSmartTable();
@@ -97,7 +98,7 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 		
 		await modalComponent.confirmEvent
 		                    .pipe(takeUntil(modalComponent.ngDestroy$))
-		                    .subscribe((dataEvent) =>
+		                    .subscribe(() =>
 		                               {
 			                               const idsForDelete: string[] = this._selectedWarehouses.map(
 					                               (w) => w.id
@@ -131,8 +132,10 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 		                               });
 	}
 	
-	// This is just workaround to show some search icon on smart table, in the future maybe we must find better solution.
-	private _addCustomHTMLElements(): any
+	// This is just workaround to show some search
+	// icon on smart table, in the future maybe we
+	// must find better solution.
+	private static _addCustomHTMLElements(): any
 	{
 		document.querySelector(
 				'tr.ng2-smart-filters > th:nth-child(1)'
