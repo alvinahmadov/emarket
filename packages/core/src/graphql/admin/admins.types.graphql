@@ -1,15 +1,17 @@
+# noinspection GraphQLTypeRedefinition
 type Admin {
     _id: String!
     id: String!
-    name: String!
+    username: String!
     email: String!
-    pictureUrl: String!
+    avatar: String!
+    role: String
     firstName: String
     lastName: String
 }
 
 input AdminCreateInput {
-    name: String!
+    username: String!
     email: String!
     avatar: String!
     firstName: String
@@ -17,9 +19,16 @@ input AdminCreateInput {
 }
 
 input AdminUpdateInput {
-    name: String
+    username: String
     email: String
     avatar: String
+    firstName: String
+    lastName: String
+}
+
+input AdminFindInput {
+    username: String
+    email: String
     firstName: String
     lastName: String
 }
@@ -42,6 +51,7 @@ input AdminPasswordUpdateInput {
 type Query {
     adminByEmail(email: String!): Admin
     admin(id: String!): Admin
+    adminSearch(findInput: AdminFindInput): Admin
     adminAuthenticated: Boolean!
 }
 
