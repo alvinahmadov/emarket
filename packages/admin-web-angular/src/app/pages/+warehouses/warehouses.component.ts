@@ -4,36 +4,35 @@ import { ToasterService }                      from 'angular2-toaster';
 import { NgbModal }                            from '@ng-bootstrap/ng-bootstrap';
 import { LocalDataSource }                     from 'ng2-smart-table';
 import { TranslateService }                    from '@ngx-translate/core';
-import { WarehousesService }                   from '../../@core/data/warehouses.service';
-import { OrdersService }                       from '../../@core/data/orders.service';
 import Warehouse                               from '@modules/server.common/entities/Warehouse';
 import { Observable, forkJoin, Subject }       from 'rxjs';
-import _                                       from 'lodash';
 import { takeUntil }                           from 'rxjs/operators';
 import { DomSanitizer }                        from '@angular/platform-browser';
-import { WarehouseViewModel }                  from '../../models/WarehouseViewModel';
-import { WarehouseMutationComponent }          from '../../@shared/warehouse/warehouse-mutation';
-import { RedirectNameComponent }               from '../../@shared/render-component/name-redirect/name-redirect.component';
-import { WarehouseActionsComponent }           from '../../@shared/render-component/warehouse-table/warehouse-actions/warehouse-actions.component';
-import { WarehouseImageComponent }             from '../../@shared/render-component/warehouse-table/warehouse-image/warehouse-image.component';
-import { WarehouseOrdersNumberComponent }      from '../../@shared/render-component/warehouse-table/warehouse-orders-number/warehouse-orders-number.component';
-import { ConfimationModalComponent }           from '../../@shared/confirmation-modal/confirmation-modal.component';
-import { WarehouseEmailComponent }             from '../../@shared/render-component/warehouse-table/warehouse-email/warehouse-email.component';
-import { WarehousePhoneComponent }             from '../../@shared/render-component/warehouse-table/warehouse-phone/warehouse-phone.component';
+import { WarehousesService }                   from '@app/@core/data/warehouses.service';
+import { OrdersService }                       from '@app/@core/data/orders.service';
+import { WarehouseMutationComponent }          from '@app/@shared/warehouse/warehouse-mutation';
+import { RedirectNameComponent }               from '@app/@shared/render-component/name-redirect/name-redirect.component';
+import { WarehouseActionsComponent }           from '@app/@shared/render-component/warehouse-table/warehouse-actions/warehouse-actions.component';
+import { WarehouseImageComponent }             from '@app/@shared/render-component/warehouse-table/warehouse-image/warehouse-image.component';
+import { WarehouseOrdersNumberComponent }      from '@app/@shared/render-component/warehouse-table/warehouse-orders-number/warehouse-orders-number.component';
+import { ConfimationModalComponent }           from '@app/@shared/confirmation-modal/confirmation-modal.component';
+import { WarehouseEmailComponent }             from '@app/@shared/render-component/warehouse-table/warehouse-email/warehouse-email.component';
+import { WarehousePhoneComponent }             from '@app/@shared/render-component/warehouse-table/warehouse-phone/warehouse-phone.component';
+import { WarehouseViewModel }                  from '@app/models/WarehouseViewModel';
 
 const perPage = 5;
 
 @Component({
-	           selector: 'ea-warehouses',
+	           selector:    'ea-warehouses',
 	           templateUrl: './warehouses.component.html',
-	           styleUrls: ['./warehouses.component.scss'],
+	           styleUrls:   ['./warehouses.component.scss'],
            })
 export class WarehousesComponent implements AfterViewInit, OnDestroy
 {
 	private static noInfoSign = '';
 	public loading: boolean;
-	protected settingsSmartTable: object;
-	protected sourceSmartTable = new LocalDataSource();
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
 	private ngDestroy$ = new Subject<void>();
 	private _selectedWarehouses: WarehouseViewModel[] = [];
 	private dataCount: number;
@@ -53,12 +52,13 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 		this._loadSettingsSmartTable();
 	}
 	
-	get hasSelectedWarehouses(): boolean
+	public ngOnDestroy()
 	{
-		return this._selectedWarehouses.length > 0;
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
 	}
 	
-	ngAfterViewInit()
+	public ngAfterViewInit()
 	{
 		this._addCustomHTMLElements();
 		this._applyTranslationOnSmartTable();
@@ -66,29 +66,34 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 		this._loadDataSmartTable();
 	}
 	
-	createWarehouseModel()
+	public get hasSelectedWarehouses(): boolean
+	{
+		return this._selectedWarehouses.length > 0;
+	}
+	
+	public createWarehouseModel()
 	{
 		this._modalService.open(WarehouseMutationComponent, {
-			size: 'lg',
+			size:      'lg',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 	}
 	
-	selectWarehouseTmp(ev)
+	public selectWarehouseTmp(ev)
 	{
 		this._selectedWarehouses = ev.selected;
 	}
 	
-	async deleteSelectedRows()
+	public async deleteSelectedRows()
 	{
 		const activeModal = this.modalService.open(ConfimationModalComponent, {
-			size: 'sm',
+			size:      'sm',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 		const modalComponent: ConfimationModalComponent =
-				activeModal.componentInstance;
+				      activeModal.componentInstance;
 		
 		await modalComponent.confirmEvent
 		                    .pipe(takeUntil(modalComponent.ngDestroy$))
@@ -126,12 +131,6 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 		                               });
 	}
 	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-	}
-	
 	// This is just workaround to show some search icon on smart table, in the future maybe we must find better solution.
 	private _addCustomHTMLElements(): any
 	{
@@ -166,7 +165,7 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 		
 		this.$merchants = this._warehousesService
 		                      .getStores({
-			                                 skip: perPage * (page - 1),
+			                                 skip:  perPage * (page - 1),
 			                                 limit: perPage,
 		                                 })
 		                      .pipe(takeUntil(this.ngDestroy$))
@@ -189,26 +188,26 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 				                                    );
 				
 				                                    return {
-					                                    id: warehouse.id,
-					                                    image: warehouse.logo || WarehousesComponent.noInfoSign,
-					                                    name: warehouse.name || WarehousesComponent.noInfoSign,
+					                                    id:            warehouse.id,
+					                                    image:         warehouse.logo || WarehousesComponent.noInfoSign,
+					                                    name:          warehouse.name || WarehousesComponent.noInfoSign,
 					                                    email:
-							                                    warehouse.contactEmail ||
-							                                    WarehousesComponent.noInfoSign,
+					                                                   warehouse.contactEmail ||
+					                                                   WarehousesComponent.noInfoSign,
 					                                    phone:
-							                                    warehouse.contactPhone ||
-							                                    WarehousesComponent.noInfoSign,
+					                                                   warehouse.contactPhone ||
+					                                                   WarehousesComponent.noInfoSign,
 					                                    city:
-							                                    warehouse.geoLocation.city ||
-							                                    WarehousesComponent.noInfoSign,
-					                                    address: `st. ${
+					                                                   warehouse.geoLocation.city ||
+					                                                   WarehousesComponent.noInfoSign,
+					                                    address:       `st. ${
 							                                    warehouse.geoLocation.streetAddress ||
 							                                    WarehousesComponent.noInfoSign
 					                                    }, hse. № ${
 							                                    warehouse.geoLocation.house ||
 							                                    WarehousesComponent.noInfoSign
 					                                    }`,
-					                                    ordersQty: merchantOrders ? merchantOrders.ordersCount : 0,
+					                                    ordersQty:     merchantOrders ? merchantOrders.ordersCount : 0,
 					                                    warehouseInfo: warehouse,
 				                                    };
 			                                    });
@@ -248,70 +247,70 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 						([id, image, name, email, phone, city, address, orders]) =>
 						{
 							this.settingsSmartTable = {
-								actions: false,
+								actions:    false,
 								selectMode: 'multi',
-								columns: {
-									images: {
-										title: image,
-										class: 'warehouse-image',
-										type: 'custom',
-										renderComponent: WarehouseImageComponent,
+								columns:    {
+									images:    {
+										title:                   image,
+										class:                   'warehouse-image',
+										type:                    'custom',
+										renderComponent:         WarehouseImageComponent,
 										onComponentInitFunction: (instance) =>
-										{
-											instance.redirectPage = 'stores';
-										},
-										filter: false,
+										                         {
+											                         instance.redirectPage = 'stores';
+										                         },
+										filter:                  false,
 									},
-									name: {
-										title: name,
-										type: 'custom',
-										class: 'warehouse-name',
-										renderComponent: RedirectNameComponent,
+									name:      {
+										title:                   name,
+										type:                    'custom',
+										class:                   'warehouse-name',
+										renderComponent:         RedirectNameComponent,
 										onComponentInitFunction: (instance) =>
-										{
-											instance.redirectPage = 'stores';
-										},
+										                         {
+											                         instance.redirectPage = 'stores';
+										                         },
 									},
-									email: {
-										title: email,
-										type: 'custom',
+									email:     {
+										title:           email,
+										type:            'custom',
 										renderComponent: WarehouseEmailComponent,
-										class: 'warehouse-email',
+										class:           'warehouse-email',
 									},
-									phone: {
-										title: phone,
-										type: 'custom',
+									phone:     {
+										title:           phone,
+										type:            'custom',
 										renderComponent: WarehousePhoneComponent,
-										class: 'warehouse-phone',
+										class:           'warehouse-phone',
 									},
-									city: {
+									city:      {
 										title: city,
 										class: 'warehouse-city',
 									},
-									address: {
+									address:   {
 										title: address,
 										class: 'warehouse-address',
 									},
 									ordersQty: {
-										title: orders,
-										type: 'custom',
-										filter: false,
-										class: 'warehouse-qty',
-										renderComponent: WarehouseOrdersNumberComponent,
+										title:                   orders,
+										type:                    'custom',
+										filter:                  false,
+										class:                   'warehouse-qty',
+										renderComponent:         WarehouseOrdersNumberComponent,
 										onComponentInitFunction: (instance) =>
-										{
-											instance.redirectPage = 'stores';
-										},
+										                         {
+											                         instance.redirectPage = 'stores';
+										                         },
 									},
-									actions: {
-										title: 'Actions',
-										filter: false,
-										type: 'custom',
-										class: 'warehouse-actions',
+									actions:   {
+										title:           'Actions',
+										filter:          false,
+										type:            'custom',
+										class:           'warehouse-actions',
 										renderComponent: WarehouseActionsComponent,
 									},
 								},
-								pager: {
+								pager:      {
 									display: true,
 									perPage,
 								},
@@ -330,7 +329,7 @@ export class WarehousesComponent implements AfterViewInit, OnDestroy
 			               if(event.action === 'page')
 			               {
 				               const page = event.paging.page;
-				               this._loadDataSmartTable(page);
+				               await this._loadDataSmartTable(page);
 			               }
 		               });
 	}
