@@ -1,20 +1,20 @@
 import { Component, OnDestroy }    from '@angular/core';
 import { environment }             from '../../environments/environment';
-import { Store }                   from '../../services/store.service';
+import { Storage }                 from 'services/storage.service';
 import { Location }                from '@angular/common';
 import { ServerConnectionService } from '@modules/client.common.angular2/services/server-connection.service';
 
 @Component({
-	           styleUrls: ['./server-down.page.scss'],
+	           styleUrls:   ['./server-down.page.scss'],
 	           templateUrl: 'server-down.page.html',
            })
 export class ServerDownPage implements OnDestroy
 {
-	noInternetLogo: string;
-	interval;
+	public noInternetLogo: string;
+	public interval: any;
 	
 	constructor(
-			private store: Store,
+			private store: Storage,
 			private location: Location,
 			private serverConnectionService: ServerConnectionService
 	)
@@ -37,10 +37,10 @@ export class ServerDownPage implements OnDestroy
 				                            clearInterval(this.interval);
 				                            this.location.back();
 			                            }
-		                            }, 5000);
+		                            }, 10000);
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		clearInterval(this.interval);
 	}
