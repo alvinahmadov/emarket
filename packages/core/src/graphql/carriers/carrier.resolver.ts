@@ -1,20 +1,21 @@
 import { Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { CarriersService }                         from '../../services/carriers';
 import { default as ICarrier }                     from '@modules/server.common/interfaces/ICarrier';
 import Carrier                                     from '@modules/server.common/entities/Carrier';
 import { first, map }                              from 'rxjs/operators';
-import { DevicesService }                          from '../../services/devices';
 import {
 	ICarrierRegistrationInput,
 	ICarrierLoginResponse
-}                                                  from '@modules/server.common/routers/ICarrierRouter';
+}                                                  from '@modules/server.common/routers/ICarrierAuthRouter';
 import CarrierStatus                               from '@modules/server.common/enums/CarrierStatus';
 import Device                                      from '@modules/server.common/entities/Device';
+import { CarriersAuthService, CarriersService }    from '../../services/carriers';
+import { DevicesService }                          from '../../services/devices';
 
 @Resolver('Carrier')
 export class CarrierResolver
 {
 	constructor(
+			private readonly _carriersAuthService: CarriersAuthService,
 			private readonly _carriersService: CarriersService,
 			private readonly _devicesService: DevicesService
 	)
@@ -96,7 +97,7 @@ export class CarrierResolver
 			{ registerInput }: { registerInput: ICarrierRegistrationInput }
 	): Promise<Carrier>
 	{
-		return this._carriersService.register(registerInput);
+		return this._carriersAuthService.register(registerInput);
 	}
 	
 	@Mutation('updateCarrierStatus')
@@ -105,7 +106,7 @@ export class CarrierResolver
 			{ id, status }: { id: string; status: string }
 	): Promise<void>
 	{
-		this._carriersService.updateStatus(id, CarrierStatus[status]);
+		await this._carriersService.updateStatus(id, CarrierStatus[status]);
 	}
 	
 	@Mutation('updateCarrier')
@@ -129,7 +130,7 @@ export class CarrierResolver
 	async removeCarriersByIds(_, { ids }: { ids: string[] }): Promise<void>
 	{
 		const carriers = await this._carriersService.find({
-			                                                  _id: { $in: ids },
+			                                                  _id:       { $in: ids },
 			                                                  isDeleted: { $eq: false }
 		                                                  });
 		
@@ -158,7 +159,7 @@ export class CarrierResolver
 			{ username, password }: { username: string; password: string }
 	): Promise<ICarrierLoginResponse>
 	{
-		return this._carriersService.login(username, password);
+		return this._carriersAuthService.login(username, password);
 	}
 	
 	@Mutation('updateCarrierPassword')
@@ -170,6 +171,6 @@ export class CarrierResolver
 			}: { id: Carrier['id']; password: { current: string; new: string } }
 	): Promise<void>
 	{
-		return this._carriersService.updatePassword(id, password);
+		return this._carriersAuthService.updatePassword(id, password);
 	}
 }
