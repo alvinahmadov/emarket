@@ -1,39 +1,40 @@
 import { Component, OnInit }     from '@angular/core';
-import { ViewCell }              from 'ng2-smart-table';
-import User                      from '@modules/server.common/entities/User';
 import { ModalController }       from '@ionic/angular';
+import { ViewCell }              from 'ng2-smart-table';
+import Customer                  from '@modules/server.common/entities/Customer';
 import { CustomerAddrPopupPage } from 'pages/+customers/customer-addr-popup/customer-addr-popup';
 
 @Component({
-	           styles: [``],
 	           template: `
-		<span class="underlined" (click)="showAddress(user)">
-			{{ user.geoLocation.city }}
-			<span *ngIf="user.geoLocation.postcode">{{
-				'(' + user.geoLocation.postcode + ')'
-			}}</span>
-		</span>
-	`,
+		                     <span class="underlined"
+		                           (click)="showAddress(customer)">
+			           {{ customer.geoLocation.city }}
+			                     <span *ngIf="customer.geoLocation.postcode">{{
+				                     '(' + customer.geoLocation.postcode + ')'
+				                     }}
+			           </span>
+		           </span>
+	                     `,
            })
 export class AddressComponent implements ViewCell, OnInit
 {
-	value: string | number;
-	rowData: any;
-	user: User;
+	public value: string | number;
+	public rowData: any;
+	public customer: Customer;
 	
 	constructor(public modalCtrl: ModalController) {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.user = this.rowData.user;
+		this.customer = this.rowData.customer;
 	}
 	
-	async showAddress(user: User)
+	public async showAddress(customer: Customer)
 	{
 		const modal = await this.modalCtrl.create({
-			                                          component: CustomerAddrPopupPage,
-			                                          componentProps: { user },
-			                                          cssClass: 'customer-address-popup',
+			                                          component:      CustomerAddrPopupPage,
+			                                          componentProps: { customer },
+			                                          cssClass:       'customer-address-popup',
 		                                          });
 		await modal.present();
 	}
