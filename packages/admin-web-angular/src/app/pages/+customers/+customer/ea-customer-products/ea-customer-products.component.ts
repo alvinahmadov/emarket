@@ -1,47 +1,47 @@
 import { Component, OnDestroy, OnInit }   from '@angular/core';
 import { ActivatedRoute }                 from '@angular/router';
+import { TranslateService }               from '@ngx-translate/core';
 import { LocalDataSource }                from 'ng2-smart-table';
-import Warehouse                          from '@modules/server.common/entities/Warehouse';
-import { UserRouter }                     from '@modules/client.common.angular2/routers/user-router.service';
+import { forkJoin, Observable, Subject }  from 'rxjs';
 import { first, takeUntil }               from 'rxjs/operators';
 import { DomSanitizer }                   from '@angular/platform-browser';
-import { WarehousesService }              from '../../../../@core/data/warehouses.service';
 import ProductInfo                        from '@modules/server.common/entities/ProductInfo';
-import { ProductOrderProductsComponent }  from '../../../../@shared/render-component/customer-products-table/product-order-products.component';
-import { StoreOrderProductsComponent }    from '../../../../@shared/render-component/customer-products-table/store-order-products.component';
-import { OrderBtnOrderProductsComponent } from '../../../../@shared/render-component/customer-products-table/order-btn-order-products/order-btn-order-products.component';
-import { GeoLocationService }             from '../../../../@core/data/geo-location.service';
-import { TranslateService }               from '@ngx-translate/core';
-import { forkJoin, Observable, Subject }  from 'rxjs';
+import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import { CustomerRouter }                 from '@modules/client.common.angular2/routers/customer-router.service';
+import { WarehousesService }              from '@app/@core/data/warehouses.service';
+import { ProductOrderProductsComponent }  from '@app/@shared/render-component/customer-products-table/product-order-products.component';
+import { StoreOrderProductsComponent }    from '@app/@shared/render-component/customer-products-table/store-order-products.component';
+import { OrderBtnOrderProductsComponent } from '@app/@shared/render-component/customer-products-table/order-btn-order-products/order-btn-order-products.component';
+import { GeoLocationService }             from '@app/@core/data/geo-location.service';
 
 @Component({
-	           selector: 'ea-customer-products',
+	           selector:  'ea-customer-products',
 	           styleUrls: ['./ea-customer-products.scss'],
-	           template: `
-		<nb-card>
-			<nb-card-body>
-				<ng2-smart-table
-					[settings]="settingsSmartTable"
-					[source]="sourceSmartTable"
-				></ng2-smart-table>
-			</nb-card-body>
-		</nb-card>
-	`,
+	           template:  `
+		                      <nb-card>
+			                      <nb-card-body>
+				                      <ng2-smart-table
+						                      [settings]="settingsSmartTable"
+						                      [source]="sourceSmartTable"
+				                      ></ng2-smart-table>
+			                      </nb-card-body>
+		                      </nb-card>
+	                      `,
            })
 export class CustomerProductsComponent implements OnDestroy, OnInit
 {
-	settingsSmartTable: object;
-	sourceSmartTable: LocalDataSource = new LocalDataSource();
-	params$: any;
-	availableProductsSubscription$: any;
-	warehouses: Warehouse[];
-	availableProducts: ProductInfo[];
-	userId: string;
+	public settingsSmartTable: object;
+	public sourceSmartTable: LocalDataSource = new LocalDataSource();
+	public params$: any;
+	public availableProductsSubscription$: any;
+	public warehouses: Warehouse[];
+	public availableProducts: ProductInfo[];
+	public customerId: string;
 	private ngDestroy$ = new Subject<void>();
 	
 	constructor(
 			private readonly geoLocationProductService: GeoLocationService,
-			private userRouter: UserRouter,
+			private customerRouter: CustomerRouter,
 			private readonly _router: ActivatedRoute,
 			private readonly _sanitizer: DomSanitizer,
 			private readonly _warehousesService: WarehousesService,
@@ -50,15 +50,15 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 	{
 		this.params$ = this._router.params.subscribe(async(res) =>
 		                                             {
-			                                             this.userId = res.id;
-			                                             const user = await this.userRouter
-			                                                                    .get(this.userId)
+			                                             this.customerId = res.id;
+			                                             const user = await this.customerRouter
+			                                                                    .get(this.customerId)
 			                                                                    .pipe(first())
 			                                                                    .toPromise();
 			
 			                                             if(user == null)
 			                                             {
-				                                             throw new Error(`User can't be found (id: ${this.userId})`);
+				                                             throw new Error(`User can't be found (id: ${this.customerId})`);
 			                                             }
 			
 			                                             this.availableProductsSubscription$ = this.geoLocationProductService
@@ -73,13 +73,13 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 		this._applyTranslationOnSmartTable();
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this._setupSmartTable();
 		this._loadWarehouses();
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		if(this.params$)
 		{
@@ -119,60 +119,60 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 					           this.settingsSmartTable = {
 						           actions: false,
 						           columns: {
-							           Product: {
-								           title: prod,
-								           type: 'custom',
+							           Product:        {
+								           title:           prod,
+								           type:            'custom',
 								           renderComponent: ProductOrderProductsComponent,
 							           },
-							           Price: {
-								           title: price,
-								           type: 'html',
+							           Price:          {
+								           title:                price,
+								           type:                 'html',
 								           valuePrepareFunction: (
-										           val,
-										           product: ProductInfo
-								           ) =>
-								           {
-									           return this._sanitizer.bypassSecurityTrustHtml(
-											           `<div class="product">
+										                                 val,
+										                                 product: ProductInfo
+								                                 ) =>
+								                                 {
+									                                 return this._sanitizer.bypassSecurityTrustHtml(
+											                                 `<div class="product">
 											<p>${product.warehouseProduct.price}</p>
 										</div>
 									</div>`
-									           );
-								           },
+									                                 );
+								                                 },
 							           },
-							           Store: {
-								           title: store,
-								           type: 'custom',
+							           Store:          {
+								           title:           store,
+								           type:            'custom',
 								           renderComponent: StoreOrderProductsComponent,
 							           },
 							           AvailableCount: {
-								           title: availableCount,
-								           type: 'html',
+								           title:                availableCount,
+								           type:                 'html',
 								           valuePrepareFunction: (
-										           val,
-										           product: ProductInfo
-								           ) =>
-								           {
-									           return this._sanitizer.bypassSecurityTrustHtml(
-											           `<div class="product">
+										                                 val,
+										                                 product: ProductInfo
+								                                 ) =>
+								                                 {
+									                                 return this._sanitizer.bypassSecurityTrustHtml(
+											                                 `<div class="product">
 											<h6>${product.warehouseProduct.count}</h6>
 										</div>
 									</div>`
-									           );
-								           },
+									                                 );
+								                                 },
 							           },
-							           Order: {
-								           title: order,
-								           type: 'custom',
-								           renderComponent: OrderBtnOrderProductsComponent,
+							           Order:          {
+								           title:                   order,
+								           type:                    'custom',
+								           renderComponent:         OrderBtnOrderProductsComponent,
 								           onComponentInitFunction: async(instance) =>
-								           {
-									           instance.userId = this.userId;
-									           instance.availableProducts = this.availableProducts;
-								           },
+								                                    {
+									                                    instance.customerId = this.customerId;
+									                                    instance.availableProducts = this.availableProducts;
+								                                    },
 							           },
 						           },
-						           pager: {
+						           pager:   {
 							           display: true,
 							           perPage: 3,
 						           },
