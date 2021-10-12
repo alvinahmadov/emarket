@@ -16,11 +16,11 @@ import ILanguage               from '@modules/server.common/interfaces/ILanguage
 import IPlatform               from '@modules/server.common/interfaces/IPlatform';
 import { IDeviceCreateObject } from '@modules/server.common/interfaces/IDevice';
 import { Router }              from '@angular/router';
-import { Store }               from '../services/store.service';
+import { Storage }             from 'services/storage.service';
 import { environment }         from '../environments/environment';
 
 @Component({
-	           selector: 'e-cu-root',
+	           selector:    'e-cu-root',
 	           templateUrl: 'app.component.html',
            })
 export class AppComponent
@@ -29,7 +29,7 @@ export class AppComponent
 			public platform: Platform,
 			public statusBar: StatusBar,
 			public splashScreen: SplashScreen,
-			private readonly store: Store,
+			private readonly store: Storage,
 			private readonly router: Router,
 			private readonly location: Location,
 			private globalization: Globalization,
@@ -46,10 +46,10 @@ export class AppComponent
 		this.initializeApp();
 	}
 	
-	rootPage: any;
-	defaultLanguage = '';
+	public rootPage: any;
+	public defaultLanguage = '';
 	
-	initializeApp()
+	public initializeApp()
 	{
 		this.platform
 		    .ready()
@@ -91,7 +91,6 @@ export class AppComponent
 			          if(!this.deviceId)
 			          {
 				          this._registerDevice()
-				              .then(r => console.log(r))
 				              .catch(e => console.error(e));
 			          }
 			
@@ -101,12 +100,12 @@ export class AppComponent
 		          });
 	}
 	
-	get deviceId()
+	public get deviceId()
 	{
 		return localStorage.getItem('_deviceId');
 	}
 	
-	startGoogleAnalytics()
+	public startGoogleAnalytics()
 	{
 		setTimeout(() =>
 		           {
@@ -123,36 +122,35 @@ export class AppComponent
 		           }, 3000);
 	}
 	
-	preferredLanguage()
+	public preferredLanguage()
 	{
 		this.globalization
 		    .getPreferredLanguage()
-		    .then(res => this.store.language = res.value.substr(0, 2))
-		    .catch(console.log);
+		    .then(res => this.store.language = res.value.substr(0, 2));
 	}
 	
-	deviceCreateObject(): IDeviceCreateObject
+	public deviceCreateObject(): IDeviceCreateObject
 	{
 		const language = localStorage.getItem('_language') || 'ru-RU';
 		if(!this.device.platform || this.device.platform === 'browser')
 		{
 			return {
 				channelId: null,
-				language: language as ILanguage,
-				type: 'browser' as IPlatform,
+				language:  language as ILanguage,
+				type:      'browser' as IPlatform,
 				// have to find way how to generate it from browser
 				uuid: environment.FAKE_UUID,
 			};
 		}
 		return {
 			channelId: null,
-			language: language as ILanguage,
-			type: this.device.platform as IPlatform,
-			uuid: this.device.uuid,
+			language:  language as ILanguage,
+			type:      this.device.platform as IPlatform,
+			uuid:      this.device.uuid,
 		};
 	}
 	
-	startMixpanel()
+	public startMixpanel()
 	{
 		this.mixpanel.init(environment.MIXPANEL_API_KEY)
 		    .then(() =>
@@ -162,12 +160,12 @@ export class AppComponent
 		          });
 	}
 	
-	async openPage(page)
+	public async openPage(page)
 	{
 		await this.router.navigate(page.url);
 	}
 	
-	get maintenanceMode()
+	public get maintenanceMode(): string
 	{
 		return this.store.maintenanceMode;
 	}
