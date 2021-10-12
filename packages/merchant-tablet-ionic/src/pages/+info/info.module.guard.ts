@@ -1,12 +1,12 @@
 import { Injectable }             from '@angular/core';
 import { CanLoad, Route, Router } from '@angular/router';
-import { Store }                  from '../../services/store.service';
+import { Storage }                from 'services/storage.service';
 
 @Injectable()
 export class InfoModuleGuard implements CanLoad
 {
 	constructor(
-			private readonly store: Store,
+			private readonly store: Storage,
 			private readonly router: Router
 	)
 	{}
@@ -15,7 +15,7 @@ export class InfoModuleGuard implements CanLoad
 	{
 		if(!this.store.warehouseId || !this.store.deviceId)
 		{
-			this.router.navigate(['login']);
+			this.router.navigate(['auth']);
 			return false;
 		}
 		
