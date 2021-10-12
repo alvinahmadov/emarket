@@ -1,26 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { ViewCell }          from 'ng2-smart-table';
-import User                  from '@modules/server.common/entities/User';
+import Customer              from '@modules/server.common/entities/Customer';
 
 @Component({
-	           selector: 'customer-image-view',
+	           selector:  'customer-image-view',
 	           styleUrls: ['./image.scss'],
-	           template: `
-		<span class="image-component">
-			<img *ngIf="user?.image" src="{{ user.image }}" />
-		</span>
-	`,
+	           template:  `
+		                      <span class="image-component">
+			                      <img *ngIf="customer?.avatar"
+			                           alt="{{ customer.username }}"
+			                           src="{{ customer.avatar }}"/>
+		                      </span>
+	                      `,
            })
 export class ImageUserComponent implements ViewCell, OnInit
 {
-	value: string | number;
-	rowData: any;
-	user: User;
+	public value: string | number;
+	public rowData: any;
+	public customer: Customer;
 	
 	constructor() {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.user = this.rowData.user;
+		this.customer = this.rowData.customer;
 	}
 }
