@@ -1,17 +1,17 @@
 import { Component, OnDestroy, OnInit, Input, OnChanges } from '@angular/core';
-import { UserOrdersRouter }                               from '@modules/client.common.angular2/routers/user-orders-router.service';
-import { ActivatedRoute }                                 from '@angular/router';
-import { LocalDataSource }                                from 'ng2-smart-table';
-import Order                                              from '@modules/server.common/entities/Order';
 import { DatePipe }                                       from '@angular/common';
-import { takeUntil }                                      from 'rxjs/operators';
-import { RedirectStoreComponent }                         from '../../../../@shared/render-component/customer-orders-table/redirect-store/redirect-store.component';
-import { RedirectCarrierComponent }                       from '../../../../@shared/render-component/customer-orders-table/redirect-carrier/redirect-carrier.component';
-import { RedirectOrderComponent }                         from '../../../../@shared/render-component/customer-orders-table/redirect-order.component';
-import { RedirectProductComponent }                       from '../../../../@shared/render-component/customer-orders-table/redirect-product/redirect-product.component';
+import { ActivatedRoute }                                 from '@angular/router';
 import { TranslateService }                               from '@ngx-translate/core';
+import { LocalDataSource }                                from 'ng2-smart-table';
 import { forkJoin, Subject, Observable }                  from 'rxjs';
+import { takeUntil }                                      from 'rxjs/operators';
+import Order                                              from '@modules/server.common/entities/Order';
+import { CustomerOrdersRouter }                           from '@modules/client.common.angular2/routers/customer-orders-router.service';
+import { RedirectCarrierComponent }                       from '@app/@shared/render-component/customer-orders-table/redirect-carrier/redirect-carrier.component';
+import { RedirectOrderComponent }                         from '@app/@shared/render-component/customer-orders-table/redirect-order.component';
 import { CustomerOrderActionsComponent }                  from '@app/@shared/render-component/customer-orders-table/customer-order-actions/customer-order-actions.component';
+import { RedirectStoreComponent }                         from '@app/@shared/render-component/customer-orders-table/redirect-store/redirect-store.component';
+import { RedirectProductComponent }                       from '@app/@shared/render-component/customer-orders-table/redirect-product/redirect-product.component';
 
 @Component({
 	           selector: 'ea-customer-orders',
@@ -21,25 +21,25 @@ import { CustomerOrderActionsComponent }                  from '@app/@shared/ren
 export class CustomerOrdersComponent implements OnDestroy, OnInit, OnChanges
 {
 	@Input()
-	userId: string;
-	settingsSmartTable: object;
-	sourceSmartTable: LocalDataSource = new LocalDataSource();
-	params$: any;
-	orderedProductsSubscription$: any;
+	public customerId: string;
+	public settingsSmartTable: object;
+	public sourceSmartTable: LocalDataSource = new LocalDataSource();
+	public params$: any;
+	public orderedProductsSubscription$: any;
 	private ngDestroy$ = new Subject<void>();
 	
 	constructor(
-			private userOrdersRouter: UserOrdersRouter,
+			private userOrdersRouter: CustomerOrdersRouter,
 			private readonly _router: ActivatedRoute,
 			private _translateService: TranslateService
 	)
 	{
 		this.params$ = this._router.params.subscribe(async(res) =>
 		                                             {
-			                                             const userId = res.id;
+			                                             const customerId: string = res.id;
 			
 			                                             this.orderedProductsSubscription$ = this.userOrdersRouter
-			                                                                                     .get(userId)
+			                                                                                     .get(customerId)
 			                                                                                     .subscribe((orders) =>
 			                                                                                                {
 				                                                                                                this.sourceSmartTable.load(orders);
@@ -48,25 +48,25 @@ export class CustomerOrdersComponent implements OnDestroy, OnInit, OnChanges
 		this._applyTranslationOnSmartTable();
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this._setupSmartTable();
 	}
 	
-	ngOnChanges()
+	public ngOnChanges()
 	{
-		if(this.userId)
+		if(this.customerId)
 		{
 			this.orderedProductsSubscription$ = this.userOrdersRouter
-			                                        .get(this.userId)
-			                                        .subscribe((orders) =>
+			                                        .get(this.customerId)
+			                                        .subscribe((orders: Order[]) =>
 			                                                   {
 				                                                   this.sourceSmartTable.load(orders);
 			                                                   });
 		}
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		if(this.params$)
 		{
