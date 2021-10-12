@@ -1,39 +1,39 @@
 import { Component, OnDestroy, ViewChild, OnInit } from '@angular/core';
-import { ProductLocalesService }                   from '@modules/client.common.angular2/locale/product-locales.service';
-import { ILocaleMember }                           from '@modules/server.common/interfaces/ILocale';
-import ProductInfo                                 from '@modules/server.common/entities/ProductInfo';
-import User                                        from '@modules/server.common/entities/User';
-import { UserMutationComponent }                   from '../../@shared/user/user-mutation';
-import { GeoLocationService }                      from '../../@core/data/geo-location.service';
+import { ToasterService }                          from 'angular2-toaster';
+import { Observable, Subject }                     from 'rxjs';
 import { takeUntil, first }                        from 'rxjs/operators';
-import { Observable, Subject, forkJoin }           from 'rxjs';
 import { TranslateService }                        from '@ngx-translate/core';
 import { NgbModal }                                from '@ng-bootstrap/ng-bootstrap';
-import { UserRouter }                              from '@modules/client.common.angular2/routers/user-router.service';
-import { Store }                                   from '@app/@core/data/store.service';
-import { SimulationProductsComponent }             from './products/products.component';
-import { WarehouseOrdersRouter }                   from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import Order                                       from '@modules/server.common/entities/Order';
-import { OrderRouter }                             from '@modules/client.common.angular2/routers/order-router.service';
-import { InviteRouter }                            from '@modules/client.common.angular2/routers/invite-router.service';
-import { InviteRequestModalComponent }             from '@app/@shared/invite/invite-request/invite-request-modal.component';
-import InviteRequest                               from '@modules/server.common/entities/InviteRequest';
+import { ILocaleMember }                           from '@modules/server.common/interfaces/ILocale';
 import { IInviteCreateObject }                     from '@modules/server.common/interfaces/IInvite';
+import { IOrderCreateInput }                       from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import Customer                                    from '@modules/server.common/entities/Customer';
 import Invite                                      from '@modules/server.common/entities/Invite';
-import { ToasterService }                          from 'angular2-toaster';
+import InviteRequest                               from '@modules/server.common/entities/InviteRequest';
+import Order                                       from '@modules/server.common/entities/Order';
+import ProductInfo                                 from '@modules/server.common/entities/ProductInfo';
+import Warehouse                                   from '@modules/server.common/entities/Warehouse';
+import { ProductLocalesService }                   from '@modules/client.common.angular2/locale/product-locales.service';
+import { CustomerRouter }                          from '@modules/client.common.angular2/routers/customer-router.service';
+import { InviteRouter }                            from '@modules/client.common.angular2/routers/invite-router.service';
+import { OrderRouter }                             from '@modules/client.common.angular2/routers/order-router.service';
+import { WarehouseRouter }                         from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseOrdersRouter }                   from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { GeoLocationService }                      from '@app/@core/data/geo-location.service';
+import { StorageService }                          from '@app/@core/data/store.service';
+import { InviteRequestModalComponent }             from '@app/@shared/invite/invite-request/invite-request-modal.component';
 import { ByCodeModalComponent }                    from '@app/@shared/invite/by-code/by-code-modal.component';
+import { UserMutationComponent }                   from '@app/@shared/user/user-mutation';
+import { SimulationProductsComponent }             from './products/products.component';
 import {
 	SimulationInstructionsComponent,
 	Step,
 }                                                  from './instructions/instructions.component';
-import Warehouse                                   from '@modules/server.common/entities/Warehouse';
-import { WarehouseRouter }                         from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { IOrderCreateInput }                       from '@modules/server.common/routers/IWarehouseOrdersRouter';
 
 @Component({
-	           selector: 'ea-simulation',
+	           selector:    'ea-simulation',
 	           templateUrl: './simulation.component.html',
-	           styleUrls: ['/simulation.component.scss'],
+	           styleUrls:   ['/simulation.component.scss'],
            })
 export class SimulationComponent implements OnDestroy, OnInit
 {
@@ -45,7 +45,7 @@ export class SimulationComponent implements OnDestroy, OnInit
 	
 	public hasProductsForOrder: boolean;
 	public inviteSystem: boolean;
-	public user: User;
+	public customer: Customer;
 	public order: Order;
 	public inviteRequest: InviteRequest;
 	public invite: Invite;
@@ -63,8 +63,8 @@ export class SimulationComponent implements OnDestroy, OnInit
 			private translate: TranslateService,
 			private _productLocalesService: ProductLocalesService,
 			private geoLocationService: GeoLocationService,
-			private store: Store,
-			private readonly userRouter: UserRouter,
+			private storageService: StorageService,
+			private readonly customerRouter: CustomerRouter,
 			private readonly warehouseOrdersRouter: WarehouseOrdersRouter,
 			private readonly orderRouter: OrderRouter,
 			private readonly inviteRouter: InviteRouter,
@@ -81,7 +81,7 @@ export class SimulationComponent implements OnDestroy, OnInit
 		this.inviteSystem = invitesSettings.isEnabled;
 		this.loadButtons = true;
 		this._listenForEntityLocaleTranslate();
-		this._startTracking();
+		await this._startTracking();
 	}
 	
 	ngOnInit(): void
@@ -103,9 +103,9 @@ export class SimulationComponent implements OnDestroy, OnInit
 			this.inviteRequest = await this._modalService.open(
 					InviteRequestModalComponent,
 					{
-						size: 'lg',
+						size:      'lg',
 						container: 'nb-layout',
-						backdrop: 'static',
+						backdrop:  'static',
 					}
 			).result;
 		} catch(error)
@@ -118,7 +118,7 @@ export class SimulationComponent implements OnDestroy, OnInit
 	{
 		this.productsTable.selectProductsChange$
 		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe(async(res) =>
+		    .subscribe(async() =>
 		               {
 			               this.productsCount = this.productsTable.selectedProducts.length;
 			
@@ -157,7 +157,7 @@ export class SimulationComponent implements OnDestroy, OnInit
 			this.hasProductsForOrder = false;
 			
 			const orderProducts = products.map((p) => ({
-				count: 1,
+				count:     1,
 				productId: p.id,
 			}));
 			
@@ -166,13 +166,13 @@ export class SimulationComponent implements OnDestroy, OnInit
 			
 			const orderRouterOptions = {
 				populateWarehouse: true,
-				populateCarrier: true,
+				populateCarrier:   true,
 			};
 			
 			const orderCreateInput: IOrderCreateInput = {
-				userId: this.user.id,
+				customerId: this.customer.id,
 				warehouseId,
-				products: orderProducts,
+				products:   orderProducts,
 			};
 			
 			const order: Order = await this.warehouseOrdersRouter.create(
@@ -260,7 +260,7 @@ export class SimulationComponent implements OnDestroy, OnInit
 		{
 			return {
 				geoLocation: this.inviteRequest.geoLocation,
-				apartment: this.inviteRequest.apartment,
+				apartment:   this.inviteRequest.apartment,
 			};
 		}
 		return null;
@@ -270,17 +270,17 @@ export class SimulationComponent implements OnDestroy, OnInit
 	{
 		try
 		{
-			this.user = await this._modalService.open(UserMutationComponent, {
-				size: 'lg',
+			this.customer = await this._modalService.open(UserMutationComponent, {
+				size:      'lg',
 				container: 'nb-layout',
-				backdrop: 'static',
+				backdrop:  'static',
 			}).result;
 			
-			this.store.userId = this.user.id;
-			this._startTracking();
+			this.storageService.userId = this.customer.id;
+			await this._startTracking();
 		} catch(error)
 		{
-			this.user = null;
+			this.customer = null;
 		}
 	}
 	
@@ -289,42 +289,42 @@ export class SimulationComponent implements OnDestroy, OnInit
 		try
 		{
 			const activeModal = this._modalService.open(ByCodeModalComponent, {
-				size: 'sm',
+				size:      'sm',
 				container: 'nb-layout',
 			});
 			
 			const modalComponent: ByCodeModalComponent =
-					activeModal.componentInstance;
+					      activeModal.componentInstance;
 			
 			if(this.invite)
 			{
 				modalComponent.location = this.invite.geoLocation.loc;
 			}
 			
-			this.user = await activeModal.result;
+			this.customer = await activeModal.result;
 			
-			this.store.userId = this.user.id;
+			this.storageService.userId = this.customer.id;
 			
 			this.invite = null;
 			
-			this._startTracking();
+			await this._startTracking();
 		} catch(error)
 		{
-			this.user = null;
+			this.customer = null;
 		}
 	}
 	
 	private async _startTracking(): Promise<void>
 	{
-		if(this.store.userId)
+		if(this.storageService.userId)
 		{
-			this.user = await this.userRouter
-			                      .get(this.store.userId)
-			                      .pipe(first())
-			                      .toPromise();
+			this.customer = await this.customerRouter
+			                          .get(this.storageService.userId)
+			                          .pipe(first())
+			                          .toPromise();
 			
 			const productsInfo: Observable<ProductInfo[]> = this.geoLocationService.getGeoLocationProducts(
-					this.user.geoLocation
+					this.customer.geoLocation
 			);
 			
 			productsInfo
