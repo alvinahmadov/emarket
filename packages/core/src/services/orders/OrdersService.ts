@@ -1,4 +1,5 @@
 import Logger                                            from 'bunyan';
+import _                                                 from 'lodash';
 import { v1 as uuid }                                    from 'uuid';
 import { Observable }                                    from 'rxjs';
 import { exhaustMap, first, map, switchMap }             from 'rxjs/operators';
@@ -18,13 +19,12 @@ import Warehouse, { WithFullProducts }                   from '@modules/server.c
 import Customer                                          from '@modules/server.common/entities/Customer';
 import IOrderRouter                                      from '@modules/server.common/routers/IOrderRouter';
 import CarriersService                                   from '../carriers/CarriersService';
+import { CustomersService }                              from '../customers';
+import { WarehousesProductsService, WarehousesService }  from '../warehouses';
 import IService                                          from '../IService';
 import { ProductsService }                               from '../../services/products';
 import { env }                                           from '../../env';
-import { WarehousesProductsService, WarehousesService }  from '../warehouses';
 import { createLogger }                                  from '../../helpers/Log';
-import { CustomersService }                              from '../customers';
-import _ = require('lodash');
 import Stripe = require('stripe');
 
 @injectable()
@@ -69,7 +69,7 @@ export class OrdersService extends DBService<Order>
 			@inject(new LazyServiceIdentifer(() => WarehousesService))
 			protected warehousesService: WarehousesService,
 			@inject(new LazyServiceIdentifer(() => CustomersService))
-			protected usersService: CustomersService,
+			protected customersService: CustomersService,
 			@inject(new LazyServiceIdentifer(() => CarriersService))
 			protected carriersService: CarriersService,
 			@inject(new LazyServiceIdentifer(() => WarehousesProductsService))
@@ -253,6 +253,7 @@ export class OrdersService extends DBService<Order>
 	/**
 	 * Pay with Stripe for given order with given CC
 	 * TODO: move to separate Payments Service
+	 * TODO: Make currency variable
 	 *
 	 * @param {Order['id']} orderId
 	 * @param {string} cardId CC Id which will be used to pay
@@ -281,19 +282,19 @@ export class OrdersService extends DBService<Order>
 			{
 				order = _order;
 				
-				const user = await this.usersService
-				                       .get(order.customer.id)
-				                       .pipe(first())
-				                       .toPromise();
+				const customer = await this.customersService
+				                           .get(order.customer.id)
+				                           .pipe(first())
+				                           .toPromise();
 				
-				if(user != null)
+				if(customer != null)
 				{
 					const charge: Stripe.charges.ICharge = await this.stripe.charges.create(
 							{
 								amount:      order.totalPrice * 100, // amount in cents, again
-								customer:    user.stripeCustomerId,
+								customer:    customer.stripeCustomerId,
 								source:      cardId,
-								currency:    'ils',
+								currency:    order.orderCurrency.toLowerCase(),
 								description: 'Order id: ' + orderId,
 								metadata:    {
 									orderId
@@ -303,12 +304,12 @@ export class OrdersService extends DBService<Order>
 					
 					order = await this.update(orderId, {
 						stripeChargeId: charge.id,
-						isPaid: true
+						isPaid:         true
 					});
 				}
 				else
 				{
-					const msg = "User specified in order is not found!";
+					const msg = "Customer specified in order is not found!";
 					this.log.error(
 							{ callId, orderId, cardId, message: msg },
 							'.payWithStripe(orderId, cardId) thrown error!'
@@ -797,33 +798,37 @@ export class OrdersService extends DBService<Order>
 		start.setHours(0, 0, 0, 0);
 		end.setHours(23, 59, 59, 999);
 		
-		const ordersRaw = await this.Model.find({
-			                                        isDeleted:   { $eq: false },
-			                                        isCancelled: { $eq: false },
-			                                        _createdAt:  { $gte: start, $lt: end }
-		                                        })
-		                            .select({
-			                                    isCancelled:      1,
-			                                    isPaid:           1,
-			                                    carrier:          1,
-			                                    carrierStatus:    1,
-			                                    warehouseStatus:  1,
-			                                    _createdAt:       1,
-			                                    warehouse:        1,
-			                                    user:             1,
-			                                    'products.price': 1,
-			                                    'products.count': 1
-		                                    })
+		const ordersRaw = await this.Model.find(
+				                            {
+					                            isDeleted:   { $eq: false },
+					                            isCancelled: { $eq: false },
+					                            _createdAt:  { $gte: start, $lt: end }
+				                            }
+		                            )
+		                            .select(
+				                            {
+					                            isCancelled:      1,
+					                            isPaid:           1,
+					                            carrier:          1,
+					                            carrierStatus:    1,
+					                            warehouseStatus:  1,
+					                            _createdAt:       1,
+					                            warehouse:        1,
+					                            customer:         1,
+					                            'products.price': 1,
+					                            'products.count': 1
+				                            }
+		                            )
 		                            .lean()
 		                            .exec();
 		
-		const orders = _.map(ordersRaw, (o) =>
+		const orders = _.map(ordersRaw, (o: Order) =>
 		{
 			return {
 				totalPrice:  OrdersService._getOrderTotalPrice(o),
 				isCompleted: this._isOrderCompleted(o),
 				isCancelled: o.isCancelled,
-				user:        o.user,
+				customer:    o.customer,
 				warehouseId: o.warehouse,
 				_createdAt:  o._createdAt
 			};
@@ -841,7 +846,7 @@ export class OrdersService extends DBService<Order>
 			                               warehouse: { $eq: storeId }
 		                               })
 		                         .select({
-			                                 user:             1,
+			                                 customer:         1,
 			                                 isPaid:           1,
 			                                 'products.price': 1,
 			                                 'products.count': 1
@@ -849,67 +854,68 @@ export class OrdersService extends DBService<Order>
 		                         .lean()
 		                         .exec();
 		
-		const unique = (value, index, self) =>
+		const unique = (value: Order, index, self: Order[]) =>
 		{
 			return (
-					self
-							.map((s) => s.user._id.toString())
-							.indexOf(value.user._id.toString()) === index
+					self.map((s: Order) => s.customer._id.toString())
+					    .indexOf(value.customer._id.toString()) === index
 			);
 		};
 		
-		const oUsers = orders.filter(unique).map((o) => new Customer(o.user));
+		const orderCustomers: Customer[] = orders.filter(unique)
+		                                         .map((o: Order) => new Customer(o.customer));
 		
-		const oUserIds = oUsers.map((u) => u.id);
-		const realUsers = await this.usersService.find({
-			                                               isDeleted: false,
-			                                               _id: { $in: oUserIds }
-		                                               });
+		const orderCustomerIds = orderCustomers.map((customer: Customer) => customer.id);
+		const realCustomers: Customer[] = await this.customersService
+		                                            .find({
+			                                                  isDeleted: false,
+			                                                  _id:       { $in: orderCustomerIds }
+		                                                  });
 		
-		return oUsers.map((u) =>
-		                  {
-			                  const userOrders = orders.filter(
-					                  (o) => o.user._id.toString() === u._id.toString()
-			                  );
+		return orderCustomers.map((customer: Customer) =>
+		                          {
+			                          const customerOrders = orders.filter(
+					                          (order: Order) => order.customer._id.toString() === customer._id.toString()
+			                          );
 			
-			                  let totalPrice = 0;
+			                          let totalPrice = 0;
 			
-			                  const paidOrders = userOrders.filter((o: Order) => o.isPaid);
+			                          const paidOrders = customerOrders.filter((o: Order) => o.isPaid);
 			
-			                  if(paidOrders.length > 0)
-			                  {
-				                  totalPrice = paidOrders
-						                  .map((o: Order) => OrdersService._getOrderTotalPrice(o))
-						                  .reduce((a, b) => a + b);
-			                  }
+			                          if(paidOrders.length > 0)
+			                          {
+				                          totalPrice = paidOrders
+						                          .map((o: Order) => OrdersService._getOrderTotalPrice(o))
+						                          .reduce((a, b) => a + b);
+			                          }
 			
-			                  return {
-				                  user:        realUsers.find((ru) => ru.id === u.id),
-				                  ordersCount: userOrders.length,
-				                  totalPrice
-			                  };
-		                  });
+			                          return {
+				                          customer:    realCustomers.find((ru) => ru.id === customer.id),
+				                          ordersCount: customerOrders.length,
+				                          totalPrice
+			                          };
+		                          });
 	}
 	
 	@asyncListener()
 	async getDashboardCompletedOrders(storeId?: string): Promise<any>
 	{
-		const quaryObj = {
+		const queryObj = {
 			isDeleted:   { $eq: false },
 			isCancelled: { $eq: false }
 		};
 		
 		if(storeId)
 		{
-			quaryObj['warehouse'] = { $eq: storeId };
+			queryObj['warehouse'] = { $eq: storeId };
 		}
 		
-		const ordersRaw = await this.Model.find(quaryObj)
+		const ordersRaw = await this.Model.find(queryObj)
 		                            .select({
 			                                    isCancelled: 1,
 			                                    isPaid:      1,
 			                                    carrier:     1,
-			                                    // user: 1,
+			                                    // customer: 1,
 			                                    carrierStatus:   1,
 			                                    warehouseStatus: 1,
 			                                    // _createdAt: 1,
@@ -927,7 +933,7 @@ export class OrdersService extends DBService<Order>
 				warehouseId: o.warehouse,
 				isCompleted: this._isOrderCompleted(o)
 				// isCancelled: o.isCancelled,
-				// user: o.user,
+				// customer: o.customer,
 				// _createdAt: o._createdAt
 			};
 		});
@@ -951,7 +957,7 @@ export class OrdersService extends DBService<Order>
 				                       ]
 			                       }
 		                       })
-		                 .populate('carrier user')
+		                 .populate('carrier customer')
 		                 .lean()
 		                 .exec();
 	}
