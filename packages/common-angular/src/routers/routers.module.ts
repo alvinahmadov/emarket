@@ -1,8 +1,6 @@
 import { NgModule }                    from '@angular/core';
 import { CarrierRouter }               from './carrier-router.service';
 import { CarrierOrdersRouter }         from './carrier-orders-router.service';
-// import { ConversationsRouter }         from './conversation-router.service';
-// import { ConversationMessagesRouter }  from './conversation-messages-router.service';
 import { CustomerRouter }              from './customer-router.service';
 import { CustomerAuthRouter }          from './customer-auth-router.service';
 import { CustomerOrdersRouter }        from './customer-orders-router.service';
@@ -34,8 +32,6 @@ import { CommonLibModule }             from '../lib';
 		          CustomerOrdersRouter,
 		          CustomerProductsRouter,
 		          CustomerRouter,
-		          // ConversationsRouter,
-		          // ConversationMessagesRouter,
 		          DeviceRouter,
 		          GeoLocationOrdersRouter,
 		          GeoLocationProductsRouter,
