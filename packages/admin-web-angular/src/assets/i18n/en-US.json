@@ -1135,6 +1135,7 @@
 	"SATELLITE": "Satellite",
 	"LOCATION": "Location",
 	"ROAD_MAP": "Road Map",
+	"SIGN_IN_REDIRECT": "Please wait a second...",
 	"Manage warehouse": "Manage store products & orders",
 	"Warehouse": "Warehouse",
 	"Create Warehouse": "Create Warehouse",
