@@ -140,6 +140,10 @@ export interface IOrderCreateObject extends DBCreateObject
 	 */
 	orderNumber?: number;
 	
+	orderCurrency?: string
+	
+	orderNotes?: string;
+	
 	/**
 	 * Check out DeliveryType
 	 *
