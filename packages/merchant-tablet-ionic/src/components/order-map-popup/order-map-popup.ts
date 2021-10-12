@@ -4,7 +4,7 @@ import Order               from '@modules/server.common/entities/Order';
 import { WarehouseRouter } from '@modules/client.common.angular2/routers/warehouse-router.service';
 import Warehouse           from '@modules/server.common/entities/Warehouse';
 import { first }           from 'rxjs/operators';
-import { environment }     from '../../../src/environments/environment';
+import { environment }     from 'environments/environment';
 import {
 	LoadingController,
 	ActionSheetController,
@@ -14,30 +14,30 @@ import {
 declare var google: any;
 
 @Component({
-	           selector: 'order-map-popup',
-	           templateUrl: 'order-map-popup.html',
-	           styleUrls: ['./order-map-popup.scss'],
+	           selector:    'order-map-popup',
+	           styleUrls:   ['./order-map-popup.scss'],
+	           templateUrl: './order-map-popup.html',
            })
 export class OrderMapPopupPage implements OnInit
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: ElementRef;
+	public gmapElement: ElementRef;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
-	map: google.maps.Map;
-	myLatLng = { lat: 0, lng: 0 };
+	public map: google.maps.Map;
+	public myLatLng = { lat: 0, lng: 0 };
 	
-	warehouse: Warehouse;
+	public warehouse: Warehouse;
 	
-	marker: any;
-	userMarker: any;
-	warehouseMarker: any;
+	public marker: any;
+	public userMarker: any;
+	public warehouseMarker: any;
 	
-	merchantIcon = environment.MAP_MERCHANT_ICON_LINK;
-	userIcon = environment.MAP_USER_ICON_LINK;
-	carrierIcon = environment.MAP_CARRIER_ICON_LINK;
+	public merchantIcon = environment.MAP_MERCHANT_ICON_LINK;
+	public customerIcon = environment.MAP_USER_ICON_LINK;
+	public carrierIcon = environment.MAP_CARRIER_ICON_LINK;
 	
 	constructor(
 			public loadingCtrl: LoadingController,
@@ -47,7 +47,7 @@ export class OrderMapPopupPage implements OnInit
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		if(this.order)
 		{
@@ -56,33 +56,33 @@ export class OrderMapPopupPage implements OnInit
 		this.showMap();
 	}
 	
-	loadMap()
+	public loadMap()
 	{
 		if(this.order && this.warehouse)
 		{
-			const user = this.order.user;
+			const customer = this.order.customer;
 			const warehouse = this.warehouse;
 			const carrier = this.order.carrier;
 			const warehouseIcon = this.merchantIcon;
-			const userIcon = this.userIcon;
+			const customerIcon = this.customerIcon;
 			
-			const carierIcon = this.carrierIcon;
+			const carrierIcon = this.carrierIcon;
 			
 			const [cLng, cLat] = carrier['geoLocation'].loc.coordinates;
 			this.marker = this.addMarker(
 					new google.maps.LatLng(cLat, cLng),
 					this.map,
-					carierIcon
+					carrierIcon
 			);
 			
-			const [uLng, uLat] = user.geoLocation.loc.coordinates;
+			const [uLng, uLat] = customer.geoLocation.coordinatesArray;
 			this.userMarker = this.addMarker(
 					new google.maps.LatLng(uLat, uLng),
 					this.map,
-					userIcon
+					customerIcon
 			);
 			
-			const [wLng, wLat] = warehouse['geoLocation'].loc.coordinates;
+			const [wLng, wLat] = warehouse['geoLocation'].coordinatesArray;
 			this.warehouseMarker = this.addMarker(
 					new google.maps.LatLng(wLat, wLng),
 					this.map,
@@ -97,22 +97,28 @@ export class OrderMapPopupPage implements OnInit
 		}
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.modalController.dismiss();
 	}
 	
-	showMap()
+	public showMap()
 	{
+		const [lng, lat] = this.warehouse
+		                   ? this.warehouse.geoLocation.coordinatesArray
+		                   : [
+					environment.DEFAULT_LONGITUDE,
+					environment.DEFAULT_LATITUDE
+				];
 		const mapProp = {
-			center: new google.maps.LatLng(42.642941, 23.334149),
-			zoom: 15,
+			center:    new google.maps.LatLng(lat, lng),
+			zoom:      15,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 	}
 	
-	addMarker(position, map, icon)
+	public addMarker(position, map, icon)
 	{
 		return new google.maps.Marker({
 			                              position,
@@ -121,7 +127,7 @@ export class OrderMapPopupPage implements OnInit
 		                              });
 	}
 	
-	getfullAddress(geoLocation)
+	public getfullAddress(geoLocation): string
 	{
 		return (
 				`${geoLocation.city}, ${geoLocation.streetAddress} ` +
