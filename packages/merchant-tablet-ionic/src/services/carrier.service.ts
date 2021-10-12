@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import Carrier        from '@modules/server.common/entities/Carrier';
 import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
+import { Apollo }     from 'apollo-angular';
 import ICarrier       from '@modules/server.common/interfaces/ICarrier';
+import Carrier        from '@modules/server.common/entities/Carrier';
+import Order          from '@modules/server.common/entities/Order';
 import {
 	GQLQueries,
 	GQLMutations
@@ -12,7 +13,8 @@ import {
 @Injectable()
 export class CarrierService
 {
-	private carriers$: Observable<Carrier[]>
+	private readonly carriers$: Observable<Carrier[]>
+	private static readonly pollInterval = 10000;
 	
 	constructor(private readonly _apollo: Apollo)
 	{
@@ -20,8 +22,8 @@ export class CarrierService
 		                     .watchQuery<{
 			                     getCarriers: ICarrier[]
 		                     }>({
-			                        query: GQLQueries.CarrierAll,
-			                        pollInterval: 1000,
+			                        query:        GQLQueries.CarrierAll,
+			                        pollInterval: CarrierService.pollInterval,
 		                        })
 		                     .valueChanges
 		                     .pipe(
@@ -31,18 +33,18 @@ export class CarrierService
 		                     );
 	}
 	
-	getAllCarriers(): Observable<Carrier[]>
+	public getAllCarriers(): Observable<Carrier[]>
 	{
 		return this.carriers$;
 	}
 	
-	updateCarrier(id: string, updateInput: any)
+	public updateCarrier(id: string, updateInput: any): Observable<Carrier>
 	{
 		return this._apollo
 		           .mutate<{
 			           updateCarrier: Carrier
 		           }>({
-			              mutation: GQLMutations.CarrierUpdate,
+			              mutation:  GQLMutations.CarrierUpdate,
 			              variables: {
 				              id,
 				              updateInput,
@@ -54,11 +56,11 @@ export class CarrierService
 		           );
 	}
 	
-	async getCarrierCurrentOrder(carrierId: string): Promise<any>
+	async getCarrierCurrentOrder(carrierId: string): Promise<Order>
 	{
 		const res = await this._apollo
 		                      .query({
-			                             query: GQLQueries.CarrierCurrentOrder,
+			                             query:     GQLQueries.CarrierCurrentOrder,
 			                             variables: { carrierId },
 		                             })
 		                      .toPromise();
