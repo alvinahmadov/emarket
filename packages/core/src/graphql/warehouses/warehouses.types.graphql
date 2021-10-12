@@ -22,8 +22,6 @@ type Warehouse {
 
     username: String!
 
-    merchant: Customer
-
     contactEmail: String
     contactPhone: String
 
@@ -61,8 +59,6 @@ input WarehouseCreateInput {
     name: String!
     logo: String! # the url of it
     username: String!
-
-    merchant: CustomerCreateInput
 
     # Is Warehouse working now
     isActive: Boolean
@@ -139,8 +135,6 @@ type Query {
 
     nearbyStores(geoLocation: GeoLocationFindInput!): [Warehouse!]!
 
-    countStoreCustomers(storeId: String!): Int!
-
     getAllActiveStores(fullProducts: Boolean!): [Warehouse!]!
 
     getStoreCustomers(storeId: String!): [Customer!]!
@@ -151,6 +145,8 @@ type Query {
     ): [WarehouseProduct!]!
 
     getStoreAvailableProducts(storeId: String!): [WarehouseProduct!]!
+
+    countCustomers(storeId: String!): Int!
 
     getCountExistingCustomers: ExistingCustomersByStores!
 
