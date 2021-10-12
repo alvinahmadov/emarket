@@ -11,33 +11,33 @@ import { ActivatedRoute, Router }          from '@angular/router';
 import { ToasterService }                  from 'angular2-toaster';
 import { LocalDataSource }                 from 'ng2-smart-table';
 import { TranslateService }                from '@ngx-translate/core';
-import Order                               from '@modules/server.common/entities/Order';
-import { WarehouseRouter }                 from '@modules/client.common.angular2/routers/warehouse-router.service';
-import Warehouse                           from '@modules/server.common/entities/Warehouse';
+import { Subject, forkJoin, Observable }   from 'rxjs';
+import { takeUntil, first }                from 'rxjs/operators';
 import { ILocaleMember }                   from '@modules/server.common/interfaces/ILocale';
+import Order                               from '@modules/server.common/entities/Order';
+import Warehouse                           from '@modules/server.common/entities/Warehouse';
 import WarehouseProduct                    from '@modules/server.common/entities/WarehouseProduct';
 import { ProductLocalesService }           from '@modules/client.common.angular2/locale/product-locales.service';
+import { WarehouseRouter }                 from '@modules/client.common.angular2/routers/warehouse-router.service';
 import {
 	ordersFilter,
 	OrdersFilterModes,
-}                                          from '../../ordersFilter/ordersFilter';
-import { WarehouseProductCreateComponent } from '../../../@shared/warehouse-product/warehouse-product-create';
-import { ElapsedComponent }                from '../../../@shared/render-component/warehouse-table/elapsed/elapsed.component';
-import { WarehouseOrderComponent }         from './+warehouse-order/warehouse-order.component';
+}                                          from '@app/pages/ordersFilter/ordersFilter';
+import { WarehouseOrdersService }          from '@app/@core/data/warehouseOrders.service';
+import { WarehouseProductCreateComponent } from '@app/@shared/warehouse-product/warehouse-product-create';
+import { ElapsedComponent }                from '@app/@shared/render-component/warehouse-table/elapsed/elapsed.component';
 import { RedirectOrderComponent }          from '@app/@shared/render-component/customer-orders-table/redirect-order.component';
+import { StatusComponent }                 from '@app/@shared/render-component/warehouse-table/status/status.component';
 import { ProductsTableComponent }          from './products-table/products-table.component';
 import { WarehouseSelectViewComponent }    from './warehouse-select-view/warehouse-select-view.component';
-import { WarehouseOrdersService }          from '@app/@core/data/warehouseOrders.service';
-import { StatusComponent }                 from '@app/@shared/render-component/warehouse-table/status/status.component';
-import { Subject, forkJoin, Observable }   from 'rxjs';
-import { takeUntil, first }                from 'rxjs/operators';
+import { WarehouseOrderComponent }         from './+warehouse-order/warehouse-order.component';
 
 const perPage = 3;
 
 @Component({
-	           selector: 'ea-warehouse',
+	           selector:    'ea-warehouse',
 	           templateUrl: './warehouse.component.html',
-	           styleUrls: ['./warehouse.component.scss'],
+	           styleUrls:   ['./warehouse.component.scss'],
            })
 export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 {
@@ -49,15 +49,15 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 	public orders: Order[] = [];
 	public allOrders: Order[] = [];
 	public loading: boolean;
-	protected warehouses: Warehouse[];
+	public selectedWarehouse: Warehouse;
+	public selectedOrder: Order;
+	public settingsSmartTable: object;
+	public sourceSmartTable: LocalDataSource = new LocalDataSource();
+	public warehouses: Warehouse[];
+	public warehouse: Warehouse;
 	protected topWarehouseProducts: WarehouseProduct[];
-	protected warehouse: Warehouse;
 	protected warehouseID: string;
-	protected selectedWarehouse: Warehouse;
-	protected selectedOrder: Order;
 	protected timers: string[] = [];
-	protected settingsSmartTable: object;
-	protected sourceSmartTable: LocalDataSource = new LocalDataSource();
 	protected isSelectedOrderActionsAvailable: boolean = true;
 	private ngDestroy$ = new Subject<void>();
 	private dataCount: number;
@@ -81,23 +81,29 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		this._listenForEntityLocaleTranslate();
 	}
 	
-	ngAfterViewInit()
+	public ngAfterViewInit()
 	{
 		this.loadSmartTableTranslates();
-		this.smartTableChange();
+		this._smartTableChange();
 	}
 	
-	ngOnChanges() {}
+	public ngOnChanges() {}
 	
-	openWarehouseOrderCreateModal()
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public openWarehouseOrderCreateModal()
 	{
 		const modalRef: NgbModalRef = this.modalService.open(
 				WarehouseOrderComponent,
 				{
-					size: 'lg',
-					container: 'nb-layout',
+					size:        'xl',
+					container:   'nb-layout',
 					windowClass: 'ng-custom',
-					backdrop: 'static',
+					backdrop:    'static',
 				}
 		);
 		
@@ -109,12 +115,12 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		                                                                  });
 	}
 	
-	switchLanguage(language: string)
+	public switchLanguage(language: string)
 	{
 		this.translate.use(language);
 	}
 	
-	async filterOrders(mode)
+	public async filterOrders(mode)
 	{
 		this.selectedOrder = null;
 		this.page = 1;
@@ -123,13 +129,13 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		this.filterMode = mode;
 	}
 	
-	getOrders()
+	public getOrders(): Order[]
 	{
 		this.orders = ordersFilter(this.allOrders, this.filterMode);
 		return this.orders;
 	}
 	
-	selectWarehouseEvent(warehouse)
+	public selectWarehouseEvent(warehouse)
 	{
 		this._router.navigate([`/stores/${warehouse.id}`]);
 		this.selectedOrder = null;
@@ -147,21 +153,14 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		}
 	}
 	
-	loadSmartTableTranslates()
+	public loadSmartTableTranslates()
 	{
-		this._translateService.onLangChange.subscribe((d) =>
-		                                              {
-			                                              this._loadTableSettings();
-		                                              });
+		this._translateService
+		    .onLangChange
+		    .subscribe(() => this._loadTableSettings());
 	}
 	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-	}
-	
-	protected selectOrder(warehouseOrderProducts)
+	public selectOrder(warehouseOrderProducts)
 	{
 		this.selectedOrder =
 				this.selectedOrder === warehouseOrderProducts.data
@@ -169,19 +168,19 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 				: warehouseOrderProducts.data;
 	}
 	
-	protected openAddProductTypeModel()
+	public openAddProductTypeModel()
 	{
 		const activeModal = this.modalService.open(
 				WarehouseProductCreateComponent,
 				{
-					size: 'lg',
-					container: 'nb-layout',
-					backdrop: 'static',
+					size:        'lg',
+					container:   'nb-layout',
+					backdrop:    'static',
 					windowClass: 'ng-custom',
 				}
 		);
 		const modalComponent: WarehouseProductCreateComponent =
-				activeModal.componentInstance;
+				      activeModal.componentInstance;
 		modalComponent.warehouseId = this.warehouseID;
 		modalComponent.selectedWarehouse = this.selectedWarehouse;
 	}
@@ -205,7 +204,7 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 	
 	private async _getWarehouseOrders(
 			id: string,
-			page = 1,
+			page   = 1,
 			status = this.filterMode
 	)
 	{
@@ -217,7 +216,7 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		                        .getStoreOrdersTableData(
 				                        id,
 				                        {
-					                        skip: perPage * (page - 1),
+					                        skip:  perPage * (page - 1),
 					                        limit: perPage,
 				                        },
 				                        status
@@ -226,7 +225,7 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		                        .subscribe(async(res) =>
 		                                   {
 			                                   const orders = res.orders;
-			                                   await this.loadDataCount(id, status);
+			                                   await this._loadDataCount(id, status);
 			
 			                                   this.allOrders = orders;
 			                                   const data = this._setupDataForSmartTable(orders);
@@ -272,58 +271,58 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 							this.settingsSmartTable = {
 								actions: false,
 								columns: {
-									orderNumber: {
-										title: orderNumber,
-										type: 'custom',
+									orderNumber:       {
+										title:           orderNumber,
+										type:            'custom',
 										renderComponent: RedirectOrderComponent,
-										width: '100px',
+										width:           '100px',
 									},
-									product: { title: product, type: 'html' },
-									status: {
+									product:           { title: product, type: 'html' },
+									status:            {
 										title: status,
-										type: 'html',
+										type:  'html',
 										width: '100px',
 									},
 									carrierStatusHtml: {
 										title: carrier,
-										type: 'html',
+										type:  'html',
 										width: '100px',
 									},
-									paid: {
-										title: paid,
-										type: 'custom',
-										renderComponent: StatusComponent,
+									paid:              {
+										title:                   paid,
+										type:                    'custom',
+										renderComponent:         StatusComponent,
 										onComponentInitFunction: async(
 												instance: StatusComponent
 										) =>
-										{
-											instance.text = paid;
-											instance.checkOrderField = 'isPaid';
-										},
-										width: '100px',
+										                         {
+											                         instance.text = paid;
+											                         instance.checkOrderField = 'isPaid';
+										                         },
+										width:                   '100px',
 									},
-									cancelled: {
-										title: cancelled,
-										type: 'custom',
-										renderComponent: StatusComponent,
+									cancelled:         {
+										title:                   cancelled,
+										type:                    'custom',
+										renderComponent:         StatusComponent,
 										onComponentInitFunction: async(
 												instance: StatusComponent
 										) =>
-										{
-											instance.text = cancelled;
-											instance.checkOrderField = 'isCancelled';
-										},
-										width: '100px',
+										                         {
+											                         instance.text = cancelled;
+											                         instance.checkOrderField = 'isCancelled';
+										                         },
+										width:                   '100px',
 									},
-									created: { title: created, type: 'string' },
-									elapsed: {
-										title: elapsed,
-										filter: false,
-										type: 'custom',
+									created:           { title: created, type: 'string' },
+									elapsed:           {
+										title:           elapsed,
+										filter:          false,
+										type:            'custom',
 										renderComponent: ElapsedComponent,
 									},
 								},
-								pager: {
+								pager:   {
 									display: true,
 									perPage,
 								},
@@ -372,19 +371,19 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 							                ]) =>
 							               {
 								               data.push({
-									                         id: order.id,
-									                         products: order.products,
-									                         orderNumber: order.orderNumber,
+									                         id:                  order.id,
+									                         products:            order.products,
+									                         orderNumber:         order.orderNumber,
 									                         warehouseStatusText: order.warehouseStatusText,
-									                         carrierStatusText: order.carrierStatusText,
-									                         createdAt: order.createdAt,
-									                         warehouseStatus: order.warehouseStatus,
-									                         carrier: order.carrier,
-									                         carrierStatus: order.carrierStatus,
-									                         isPaid: order.isPaid,
-									                         isCancelled: order.isCancelled,
-									                         product: order.products.length
-									                                  ? `
+									                         carrierStatusText:   order.carrierStatusText,
+									                         createdAt:           order.createdAt,
+									                         warehouseStatus:     order.warehouseStatus,
+									                         carrier:             order.carrier,
+									                         carrierStatus:       order.carrierStatus,
+									                         isPaid:              order.isPaid,
+									                         isCancelled:         order.isCancelled,
+									                         product:             order.products.length
+									                                              ? `
 							<div>
 								<img width="32" height="32" src="${this.localeTranslate(
 													                         order.products[0].product.images
@@ -395,11 +394,11 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 								</p>
 							</div>
 						`
-									                                  : '',
-									                         status: `<div class="badge badge-secondary">${warehouseStatusText}</div>`,
-									                         carrierStatusHtml: `<div class="badge badge-secondary">${carrierStatusText}</div>`,
-									                         created: formatted,
-									                         orderType: order.orderType,
+									                                              : '',
+									                         status:              `<div class="badge badge-secondary">${warehouseStatusText}</div>`,
+									                         carrierStatusHtml:   `<div class="badge badge-secondary">${carrierStatusText}</div>`,
+									                         created:             formatted,
+									                         orderType:           order.orderType,
 									                         order,
 								                         });
 							               }
@@ -439,7 +438,7 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		}
 	}
 	
-	private async smartTableChange()
+	private async _smartTableChange()
 	{
 		this.sourceSmartTable
 		    .onChanged()
@@ -459,7 +458,7 @@ export class WarehouseComponent implements OnDestroy, AfterViewInit, OnChanges
 		               });
 	}
 	
-	private async loadDataCount(id, status)
+	private async _loadDataCount(id, status)
 	{
 		this.dataCount = await this.warehouseOrdersService.getCountOfStoreOrders(
 				id,
