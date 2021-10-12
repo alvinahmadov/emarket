@@ -11,12 +11,12 @@ import {
 }                                                    from 'rxjs/operators';
 import { observableListener, routerName }            from '@pyro/io';
 import ICustomerProductsRouter                       from '@modules/server.common/routers/ICustomerProductsRouter';
+import { observeFile }                               from '../../utils';
 import { DevicesService }                            from '../devices/DevicesService';
 import IService                                      from '../IService';
-import { observeFile }                               from '../../utils';
 
 @injectable()
-@routerName('user-products')
+@routerName('customer-products')
 export class CustomersProductsService implements ICustomerProductsRouter, IService
 {
 	private static templatesDirPath: string = `${__dirname}/../../../../res/templates/`;
