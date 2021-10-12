@@ -1,16 +1,16 @@
-import Logger                                            from "bunyan";
-import { inject, injectable }                            from "inversify";
-import { first }                                         from "rxjs/operators";
+import Logger                                            from 'bunyan';
+import { inject, injectable }                            from 'inversify';
+import { first }                                         from 'rxjs/operators';
 import { asyncListener, routerName, }                    from '@pyro/io';
 import { DBService }                                     from '@pyro/db-server';
-import Warehouse                                         from "@modules/server.common/entities/Warehouse";
+import Warehouse                                         from '@modules/server.common/entities/Warehouse';
 import IWarehouseAuthRouter,
-{ IWarehouseLoginResponse, IWarehouseRegistrationInput } from "@modules/server.common/routers/IWarehouseAuthRouter";
-import { IWarehouseCreateObject }                        from "@modules/server.common/interfaces/IWarehouse";
-import IService                                          from "../IService";
-import { AuthService, AuthServiceFactory }               from "../auth";
-import { createLogger }                                  from "../../helpers/Log";
-import { env }                                           from "../../env";
+{ IWarehouseLoginResponse, IWarehouseRegistrationInput } from '@modules/server.common/routers/IWarehouseAuthRouter';
+import { IWarehouseCreateObject }                        from '@modules/server.common/interfaces/IWarehouse';
+import IService                                          from '../IService';
+import { AuthService, AuthServiceFactory }               from '../auth';
+import { createLogger }                                  from '../../helpers/Log';
+import { env }                                           from '../../env';
 
 @injectable()
 @routerName('warehouse-auth')
@@ -29,8 +29,8 @@ export class WarehousesAuthService extends DBService<Warehouse>
 		super();
 		
 		const authConfig = {
-			role: 'warehouse',
-			Entity: Warehouse,
+			role:       'warehouse',
+			Entity:     Warehouse,
 			saltRounds: env.WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS
 		};
 		
@@ -51,9 +51,7 @@ export class WarehousesAuthService extends DBService<Warehouse>
 			...input.warehouse,
 			...(input.password
 			    ? {
-						hash: await this.authService.getPasswordHash(
-								input.password
-						)
+						hash: await this.authService.getPasswordHash(input.password)
 					}
 			    : {})
 		}
@@ -93,7 +91,7 @@ export class WarehousesAuthService extends DBService<Warehouse>
 			
 			return {
 				warehouse: res.entity,
-				token: res.token
+				token:     res.token
 			}
 		} catch(e)
 		{
