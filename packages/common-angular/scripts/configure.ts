@@ -34,28 +34,30 @@ Error.stackTraceLimit = Infinity;
 require('zone.js/dist/long-stack-trace-zone');
 
 export const environment: Environment = {
-  production: ${isProd},
+  production:               ${isProd},
 
-  LOG_LEVEL: "${env.LOG_LEVEL}",
+  LOG_LEVEL:                "${env.LOG_LEVEL}",
 
-  DEFAULT_LANGUAGE: "${env.DEFAULT_LANGUAGE}",
-  AVAILABLE_LOCALES: "${env.AVAILABLE_LOCALES}",
+  DEFAULT_LANGUAGE:         "${env.DEFAULT_LANGUAGE}",
+  AVAILABLE_LOCALES:        "${env.AVAILABLE_LOCALES}",
 
-  DEFAULT_COORDINATES: ${env.DEFAULT_COORDINATES},
-  DEFAULT_LATITUDE: ${env.DEFAULT_LATITUDE},
-  DEFAULT_LONGITUDE: ${env.DEFAULT_LONGITUDE},
+  DEFAULT_COORDINATES:      ${env.DEFAULT_COORDINATES},
+  DEFAULT_LATITUDE:         ${env.DEFAULT_LATITUDE},
+  DEFAULT_LONGITUDE:        ${env.DEFAULT_LONGITUDE},
   
-  COMPANY_NAME: "${env.COMPANY_NAME}",
-  COMPANY_SITE_LINK: "${env.COMPANY_SITE_LINK}",
-  COMPANY_FACEBOOK_LINK: "${env.COMPANY_FACEBOOK_LINK}",
-  COMPANY_VKONTAKTE_LINK: "${env.COMPANY_VKONTAKTE_LINK}",
-  COMPANY_TWITTER_LINK: "${env.COMPANY_TWITTER_LINK}",
-  COMPANY_LINKEDIN_LINK: "${env.COMPANY_LINKEDIN_LINK}",
+  COMPANY_NAME:             "${env.COMPANY_NAME}",
+  COMPANY_SITE_LINK:        "${env.COMPANY_SITE_LINK}",
+  COMPANY_FACEBOOK_LINK:    "${env.COMPANY_FACEBOOK_LINK}",
+  COMPANY_VKONTAKTE_LINK:   "${env.COMPANY_VKONTAKTE_LINK}",
+  COMPANY_TWITTER_LINK:     "${env.COMPANY_TWITTER_LINK}",
+  COMPANY_LINKEDIN_LINK:    "${env.COMPANY_LINKEDIN_LINK}",
   
-  CURRENCY_SYMBOL: "${env.CURRENCY_SYMBOL}",
+  CURRENCY_SYMBOL:          "${env.CURRENCY_SYMBOL}",
   
-  AUTH_LOGO: "${env.AUTH_LOGO}",
-  NO_INTERNET_LOGO: "${env.NO_INTERNET_LOGO}",
+  TALKJS_APP_ID:            "${env.TALKJS_APP_ID}",
+  
+  AUTH_LOGO:                "${env.AUTH_LOGO}",
+  NO_INTERNET_LOGO:         "${env.NO_INTERNET_LOGO}",
 
   /**
 	* Angular debug tools in the dev console
@@ -90,28 +92,30 @@ import { Environment } from './model';
 enableProdMode();
 
 export const environment: Environment = {
-  production: ${isProd},
+  production:               ${isProd},
 
-  LOG_LEVEL: "${env.LOG_LEVEL}",
+  LOG_LEVEL:                "${env.LOG_LEVEL}",
 
-  DEFAULT_LANGUAGE: "${env.DEFAULT_LANGUAGE}",
-  AVAILABLE_LOCALES: "${env.AVAILABLE_LOCALES}",
+  DEFAULT_LANGUAGE:         "${env.DEFAULT_LANGUAGE}",
+  AVAILABLE_LOCALES:        "${env.AVAILABLE_LOCALES}",
 
-  DEFAULT_COORDINATES: ${env.DEFAULT_COORDINATES},
-  DEFAULT_LATITUDE: ${env.DEFAULT_LATITUDE},
-  DEFAULT_LONGITUDE: ${env.DEFAULT_LONGITUDE},
+  DEFAULT_COORDINATES:      ${env.DEFAULT_COORDINATES},
+  DEFAULT_LATITUDE:         ${env.DEFAULT_LATITUDE},
+  DEFAULT_LONGITUDE:        ${env.DEFAULT_LONGITUDE},
   
-  COMPANY_NAME: "${env.COMPANY_NAME}",
-  COMPANY_SITE_LINK: "${env.COMPANY_SITE_LINK}",
-  COMPANY_FACEBOOK_LINK: "${env.COMPANY_FACEBOOK_LINK}",
-  COMPANY_VKONTAKTE_LINK: "${env.COMPANY_VKONTAKTE_LINK}",
-  COMPANY_TWITTER_LINK: "${env.COMPANY_TWITTER_LINK}",
-  COMPANY_LINKEDIN_LINK: "${env.COMPANY_LINKEDIN_LINK}",
+  COMPANY_NAME:             "${env.COMPANY_NAME}",
+  COMPANY_SITE_LINK:        "${env.COMPANY_SITE_LINK}",
+  COMPANY_FACEBOOK_LINK:    "${env.COMPANY_FACEBOOK_LINK}",
+  COMPANY_VKONTAKTE_LINK:   "${env.COMPANY_VKONTAKTE_LINK}",
+  COMPANY_TWITTER_LINK:     "${env.COMPANY_TWITTER_LINK}",
+  COMPANY_LINKEDIN_LINK:    "${env.COMPANY_LINKEDIN_LINK}",
   
-  CURRENCY_SYMBOL: "${env.CURRENCY_SYMBOL}",
+  CURRENCY_SYMBOL:          "${env.CURRENCY_SYMBOL}",
+
+  TALKJS_APP_ID:            "${env.TALKJS_APP_ID}",
   
-  AUTH_LOGO: "${env.AUTH_LOGO}",
-  NO_INTERNET_LOGO: "${env.NO_INTERNET_LOGO}",
+  AUTH_LOGO:                "${env.AUTH_LOGO}",
+  NO_INTERNET_LOGO:         "${env.NO_INTERNET_LOGO}",
 
   /**
 	* Angular debug tools in the dev console

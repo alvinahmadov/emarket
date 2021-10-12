@@ -1,4 +1,5 @@
 import { cleanEnv, num, str, bool } from 'envalid';
+import * as path from 'path';
 
 export type Env = Readonly<{
 	production: boolean;
@@ -21,6 +22,8 @@ export type Env = Readonly<{
 	COMPANY_LINKEDIN_LINK: string;
 	
 	CURRENCY_SYMBOL: string;
+	
+	TALKJS_APP_ID: string;
 	
 	LOG_LEVEL: string;
 }>;
@@ -51,8 +54,12 @@ export const env: Env = cleanEnv(
 			
 			CURRENCY_SYMBOL: str({ default: '₽' }),
 			
+			TALKJS_APP_ID: str({ default: '' }),
+			
 			AUTH_LOGO:        str({ default: 'assets/img/logo.svg' }),
 			NO_INTERNET_LOGO: str({ default: 'assets/img/ni-logo.svg' }),
 		},
-		{ strict: true, dotEnvPath: '/../../.env' }
+		{ strict: true, dotEnvPath: path.resolve(__dirname, '../.env') }
 );
+
+console.log(`${path.resolve(__dirname, '../.env')}`)
