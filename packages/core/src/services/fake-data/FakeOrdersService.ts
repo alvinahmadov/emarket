@@ -190,7 +190,7 @@ export class FakeOrdersService
 			carrier:              this._carrierId,
 			startDeliveryTime,
 			deliveryTime,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -212,7 +212,7 @@ export class FakeOrdersService
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
 			carrier:              this._carrierId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			startDeliveryTime:    this.getOrderNextTime(this._orderCreatedAt),
 			_createdAt:           this._orderCreatedAt
@@ -233,7 +233,7 @@ export class FakeOrdersService
 			warehouse:            this._storeId,
 			carrier:              this._carrierId,
 			startDeliveryTime:    this.getOrderNextTime(this._orderCreatedAt),
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -252,7 +252,7 @@ export class FakeOrdersService
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
 			carrier:              this._carrierId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -270,7 +270,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -291,7 +291,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -313,7 +313,7 @@ export class FakeOrdersService
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
 			carrier:              this._carrierId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			startDeliveryTime,
 			finishedProcessingTime,
@@ -342,7 +342,7 @@ export class FakeOrdersService
 			carrier:              this._carrierId,
 			startDeliveryTime,
 			finishedProcessingTime,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -365,7 +365,7 @@ export class FakeOrdersService
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
 			finishedProcessingTime,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -388,7 +388,7 @@ export class FakeOrdersService
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
 			finishedProcessingTime,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -406,7 +406,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -424,7 +424,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -445,7 +445,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -466,7 +466,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -488,7 +488,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          1,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			finishedProcessingTime,
 			_createdAt:           this._orderCreatedAt
@@ -507,7 +507,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          1,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
@@ -525,7 +525,7 @@ export class FakeOrdersService
 			isDeleted:            false,
 			orderNumber:          this._orderNumber,
 			warehouse:            this._storeId,
-			user:                 this.getRandomOrderCustomer(customers),
+			customer:             this.getRandomOrderCustomer(customers),
 			products:             this.generateRandomOrderProducts(products),
 			_createdAt:           this._orderCreatedAt
 		};
