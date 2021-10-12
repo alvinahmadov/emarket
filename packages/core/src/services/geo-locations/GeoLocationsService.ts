@@ -1,12 +1,17 @@
 import { injectable }                from 'inversify';
 import Logger                        from 'bunyan';
-import { createLogger }              from '../../helpers/Log';
-import { routerName, asyncListener } from '@pyro/io';
-import IService                      from '../IService';
-import axios                         from 'axios';
-import IGeoLocationsRouter           from '@modules/server.common/routers/IGeoLocationsRouter';
-import { env }                       from '../../env';
 import { inspect }                   from 'util';
+import ipstack                       from 'ipstack';
+import axios                         from 'axios';
+import { routerName, asyncListener } from '@pyro/io';
+import { ILocation }                 from '@modules/server.common/interfaces/IGeoLocation';
+import GeoLocation                   from '@modules/server.common/entities/GeoLocation';
+import IGeoLocationsRouter           from '@modules/server.common/routers/IGeoLocationsRouter';
+import IService                      from '../IService';
+import { env }                       from '../../env';
+import { createLogger }              from '../../helpers/Log';
+
+const INTERNAL_IPS = ['127.0.0.1', '::1'];
 
 @injectable()
 @routerName('geo-location')
@@ -16,13 +21,55 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 		                                     name: 'GeoLocationsService'
 	                                     });
 	
-	private readonly arcgisClientID: string;
-	private readonly arcgisClientSecret: string;
+	private static readonly arcgisClientID: string = env.ARCGIS_CLIENT_ID;
+	private static readonly arcgisClientSecret: string = env.ARCGIS_CLIENT_SECRET;
+	private static readonly ipStackApiKey = env.IP_STACK_API_KEY;
 	
 	constructor()
+	{}
+	
+	getLocationByIP(clientIp: string): Promise<GeoLocation>
 	{
-		this.arcgisClientID = env.ARCGIS_CLIENT_ID;
-		this.arcgisClientSecret = env.ARCGIS_CLIENT_SECRET;
+		//TODO: Add client ip detection algorithm
+		const ipStackKey = GeoLocationsService.ipStackApiKey;
+		let location: ILocation;
+		
+		try
+		{
+			location = {
+				type:        "Point",
+				coordinates: [0, 0]
+			}
+			if(!ipStackKey)
+			{
+				this.log.warn("Cannot use getLocationByIP without ipStackApiKey");
+				
+				return null;
+			}
+			location.type = "Point";
+			
+			const clientIp = "5.197.252.112";
+			
+			if(!INTERNAL_IPS.includes(clientIp))
+			{
+				ipstack(clientIp, ipStackKey, (err, response) =>
+				{
+					location.coordinates[0] = response.latitude;
+					location.coordinates[1] = response.longitude;
+				});
+			}
+			else
+			{
+				this.log.info(
+						`Can't use ipstack with internal ip address ${clientIp}`
+				);
+			}
+		} catch(e)
+		{
+		
+		}
+		
+		throw new Error("Method not implemented.");
 	}
 	
 	@asyncListener()
@@ -31,12 +78,15 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 			lng: number
 	): Promise<any | null>
 	{
-		if(!this.arcgisClientID || !this.arcgisClientSecret)
+		const arcGisClientID = GeoLocationsService.arcgisClientID;
+		const arcGisClientSecret = GeoLocationsService.arcgisClientSecret;
+		
+		if(!arcGisClientID || !arcGisClientSecret)
 		{
 			this.log.warn(
 					`Cannot use getAddressByCoordinatesUsingArcGIS without${
-							this.arcgisClientID ? '' : ' arcgisClientID'
-					}${this.arcgisClientSecret ? '' : ' arcgisClientSecret'}`
+							arcGisClientID ? '' : ' arcgisClientID'
+					}${arcGisClientSecret ? '' : ' arcgisClientSecret'}`
 			);
 			
 			return null;
@@ -48,7 +98,7 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 					`Attempt to reverse Geocode coordinates: ${lat},${lng}`
 			);
 			
-			const tokenRequestUrl = `https://www.arcgis.com/sharing/oauth2/token?client_id=${this.arcgisClientID}&client_secret=${this.arcgisClientSecret}&grant_type=client_credentials&f=json`;
+			const tokenRequestUrl = `https://www.arcgis.com/sharing/oauth2/token?client_id=${arcGisClientID}&client_secret=${arcGisClientSecret}&grant_type=client_credentials&f=json`;
 			
 			const tokenResult = await axios.get(tokenRequestUrl);
 			
@@ -59,7 +109,7 @@ export class GeoLocationsService implements IGeoLocationsRouter, IService
 			)
 			{
 				this.log.warn(
-						`Cannot get arcgis token with client_id=${this.arcgisClientID}, client_secret=${this.arcgisClientSecret}`
+						`Cannot get arcgis token with client_id=${arcGisClientID}, client_secret=${arcGisClientSecret}`
 				);
 				return null;
 			}
