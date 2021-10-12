@@ -1,28 +1,22 @@
 import Logger                                from 'bunyan';
-import CarrierStatus                         from '@modules/server.common/enums/CarrierStatus';
-import Carrier                               from '@modules/server.common/entities/Carrier';
-import { createLogger }                      from '../../helpers/Log';
-import { DBService }                         from '@pyro/db-server';
-import { inject, injectable }                from 'inversify';
-import ICarrierRouter,
-{
-	ICarrierLoginResponse,
-	ICarrierRegistrationInput
-}                                            from '@modules/server.common/routers/ICarrierRouter';
+import { injectable }                        from 'inversify';
+import { concat, Observable, of }            from 'rxjs';
+import { exhaustMap, first, map, switchMap } from 'rxjs/operators';
 import {
 	asyncListener,
 	observableListener,
 	routerName,
 	serialization
 }                                            from '@pyro/io';
-import IService                              from '../IService';
-import GeoLocation                           from '@modules/server.common/entities/GeoLocation';
+import { DBService }                         from '@pyro/db-server';
 import IGeoLocation                          from '@modules/server.common/interfaces/IGeoLocation';
-import { concat, Observable, of }            from 'rxjs';
-import { exhaustMap, first, map, switchMap } from 'rxjs/operators';
-import { env }                               from '../../env';
-import { AuthService, AuthServiceFactory }   from '../auth';
 import IPagingOptions                        from '@modules/server.common/interfaces/IPagingOptions';
+import ICarrierRouter                        from '@modules/server.common/routers/ICarrierRouter';
+import CarrierStatus                         from '@modules/server.common/enums/CarrierStatus';
+import Carrier                               from '@modules/server.common/entities/Carrier';
+import GeoLocation                           from '@modules/server.common/entities/GeoLocation';
+import IService                              from '../IService';
+import { createLogger }                      from '../../helpers/Log';
 
 @injectable()
 @routerName('carrier')
@@ -33,21 +27,6 @@ export class CarriersService extends DBService<Carrier>
 	protected readonly log: Logger = createLogger({
 		                                              name: 'carriersService'
 	                                              });
-	
-	private readonly authService: AuthService<Carrier>;
-	
-	constructor(
-			@inject('Factory<AuthService>')
-			private readonly authServiceFactory: AuthServiceFactory
-	)
-	{
-		super();
-		this.authService = this.authServiceFactory({
-			                                           role: 'carrier',
-			                                           Entity: Carrier,
-			                                           saltRounds: env.CARRIER_PASSWORD_BCRYPT_SALT_ROUNDS
-		                                           });
-	}
 	
 	@observableListener()
 	get(id: Carrier['id'])
@@ -78,59 +57,12 @@ export class CarriersService extends DBService<Carrier>
 	): Promise<Observable<Carrier[]>>
 	{
 		const carriers = await this.find({
-			                                 _id: { $in: carrierIds },
+			                                 _id:       { $in: carrierIds },
 			                                 isDeleted: { $eq: false }
 		                                 });
 		
 		const carriersIdsToReturn = carriers.map((c) => c.id);
 		return this.getMultiple(carriersIdsToReturn);
-	}
-	
-	@asyncListener()
-	async register(input: ICarrierRegistrationInput)
-	{
-		return await super.create({
-			                          ...input.carrier,
-			                          ...(input.password
-			                              ? {
-						                          hash: await this.authService.getPasswordHash(
-								                          input.password
-						                          )
-					                          }
-			                              : {})
-		                          });
-	}
-	
-	async updatePassword(
-			id: Carrier['id'],
-			password: { current: string; new: string }
-	): Promise<void>
-	{
-		await this.throwIfNotExists(id);
-		await this.authService.updatePassword(id, password);
-	}
-	
-	@asyncListener()
-	async login(
-			username: string,
-			password: string
-	): Promise<ICarrierLoginResponse | null>
-	{
-		const res = await this.authService.login({ username }, password);
-		
-		if(!res)
-		{
-			return null;
-		}
-		else if(res.entity.isDeleted)
-		{
-			return null;
-		}
-		
-		return {
-			carrier: res.entity,
-			token: res.token
-		};
 	}
 	
 	@asyncListener()
