@@ -312,16 +312,16 @@ export class WarehousesOrdersService
 		
 		if(existedOrder.customer.id !== customerId)
 		{
-			throw new Error(`The order is not used by user with Id ${customerId}`);
+			throw new Error(`The order is not used by customer with Id ${customerId}`);
 		}
 		
-		const user = await this._getCustomer(customerId);
+		const customer = await this._getCustomer(customerId);
 		const warehouse = await this._getWarehouse(warehouseId);
 		
 		const warehouseProducts = _.keyBy(warehouse.products, 'productId');
 		
 		this.log.info(
-				{ user, warehouseId, orderId, products },
+				{ customer, warehouseId, orderId, products },
 				'Add more products call'
 		);
 		
@@ -629,6 +629,7 @@ export class WarehousesOrdersService
 					}
 					return {
 						count:              args.count,
+						comment:            args.comment,
 						price:              wProduct.price,
 						initialPrice:       wProduct.initialPrice,
 						deliveryTimeMin:    wProduct.deliveryTimeMin,
