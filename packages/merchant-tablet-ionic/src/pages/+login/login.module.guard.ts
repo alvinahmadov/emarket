@@ -1,12 +1,12 @@
 import { Injectable }             from '@angular/core';
 import { CanLoad, Route, Router } from '@angular/router';
-import { Store }                  from '../../services/store.service';
+import { Storage }                from 'services/storage.service';
 
 @Injectable()
 export class LoginModuleGuard implements CanLoad
 {
 	constructor(
-			private readonly store: Store,
+			private readonly store: Storage,
 			private readonly router: Router
 	)
 	{}
