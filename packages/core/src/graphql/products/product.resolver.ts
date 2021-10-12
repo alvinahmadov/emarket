@@ -1,11 +1,13 @@
-import { Resolver, Query, Mutation } from '@nestjs/graphql';
-import { first }                     from 'rxjs/operators';
-import { ProductsService }           from '../../services/products';
+import { Resolver, Query, Mutation }                           from '@nestjs/graphql';
+import { first }                                               from 'rxjs/operators';
+import Product                                                 from '@modules/server.common/entities/Product';
+import IWarehouseProduct                                       from '@modules/server.common/interfaces/IWarehouseProduct';
+import { IProductDescription, IProductDetails, IProductTitle } from '@modules/server.common/interfaces/IProduct';
+import { ProductsService }                                     from '../../services/products';
 import {
 	WarehousesService,
 	WarehousesProductsService
-}                                    from '../../services/warehouses';
-import Product                       from '@modules/server.common/entities/Product';
+}                                                              from '../../services/warehouses';
 
 @Resolver('Product')
 export class ProductResolver
@@ -61,7 +63,7 @@ export class ProductResolver
 			                                                      isDeleted: { $eq: false }
 		                                                      });
 		const products = await this._productsService.find({
-			                                                  _id: { $in: ids },
+			                                                  _id:       { $in: ids },
 			                                                  isDeleted: { $eq: false }
 		                                                  });
 		const productsIds = products.map((d) => d.id);
@@ -99,5 +101,40 @@ export class ProductResolver
 	async createProduct(_, { product }: { product })
 	{
 		return this._productsService.create(product);
+	}
+	
+	private static filterBySearchText(wProduct: IWarehouseProduct, searchText: string)
+	{
+		if(!searchText)
+		{
+			return true;
+		}
+		
+		let titles = wProduct.product['title'];
+		titles = titles ? titles.map((t: IProductTitle) => t.value) : [];
+		let descriptions = wProduct.product['description'];
+		descriptions = descriptions
+		               ? descriptions.map((d: IProductDescription) => d.value)
+		               : [];
+		let details = wProduct.product['details'];
+		details = details ? details.map((d: IProductDetails) => d.value) : [];
+		
+		return (
+				(titles &&
+				 titles
+						 .join()
+						 .toLocaleLowerCase()
+						 .includes(searchText.toLocaleLowerCase())) ||
+				(descriptions &&
+				 descriptions
+						 .join()
+						 .toLocaleLowerCase()
+						 .includes(searchText.toLocaleLowerCase())) ||
+				(details &&
+				 details
+						 .join()
+						 .toLocaleLowerCase()
+						 .includes(searchText.toLocaleLowerCase()))
+		);
 	}
 }
