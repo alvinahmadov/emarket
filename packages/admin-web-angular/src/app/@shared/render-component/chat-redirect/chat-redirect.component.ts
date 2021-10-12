@@ -1,27 +1,30 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ViewCell }                 from 'ng2-smart-table';
-import { Router }                   from '@angular/router';
+import { Component, Input } from '@angular/core';
+import { ViewCell }         from 'ng2-smart-table';
+import { Router }           from '@angular/router';
 
 @Component({
 	           styleUrls:   ['chat-redirect.component.scss'],
 	           templateUrl: './chat-redirect.component.html',
            })
-export class RedirectChatComponent implements ViewCell, OnInit
+export class RedirectChatComponent implements ViewCell
 {
-	value: string | number;
-	redirectPage: string;
+	public value: string | null;
+	public redirectPage: string;
 	@Input()
-	rowData: any;
+	public rowData: any;
 	
 	constructor(private readonly router: Router) {}
 	
-	ngOnInit() {}
+	public get id(): string
+	{
+		return this.rowData['id'];
+	}
 	
-	redirect()
+	public redirect()
 	{
 		if(this.redirectPage)
 		{
-			this.router.navigate([`${this.redirectPage}/${this.rowData.id}`]);
+			this.router.navigate([this.redirectPage], { state: { userId: this.id } });
 		}
 	}
 }
