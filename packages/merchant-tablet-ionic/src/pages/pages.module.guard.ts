@@ -5,14 +5,14 @@ import {
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
 }                     from '@angular/router';
-import { Store }      from '../services/store.service';
+import { Storage }    from 'services/storage.service';
 
 @Injectable()
 export class PagesModuleGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Store
+			private readonly store: Storage
 	)
 	{}
 	
