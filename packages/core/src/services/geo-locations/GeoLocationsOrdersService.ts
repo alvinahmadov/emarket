@@ -126,7 +126,7 @@ export class GeoLocationsOrdersService
 			searchObj?: { byRegex: Array<{ key: string; value: string }> }
 	): Promise<number>
 	{
-		const merchants = await this.geoLocationsWarehousesService.getMerchants(
+		const merchants = await this.geoLocationsWarehousesService.getStores(
 				geoLocation,
 				GeoLocationsWarehousesService.TrackingDistance,
 				{ fullProducts: false, activeOnly: true }
@@ -223,7 +223,7 @@ export class GeoLocationsOrdersService
 			}
 	): Promise<Order[]>
 	{
-		const merchants = await this.geoLocationsWarehousesService.getMerchants(
+		const merchants = await this.geoLocationsWarehousesService.getStores(
 				geoLocation,
 				GeoLocationsWarehousesService.TrackingDistance,
 				{ fullProducts: false, activeOnly: true }
