@@ -7,6 +7,14 @@ import GeoLocation                       from '@modules/server.common/entities/G
 
 const IN_STORE_DISTANCE = 50;
 
+type TGetGeoLocationWarehousesOptions =
+		{
+			activeOnly?: boolean;
+			inStoreMode?: boolean;
+			maxDistance?: number;
+			fullProducts?: boolean;
+		}
+
 @Resolver('GeoLocationMerchants')
 export class GeoLocationMerchantsResolver
 {
@@ -15,14 +23,71 @@ export class GeoLocationMerchantsResolver
 	)
 	{}
 	
+	/**
+	 * Tries to find close warehouses/merchants
+	 * in range of 0 and max distance of 50 meters
+	 * to the customer
+	 *
+	 * @param _
+	 * @param {IGeoLocation} geoLocation Geolocation object
+	 * for distance measures
+	 *
+	 * @returns {Promise<Warehouse[]>} Found merchants
+	 *
+	 * @memberOf {GeoLocationMerchantsResolver}
+	 * */
 	@Query('getCloseMerchants')
 	async getCloseMerchants(_, { geoLocation }: { geoLocation: IGeoLocation })
 	{
-		let merchants = await this.geoLocationsWarehousesService.getMerchants(
-				geoLocation,
-				IN_STORE_DISTANCE,
-				{ fullProducts: false, activeOnly: true, inStoreMode: true }
+		return this.getNearMerchants(
+				_,
+				{
+					geoLocation: geoLocation,
+					options:     {
+						fullProducts: false,
+						activeOnly:   true,
+						inStoreMode:  true,
+						maxDistance:  IN_STORE_DISTANCE
+					}
+				}
 		);
+	}
+	
+	
+	/**
+	 * Tries to find warehouses/merchants
+	 * in range of 0 and max distance meters
+	 * to the customer
+	 *
+	 * @param _
+	 * @param {IGeoLocation} geoLocation Geolocation object
+	 * for distance measures
+	 * @param {TGetGeoLocationWarehousesOptions} options
+	 *
+	 * @returns {Promise<Warehouse[]>} Found merchants
+	 *
+	 * @memberOf {GeoLocationMerchantsResolver}
+	 * */
+	@Query('getNearMerchants')
+	async getNearMerchants(
+			_,
+			{ geoLocation, options }:
+					{
+						geoLocation: IGeoLocation,
+						options?: TGetGeoLocationWarehousesOptions
+					}
+	)
+	{
+		let merchants = await this.geoLocationsWarehousesService
+		                          .getStores(
+				                          geoLocation,
+				                          options?.maxDistance ?? 50,
+				                          {
+					                          activeOnly:   options?.activeOnly ?? true,
+					                          inStoreMode:  options?.inStoreMode ?? true,
+					                          fullProducts: false
+				                          }
+		                          );
 		
 		merchants = merchants.sort(
 				(m1, m2) =>
