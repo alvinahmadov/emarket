@@ -1,83 +1,84 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { TranslateService }                               from '@ngx-translate/core';
 import { LocalDataSource }                                from 'ng2-smart-table';
 import { takeUntil }                                      from 'rxjs/operators';
 import { Subject, forkJoin, Observable }                  from 'rxjs';
-import User                                               from '@modules/server.common/entities/User';
-import { UsersService }                                   from '../../services/users.service';
+import Customer                                           from '@modules/server.common/entities/Customer';
 import { AddressComponent }                               from './address.component';
-import { TranslateService }                               from '@ngx-translate/core';
+import { CustomersService }                               from '../../services/customers.service';
 
 @Component({
 	           selector: 'select-add-customer',
 	           styleUrls: ['./select-add-customer.component.scss'],
 	           template: `
-		<span class="select-add-customer-component">
-			<div class="customers-table" *ngIf="isSelectedFromExisting">
-				<ng2-smart-table
-					class="smart-table"
-					[settings]="settingsSmartTable"
-					[source]="sourceSmartTable"
-					(userRowSelect)="selectFromExisting($event)"
-				>
-				</ng2-smart-table>
-			</div>
+		           <span class="select-add-customer-component">
+			           <div class="customers-table" *ngIf="isSelectedFromExisting">
+				           <ng2-smart-table
+						           class="smart-table"
+						           [settings]="settingsSmartTable"
+						           [source]="sourceSmartTable"
+						           (userRowSelect)="selectFromExisting($event)"
+				           >
+				           </ng2-smart-table>
+			           </div>
 
-			<div *ngIf="!isSelectedFromExisting">
-				<user-mutation
-					[visible]="visible"
-					(changeState)="changeState($event)"
-					(customerIdEmitter)="broadcastCustomerId($event)"
-				></user-mutation>
-			</div>
-		</span>
-	`,
+			           <div *ngIf="!isSelectedFromExisting">
+				           <user-mutation
+						           [visible]="visible"
+						           (updateVisible)="changeState($event)"
+						           (customerIdEmitter)="broadcastCustomerId($event)"
+				           ></user-mutation>
+			           </div>
+		           </span>
+	           `,
            })
 export class SelectAddCustomerComponent implements OnInit
 {
 	private ngDestroy$ = new Subject<void>();
 	
-	visible: boolean;
+	// TODO: Watch for changeState => updateVisible in template
+	public visible: boolean;
 	
 	@Input()
-	customerOptionSelected: number;
+	public customerOptionSelected: number;
 	
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
 	
 	@Output()
-	customerIdEmitter = new EventEmitter<string>();
+	public customerIdEmitter = new EventEmitter<string>();
 	
 	private _noInfoSign = '';
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(
-			private readonly _usersService: UsersService,
+			private readonly _customersService: CustomersService,
 			private readonly _translateService: TranslateService
 	)
 	{}
 	
-	get isSelectedFromExisting()
+	public get isSelectedFromExisting(): boolean
 	{
 		return this.customerOptionSelected === 0;
 	}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this._setupSettingsSmartTable();
 		this._loadDataSmartTable();
 	}
 	
-	selectFromExisting(ev)
+	public selectFromExisting(ev)
 	{
 		this.broadcastCustomerId(ev.data.id);
 	}
 	
-	changeState(ev): void
+	public changeState(ev): void
 	{
 		this.visible = ev;
 	}
 	
-	broadcastCustomerId(customerId: string)
+	public broadcastCustomerId(customerId: string)
 	{
 		this.customerIdEmitter.emit(customerId);
 	}
@@ -120,30 +121,29 @@ export class SelectAddCustomerComponent implements OnInit
 	
 	private _loadDataSmartTable()
 	{
-		this._usersService
-		    .getUsers()
+		this._customersService
+		    .getCustomers()
 		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe((users: User[]) =>
+		    .subscribe((users: Customer[]) =>
 		               {
 			               const formattedData = this._formatDataSmartTable(users);
 			               this.sourceSmartTable.load(formattedData);
 		               });
 	}
 	
-	private _formatDataSmartTable(users: User[])
+	private _formatDataSmartTable(customers: Customer[])
 	{
-		return users.map((user: User) =>
-		                 {
-			                 return {
-				                 id: user.id,
-				                 name: `
-					${user.firstName || this._noInfoSign} ${user.lastName || this._noInfoSign}
-				`,
-				                 email: user.email || this._noInfoSign,
-				                 phone: user.phone || this._noInfoSign,
-				                 address: user.fullAddress || this._noInfoSign,
-				                 user,
-			                 };
-		                 });
+		return customers.map((customer: Customer) =>
+		                     {
+			                     return {
+				                     id: customer.id,
+				                     username: customer.username,
+				                     fullname: `${customer.fullName || this._noInfoSign}`,
+				                     email: customer.email || this._noInfoSign,
+				                     phone: customer.phone || this._noInfoSign,
+				                     address: customer.fullAddress || this._noInfoSign,
+				                     customer: customer,
+			                     };
+		                     });
 	}
 }
