@@ -2,7 +2,14 @@ import 'reflect-metadata';
 import { Container, interfaces, ContainerModule }                 from 'inversify';
 import _                                                          from 'lodash';
 import { IRoutersManager, RoutersManager, RouterSymbol }          from '@pyro/io';
-import { CarriersOrdersService, CarriersService }                 from './carriers';
+import { getConnection, Repository }                              from 'typeorm';
+import Admin                                                      from '@modules/server.common/entities/Admin';
+import Device                                                     from '@modules/server.common/entities/Device';
+import {
+	CarriersOrdersService,
+	CarriersAuthService,
+	CarriersService
+}                                                                 from './carriers';
 import {
 	SocialRegisterService,
 	SocialStrategiesService,
@@ -35,9 +42,6 @@ import { ServicesApp }                                            from './servic
 import { AuthenticationService, AuthService, authServiceFactory } from './auth';
 import { CustomersAuthService }                                   from './customers/CustomersAuthService';
 import { AdminsService }                                          from './admins';
-import { getConnection, Repository }                              from 'typeorm';
-import Admin                                                      from '@modules/server.common/entities/Admin';
-import Device                                                     from '@modules/server.common/entities/Device';
 import { FakeOrdersService }                                      from './fake-data/FakeOrdersService';
 import { CurrenciesService }                                      from './currency/CurrencyService';
 import { PromotionService }                                       from './products/PromotionService';
@@ -71,6 +75,7 @@ const bindings = new ContainerModule((bind: interfaces.Bind) =>
 				                                     UserCommandService,
 				                                     AdminsService,
 				                                     CarriersOrdersService,
+				                                     CarriersAuthService,
 				                                     CarriersService,
 				                                     DevicesService,
 				                                     GeoLocationsProductsService,
@@ -86,6 +91,10 @@ const bindings = new ContainerModule((bind: interfaces.Bind) =>
 				                                     CustomersAuthService,
 				                                     SocialStrategiesService,
 				                                     SocialRegisterService,
+				                                     // TODO: Implement payment services
+				                                     //StripeService,
+				                                     //YooKassaService,
+				                                     //PayPalService,
 				                                     WarehousesOrdersService,
 				                                     WarehousesProductsService,
 				                                     WarehousesCustomersService,
