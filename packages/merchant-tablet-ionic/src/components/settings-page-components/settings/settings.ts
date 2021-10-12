@@ -1,35 +1,35 @@
-import { Component, Input, AfterViewInit, ViewChild } from '@angular/core';
-import Warehouse                                      from '@modules/server.common/entities/Warehouse';
+import QRCode                              from 'qrcode';
+import { Component, Input, AfterViewInit } from '@angular/core';
+import { BarcodeScanner }                  from '@ionic-native/barcode-scanner/ngx';
+import { AlertController }                 from '@ionic/angular';
+import Warehouse                           from '@modules/server.common/entities/Warehouse';
 import OrderBarcodeTypes, {
 	orderBarcodeTypesToString,
-}                                                     from '@modules/server.common/enums/OrderBarcodeTypes';
-import { WarehouseRouter }                            from '@modules/client.common.angular2/routers/warehouse-router.service';
-import QRCode                                         from 'qrcode';
-import { BarcodeScanner }                             from '@ionic-native/barcode-scanner/ngx';
-import { AlertController }                            from '@ionic/angular';
+}                                          from '@modules/server.common/enums/OrderBarcodeTypes';
+import { WarehouseRouter }                 from '@modules/client.common.angular2/routers/warehouse-router.service';
 
 @Component({
-	           selector: 'merchant-settings',
-	           templateUrl: 'settings.html',
-	           styleUrls: ['settings.scss'],
+	           selector:    'merchant-settings',
+	           styleUrls:   ['./settings.scss'],
+	           templateUrl: './settings.html',
            })
 export class SettingsComponent implements AfterViewInit
 {
 	@Input()
-	currWarehouse: Warehouse;
+	public currentWarehouse: Warehouse;
 	
-	showPayments = false;
+	public showPayments = false;
 	
-	orderBarcodeTypes: OrderBarcodeTypes[] = [
+	public orderBarcodeTypes: OrderBarcodeTypes[] = [
 		OrderBarcodeTypes.QR,
 		OrderBarcodeTypes.CODE128,
 		OrderBarcodeTypes.CODE39,
 		OrderBarcodeTypes.pharmacode,
 	];
 	
-	selectedOrderBarcodeType: OrderBarcodeTypes;
-	barcodetDataUrl: string;
-	hasScanCode: boolean;
+	public selectedOrderBarcodeType: OrderBarcodeTypes;
+	public barcodetDataUrl: string;
+	public hasScanCode: boolean;
 	
 	private merchantBeforeUpdate: Warehouse;
 	
@@ -40,35 +40,35 @@ export class SettingsComponent implements AfterViewInit
 	)
 	{}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
-		if(this.currWarehouse)
+		if(this.currentWarehouse)
 		{
-			this.merchantBeforeUpdate = new Warehouse(this.currWarehouse);
+			this.merchantBeforeUpdate = new Warehouse(this.currentWarehouse);
 		}
 		
 		this.generateQRCode();
 	}
 	
-	getorderBarcodeTypesToString(status: OrderBarcodeTypes)
+	public getorderBarcodeTypesToString(status: OrderBarcodeTypes)
 	{
 		return orderBarcodeTypesToString(status);
 	}
 	
-	hasChanges()
+	public hasChanges()
 	{
 		return !Array.from(arguments).includes(true) && !this.hasScanCode;
 	}
 	
-	async saveChanges()
+	public async saveChanges()
 	{
 		try
 		{
-			await this.warehouseRouter.save(this.currWarehouse);
+			await this.warehouseRouter.save(this.currentWarehouse);
 			const alert = await this.alertController.create({
 				                                                cssClass: 'success-info',
-				                                                message: 'Successfully saved changes',
-				                                                buttons: ['OK'],
+				                                                message:  'Successfully saved changes',
+				                                                buttons:  ['OK'],
 			                                                });
 			
 			await alert.present();
@@ -76,21 +76,21 @@ export class SettingsComponent implements AfterViewInit
 		{
 			const alert = await this.alertController.create({
 				                                                cssClass: 'error-info',
-				                                                message: error.message,
-				                                                buttons: ['OK'],
+				                                                message:  error.message,
+				                                                buttons:  ['OK'],
 			                                                });
 			
-			this.currWarehouse = this.merchantBeforeUpdate;
+			this.currentWarehouse = this.merchantBeforeUpdate;
 			await alert.present();
 		}
 	}
 	
-	async scan()
+	public async scan()
 	{
 		try
 		{
 			const barcodeData = await this.barcodeScanner.scan();
-			this.currWarehouse.barcodeData = barcodeData.text;
+			this.currentWarehouse.barcodeData = barcodeData.text;
 			this.hasScanCode = true;
 		} catch(error)
 		{
@@ -98,7 +98,7 @@ export class SettingsComponent implements AfterViewInit
 		}
 	}
 	
-	async barcodeDataChange(e)
+	public async barcodeDataChange(e)
 	{
 		if(e.value)
 		{
@@ -112,10 +112,10 @@ export class SettingsComponent implements AfterViewInit
 	
 	private async generateQRCode()
 	{
-		if(this.currWarehouse)
+		if(this.currentWarehouse)
 		{
-			this.barcodetDataUrl = await QRCode.toDataURL(
-					this.currWarehouse.barcodeData
+			this.barcodetDataUrl = QRCode.toDataURL(
+					this.currentWarehouse.barcodeData
 			);
 		}
 		
