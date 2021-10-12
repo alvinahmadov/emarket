@@ -2,7 +2,7 @@ import { NgModule }             from '@angular/core';
 import { LoginPage }            from './login';
 import { TranslateModule }      from '@ngx-translate/core';
 import { AuthService }          from '../../services/auth.service';
-import { Store }                from '../../services/store.service';
+import { Storage }              from 'services/storage.service';
 import { Routes, RouterModule } from '@angular/router';
 import { CommonModule }         from '@angular/common';
 import { FormsModule }          from '@angular/forms';
@@ -11,15 +11,15 @@ import { TabModule }            from "@modules/client.common.angular2/components
 
 const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: LoginPage,
 	},
 ];
 
 @NgModule({
 	          declarations: [LoginPage],
-	          providers: [AuthService, Store],
-	          imports: [
+	          providers:    [AuthService, Storage],
+	          imports:      [
 		          IonicModule,
 		          RouterModule.forChild(routes),
 		          CommonModule,
