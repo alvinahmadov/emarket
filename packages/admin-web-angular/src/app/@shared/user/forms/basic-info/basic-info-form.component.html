@@ -1,116 +1,129 @@
-<div *ngIf="form" [formGroup]="form" class="col-sm-12">
-    <br/>
-
-    <fieldset>
-        <div class="form-group row">
-            <label class="col-sm-2 control-label">
-				<span *ngIf="showBasicInfoLabel">{{
-                    'SHARED.USER.FORMS.BASIC_INFO.TITLE' | translate
-                    }}</span>
-            </label>
-
-            <div class="col-sm-5">
-                <input
-                        class="form-control"
-                        formControlName="firstName"
-                        placeholder="{{
-						'SHARED.USER.FORMS.BASIC_INFO.FIRST_NAME_OPTIONAL'
-							| translate
-					}}"
-                        type="text"
-                />
-            </div>
-
-            <div class="col-sm-5">
-                <input
-                        class="form-control"
-                        formControlName="lastName"
-                        placeholder="{{
-						'SHARED.USER.FORMS.BASIC_INFO.LAST_NAME_OPTIONAL'
-							| translate
-					}}"
-                        type="text"
-                />
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label class="col-sm-2 control-label">{{
-                'SHARED.USER.FORMS.BASIC_INFO.EMAIL' | translate
-                }}</label>
-
-            <div class="col-sm-10">
-                <input
-                        class="form-control"
-                        formControlName="email"
-                        placeholder="{{
-						'SHARED.USER.FORMS.BASIC_INFO.EMAIL_OPTIONAL'
-							| translate
-					}}"
-                        type="text"
-                />
-
-                <div
-                        *ngIf="email.errors && (email.dirty || email.touched)"
-                        class="alert alert-danger"
-                >
-                    <div [hidden]="!email.hasError('email')">
-                        {{
-                        'SHARED.USER.FORMS.BASIC_INFO.ERRORS.INVALID_EMAIL'
-                            | translate
-                        }}!
-                    </div>
-                    <div [hidden]="!email.hasError('emailTaken')">
-                        {{
-                        'SHARED.USER.FORMS.BASIC_INFO.ERRORS.EMAIL_IS_ALREADY_IN_USE'
-                            | translate
-                        }}!
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-group row">
-            <label class="col-sm-2 control-label">
-                {{ 'SHARED.USER.FORMS.BASIC_INFO.PHOTO_URL' | translate }}
-            </label>
-
-            <div class="col-sm-10">
-                <e-cu-file-uploader
-                        (uploadedImgUrl)="image.setValue($event)"
-                        [fileUrl]="image?.value"
-                        [name]="firstName?.value"
-                        [placeholder]="uploaderPlaceholder"
-                ></e-cu-file-uploader>
-                <div *ngIf="image.invalid" class="alert alert-danger">
-                    {{ 'SHARED.FORMS.ERRORS.LOGO_URL_REQUIRED' | translate }}!
-                </div>
-            </div>
-        </div>
-
-        <div [hidden]="image.invalid" class="form-group row">
-            <label class="col-sm-2 control-label"></label>
-            <div class="col-sm-10">
-                <div class="row preview-img">
-                    <div
-                            (click)="deleteImg()"
-                            [hidden]="!showLogoMeta"
-                            class="remove-icon"
-                    >
-                        <img
-                            #logoImagePreview
-                            alt="Invalid image"
-                            class="img-rounded"
-                            src="{{ image.value }}"
-                        />
-
-                        <span
-                                class="ion-md-remove-circle text-danger pl-2"
-                                title="Remove"
-                        ></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </fieldset>
+<div *ngIf="form"
+     [formGroup]="form"
+     class="col-sm-12"
+>
+	<br/>
+	
+	<fieldset>
+		<!-- FirstName, LastName -->
+		<div class="form-group row">
+			<label class="col-sm-2 control-label">
+				<span *ngIf="showBasicInfoLabel">
+					{{ 'SHARED.USER.FORMS.BASIC_INFO.TITLE' | translate }}
+				</span>
+			</label>
+			
+			<div class="col-sm-5">
+				<input
+						class="form-control"
+						formControlName="firstName"
+						placeholder="{{ 'SHARED.USER.FORMS.BASIC_INFO.FIRST_NAME_OPTIONAL' | translate}}"
+						type="text"
+				/>
+			</div>
+			
+			<div class="col-sm-5">
+				<input
+						class="form-control"
+						formControlName="lastName"
+						placeholder="{{ 'SHARED.USER.FORMS.BASIC_INFO.LAST_NAME_OPTIONAL' | translate }}"
+						type="text"
+				/>
+			</div>
+		</div>
+		
+		<!-- Email -->
+		<div class="form-group row">
+			<label class="col-sm-2 control-label">
+				{{ 'SHARED.USER.FORMS.BASIC_INFO.EMAIL' | translate }}
+			</label>
+			
+			<div class="col-sm-10">
+				<input
+						class="form-control"
+						formControlName="email"
+						placeholder="{{'SHARED.USER.FORMS.BASIC_INFO.EMAIL' | translate }}"
+						type="text"
+				/>
+				
+				<div
+						*ngIf="email.errors && (email.dirty || email.touched)"
+						class="alert alert-danger"
+				>
+					<div [hidden]="!email.hasError('email')">
+						{{ 'SHARED.USER.FORMS.BASIC_INFO.ERRORS.INVALID_EMAIL' | translate }}!
+					</div>
+					<div [hidden]="!email.hasError('emailTaken')">
+						{{ 'SHARED.USER.FORMS.BASIC_INFO.ERRORS.EMAIL_IS_ALREADY_IN_USE' | translate }}!
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Password -->
+		<div class="form-group row">
+			<label class="col-sm-2 control-label">
+				{{ 'SHARED.USER.FORMS.BASIC_INFO.PASSWORD' | translate }}
+			</label>
+			
+			<div class="col-sm-10">
+				<input
+						class="form-control"
+						formControlName="password"
+						placeholder="{{ 'SHARED.USER.FORMS.BASIC_INFO.PASSWORD' | translate }}"
+						type="password"
+				/>
+				
+				<div
+						*ngIf="password.errors && (password.dirty || password.touched)"
+						class="alert alert-danger"
+				>
+					<div [hidden]="!password.hasError('password')">
+						{{ 'SHARED.USER.FORMS.BASIC_INFO.ERRORS.INVALID_PASSWORD' | translate }}!
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Avatar -->
+		<div class="form-group row">
+			<label class="col-sm-2 control-label">
+				{{ 'SHARED.USER.FORMS.BASIC_INFO.PHOTO_URL' | translate }}
+			</label>
+			
+			<div class="col-sm-10">
+				<e-cu-file-uploader
+						(uploadedImgUrl)="avatar.setValue($event)"
+						[fileUrl]="avatar?.value"
+						[name]="firstName?.value"
+						[placeholder]="uploaderPlaceholder"
+				></e-cu-file-uploader>
+				<div *ngIf="avatar.invalid" class="alert alert-danger">
+					{{ 'SHARED.FORMS.ERRORS.LOGO_URL_REQUIRED' | translate }}!
+				</div>
+			</div>
+		</div>
+		
+		<div [hidden]="avatar.invalid" class="form-group row">
+			<label class="col-sm-2 control-label"></label>
+			<div class="col-sm-10">
+				<div class="row preview-img">
+					<div (click)="deleteImg()"
+					     [hidden]="!showLogoMeta"
+					     class="remove-icon"
+					>
+						<img #logoImagePreview
+						     alt="Invalid image"
+						     class="img-rounded"
+						     src="{{ avatar.value }}"
+						/>
+						
+						<span class="ion-md-remove-circle text-danger pl-2"
+						      title="Remove"
+						></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</fieldset>
 </div>
