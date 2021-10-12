@@ -11,7 +11,7 @@
 	"scripts": {
 		"config": "yarn ts-node ./scripts/configure.ts",
 		"watch": "tsc -p ./tsconfig.build.json -w",
-		"build": "rimraf build && yarn config && tsc -p ./tsconfig.build.json",
+		"build": "rimraf build && yarn run config && tsc -p ./tsconfig.build.json",
 		"lint": "tslint --fix --project ./",
 		"test": "jest --config ./jest.config.js"
 	},
@@ -33,6 +33,7 @@
 		"@ever-platform/common": "file:../common",
 		"@ngx-translate/core": "^12.1.2",
 		"@ngx-translate/http-loader": "^4.0.0",
+		"talkjs": "^0.14.5",
 		"tslib": "^1.10.0",
 		"zone.js": "~0.10.2"
 	},
