@@ -33,12 +33,12 @@ export class SocialRegisterService implements IService
 		{
 			const [firstname, lastname] = profileInfo.displayName.split(' ');
 			
-			const name = profileInfo.username ?? firstname;
+			const username = profileInfo.username ?? firstname;
 			const email = profileInfo.emails[0].value;
 			
 			const newUser = await this.usersService
 			                          .initCustomer({
-				                                        name:                    name,
+				                                        username:                username,
 				                                        email:                   email,
 				                                        firstName:               firstname,
 				                                        lastName:                lastname,
