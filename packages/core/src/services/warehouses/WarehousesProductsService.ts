@@ -24,10 +24,13 @@ import Warehouse                  from '@modules/server.common/entities/Warehous
 import { WarehousesService }      from './WarehousesService';
 import IService                   from '../IService';
 import { createLogger }           from '../../helpers/Log';
+// import AsyncLock                  from 'async-lock'
 
 const noGetProductTypeMessage = `There should be true at least one of the two - "isCarrierRequired" or "isTakeaway"!`;
 
 type CountOpType = "sold" | "likes" | "views" | "qty";
+
+// const lock = new AsyncLock();
 
 /**
  * Warehouses Products Service
@@ -186,7 +189,7 @@ export class WarehousesProductsService
 		// products not populated!
 		let warehouse = await this._getWarehouse(warehouseId, false);
 		
-		const notUpdatedWarehouse = _.clone(warehouse);
+		const lastValue = _.clone(warehouse);
 		
 		// In practice to make it more reliable, we should go one by one, i.e. one product a time
 		// and each time execute atomic operation on each product.
@@ -263,12 +266,14 @@ export class WarehousesProductsService
 		
 		if(triggerChange)
 		{
-			this.warehousesService.existence.next({
-				                                      id: warehouse.id,
-				                                      value: warehouse,
-				                                      lastValue: notUpdatedWarehouse,
-				                                      type: ExistenceEventType.Updated
-			                                      });
+			this.warehousesService
+			    .existence
+			    .next({
+				          id: warehouse.id,
+				          value: warehouse,
+				          lastValue: lastValue,
+				          type: ExistenceEventType.Updated
+			          });
 		}
 		
 		const newProdsIds = _.map(newProds, (warehouseProduct) =>
@@ -319,7 +324,7 @@ export class WarehousesProductsService
 	}
 	
 	/**
-	 * TODO: document
+	 * Update warehouse product
 	 *
 	 * @param {string} warehouseId
 	 * @param {WarehouseProduct} _updatedWarehouseProduct
@@ -463,8 +468,6 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		// TODO: Some global distributed lock should be apply here
-		// so we can't decrease product count on 2 separate servers at the same time!
 		return this._changeCount(warehouseId, productId, -count);
 	}
 	
