@@ -38,6 +38,8 @@ export type Environment = Readonly<{
 	
 	GOOGLE_MAPS_API_KEY: string;
 	
+	TALKJS_APP_ID: string;
+	
 	GOOGLE_ANALYTICS_API_KEY: string;
 	FAKE_UUID: string;
 	MIXPANEL_API_KEY: string;
@@ -100,6 +102,8 @@ export const env: Environment = cleanEnv(
 			APP_NAME: str({ default: 'Merchant' }),
 			GOOGLE_MAPS_API_KEY: str({ default: '' }),
 			GOOGLE_ANALYTICS_API_KEY: str({ default: '' }),
+			TALKJS_APP_ID: str({ default: '' }),
+			
 			FAKE_UUID: str({ default: uuid() }),
 			MIXPANEL_API_KEY: str({ default: '' }),
 			
