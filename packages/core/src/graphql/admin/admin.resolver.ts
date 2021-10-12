@@ -1,6 +1,8 @@
+import { UseGuards }                 from '@nestjs/common';
 import { Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ExtractJwt }                from 'passport-jwt';
 import { first }                     from 'rxjs/operators';
+import { IAdminFindInput }           from '@modules/server.common/interfaces/IAdmin';
 import {
 	IAdminRegistrationInput,
 	IAdminLoginResponse
@@ -8,6 +10,7 @@ import {
 import Admin                         from '@modules/server.common/entities/Admin';
 import { env }                       from '../../env';
 import { AdminsService }             from '../../services/admins';
+import { GqlAdminGuard }             from '../../auth/guards/gql.guard';
 
 @Resolver('Admin')
 export class AdminResolver
@@ -15,6 +18,7 @@ export class AdminResolver
 	constructor(private readonly _adminsService: AdminsService) {}
 	
 	@Query('admin')
+	@UseGuards(GqlAdminGuard)
 	async getAdmin(_, { id }: { id: string }): Promise<Admin>
 	{
 		return this._adminsService
@@ -24,9 +28,16 @@ export class AdminResolver
 	}
 	
 	@Query('adminByEmail')
+	@UseGuards(GqlAdminGuard)
 	async getByEmail(_, { email }: { email: string }): Promise<Admin>
 	{
 		return this._adminsService.getByEmail(email);
+	}
+	
+	@Query('adminSearch')
+	async findAdmin(_, { findInput }: { findInput: IAdminFindInput })
+	{
+		return this._adminsService.findAdmin(findInput)
 	}
 	
 	@Mutation()
@@ -36,16 +47,6 @@ export class AdminResolver
 	): Promise<Admin>
 	{
 		return this._adminsService.register(registerInput);
-	}
-	
-	@Mutation()
-	async updateAdmin(
-			_,
-			{ id, updateInput }: { id: string; updateInput }
-	): Promise<Admin>
-	{
-		await this._adminsService.throwIfNotExists(id);
-		return this._adminsService.update(id, updateInput);
 	}
 	
 	@Mutation()
@@ -66,6 +67,18 @@ export class AdminResolver
 	}
 	
 	@Mutation()
+	@UseGuards(GqlAdminGuard)
+	async updateAdmin(
+			_,
+			{ id, updateInput }: { id: string; updateInput }
+	): Promise<Admin>
+	{
+		await this._adminsService.throwIfNotExists(id);
+		return this._adminsService.update(id, updateInput);
+	}
+	
+	@Mutation()
+	@UseGuards(GqlAdminGuard)
 	async updateAdminPassword(
 			_,
 			{
