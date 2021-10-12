@@ -54,7 +54,7 @@ export class WarehousesCustomersService implements IService, IWarehouseCustomers
 						exhaustMap(() =>
 						           {
 							           return this.ordersService.Model
-							                      .distinct('user._id', {
+							                      .distinct('customer._id', {
 								                      warehouse: warehouseId,
 								                      isDeleted: { $eq: false }
 							                      })
