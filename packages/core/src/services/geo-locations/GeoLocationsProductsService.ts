@@ -21,11 +21,11 @@ import GeoLocation                        from '@modules/server.common/entities/
 import ProductInfo                        from '@modules/server.common/entities/ProductInfo';
 import WarehouseProduct                   from '@modules/server.common/entities/WarehouseProduct';
 import GeoUtils                           from '@modules/server.common/utilities/geolocation';
-import { WarehousesService }              from '@core/services/warehouses';
-import { GeoLocationsWarehousesService }  from '@core/services/geo-locations/GeoLocationsWarehousesService';
-import IService                           from '@core/services/IService';
-import { createLogger }                   from '@core/helpers/Log';
 import { IGetGeoLocationProductsOptions } from 'graphql/geo-locations/geo-location.resolver';
+import { WarehousesService }              from '../../services/warehouses';
+import { GeoLocationsWarehousesService }  from '../../services/geo-locations/GeoLocationsWarehousesService';
+import IService                           from '../../services/IService';
+import { createLogger }                   from '../../helpers/Log';
 
 @injectable()
 @routerName('geo-location-products')
