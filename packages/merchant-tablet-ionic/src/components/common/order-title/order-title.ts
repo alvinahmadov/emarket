@@ -1,28 +1,25 @@
 import { Component, Input } from '@angular/core';
+import Customer             from '@modules/server.common/entities/Customer';
 import CommonUtils          from '@modules/server.common/utilities/common';
 
 @Component({
-	           selector: 'order-title',
-	           styleUrls: ['./order-title.scss'],
-	           templateUrl: 'order-title.html',
+	           selector:    'order-title',
+	           styleUrls:   ['./order-title.scss'],
+	           templateUrl: './order-title.html',
            })
 export class OrderTitleComponent
 {
 	@Input()
 	public order;
 	
-	get orderName()
+	public get orderName()
 	{
 		return CommonUtils.getIdFromTheDate(this.order);
 	}
 	
-	get userFullName()
+	public get userFullName()
 	{
-		const fullName = `${this.order.user.firstName || ''} ${
-				this.order.user.lastName || ''
-		}`;
-		return fullName.trim();
+		const customer = this.order.customer as Customer;
+		return customer.fullName;
 	}
-	
-	constructor() {}
 }
