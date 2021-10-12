@@ -1,24 +1,24 @@
 import Logger                                            from 'bunyan';
 import _                                                 from 'lodash';
-import { createLogger }                                  from '../../helpers/Log';
+import { inject, injectable }                            from 'inversify';
+import { asyncListener, observableListener, routerName } from '@pyro/io';
+import { ExistenceEventType }                            from '@pyro/db-server';
+import IOrder                                            from '@modules/server.common/interfaces/IOrder';
+import OrderCarrierStatus                                from '@modules/server.common/enums/OrderCarrierStatus';
+import Carrier                                           from '@modules/server.common/entities/Carrier';
+import Order                                             from '@modules/server.common/entities/Order';
+import ICarrierOrdersRouter                              from '@modules/server.common/routers/ICarrierOrdersRouter';
+import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
+import CarriersService                                   from './CarriersService';
 import { ProductsService }                               from '../products';
 import { OrdersService }                                 from '../orders';
-import CarriersService                                   from './CarriersService';
-import Carrier                                           from '@modules/server.common/entities/Carrier';
-import OrderCarrierStatus                                from '@modules/server.common/enums/OrderCarrierStatus';
-import { inject, injectable }                            from 'inversify';
+import { createLogger }                                  from '../../helpers/Log';
 import { WarehousesOrdersService }                       from '../warehouses';
-import ICarrierOrdersRouter                              from '@modules/server.common/routers/ICarrierOrdersRouter';
-import { asyncListener, observableListener, routerName } from '@pyro/io';
 import IService                                          from '../IService';
-import Order                                             from '@modules/server.common/entities/Order';
-import IOrder                                            from '@modules/server.common/interfaces/IOrder';
 import {
 	GeoLocationsOrdersService,
 	GeoLocationOrdersOptions
 }                                                        from '../geo-locations';
-import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
-import { ExistenceEventType }                            from '@pyro/db-server';
 import {
 	concat,
 	distinctUntilChanged,
@@ -219,7 +219,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 		await this.carriersService.throwIfNotExists(carrierId);
 		
 		const _orders = await this.ordersService.find({
-			                                              _id: { $in: orderIds },
+			                                              _id:       { $in: orderIds },
 			                                              isDeleted: { $eq: false }
 		                                              });
 		const ordersIdsFiltered = _orders.map((d) => d.id);
@@ -227,7 +227,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 		const orders = await this.ordersService.updateMultipleByIds(
 				ordersIdsFiltered,
 				{
-					$unset: { carrier: 1 },
+					$unset:        { carrier: 1 },
 					carrierStatus: OrderCarrierStatus.NoCarrier
 				}
 		);
@@ -284,7 +284,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 				completion: 'completed' | 'not-completed' | 'all';
 			} = {
 				populateWarehouse: false,
-				completion: 'not-completed'
+				completion:        'not-completed'
 			}
 	): Observable<Order[]>
 	{
@@ -339,7 +339,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 				completion: 'completed' | 'not-completed' | 'all';
 			} = {
 				populateWarehouse: false,
-				completion: 'not-completed'
+				completion:        'not-completed'
 			}
 	): Promise<IOrder[]>
 	{
@@ -383,7 +383,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 		await this.carriersService.throwIfNotExists(carrierId);
 		
 		return this.ordersService.Model.findOne(
-				           _.assign(this.getOrdersForWorkFilter(carrierId), {
+				           _.assign(CarriersOrdersService.getOrdersForWorkFilter(carrierId), {
 					           carrier: carrierId
 				           })
 		           )
@@ -466,10 +466,10 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 		}
 	}
 	
-	private getOrdersForWorkFilter(carrierId: string)
+	private static getOrdersForWorkFilter(carrierId: string): object
 	{
 		return {
-			carrierStatus: {
+			carrierStatus:   {
 				$nin: [
 					OrderCarrierStatus.IssuesDuringDelivery,
 					OrderCarrierStatus.ClientRefuseTakingOrder,
@@ -482,7 +482,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 					OrderWarehouseStatus.GivenToCarrier
 				]
 			},
-			$or: [{ carrier: null }, { carrier: carrierId }]
+			$or:             [{ carrier: null }, { carrier: carrierId }]
 		};
 	}
 }
