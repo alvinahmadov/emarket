@@ -5,9 +5,9 @@ import { BrowserAnimationsModule }          from '@angular/platform-browser/anim
 import { HttpClient, HttpClientModule }     from '@angular/common/http';
 import { NgbModule }                        from '@ng-bootstrap/ng-bootstrap';
 import { FormWizardModule }                 from '@ever-co/angular2-wizard';
-import { SimpleTimer }                      from 'ng2-simple-timer';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
+import { SimpleTimer }                      from 'ng2-simple-timer';
 import { ToasterModule }                    from 'angular2-toaster';
 import { Apollo, ApolloModule }             from 'apollo-angular';
 import { HttpLink, HttpLinkModule }         from 'apollo-angular-link-http';
@@ -16,26 +16,26 @@ import { ApolloLink }                       from 'apollo-link';
 import { WebSocketLink }                    from 'apollo-link-ws';
 import { setContext }                       from 'apollo-link-context';
 import { getOperationAST }                  from 'graphql/utilities/getOperationAST';
-import { CoreModule }                       from './@core/core.module';
-import { ThemeModule }                      from './@theme/theme.module';
 import { CommonModule }                     from '@modules/client.common.angular2/common.module';
-import { AppComponent }                     from './app.component';
-import { AppRoutingModule }                 from './app-routing.module';
-import { environment }                      from 'environments/environment';
-import { Store }                            from './@core/data/store.service';
 import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/googlemaps-loader';
 import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
-import { AppModuleGuard }                   from './app.module.guard';
-import { MaintenanceModuleGuard }           from './pages/+maintenance-info/maintenance-info.module.guard';
 import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
-import { ServerSettingsService }            from './@core/services/server-settings.service';
+import { ThemeModule }                      from '@app/@theme/theme.module';
+import { CoreModule }                       from '@app/@core/core.module';
+import { StorageService }                   from '@app/@core/data/store.service';
+import { ServerSettingsService }            from '@app/@core/services/server-settings.service';
+import { AppComponent }                     from '@app/app.component';
+import { AppRoutingModule }                 from '@app/app-routing.module';
+import { AppModuleGuard }                   from '@app/app.module.guard';
+import { MaintenanceModuleGuard }           from '@app/pages/+maintenance-info/maintenance-info.module.guard';
+import { environment }                      from 'environments/environment';
 
 // It's more 'standard' way to use Font-Awesome module and special package,
 // but for some reason ngx-admin works without it. So we leave next line commented for now.
 // import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 // noinspection AngularInvalidImportedOrDeclaredSymbol
 @NgModule({
-	          imports: [
+	          imports:      [
 		          BrowserModule,
 		          FormWizardModule,
 		          // See comment above about Font-Awesome in ngx-admin
@@ -48,9 +48,9 @@ import { ServerSettingsService }            from './@core/services/server-settin
 		          HttpLinkModule,
 		          TranslateModule.forRoot({
 			                                  loader: {
-				                                  provide: TranslateLoader,
+				                                  provide:    TranslateLoader,
 				                                  useFactory: HttpLoaderFactory,
-				                                  deps: [HttpClient],
+				                                  deps:       [HttpClient],
 			                                  },
 		                                  }),
 		          CommonModule.forRoot({ apiUrl: environment.HTTP_SERVICES_ENDPOINT }),
@@ -59,35 +59,35 @@ import { ServerSettingsService }            from './@core/services/server-settin
 		          CoreModule.forRoot(),
 	          ],
 	          declarations: [AppComponent],
-	          bootstrap: [AppComponent],
-	          providers: [
+	          bootstrap:    [AppComponent],
+	          providers:    [
 		          ServerConnectionService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: serverConnectionFactory,
-			          deps: [ServerConnectionService, Store],
-			          multi: true,
+			          deps:       [ServerConnectionService, StorageService],
+			          multi:      true,
 		          },
 		          GoogleMapsLoader,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: googleMapsLoaderFactory,
-			          deps: [GoogleMapsLoader],
-			          multi: true,
+			          deps:       [GoogleMapsLoader],
+			          multi:      true,
 		          },
 		          MaintenanceService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: maintenanceFactory,
-			          deps: [MaintenanceService],
-			          multi: true,
+			          deps:       [MaintenanceService],
+			          multi:      true,
 		          },
 		          ServerSettingsService,
 		          {
-			          provide: APP_INITIALIZER,
+			          provide:    APP_INITIALIZER,
 			          useFactory: serverSettingsFactory,
-			          deps: [ServerSettingsService],
-			          multi: true,
+			          deps:       [ServerSettingsService],
+			          multi:      true,
 		          },
 		          { provide: APP_BASE_HREF, useValue: '/' },
 		          SimpleTimer,
@@ -97,7 +97,7 @@ import { ServerSettingsService }            from './@core/services/server-settin
           })
 export class AppModule
 {
-	constructor(apollo: Apollo, httpLink: HttpLink, private store: Store)
+	constructor(apollo: Apollo, httpLink: HttpLink, private store: StorageService)
 	{
 		// Create an http link:
 		const http = httpLink.create({
@@ -106,10 +106,10 @@ export class AppModule
 		
 		// Create a WebSocket link:
 		const ws = new WebSocketLink({
-			                             uri: environment.GQL_SUBSCRIPTIONS_ENDPOINT,
+			                             uri:     environment.GQL_SUBSCRIPTIONS_ENDPOINT,
 			                             options: {
 				                             reconnect: true,
-				                             lazy: true,
+				                             lazy:      true,
 			                             },
 		                             });
 		
@@ -127,7 +127,7 @@ export class AppModule
 		                            });
 		
 		apollo.create({
-			              link: authLink.concat(
+			              link:           authLink.concat(
 					              ApolloLink.split(
 							              (operation) =>
 							              {
@@ -149,15 +149,15 @@ export class AppModule
 					              fetchPolicy: 'network-only',
 					              errorPolicy: 'ignore',
 				              },
-				              query: {
+				              query:      {
 					              fetchPolicy: 'network-only',
 					              errorPolicy: 'all',
 				              },
-				              mutate: {
+				              mutate:     {
 					              errorPolicy: 'all',
 				              },
 			              },
-			              cache: new InMemoryCache(),
+			              cache:          new InMemoryCache(),
 		              });
 	}
 }
@@ -174,7 +174,7 @@ export function googleMapsLoaderFactory(provider: GoogleMapsLoader)
 
 export function serverConnectionFactory(
 		provider: ServerConnectionService,
-		store: Store
+		store: StorageService
 )
 {
 	return () => provider.load(environment.HTTP_SERVICES_ENDPOINT, store);
