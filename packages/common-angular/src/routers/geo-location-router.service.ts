@@ -1,5 +1,6 @@
 import { Injectable }            from '@angular/core';
 import { RouterFactory, Router } from '../lib/router';
+import GeoLocation               from '@modules/server.common/entities/GeoLocation';
 import IGeoLocationsRouter       from '@modules/server.common/routers/IGeoLocationsRouter';
 
 @Injectable()
@@ -18,5 +19,10 @@ export class GeoLocationRouter implements IGeoLocationsRouter
 	): Promise<any | null>
 	{
 		return this.router.run('getAddressByCoordinatesUsingArcGIS', lat, lng);
+	}
+	
+	getLocationByIP(ipStackKey: string): Promise<GeoLocation | null>
+	{
+		return this.router.run<GeoLocation>('getLocationByIP', ipStackKey);
 	}
 }
