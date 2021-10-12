@@ -1,47 +1,50 @@
 import { Component, OnInit }           from '@angular/core';
-import { ViewCell }                    from 'ng2-smart-table';
-import User                            from '@modules/server.common/entities/User';
-import Order                           from '@modules/server.common/entities/Order';
 import { ModalController }             from '@ionic/angular';
+import { ViewCell }                    from 'ng2-smart-table';
+import Customer                        from '@modules/server.common/entities/Customer';
+import Order                           from '@modules/server.common/entities/Order';
 import { CustomerDeliveriesPopupPage } from 'pages/+customers/customer-deliveries-popup/customer-deliveries-popup';
 
 @Component({
 	           template: `
-		<div class="text-center">
-			<span class="ordersCount" (click)="showDeliveriesInfo(user)">{{
-				rowData?.orders
-			}}</span>
-			<div></div>
-		</div>
-	`,
+		                     <div class="text-center">
+			                     <span class="ordersCount"
+			                           (click)="showDeliveriesInfo(customer)">
+				                     {{ rowData?.orders }}
+			                     </span>
+			                     <div></div>
+		                     </div>
+	                     `,
            })
 export class OrdersComponent implements ViewCell, OnInit
 {
-	value: string | number;
-	rowData: any;
-	user: User;
-	orders: Order[];
+	public value: string | number;
+	public rowData: any;
+	public customer: Customer;
+	public orders: Order[];
 	
 	constructor(public modalCtrl: ModalController) {}
 	
 	ngOnInit(): void
 	{
-		this.user = this.rowData.user;
+		this.customer = this.rowData.customer;
 		this.orders = this.rowData.allOrders;
 	}
 	
-	getOrdersCount(userId: string)
+	public getOrdersCount(customerId: string)
 	{
-		return this.orders.filter((o: Order) => o.user.id === userId).length;
+		return this.orders
+		           .filter((o: Order) => o.customer.id === customerId).length;
 	}
 	
-	async showDeliveriesInfo(user)
+	public async showDeliveriesInfo(customer: Customer)
 	{
-		const modal = await this.modalCtrl.create({
-			                                          component: CustomerDeliveriesPopupPage,
-			                                          componentProps: { user },
-			                                          cssClass: 'customer-deliveries',
-		                                          });
+		const modal = await this.modalCtrl
+		                        .create({
+			                                component:      CustomerDeliveriesPopupPage,
+			                                componentProps: { customer },
+			                                cssClass:       'customer-deliveries',
+		                                });
 		await modal.present();
 	}
 }
