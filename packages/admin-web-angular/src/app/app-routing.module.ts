@@ -8,69 +8,77 @@ import {
 	NbRequestPasswordComponent,
 	NbResetPasswordComponent,
 }                                             from '@nebular/auth';
+import { environment }                        from 'environments/environment';
 import { AdminAuthGuard }                     from './@core/auth/admin-auth.guard';
 import { AppModuleGuard }                     from './app.module.guard';
 import { MaintenanceModuleGuard }             from './pages/+maintenance-info/maintenance-info.module.guard';
 
+function logModuleCatch(err)
+{
+	if(!environment.production)
+	{
+		console.error(err);
+	}
+}
+
 const routes: Routes = [
 	{
-		path: '',
-		loadChildren: () =>
-				import('app/pages/pages.module').then((m) => m.PagesModule),
-		canActivate: [AppModuleGuard, AdminAuthGuard],
+		path:         '',
+		loadChildren: () => import('app/pages/pages.module')
+				.then((m) => m.PagesModule)
+				.catch(err => logModuleCatch(err)),
+		canActivate:  [AppModuleGuard, AdminAuthGuard],
 	},
 	{
-		path: 'auth',
-		component: NbAuthComponent,
+		path:        'auth',
+		component:   NbAuthComponent,
 		canActivate: [AppModuleGuard],
-		children: [
+		children:    [
 			{
-				path: '',
+				path:      '',
 				component: NbLoginComponent,
 			},
 			{
-				path: 'login',
+				path:      'login',
 				component: NbLoginComponent,
 			},
 			{
-				path: 'register',
+				path:      'register',
 				component: NbRegisterComponent,
 			},
 			{
-				path: 'logout',
+				path:      'logout',
 				component: NbLogoutComponent,
 			},
 			{
-				path: 'request-password',
+				path:      'request-password',
 				component: NbRequestPasswordComponent,
 			},
 			{
-				path: 'reset-password',
+				path:      'reset-password',
 				component: NbResetPasswordComponent,
 			},
 		],
 	},
 	{
-		path: 'maintenance-info',
-		loadChildren: () =>
-				import('app/pages/+maintenance-info/maintenance-info.module').then(
-						(m) => m.MaintenanceInfoModule
-				),
-		canActivate: [MaintenanceModuleGuard],
+		path:         'maintenance-info',
+		loadChildren: () => import('app/pages/+maintenance-info/maintenance-info.module')
+				.then((m) => m.MaintenanceInfoModule)
+				.catch(err => logModuleCatch(err)),
+		canActivate:  [MaintenanceModuleGuard],
 	},
 	{
-		path: 'server-down',
-		loadChildren: () =>
-				import('app/pages/+server-down/server-down.module').then(
-						(m) => m.ServerDownModule
-				),
+		path:         'server-down',
+		loadChildren: () => import('app/pages/+server-down/server-down.module')
+				.then((m) => m.ServerDownModule)
+				.catch(err => logModuleCatch(err)),
 	},
 	{ path: '**', redirectTo: '' },
 ];
 
 const config: ExtraOptions = {
-	useHash: true,
-	enableTracing: true,
+	useHash:       true,
+	enableTracing: false,
 };
 
 @NgModule({
