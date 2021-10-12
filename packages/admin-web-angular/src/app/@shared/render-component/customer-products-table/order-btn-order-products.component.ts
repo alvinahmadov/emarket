@@ -6,36 +6,36 @@ import Product                      from '@modules/server.common/entities/Produc
 
 @Component({
 	           template: `
-		<div class="product">
-			<div (click)="openModal()" class="btn btn-custom">
-				{{ 'CUSTOMERS_VIEW.ORDER' | translate }}
-			</div>
-		</div>
-	`,
+		                     <div class="product">
+			                     <div (click)="openModal()" class="btn btn-custom">
+				                     {{ 'CUSTOMERS_VIEW.ORDER' | translate }}
+			                     </div>
+		                     </div>
+	                     `,
            })
 export class OrderBtnOrderProductsComponent implements ViewCell, OnInit
 {
-	value: string | number;
+	public value: string | number;
 	
 	@Input()
-	rowData: any;
+	public rowData: any;
 	
 	@Input()
-	availableProducts: Product[];
+	public availableProducts: Product[];
 	
 	@Input()
-	userId: string;
+	public customerId: string;
 	
 	private productId: string;
 	
 	constructor(private readonly modalService: NgbModal) {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.productId = this.rowData.warehouseProduct.product.id;
 	}
 	
-	openModal()
+	public openModal()
 	{
 		const productsArray: any = this.availableProducts;
 		if(productsArray)
@@ -46,14 +46,14 @@ export class OrderBtnOrderProductsComponent implements ViewCell, OnInit
 				                                       return x.warehouseProduct.product.id === this.productId;
 			                                       });
 			const activeModal = this.modalService.open(CustomOrderComponent, {
-				size: 'lg',
+				size:      'lg',
 				container: 'nb-layout',
 			});
 			
 			const modalComponent: CustomOrderComponent =
-					activeModal.componentInstance;
+					      activeModal.componentInstance;
 			modalComponent.warehouseId = currProduct.warehouseId;
-			modalComponent.userId = this.userId;
+			modalComponent.customerId = this.customerId;
 			modalComponent.currentProduct = currProduct;
 		}
 	}
