@@ -9,6 +9,7 @@ certificates
 **/*.d.ts.map
 dist
 build
+cache/currency/*.json
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
