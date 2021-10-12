@@ -2,10 +2,12 @@ import { Component, OnInit }                  from '@angular/core';
 import { PopoverController, ModalController } from '@ionic/angular';
 import { Mixpanel }                           from '@ionic-native/mixpanel/ngx';
 import { BarcodeScanner }                     from '@ionic-native/barcode-scanner/ngx';
+import { Subscription }                       from 'rxjs';
 import { ILocaleMember }                      from '@modules/server.common/interfaces/ILocale';
 import Order                                  from '@modules/server.common/entities/Order';
 import Product                                from '@modules/server.common/entities/Product';
 import Warehouse                              from '@modules/server.common/entities/Warehouse';
+import WarehouseProduct                       from '@modules/server.common/entities/WarehouseProduct';
 import OrderCarrierStatus                     from '@modules/server.common/enums/OrderCarrierStatus';
 import OrderWarehouseStatus                   from '@modules/server.common/enums/OrderWarehouseStatus';
 import { OrderRouter }                        from '@modules/client.common.angular2/routers/order-router.service';
@@ -15,7 +17,7 @@ import { WarehousesService }                  from 'services/warehouses.service'
 import { CreateProductTypePopupPage }         from './create-product-type-popup/create-product-type-popup';
 import { EditProductTypePopupPage }           from './edit-product-type-popup/edit-product-type-popup';
 import { OrdersFilterModes }                  from '../../filters/orders-filters';
-import { Store }                              from '../../../src/services/store.service';
+import { Storage }                            from 'services/storage.service';
 
 export enum OrderState
 {
@@ -29,123 +31,76 @@ export enum OrderState
 
 export enum OrderStatus
 {
-	'all' = 'ALL',
-	'confirmed' = 'CONFIRMED',
-	'processing' = 'PROCESSING',
+	'all'               = 'ALL',
+	'confirmed'         = 'CONFIRMED',
+	'processing'        = 'PROCESSING',
 	'alocation_started' = 'ALLOCATION_STARTED',
-	'packaging' = 'PACKAGING_STARTED',
-	'packaged' = 'PACKAGED',
-	'in_delivery' = 'GIVEN_TO_CARRIER',
+	'packaging'         = 'PACKAGING_STARTED',
+	'packaged'          = 'PACKAGED',
+	'in_delivery'       = 'GIVEN_TO_CARRIER',
 }
 
 @Component({
-	           selector: 'page-warehouse',
+	           selector:    'page-warehouse',
+	           styleUrls:   ['./warehouse.scss'],
 	           templateUrl: 'warehouse.html',
-	           styleUrls: ['./warehouse.scss'],
            })
 export class WarehousePage implements OnInit
 {
-	private warehouse$: any;
-	filterMode: OrdersFilterModes = 'ready';
-	warehouse: Warehouse;
-	OrderState: any = OrderState;
-	isOrderContainerLive: boolean = false;
-	productsLoading: boolean = true;
-	ordersCount: number;
-	showRelevant: boolean = true;
-	showAllProducts: boolean = false;
-	focusedOrder: Order;
-	focusedOrder$: any;
-	orderStatus: boolean;
+	public filterMode: OrdersFilterModes = 'ready';
+	public warehouse: Warehouse;
+	public OrderState: any = OrderState;
+	public isOrderContainerLive: boolean = false;
+	public productsLoading: boolean = true;
+	public ordersCount: number;
+	public showRelevant: boolean = true;
+	public showAllProducts: boolean = false;
+	public focusedOrder: Order;
+	public focusedOrder$: any;
+	public orderStatus: any;
 	
-	filter: any; //todo
-	keys = Object.keys;
-	statuses = OrderStatus;
+	public filter: any; //todo
+	public keys = Object.keys;
+	public statuses = OrderStatus;
 	
-	constructor(
-			// public navCtrl: NavController,
-			// public navParams: NavParams,
+	private warehouse$: Subscription;
+	
+	public constructor(
 			public popoverCtrl: PopoverController,
 			private modalCtrl: ModalController,
 			private orderRouter: OrderRouter,
 			private warehouseProductsRouter: WarehouseProductsRouter,
 			private mixpanel: Mixpanel,
 			private translateProductLocales: ProductLocalesService,
-			private store: Store,
+			private storage: Storage,
 			private barcodeScanner: BarcodeScanner,
 			private warehouseService: WarehousesService
 	)
-	{
-	}
+	{}
 	
-	// ionViewDidLoad() {
-	// 	if (!this.isLogged) {
-	// 		this.navCtrl.setRoot('LoginPage');
-	// 	}
-	// }
-	// TODO
-	// async ionViewCanEnter() {
-	// 	const isLogged = await this.store.isLogged();
-	// 	return this.store.maintenanceMode === null && isLogged;
-	// }
-	
-	ngOnInit()
+	public ngOnInit(): void
 	{
 		this.getOrderShortProcess()
 		    .then(console.log)
 		    .catch(console.error);
 	}
 	
-	get isLogged()
+	public get isLogged(): string
 	{
-		return localStorage.getItem('_warehouseId');
+		return this.storage.warehouseId;
 	}
 	
-	get warehouseId()
+	public get warehouseId(): string
 	{
-		return localStorage.getItem('_warehouseId');
+		return this.storage.warehouseId;
 	}
 	
-	get language()
+	public get language(): string
 	{
-		return localStorage.getItem('_language');
+		return this.storage.language;
 	}
 	
-	async scanBarcode()
-	{
-		try
-		{
-			const barcodeData = await this.barcodeScanner.scan();
-			const orderId = barcodeData.text;
-			if(orderId !== '')
-			{
-				this.focusedOrder$ = this.orderRouter
-				                         .get(orderId, {
-					                         populateCarrier: true,
-					                         populateWarehouse: true,
-				                         })
-				                         .subscribe((order) =>
-				                                    {
-					                                    if(
-							                                    order.warehouseStatus >=
-							                                    OrderWarehouseStatus.GivenToCarrier
-					                                    )
-					                                    {
-						                                    this.switchOrders(this.showRelevant);
-					                                    }
-					                                    else
-					                                    {
-						                                    this.focusedOrder = order;
-					                                    }
-				                                    });
-			}
-		} catch(error)
-		{
-			console.warn(error);
-		}
-	}
-	
-	switchOrders(showRelevant, event?)
+	public switchOrders(showRelevant, event?): void
 	{
 		if(this.focusedOrder$)
 		{
@@ -164,17 +119,17 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	onOrderFinish()
+	public onOrderFinish(): void
 	{
 		this.toggleOrderContainer();
 	}
 	
-	toggleOrderContainer()
+	public toggleOrderContainer(): void
 	{
 		this.isOrderContainerLive = !this.isOrderContainerLive;
 	}
 	
-	getWarehouseProductImageUrl(p: Product)
+	public getWarehouseProductImageUrl(p: Product): string
 	{
 		if(p instanceof Product)
 		{
@@ -187,7 +142,7 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	truncateTitle(title: string)
+	public truncateTitle(title: string): string
 	{
 		if(title)
 		{
@@ -200,7 +155,7 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		if(member !== undefined)
 		{
@@ -208,7 +163,7 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	orderState(order: Order)
+	public orderState(order: Order): OrderState
 	{
 		if(order.warehouseStatus >= 200)
 		{
@@ -240,7 +195,7 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	updateOrderWarehouseStatus(orderId: string, status: OrderWarehouseStatus)
+	public updateOrderWarehouseStatus(orderId: string, status: OrderWarehouseStatus): Promise<Order>
 	{
 		if(status >= 200)
 		{
@@ -252,7 +207,7 @@ export class WarehousePage implements OnInit
 		return this.orderRouter.updateWarehouseStatus(orderId, status);
 	}
 	
-	addProduct(productId: string)
+	public addProduct(productId: string): Promise<WarehouseProduct>
 	{
 		return this.warehouseProductsRouter.increaseCount(
 				this.warehouseId,
@@ -261,47 +216,16 @@ export class WarehousePage implements OnInit
 		);
 	}
 	
-	async presentCreateProductPopover()
+	public removeProduct(productId: string): Promise<WarehouseProduct>
 	{
-		try
-		{
-			const modal = await this.modalCtrl.create({
-				                                          component: CreateProductTypePopupPage,
-				                                          backdropDismiss: true,
-				                                          cssClass: 'mutation-product-modal',
-			                                          });
-			
-			await modal.present();
-		} catch(e)
-		{
-			console.error(e)
-		}
+		return this.warehouseProductsRouter.decreaseCount(
+				this.warehouseId,
+				productId,
+				1
+		);
 	}
 	
-	async openEditProductModal(product)
-	{
-		const modal = await this.modalCtrl.create({
-			                                          component: EditProductTypePopupPage,
-			                                          backdropDismiss: true,
-			                                          componentProps: { warehouseProduct: product },
-			                                          cssClass: 'mutation-product-modal',
-		                                          });
-		
-		await modal.present();
-	}
-	
-	async getOrderShortProcess()
-	{
-		this.orderStatus = await this.warehouseService
-		                             .getWarehouseOrderProcess(this.store.warehouseId)
-		                             .toPromise();
-		
-		this.orderStatus = this.orderStatus['ordersShortProcess'];
-		
-		return this.orderStatus;
-	}
-	
-	getWarehouseStatus(orderWarehouseStatusNumber: OrderWarehouseStatus)
+	public getWarehouseStatus(orderWarehouseStatusNumber: OrderWarehouseStatus): string
 	{
 		const basePath = 'WAREHOUSE_VIEW.ORDER_WAREHOUSE_STATUSES.';
 		switch(orderWarehouseStatusNumber)
@@ -333,7 +257,7 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	ionViewWillLeave()
+	public ionViewWillLeave(): void
 	{
 		if(this.warehouse$)
 		{
@@ -342,6 +266,81 @@ export class WarehousePage implements OnInit
 		if(this.focusedOrder$)
 		{
 			this.focusedOrder$.unsubscribe();
+		}
+	}
+	
+	public async presentCreateProductPopover(): Promise<void>
+	{
+		try
+		{
+			const modal = await this.modalCtrl.create({
+				                                          component:       CreateProductTypePopupPage,
+				                                          backdropDismiss: true,
+				                                          cssClass:        'mutation-product-modal',
+			                                          });
+			
+			await modal.present();
+		} catch(e)
+		{
+			console.error(e)
+		}
+	}
+	
+	public async openEditProductModal(product: WarehouseProduct): Promise<void>
+	{
+		const modal = await this.modalCtrl
+		                        .create({
+			                                component:       EditProductTypePopupPage,
+			                                backdropDismiss: true,
+			                                componentProps:  { warehouseProduct: product },
+			                                cssClass:        'mutation-product-modal',
+		                                });
+		
+		await modal.present();
+	}
+	
+	public async getOrderShortProcess(): Promise<boolean>
+	{
+		this.orderStatus = await this.warehouseService
+		                             .getWarehouseOrderProcess(this.storage.warehouseId)
+		                             .toPromise();
+		
+		this.orderStatus = this.orderStatus['ordersShortProcess'];
+		
+		return this.orderStatus;
+	}
+	
+	public async scanBarcode(): Promise<void>
+	{
+		try
+		{
+			const barcodeData = await this.barcodeScanner.scan();
+			const orderId = barcodeData.text;
+			if(orderId !== '')
+			{
+				this.focusedOrder$ = this.orderRouter
+				                         .get(orderId, {
+					                         populateCarrier:   true,
+					                         populateWarehouse: true,
+				                         })
+				                         .subscribe((order) =>
+				                                    {
+					                                    if(
+							                                    order.warehouseStatus >=
+							                                    OrderWarehouseStatus.GivenToCarrier
+					                                    )
+					                                    {
+						                                    this.switchOrders(this.showRelevant);
+					                                    }
+					                                    else
+					                                    {
+						                                    this.focusedOrder = order;
+					                                    }
+				                                    });
+			}
+		} catch(error)
+		{
+			console.error(error);
 		}
 	}
 }
