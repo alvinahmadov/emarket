@@ -7,9 +7,9 @@ export class ServerConnectionService
 {
 	public constructor(private readonly httpClient: HttpClient) {}
 	
-	public load(endPoint: string, store: { serverConnection: string })
+	public load(endPoint: string, store: { serverConnection: string }): Promise<boolean>
 	{
-		return new Promise(async(resolve, reject) =>
+		return new Promise(async(resolve) =>
 		                   {
 			                   await this.checkServerConnection(endPoint, store);
 			
