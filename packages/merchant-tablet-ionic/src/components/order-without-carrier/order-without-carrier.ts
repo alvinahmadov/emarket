@@ -4,33 +4,29 @@ import Order                     from '@modules/server.common/entities/Order';
 import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
 
 @Component({
-	           selector: 'order-without-carrier',
-	           templateUrl: 'order-without-carrier.html',
-	           styleUrls: ['./order-without-carrier.scss'],
+	           selector:    'order-without-carrier',
+	           styleUrls:   ['./order-without-carrier.scss'],
+	           templateUrl: './order-without-carrier.html',
            })
 export class OrderWithoutCarrierComponent
 {
 	@Input()
-	getWarehouseStatus: () => void;
+	public getWarehouseStatus: () => void;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
 	@Input()
-	onUpdateWarehouseStatus: any;
+	public onUpdateWarehouseStatus: any;
 	
 	constructor(private _translateProductLocales: ProductLocalesService) {}
 	
-	get hasProducts()
+	public get hasProducts(): boolean
 	{
-		if(this.order && this.order.products && this.order.products.length)
-		{
-			return true;
-		}
-		return false;
+		return !!(this.order && this.order.products && this.order.products.length);
 	}
 	
-	localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._translateProductLocales.getTranslate(member);
 	}
