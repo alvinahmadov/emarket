@@ -1,54 +1,52 @@
 import { Component, ViewChild, ElementRef, Input, OnInit } from '@angular/core';
 import { ModalController }                                 from '@ionic/angular';
-import User                                                from '@modules/server.common/entities/User';
+import Customer                                            from '@modules/server.common/entities/Customer';
 
 @Component({
-	           selector: 'customer-addr-popup',
-	           templateUrl: 'customer-addr-popup.html',
-	           styleUrls: ['./customer-addr-popup.scss'],
+	           selector:    'customer-addr-popup',
+	           styleUrls:   ['./customer-addr-popup.scss'],
+	           templateUrl: './customer-addr-popup.html',
            })
 export class CustomerAddrPopupPage implements OnInit
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: ElementRef;
-	map: google.maps.Map;
-	myLatLng = { lat: 0, lng: 0 };
+	public gmapElement: ElementRef;
+	public map: google.maps.Map;
+	public myLatLng = { lat: 0, lng: 0 };
 	
 	@Input()
-	user: User;
+	public customer: Customer;
 	
-	city: string;
-	country: string;
-	street: string;
-	house: string;
-	apartment: string;
-	coordinates: number[];
+	public city: string;
+	public country: string;
+	public street: string;
+	public house: string;
+	public apartment: string;
+	public coordinates: number[];
 	
 	constructor(public modalController: ModalController) {}
 	
-	get coordinatesStr()
+	public get coordinatesStr()
 	{
-		return this.user
-		       ? this.user.geoLocation.loc.coordinates
+		return this.customer
+		       ? this.customer.geoLocation.coordinatesArray
 		             .map((c) => c.toFixed(6))
 		             .reverse()
 		             .join(', ')
 		       : '';
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		const user = this.user;
-		this.city = user.geoLocation.city;
-		this.country = user.geoLocation.countryName;
-		this.street = user.geoLocation.streetAddress;
-		this.house = user.geoLocation.house;
-		this.apartment = user.apartment;
+		const customer = this.customer;
+		this.city = customer.geoLocation.city;
+		this.country = customer.geoLocation.countryName;
+		this.street = customer.geoLocation.streetAddress;
+		this.house = customer.geoLocation.house;
+		this.apartment = customer.apartment;
 		
 		// We use reverse because MongoDB store lnt => lat
-		this.coordinates = Array.from(
-				user.geoLocation.loc.coordinates
-		).reverse();
+		this.coordinates = customer.geoLocation.coordinatesArray;
 		
 		this.myLatLng.lat = this.coordinates[0];
 		this.myLatLng.lng = this.coordinates[1];
@@ -56,11 +54,11 @@ export class CustomerAddrPopupPage implements OnInit
 		this.loadMap();
 	}
 	
-	loadMap()
+	public loadMap()
 	{
 		const mapProp = {
-			center: this.myLatLng,
-			zoom: 15,
+			center:    this.myLatLng,
+			zoom:      15,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		
@@ -68,12 +66,12 @@ export class CustomerAddrPopupPage implements OnInit
 		
 		const marker = new google.maps.Marker({
 			                                      position: this.myLatLng,
-			                                      map: this.map,
-			                                      title: 'Your Warehouse!',
+			                                      map:      this.map,
+			                                      title:    'Your Warehouse!',
 		                                      });
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.modalController.dismiss();
 	}
