@@ -19,29 +19,28 @@ import { env }                             from '../../env';
 
 /**
  * Customers Authentication Service
- * TODO: rename "Users" to "Customers"
  *
  * @export
  * @class CustomersAuthService
  * @extends {EntityService<User>}
- * @implements {IUserAuthRouter}
+ * @implements {ICustomerAuthRouter}
  * @implements {IService}
  */
 @injectable()
-@routerName('user-auth')
+@routerName('customer-auth')
 export class CustomersAuthService extends EntityService<Customer>
 		implements ICustomerAuthRouter, IService
 {
 	private static IS_INVITES_SYSTEM_ON: boolean = env.SETTING_INVITES_ENABLED;
 	readonly DBObject: any = Customer;
 	protected readonly log: Logger = createLogger({
-		                                              name: 'userAuthService'
+		                                              name: 'customerAuthService'
 	                                              });
 	
 	private readonly authService: AuthService<Customer>;
 	
 	constructor(
-			private readonly usersService: CustomersService,
+			private readonly customersService: CustomersService,
 			private readonly invitesService: InvitesService,
 			@inject('Factory<AuthService>')
 			private readonly authServiceFactory: AuthServiceFactory
@@ -50,7 +49,7 @@ export class CustomersAuthService extends EntityService<Customer>
 		super();
 		
 		this.authService = this.authServiceFactory({
-			                                           role:       'user',
+			                                           role:       'customer',
 			                                           Entity:     Customer,
 			                                           saltRounds: env.USER_PASSWORD_BCRYPT_SALT_ROUNDS
 		                                           });
@@ -61,7 +60,7 @@ export class CustomersAuthService extends EntityService<Customer>
 	 * Throw NotInvitedError if customer not invited and invites system enabled
 	 *
 	 *
-	 * @param {IUserRegistrationInput} input
+	 * @param {ICustomerRegistrationInput} input
 	 * @returns {Promise<User>}
 	 * @memberof UsersAuthService
 	 */
@@ -86,21 +85,16 @@ export class CustomersAuthService extends EntityService<Customer>
 			delete input.user.lastName;
 		}
 		
-		if(input.user.email === '')
-		{
-			delete input.user.email;
-		}
-		
-		return await this.usersService.create({
-			                                      ...input.user,
-			                                      ...(input.password
-			                                          ? {
-						                                      hash: await this.authService.getPasswordHash(
-								                                      input.password
-						                                      )
-					                                      }
-			                                          : {})
-		                                      });
+		return await this.customersService.create({
+			                                          ...input.user,
+			                                          ...(input.password
+			                                              ? {
+						                                          hash: await this.authService.getPasswordHash(
+								                                          input.password
+						                                          )
+					                                          }
+			                                              : {})
+		                                          });
 	}
 	
 	/**
@@ -117,7 +111,7 @@ export class CustomersAuthService extends EntityService<Customer>
 			password: { current: string; new: string }
 	): Promise<void>
 	{
-		await this.usersService.throwIfNotExists(id);
+		await this.customersService.throwIfNotExists(id);
 		await this.authService.updatePassword(id, password);
 	}
 	
@@ -141,18 +135,18 @@ export class CustomersAuthService extends EntityService<Customer>
 			{ email, password, firstName, lastName, phone }: AddableRegistrationInfo
 	): Promise<void>
 	{
-		await this.usersService.throwIfNotExists(id);
+		await this.customersService.throwIfNotExists(id);
 		
-		const user = await this.usersService.getCurrent(id);
+		const customer = await this.customersService.getCurrent(id);
 		
-		if(user.email == null && email)
+		if(customer.email == null && email)
 		{
 			throw new Error('To add password user must have email');
 		}
 		
 		await this.authService.addPassword(id, password);
 		
-		await this.usersService.update(id, {
+		await this.customersService.update(id, {
 			...(email ? { email } : {}),
 			...(firstName ? { firstName } : {}),
 			...(lastName ? { lastName } : {}),
@@ -162,11 +156,10 @@ export class CustomersAuthService extends EntityService<Customer>
 	
 	/**
 	 * Login Customer (returns user record and Auth token)
-	 * TODO: Make possible to login by email or username
 	 *
 	 * @param {string} emailOrUsername
 	 * @param {string} password
-	 * @returns {(Promise<IUserLoginResponse | null>)}
+	 * @returns {(Promise<ICustomerLoginResponse | null>)}
 	 * @memberof UsersAuthService
 	 */
 	@asyncListener()
