@@ -109,12 +109,9 @@ export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 				                      }).select({ products: 1 });
 		
 		const completedOrdersTotalSum = completedUserOrders
-				.map((o) =>
-				     {
-					     return o.products
-					             .map((p) => p.price * p.count)
-					             .reduce((a, b) => a + b, 0);
-				     })
+				.map((o) => o.products
+				             .map((p) => p.price * p.count)
+				             .reduce((a, b) => a + b, 0))
 				.reduce((a, b) => a + b, 0);
 		
 		const totalOrders = await this.ordersService
