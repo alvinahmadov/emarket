@@ -1,4 +1,5 @@
 import { Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { UseGuards }                               from '@nestjs/common';
 import { first }                                   from 'rxjs/operators';
 import IGeoLocation, { IGeoLocationCreateObject }  from '@modules/server.common/interfaces/IGeoLocation';
 import { default as IWarehouse }                   from '@modules/server.common/interfaces/IWarehouse';
@@ -8,6 +9,7 @@ import Order                                       from '@modules/server.common/
 import Warehouse                                   from '@modules/server.common/entities/Warehouse';
 import { IWarehouseRegistrationInput }             from '@modules/server.common/routers/IWarehouseAuthRouter';
 import { GeoUtils }                                from '@modules/server.common/utilities';
+import { GqlWarehouseGuard, GqlAdminGuard }        from '../../auth/guards/gql.guard';
 import {
 	WarehousesAuthService,
 	WarehousesCarriersService,
@@ -75,7 +77,7 @@ export class WarehouseResolver
 	}
 	
 	@Query()
-	async countStoreCustomers(_, { storeId }: { storeId: string })
+	async countCustomers(_, { storeId }: { storeId: string })
 	{
 		const storeOrders: Order[] = await this._warehousesOrdersService
 		                                       .get(storeId)
@@ -142,7 +144,7 @@ export class WarehouseResolver
 			                              ...isDeletedFlag,
 			                              _createdAt: { $gte: start, $lt: end }
 		                              })
-		                        .distinct('user._id')
+		                        .distinct('customer._id')
 		                        .lean()
 		                        .exec();
 		
@@ -166,11 +168,11 @@ export class WarehouseResolver
 						                                        .find(
 								                                        {
 									                                        ...isDeletedFlag,
-									                                        'user._id':
+									                                        'customer._id':
 											                                        { $in: users.map((u) => u._id) },
 									                                        warehouse: storeId
 								                                        }
-						                                        ).distinct('user._id');
+						                                        ).distinct('customer._id');
 				                        return {
 					                        storeId,
 					                        customersCount: usersIds.length
@@ -221,6 +223,7 @@ export class WarehouseResolver
 	}
 	
 	@Query()
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async getStoreCustomers(
 			_,
 			{ storeId }: { storeId: string }
@@ -307,6 +310,7 @@ export class WarehouseResolver
 	}
 	
 	@Mutation()
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async updateStoreGeoLocation(
 			_,
 			{
@@ -322,12 +326,14 @@ export class WarehouseResolver
 	}
 	
 	@Mutation()
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async removeWarehousesByIds(_, { ids }: { ids: string[] })
 	{
 		return this._warehousesService.removeMultipleByIds(ids);
 	}
 	
 	@ResolveField('devices')
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async getDevices(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
@@ -338,6 +344,7 @@ export class WarehouseResolver
 	}
 	
 	@ResolveField('orders')
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async getOrders(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
@@ -348,6 +355,7 @@ export class WarehouseResolver
 	}
 	
 	@ResolveField('customers')
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async getCustomers(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
@@ -359,6 +367,7 @@ export class WarehouseResolver
 	}
 	
 	@ResolveField('carriers')
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async getCarriers(_warehouse: IWarehouse)
 	{
 		const warehouse = new Warehouse(_warehouse);
@@ -370,6 +379,7 @@ export class WarehouseResolver
 	}
 	
 	@Mutation()
+	@UseGuards(GqlAdminGuard, GqlWarehouseGuard)
 	async updateWarehousePassword(
 			_,
 			{
