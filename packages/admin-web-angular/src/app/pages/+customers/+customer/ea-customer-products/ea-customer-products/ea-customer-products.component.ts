@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit }   from '@angular/core';
-import { ActivatedRoute }                 from '@angular/router';
+import { ActivatedRoute, Params }         from '@angular/router';
 import { LocalDataSource }                from 'ng2-smart-table';
 import {
-	forkJoin, Observable, Subject,
+	forkJoin,
+	Observable,
+	Subject,
 	Subscription
 }                                         from 'rxjs';
 import { first, takeUntil }               from 'rxjs/operators';
@@ -26,7 +28,7 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 {
 	public settingsSmartTable: object;
 	public sourceSmartTable: LocalDataSource = new LocalDataSource();
-	public params$: any;
+	public params$: Params;
 	public availableProductsSubscription$: Subscription;
 	public warehouses: Warehouse[];
 	public availableProducts: ProductInfo[];
@@ -42,27 +44,30 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 			private _translateService: TranslateService
 	)
 	{
-		this.params$ = this._router.params.subscribe(async(res) =>
-		                                             {
-			                                             this.customerId = res.id;
-			                                             const customer = await this.customerRouter
-			                                                                        .get(this.customerId)
-			                                                                        .pipe(first())
-			                                                                        .toPromise();
-			
-			                                             if(customer == null)
-			                                             {
-				                                             throw new Error(`User can't be found (id: ${this.customerId})`);
-			                                             }
-			
-			                                             this.availableProductsSubscription$ = this.geoLocationProductService
-			                                                                                       .getGeoLocationProducts(customer.geoLocation)
-			                                                                                       .subscribe((products: ProductInfo[]) =>
-			                                                                                                  {
-				                                                                                                  this.availableProducts = products;
-				                                                                                                  this.sourceSmartTable.load(products);
-			                                                                                                  });
-		                                             });
+		this.params$ = this._router.params.subscribe(
+				async(res: Params) =>
+				{
+					this.customerId = res.id;
+					const customer = await this.customerRouter
+					                           .get(this.customerId)
+					                           .pipe(first())
+					                           .toPromise();
+					
+					if(customer == null)
+					{
+						throw new Error(`Customer can't be found (id: ${this.customerId})`);
+					}
+					
+					this.availableProductsSubscription$ =
+							this.geoLocationProductService
+							    .getGeoLocationProducts(customer.geoLocation)
+							    .subscribe((products: ProductInfo[]) =>
+							               {
+								               this.availableProducts = products;
+								               this.sourceSmartTable.load(products);
+							               });
+				}
+		);
 		
 		this._applyTranslationOnSmartTable();
 	}
