@@ -975,11 +975,11 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	
 	private async _isCarrierUsernameExists(username: string)
 	{
-		const carrierUsername = await this._carriersService
-		                                  .getCarrierByUsername(username)
-		                                  .pipe(first())
-		                                  .toPromise();
-		return carrierUsername !== null;
+		const carrier = await this._carriersService
+		                          .getCarrierByUsername(username)
+		                          .pipe(first())
+		                          .toPromise();
+		return carrier !== null;
 	}
 	
 	private async _createHardcodedWarehouses()
@@ -1011,10 +1011,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 				return;
 			}
 			
-			carrierIds.forEach((carrierId) =>
-			                   {
-				                   objToRegister.warehouse.usedCarriersIds.push(carrierId);
-			                   });
+			carrierIds.forEach((carrierId) => objToRegister.warehouse.usedCarriersIds.push(carrierId));
 			
 			const createdObject = await this.warehouseAuthRouter.register(
 					objToRegister
