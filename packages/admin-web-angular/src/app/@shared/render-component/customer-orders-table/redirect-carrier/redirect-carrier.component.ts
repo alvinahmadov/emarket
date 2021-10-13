@@ -1,33 +1,31 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ViewCell }                 from 'ng2-smart-table';
 import { Router }                   from '@angular/router';
 import { Observable }               from 'rxjs';
+import { ViewCell }                 from 'ng2-smart-table';
 import Carrier                      from '@modules/server.common/entities/Carrier';
-import { CarriersService }          from '../../../../@core/data/carriers.service';
-import { TranslateService }         from '@ngx-translate/core';
+import { CarriersService }          from '@app/@core/data/carriers.service';
 
 @Component({
-	           styleUrls: ['./redirect-carrier.component.scss'],
+	           styleUrls:   ['./redirect-carrier.component.scss'],
 	           templateUrl: './redirect-carrier.component.html',
            })
 export class RedirectCarrierComponent implements ViewCell, OnInit
 {
-	value: string | number;
+	public value: string | number;
 	
 	@Input()
-	rowData: any;
-	carrier$: Observable<Carrier>;
+	public rowData: any;
+	public carrier$: Observable<Carrier>;
 	
 	public carrierStatusText: string;
 	
 	constructor(
 			private readonly router: Router,
 			private readonly carriersService: CarriersService,
-			private translate: TranslateService
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		if(this.rowData.carrierId)
 		{
@@ -39,11 +37,16 @@ export class RedirectCarrierComponent implements ViewCell, OnInit
 				'STATUS_TEXT.' + this.rowData.carrierStatusText;
 	}
 	
-	redirect()
+	public get carrierId(): string
+	{
+		return this.rowData.carrierId;
+	}
+	
+	public redirect()
 	{
 		if(this.rowData.carrierId)
 		{
-			this.router.navigate([`carriers/${this.rowData.carrierId}`]);
+			this.router.navigate([`carriers/${this.carrierId}`]);
 		}
 	}
 }
