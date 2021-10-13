@@ -1,34 +1,33 @@
 import {
 	Component,
 	ViewChild,
-	OnDestroy,
-	AfterViewInit,
 	Input,
+	AfterViewInit,
+	OnDestroy,
 }                                      from '@angular/core';
-import Carrier                         from '@modules/server.common/entities/Carrier';
-import { CarriersSmartTableComponent } from '@app/@shared/carrier/carriers-table/carriers-table.component';
+import { TranslateService }            from '@ngx-translate/core';
 import { Subject }                     from 'rxjs';
 import { takeUntil }                   from 'rxjs/operators';
-import { TranslateService }            from '@ngx-translate/core';
+import Carrier                         from '@modules/server.common/entities/Carrier';
 import { CarriersService }             from '@app/@core/data/carriers.service';
-import CarrierStatus                   from '@modules/server.common/enums/CarrierStatus';
+import { CarriersSmartTableComponent } from '@app/@shared/carrier/carriers-table/carriers-table.component';
 
 const perPage = 5;
 
 @Component({
-	           selector: 'ea-merchants-setup-shared-carriers',
+	           selector:    'ea-merchants-setup-shared-carriers',
 	           templateUrl: './shared-carriers.component.html',
            })
 export class SetupMerchantSharedCarriersComponent
 		implements OnDestroy, AfterViewInit
 {
 	@ViewChild('carriersTable', { static: true })
-	carriersTable: CarriersSmartTableComponent;
+	public carriersTable: CarriersSmartTableComponent;
 	
 	@Input()
-	existedCarriersIds: string[] = [];
+	public existedCarriersIds: string[] = [];
 	
-	perPage = perPage;
+	public perPage = perPage;
 	
 	private dataCount: number;
 	private $carriers;
@@ -42,13 +41,13 @@ export class SetupMerchantSharedCarriersComponent
 		this._applyTranslationOnSmartTable();
 	}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
 		this._loadDataSmartTable();
 		this.smartTablePageChange();
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.ngDestroy$.next();
 		this.ngDestroy$.complete();
@@ -64,12 +63,12 @@ export class SetupMerchantSharedCarriersComponent
 		this.$carriers = this._carriersService
 		                     .getCarriers(
 				                     {
-					                     skip: perPage * (page - 1),
+					                     skip:  perPage * (page - 1),
 					                     limit: perPage,
 				                     },
 				                     {
 					                     isSharedCarrier: true,
-					                     _id: {
+					                     _id:             {
 						                     $nin: this.existedCarriersIds,
 					                     },
 				                     }
@@ -115,20 +114,18 @@ export class SetupMerchantSharedCarriersComponent
 		{
 			this.carriersTable.pageChange
 			    .pipe(takeUntil(this.ngDestroy$))
-			    .subscribe((page) =>
-			               {
-				               this._loadDataSmartTable(page);
-			               });
+			    .subscribe((page) => this._loadDataSmartTable(page));
 		}
 	}
 	
 	private async loadDataCount()
 	{
-		this.dataCount = await this._carriersService.getCountOfCarriers({
-			                                                                isSharedCarrier: true,
-			                                                                _id: {
-				                                                                $nin: this.existedCarriersIds,
-			                                                                },
-		                                                                });
+		this.dataCount = await this._carriersService
+		                           .getCountOfCarriers({
+			                                               isSharedCarrier: true,
+			                                               _id:             {
+				                                               $nin: this.existedCarriersIds,
+			                                               },
+		                                               });
 	}
 }
