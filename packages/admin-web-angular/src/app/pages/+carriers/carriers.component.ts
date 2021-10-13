@@ -1,31 +1,33 @@
-import { Component, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-
-import { CarriersService }             from '../../@core/data/carriers.service';
-import { CarrierMutationComponent }    from '../../@shared/carrier/carrier-mutation';
-import { Subject }                     from 'rxjs';
-import { ToasterService }              from 'angular2-toaster';
+import {
+	Component,
+	ViewChild,
+	OnDestroy,
+	AfterViewInit
+}                                      from '@angular/core';
 import { NgbModal }                    from '@ng-bootstrap/ng-bootstrap';
-import _                               from 'lodash';
-import { CarriersSmartTableComponent } from '@app/@shared/carrier/carriers-table/carriers-table.component';
-import { takeUntil, first }            from 'rxjs/operators';
-import Carrier                         from '@modules/server.common/entities/Carrier';
-import CarrierStatus                   from '@modules/server.common/enums/CarrierStatus';
 import { TranslateService }            from '@ngx-translate/core';
+import { ToasterService }              from 'angular2-toaster';
+import { Subject }                     from 'rxjs';
+import { first, takeUntil }            from 'rxjs/operators';
+import Carrier                         from '@modules/server.common/entities/Carrier';
+import { CarriersService }             from '@app/@core/data/carriers.service';
+import { CarrierMutationComponent }    from '@app/@shared/carrier/carrier-mutation';
+import { CarriersSmartTableComponent } from '@app/@shared/carrier/carriers-table/carriers-table.component';
 
 const perPage = 5;
 
 @Component({
-	           selector: 'ea-carriers',
-	           templateUrl: 'carriers.component.html',
-	           styleUrls: ['carriers.component.scss'],
+	           selector:    'ea-carriers',
+	           styleUrls:   ['./carriers.component.scss'],
+	           templateUrl: './carriers.component.html',
            })
 export class CarriersComponent implements OnDestroy, AfterViewInit
 {
 	@ViewChild('carriersTable', { static: true })
 	carriersTable: CarriersSmartTableComponent;
 	
-	loading: boolean;
-	perPage = perPage;
+	public loading: boolean;
+	public perPage = perPage;
 	
 	private dataCount: number;
 	private $carriers;
@@ -41,17 +43,29 @@ export class CarriersComponent implements OnDestroy, AfterViewInit
 		this._applyTranslationOnSmartTable();
 	}
 	
-	openWizardNewCarrier()
+	public ngAfterViewInit(): void
+	{
+		this._loadDataSmartTable();
+		this.smartTablePageChange();
+	}
+	
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public openWizardNewCarrier()
 	{
 		this.modalService.open(CarrierMutationComponent, {
-			size: 'lg',
-			container: 'nb-layout',
+			size:        'lg',
+			container:   'nb-layout',
 			windowClass: 'ng-custom',
-			backdrop: 'static',
+			backdrop:    'static',
 		});
 	}
 	
-	async deleteSelectedCarriers()
+	public async deleteSelectedCarriers()
 	{
 		const idsForDelete: string[] = this.carriersTable.selectedCarriers.map(
 				(c) => c.id
@@ -65,12 +79,15 @@ export class CarriersComponent implements OnDestroy, AfterViewInit
 			          .pipe(first())
 			          .toPromise();
 			
-			this.carriersTable.selectedCarriers.forEach((carrier) =>
-					                                            this._toasterService.pop(
-							                                            `success`,
-							                                            `Carrier ${carrier['name']} DELETED`
-					                                            )
-			);
+			this.carriersTable
+			    .selectedCarriers
+			    .forEach(
+					    (carrier) =>
+							    this._toasterService.pop(
+									    `success`,
+									    `Carrier ${carrier['name']} DELETED`
+							    )
+			    );
 			
 			this.carriersTable.selectedCarriers = [];
 			this.loading = false;
@@ -79,18 +96,6 @@ export class CarriersComponent implements OnDestroy, AfterViewInit
 			this.loading = false;
 			this._toasterService.pop(`error`, `${error.message}`);
 		}
-	}
-	
-	ngAfterViewInit(): void
-	{
-		this._loadDataSmartTable();
-		this.smartTablePageChange();
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 	
 	private async _loadDataSmartTable(page = 1)
@@ -102,7 +107,7 @@ export class CarriersComponent implements OnDestroy, AfterViewInit
 		
 		this.$carriers = this._carriersService
 		                     .getCarriers({
-			                                  skip: perPage * (page - 1),
+			                                  skip:  perPage * (page - 1),
 			                                  limit: perPage,
 		                                  })
 		                     .pipe(takeUntil(this.ngDestroy$))
@@ -151,10 +156,7 @@ export class CarriersComponent implements OnDestroy, AfterViewInit
 		{
 			this.carriersTable.pageChange
 			    .pipe(takeUntil(this.ngDestroy$))
-			    .subscribe((page) =>
-			               {
-				               this._loadDataSmartTable(page);
-			               });
+			    .subscribe((page) => this._loadDataSmartTable(page));
 		}
 	}
 }
