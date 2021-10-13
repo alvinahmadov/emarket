@@ -1,36 +1,36 @@
-import _                                           from 'lodash';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subject }                                 from 'rxjs';
-import { ICarrierCreateObject }                    from '@modules/server.common/interfaces/ICarrier';
-import { ICarrierOrdersRouterGetOptions }          from '@modules/server.common/routers/ICarrierOrdersRouter';
-import Order                                       from '@modules/server.common/entities/Order';
-import OrderCarrierStatus                          from '@modules/server.common/enums/OrderCarrierStatus';
-import Carrier                                     from '@modules/server.common/entities/Carrier';
 import { ActivatedRoute, Router }                  from '@angular/router';
-import { ToasterService }                          from 'angular2-toaster';
+import _                                           from 'lodash';
+import { Subject, Subscription }                   from 'rxjs';
 import { first }                                   from 'rxjs/operators';
-import { CarriersService }                         from '../../../@core/data/carriers.service';
+import { ToasterService }                          from 'angular2-toaster';
+import { ICarrierCreateObject }                    from '@modules/server.common/interfaces/ICarrier';
 import CarrierStatus                               from '@modules/server.common/enums/CarrierStatus';
+import OrderCarrierStatus                          from '@modules/server.common/enums/OrderCarrierStatus';
+import Order                                       from '@modules/server.common/entities/Order';
+import Carrier                                     from '@modules/server.common/entities/Carrier';
+import { ICarrierOrdersRouterGetOptions }          from '@modules/server.common/routers/ICarrierOrdersRouter';
+import { CarriersService }                         from '@app/@core/data/carriers.service';
 import { CarrierOrdersComponent }                  from './carrier-orders/carrier-orders.component';
 
 @Component({
-	           selector: 'ea-carrier',
+	           selector:    'ea-carrier',
+	           styleUrls:   ['./carrier.component.scss'],
 	           templateUrl: './carrier.component.html',
-	           styleUrls: ['./carrier.component.scss'],
            })
 export class CarrierComponent implements OnInit, OnDestroy
 {
 	@ViewChild('carrierOrders', { static: false })
 	public carrierOrders: CarrierOrdersComponent;
 	public carriers: ICarrierCreateObject[];
-	carrierOrderOptions: ICarrierOrdersRouterGetOptions;
+	public carrierOrderOptions: ICarrierOrdersRouterGetOptions;
 	public selectedOrdersId: string[] = [];
-	protected selectedOrder: Order;
-	protected selectedCarrier: ICarrierCreateObject;
+	public selectedOrder: Order;
+	public selectedCarrier: ICarrierCreateObject;
 	private ngDestroy$ = new Subject();
 	private inDeliveryOrders: Order[] = [];
 	private closeOrders: Order[] = [];
-	private carriers$: any;
+	private carriers$: Subscription;
 	private currentTab: string;
 	
 	constructor(
@@ -41,7 +41,22 @@ export class CarrierComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	get showOrderStatus()
+	public ngOnInit()
+	{
+		this.getAllCarriers();
+	}
+	
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+		if(this.carriers$)
+		{
+			this.carriers$.unsubscribe();
+		}
+	}
+	
+	public get showOrderStatus()
 	{
 		return (
 				this.selectedOrder &&
@@ -80,17 +95,12 @@ export class CarrierComponent implements OnInit, OnDestroy
 		);
 	}
 	
-	ngOnInit()
-	{
-		this.getAllCarriers();
-	}
-	
-	getChangeOrder(order: Order)
+	public getChangeOrder(order: Order)
 	{
 		this.selectedOrder = order;
 	}
 	
-	getChangeCarrier(carrier: Carrier)
+	public getChangeCarrier(carrier: Carrier)
 	{
 		if(carrier.status === CarrierStatus.Offline)
 		{
@@ -99,7 +109,7 @@ export class CarrierComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	carrierSelect(newCarrier: Carrier)
+	public carrierSelect(newCarrier: Carrier)
 	{
 		this._router.navigate([`/carriers/${newCarrier.id}`]);
 		
@@ -107,7 +117,7 @@ export class CarrierComponent implements OnInit, OnDestroy
 		
 		const objToCompare: ICarrierOrdersRouterGetOptions = {
 			populateWarehouse: true,
-			completion: 'not-completed',
+			completion:        'not-completed',
 		};
 		
 		this.carrierOrderOptions =
@@ -117,16 +127,18 @@ export class CarrierComponent implements OnInit, OnDestroy
 				this.selectedCarrier === newCarrier ? null : newCarrier;
 	}
 	
-	getAllCarriers()
+	public getAllCarriers()
 	{
-		this.carriers$ = this.carriersService.getCarriers().subscribe((c) =>
-		                                                              {
-			                                                              this.carriers = c;
-			                                                              this._selectCarrierIfIdExists();
-		                                                              });
+		this.carriers$ = this.carriersService
+		                     .getCarriers()
+		                     .subscribe((carriers) =>
+		                                {
+			                                this.carriers = carriers;
+			                                this._selectCarrierIfIdExists();
+		                                });
 	}
 	
-	orderStatusShow(warehouseOrderProducts)
+	public orderStatusShow(warehouseOrderProducts)
 	{
 		if(warehouseOrderProducts)
 		{
@@ -141,7 +153,7 @@ export class CarrierComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	selectTab(ev)
+	public selectTab(ev)
 	{
 		if(this.currentTab !== ev.tabTitle)
 		{
@@ -154,19 +166,9 @@ export class CarrierComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	selectedOrdersChange(selectedOrdersIds: string[])
+	public selectedOrdersChange(selectedOrdersIds: string[])
 	{
 		this.selectedOrdersId = selectedOrdersIds;
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-		if(this.carriers$)
-		{
-			this.carriers$.unsubscribe();
-		}
 	}
 	
 	private async _selectCarrierIfIdExists()
