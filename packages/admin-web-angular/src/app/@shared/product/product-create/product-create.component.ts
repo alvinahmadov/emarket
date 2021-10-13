@@ -1,32 +1,38 @@
 import { Component, OnInit, ViewChild }        from '@angular/core';
-import { NgbActiveModal }                      from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { BasicInfoFormComponent }              from '../forms';
-import { IProductCreateObject }                from '@modules/server.common/interfaces/IProduct';
-import { ProductsService }                     from '../../../@core/data/products.service';
-import { first }                               from 'rxjs/operators';
+import { NgbActiveModal }                      from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService }                    from '@ngx-translate/core';
+import { first }                               from 'rxjs/operators';
+import { IProductCreateObject }                from '@modules/server.common/interfaces/IProduct';
+import { ProductsService }                     from '@app/@core/data/products.service';
 import { NotifyService }                       from '@app/@core/services/notify/notify.service';
+import { BasicInfoFormComponent }              from '../forms';
 
 @Component({
-	           selector: 'ea-product-create',
+	           selector:    'ea-product-create',
+	           styleUrls:   ['./product-create.component.scss'],
 	           templateUrl: './product-create.component.html',
-	           styleUrls: ['./product-create.component.scss'],
            })
 export class ProductCreateComponent implements OnInit
 {
 	@ViewChild('basicInfoForm', { static: true })
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	public loading: boolean;
 	public productsCategories: any;
-	public BUTTON_DONE: string = 'BUTTON_DONE';
+	public buttons = {
+		done: 'BUTTON_DONE',
+		next: 'BUTTON_NEXT',
+		prev: 'BUTTON_PREV'
+	}
 	
-	readonly form: FormGroup = this._formBuilder.group({
-		                                                   basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
-	                                                   });
+	public readonly form: FormGroup = this._formBuilder.group(
+			{
+				basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
+			}
+	);
 	
-	readonly basicInfo = this.form.get('basicInfo') as FormControl;
+	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
 	
 	constructor(
 			private readonly _activeModal: NgbActiveModal,
@@ -37,17 +43,27 @@ export class ProductCreateComponent implements OnInit
 	)
 	{}
 	
-	get buttonDone()
-	{
-		return this._translate(this.BUTTON_DONE);
-	}
-	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.basicInfoForm.productCategories = this.productsCategories;
 	}
 	
-	async createProduct()
+	public get buttonDone()
+	{
+		return this._translate(this.buttons.done);
+	}
+	
+	public get buttonNext()
+	{
+		return this._translate(this.buttons.next);
+	}
+	
+	public get buttonPrev()
+	{
+		return this._translate(this.buttons.prev);
+	}
+	
+	public async createProduct()
 	{
 		if(this.basicInfo.valid)
 		{
@@ -64,31 +80,29 @@ export class ProductCreateComponent implements OnInit
 				const message = `Product ${productCreateObject.title[0].value} is created`;
 				
 				this._notifyService.success(message);
-				this._cancelModal();
+				this.cancelModal();
 			} catch(error)
 			{
 				const message = `Something went wrong!`;
 				this.loading = false;
 				this._notifyService.error(message);
-				this._cancelModal();
+				this.cancelModal();
 			}
 		}
+	}
+	
+	public cancelModal()
+	{
+		this._activeModal.dismiss('canceled');
 	}
 	
 	private _translate(key: string): string
 	{
 		let translationResult = '';
 		
-		this._translateService.get(key).subscribe((res) =>
-		                                          {
-			                                          translationResult = res;
-		                                          });
+		this._translateService.get(key)
+		    .subscribe((res) => translationResult = res);
 		
 		return translationResult;
-	}
-	
-	private _cancelModal()
-	{
-		this._activeModal.dismiss('canceled');
 	}
 }
