@@ -22,11 +22,11 @@ export class CarrierComponent implements OnInit, OnDestroy
 {
 	@ViewChild('carrierOrders', { static: false })
 	public carrierOrders: CarrierOrdersComponent;
-	public carriers: ICarrierCreateObject[];
+	public carriers: Carrier[];
 	public carrierOrderOptions: ICarrierOrdersRouterGetOptions;
 	public selectedOrdersId: string[] = [];
 	public selectedOrder: Order;
-	public selectedCarrier: ICarrierCreateObject;
+	public selectedCarrier: Carrier;
 	private ngDestroy$ = new Subject();
 	private inDeliveryOrders: Order[] = [];
 	private closeOrders: Order[] = [];
@@ -109,9 +109,10 @@ export class CarrierComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	public carrierSelect(newCarrier: Carrier)
+	public carrierSelect(newCarrier: unknown)
 	{
-		this._router.navigate([`/carriers/${newCarrier.id}`]);
+		const carrier = newCarrier as Carrier;
+		this._router.navigate([`/carriers/${carrier.id}`]);
 		
 		this.selectedOrder = null;
 		
@@ -124,14 +125,14 @@ export class CarrierComponent implements OnInit, OnDestroy
 				this.carrierOrderOptions === objToCompare ? null : objToCompare;
 		
 		this.selectedCarrier =
-				this.selectedCarrier === newCarrier ? null : newCarrier;
+				this.selectedCarrier === carrier ? null : carrier;
 	}
 	
 	public getAllCarriers()
 	{
 		this.carriers$ = this.carriersService
 		                     .getCarriers()
-		                     .subscribe((carriers) =>
+		                     .subscribe((carriers: Carrier[]) =>
 		                                {
 			                                this.carriers = carriers;
 			                                this._selectCarrierIfIdExists();
