@@ -3,12 +3,12 @@ import { ActivatedRoute, Params }                  from '@angular/router';
 import { Subject, Subscription }                   from 'rxjs';
 import GeoLocation                                 from '@modules/server.common/entities/GeoLocation';
 import Carrier                                     from '@modules/server.common/entities/Carrier';
+import Order                                       from '@modules/server.common/entities/Order';
 import Warehouse                                   from '@modules/server.common/entities/Warehouse';
 import { CarrierRouter }                           from '@modules/client.common.angular2/routers/carrier-router.service';
 import { CarrierOrdersRouter }                     from '@modules/client.common.angular2/routers/carrier-orders-router.service';
 import { CarriersService }                         from '@app/@core/data/carriers.service';
 import { environment }                             from 'environments/environment';
-import Order                                       from '@modules/server.common/entities/Order';
 
 declare var google: any;
 const directionsDisplay = new google.maps.DirectionsRenderer();
