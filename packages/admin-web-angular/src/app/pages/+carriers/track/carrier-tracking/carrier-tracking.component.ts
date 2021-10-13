@@ -1,56 +1,55 @@
 import {
 	Component,
-	Input,
-	Output,
 	EventEmitter,
+	Output,
 	ViewChild,
 	OnInit,
-	OnDestroy,
-}                                 from '@angular/core';
-import { CarrierRouter }          from '@modules/client.common.angular2/routers/carrier-router.service';
-import { Subject, Subscription }  from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CarrierOrdersRouter }    from '@modules/client.common.angular2/routers/carrier-orders-router.service';
-import { CarriersService }        from '@app/@core/data/carriers.service';
-import { environment }            from 'environments/environment';
-import GeoLocation                from '@modules/server.common/entities/GeoLocation';
-import Warehouse                  from '@modules/server.common/entities/Warehouse';
-import { NgSelectModule }         from '@ng-select/ng-select';
-import { FormsModule }            from '@angular/forms';
-import { WarehousesService }      from '@app/@core/data/warehouses.service';
-import Carrier                    from '@modules/server.common/entities/Carrier';
-import { ICarrierCreateObject }   from '@modules/server.common/interfaces/ICarrier';
-import { takeUntil }              from 'rxjs/operators';
+	OnDestroy
+}                                         from '@angular/core';
+import { ActivatedRoute, Router, Params } from '@angular/router';
+import { Subject, Subscription }          from 'rxjs';
+import { takeUntil }                      from 'rxjs/operators';
+import Carrier                            from '@modules/server.common/entities/Carrier';
+import Warehouse                          from '@modules/server.common/entities/Warehouse';
+import { CarrierRouter }                  from '@modules/client.common.angular2/routers/carrier-router.service';
+import { CarrierOrdersRouter }            from '@modules/client.common.angular2/routers/carrier-orders-router.service';
+import { CarriersService }                from '@app/@core/data/carriers.service';
+import { WarehousesService }              from '@app/@core/data/warehouses.service';
+import { environment }                    from 'environments/environment';
 
 declare var google: any;
 const directionsDisplay = new google.maps.DirectionsRenderer();
 const directionsService = new google.maps.DirectionsService();
 
 @Component({
-	           selector: 'ea-carrier-tracking',
-	           styleUrls: ['carrier-tracking.component.scss'],
+	           selector:    'ea-carrier-tracking',
+	           styleUrls:   ['carrier-tracking.component.scss'],
 	           templateUrl: 'carrier-tracking.component.html',
            })
 export class CarrierTrackingComponent implements OnInit, OnDestroy
 {
 	public carrierId: string;
+	
 	@ViewChild('gmap', { static: true })
-	gmapElement: any;
-	map: google.maps.Map;
-	carrierSub$: any;
-	marker: any;
-	userMarker: any;
-	warehouseMarkers = [];
-	interval: NodeJS.Timer;
-	isReverted: boolean = true;
-	params$: Subscription;
-	selectedCarrier: Carrier;
-	carriers: Carrier[] = [];
-	selectedStore: Warehouse;
-	filteredCarriersList: Carrier[] = [];
-	public stores: Warehouse[] = [];
+	public gmapElement: any;
+	
 	@Output()
-	selectedStoreEmitter = new EventEmitter<Warehouse>();
+	public selectedStoreEmitter = new EventEmitter<Warehouse>();
+	
+	public map: google.maps.Map;
+	public carrierSub$: any;
+	public marker: any;
+	public userMarker: any;
+	public warehouseMarkers = [];
+	public interval: NodeJS.Timer;
+	public isReverted: boolean = true;
+	public params$: Subscription;
+	public selectedCarrier: Carrier;
+	public carriers: Carrier[] = [];
+	public selectedStore: Warehouse;
+	public filteredCarriersList: Carrier[] = [];
+	public stores: Warehouse[] = [];
+	
 	private ngDestroy$ = new Subject();
 	
 	constructor(
@@ -63,13 +62,34 @@ export class CarrierTrackingComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.showMap();
 		this.getCarriers();
 	}
 	
-	getCarriers()
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+		this.carriers = [];
+		if(this.interval)
+		{
+			clearInterval(this.interval);
+		}
+		
+		if(this.carrierSub$)
+		{
+			this.carrierSub$.unsubscribe();
+		}
+		
+		if(this.params$)
+		{
+			this.params$.unsubscribe();
+		}
+	}
+	
+	public getCarriers()
 	{
 		this._storesService
 		    .getStores()
@@ -91,17 +111,17 @@ export class CarrierTrackingComponent implements OnInit, OnDestroy
 		               });
 	}
 	
-	selectNewStore(id)
+	public selectNewStore(id)
 	{
 		this.selectedStore = this.stores.find((s) => s.id === id);
 	}
 	
-	storeListener(e)
+	public storeListener(e)
 	{
 		this.router.navigate([`carriers/track/${this.selectedStore.id}`]);
 	}
 	
-	carrierListener(e)
+	public carrierListener(e)
 	{
 		if(this.selectedStore)
 		{
@@ -117,46 +137,48 @@ export class CarrierTrackingComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	loadDataFromUrl()
+	public loadDataFromUrl()
 	{
-		this.params$ = this.route.params.subscribe((res) =>
-		                                           {
-			                                           if(!res.carrierId && res.storeId)
-			                                           {
-				                                           this.selectNewStore(res.storeId);
-				                                           this.filteredCarriersList = this.carriers.filter((x) =>
-						                                                                                            this.selectedStore.usedCarriersIds.includes(x.id)
-				                                           );
-				                                           this.selectedCarrier = undefined;
-				                                           this.revertMap();
-				                                           this._subscribeCarrier(this.filteredCarriersList);
-			                                           }
-			                                           else if(res.carrierId)
-			                                           {
-				                                           this.selectNewStore(res.storeId);
-				                                           const filteredList = this.filteredCarriersList.filter(
-						                                           (carrier) => carrier._id === res.carrierId
-				                                           );
-				                                           this.selectedCarrier = filteredList[0];
-				                                           this.revertMap();
-				                                           this._subscribeCarrier(filteredList);
-			                                           }
-			                                           else if(!res.carrierId && !res.storeId)
-			                                           {
-				                                           this._subscribeCarrier(this.filteredCarriersList);
-			                                           }
-		                                           });
+		this.params$ =
+				this.route.params
+				    .subscribe((res: Params) =>
+				               {
+					               if(!res.carrierId && res.storeId)
+					               {
+						               this.selectNewStore(res.storeId);
+						               this.filteredCarriersList = this.carriers.filter(
+								               (x) => this.selectedStore.usedCarriersIds.includes(x.id)
+						               );
+						               this.selectedCarrier = undefined;
+						               this.revertMap();
+						               this._subscribeCarrier(this.filteredCarriersList);
+					               }
+					               else if(res.carrierId)
+					               {
+						               this.selectNewStore(res.storeId);
+						               const filteredList = this.filteredCarriersList.filter(
+								               (carrier) => carrier._id === res.carrierId
+						               );
+						               this.selectedCarrier = filteredList[0];
+						               this.revertMap();
+						               this._subscribeCarrier(filteredList);
+					               }
+					               else if(!res.carrierId && !res.storeId)
+					               {
+						               this._subscribeCarrier(this.filteredCarriersList);
+					               }
+				               });
 	}
 	
-	async _subscribeCarrier(carrierList: Carrier[])
+	public async _subscribeCarrier(carrierList: Carrier[])
 	{
-		const idArray = carrierList.map((carrier) => carrier._id);
+		const idArray = carrierList.map((carrier: Carrier) => carrier._id);
 		idArray.forEach((c) =>
 		                {
 			                const carrierId = c.toString();
 			                this.carrierSub$ = this.carrierRouter
 			                                       .get(carrierId)
-			                                       .subscribe(async(carrier) =>
+			                                       .subscribe(async(carrier: Carrier) =>
 			                                                  {
 				                                                  if(this.interval)
 				                                                  {
@@ -179,7 +201,7 @@ export class CarrierTrackingComponent implements OnInit, OnDestroy
 		                });
 	}
 	
-	revertMap()
+	public revertMap()
 	{
 		if(this.warehouseMarkers.length > 0)
 		{
@@ -191,43 +213,23 @@ export class CarrierTrackingComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	showMap()
+	public showMap()
 	{
+		const [lat, lng] = [environment.DEFAULT_LATITUDE, environment.DEFAULT_LONGITUDE];
 		const mapProp = {
-			center: new google.maps.LatLng(42.642941, 23.334149),
-			zoom: 15,
+			center:    new google.maps.LatLng(lat ?? 42.642941, lng ?? 23.334149),
+			zoom:      15,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 	}
 	
-	addMarker(position, map, icon)
+	public addMarker(position, map, icon)
 	{
 		return new google.maps.Marker({
 			                              position,
 			                              map,
 			                              icon,
 		                              });
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-		this.carriers = [];
-		if(this.interval)
-		{
-			clearInterval(this.interval);
-		}
-		
-		if(this.carrierSub$)
-		{
-			this.carrierSub$.unsubscribe();
-		}
-		
-		if(this.params$)
-		{
-			this.params$.unsubscribe();
-		}
 	}
 }
