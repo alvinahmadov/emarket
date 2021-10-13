@@ -92,10 +92,8 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 	
 	private _applyTranslationOnSmartTable()
 	{
-		this._translateService.onLangChange.subscribe(() =>
-		                                              {
-			                                              this._setupSmartTable();
-		                                              });
+		this._translateService.onLangChange
+		    .subscribe(() => this._setupSmartTable());
 	}
 	
 	private _setupSmartTable()
