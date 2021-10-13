@@ -24,24 +24,21 @@ import { StorageService }                          from '@app/@core/data/store.s
 import { InviteRequestModalComponent }             from '@app/@shared/invite/invite-request/invite-request-modal.component';
 import { ByCodeModalComponent }                    from '@app/@shared/invite/by-code/by-code-modal.component';
 import { UserMutationComponent }                   from '@app/@shared/user/user-mutation';
+import { SimulationInstructionsComponent, Step }   from './instructions/instructions.component';
 import { SimulationProductsComponent }             from './products/products.component';
-import {
-	SimulationInstructionsComponent,
-	Step,
-}                                                  from './instructions/instructions.component';
 
 @Component({
 	           selector:    'ea-simulation',
-	           templateUrl: './simulation.component.html',
 	           styleUrls:   ['/simulation.component.scss'],
+	           templateUrl: './simulation.component.html',
            })
 export class SimulationComponent implements OnDestroy, OnInit
 {
 	@ViewChild('productsTable', { static: true })
-	productsTable: SimulationProductsComponent;
+	public productsTable: SimulationProductsComponent;
 	
 	@ViewChild('instructions')
-	instructions: SimulationInstructionsComponent;
+	public instructions: SimulationInstructionsComponent;
 	
 	public hasProductsForOrder: boolean;
 	public inviteSystem: boolean;
@@ -75,46 +72,25 @@ export class SimulationComponent implements OnDestroy, OnInit
 		this.loadPage();
 	}
 	
-	async loadPage()
-	{
-		const invitesSettings = await this.inviteRouter.getInvitesSettings();
-		this.inviteSystem = invitesSettings.isEnabled;
-		this.loadButtons = true;
-		this._listenForEntityLocaleTranslate();
-		await this._startTracking();
-	}
-	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.selectProductsChange();
 		localStorage.removeItem('simulationStartDate');
 		localStorage.removeItem('simulationEndTime');
 	}
 	
-	localeTranslate(member: ILocaleMember[])
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public localeTranslate(member: ILocaleMember[])
 	{
 		return this._productLocalesService.getTranslate(member);
 	}
 	
-	async showInviteRequestModal(): Promise<void>
-	{
-		try
-		{
-			this.inviteRequest = await this._modalService.open(
-					InviteRequestModalComponent,
-					{
-						size:      'lg',
-						container: 'nb-layout',
-						backdrop:  'static',
-					}
-			).result;
-		} catch(error)
-		{
-			this.inviteRequest = null;
-		}
-	}
-	
-	selectProductsChange()
+	public selectProductsChange()
 	{
 		this.productsTable.selectProductsChange$
 		    .pipe(takeUntil(this._ngDestroy$))
@@ -146,7 +122,16 @@ export class SimulationComponent implements OnDestroy, OnInit
 		               });
 	}
 	
-	async orderCreate()
+	public orderConfirm()
+	{
+		this.loading = true;
+		this.order = null;
+		this.instructions.step = Step.Two;
+		this.productsTable.setupDataForSmartTable(this._productsInfoData);
+		// this.loading = false;
+	}
+	
+	public async orderCreate(): Promise<void>
 	{
 		const products = this.productsTable.selectedProducts;
 		
@@ -193,16 +178,34 @@ export class SimulationComponent implements OnDestroy, OnInit
 		}
 	}
 	
-	orderConfirm()
+	public async loadPage(): Promise<void>
 	{
-		this.loading = true;
-		this.order = null;
-		this.instructions.step = Step.Two;
-		this.productsTable.setupDataForSmartTable(this._productsInfoData);
-		// this.loading = false;
+		const invitesSettings = await this.inviteRouter.getInvitesSettings();
+		this.inviteSystem = invitesSettings.isEnabled;
+		this.loadButtons = true;
+		this._listenForEntityLocaleTranslate();
+		await this._startTracking();
 	}
 	
-	async inviteUser(): Promise<void>
+	public async showInviteRequestModal(): Promise<void>
+	{
+		try
+		{
+			this.inviteRequest = await this._modalService.open(
+					InviteRequestModalComponent,
+					{
+						size:      'lg',
+						container: 'nb-layout',
+						backdrop:  'static',
+					}
+			).result;
+		} catch(error)
+		{
+			this.inviteRequest = null;
+		}
+	}
+	
+	public async inviteUser(): Promise<void>
 	{
 		try
 		{
@@ -227,7 +230,7 @@ export class SimulationComponent implements OnDestroy, OnInit
 		}
 	}
 	
-	async createUser(): Promise<void>
+	public async createUser(): Promise<void>
 	{
 		if(this.inviteSystem)
 		{
@@ -239,31 +242,13 @@ export class SimulationComponent implements OnDestroy, OnInit
 		}
 	}
 	
-	async orderCancel(): Promise<void>
+	public async orderCancel(): Promise<void>
 	{
 		this.loading = true;
 		await this.warehouseOrdersRouter.cancel(this.order.id);
 		this.order = null;
 		this.instructions.step = Step.Two;
 		this.loading = false;
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-	}
-	
-	private getInviteCreateObj(): IInviteCreateObject
-	{
-		if(this.inviteRequest)
-		{
-			return {
-				geoLocation: this.inviteRequest.geoLocation,
-				apartment:   this.inviteRequest.apartment,
-			};
-		}
-		return null;
 	}
 	
 	private async showCreateUserModal(): Promise<void>
@@ -344,15 +329,25 @@ export class SimulationComponent implements OnDestroy, OnInit
 		}
 	}
 	
+	private getInviteCreateObj(): IInviteCreateObject
+	{
+		if(this.inviteRequest)
+		{
+			return {
+				geoLocation: this.inviteRequest.geoLocation,
+				apartment:   this.inviteRequest.apartment,
+			};
+		}
+		return null;
+	}
+	
 	private _listenForEntityLocaleTranslate()
 	{
 		this.translate.onLangChange
 		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe(() =>
-		               {
-			               this.productsTable.setupDataForSmartTable(
-					               this._productsInfoData
-			               );
-		               });
+		    .subscribe(
+				    () => this.productsTable
+				              .setupDataForSmartTable(this._productsInfoData)
+		    );
 	}
 }
