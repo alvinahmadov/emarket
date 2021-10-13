@@ -1,29 +1,32 @@
+// noinspection PointlessBooleanExpressionJS
+
 import {
 	Component,
 	EventEmitter,
 	Input,
+	Output,
 	OnChanges,
 	OnDestroy,
-	Output,
 	AfterViewInit,
-} from '@angular/core';
-
-import Order                              from '@modules/server.common/entities/Order';
-import OrderCarrierStatus                 from '@modules/server.common/enums/OrderCarrierStatus';
-import { ICarrierOrdersRouterGetOptions } from '@modules/server.common/routers/ICarrierOrdersRouter';
-import Carrier                            from '@modules/server.common/entities/Carrier';
-import { CarrierOrdersRouter }            from '@modules/client.common.angular2/routers/carrier-orders-router.service';
-import { OrderRouter }                    from '@modules/client.common.angular2/routers/order-router.service';
-import CarrierStatus                      from '@modules/server.common/enums/CarrierStatus';
+}                                         from '@angular/core';
 import _                                  from 'lodash';
 import { LocalDataSource }                from 'ng2-smart-table';
-import { Subject, Observable }            from 'rxjs/Rx';
+import {
+	Subject, Observable,
+	forkJoin, Subscription
+}                                         from 'rxjs';
 import { TranslateService }               from '@ngx-translate/core';
-import { forkJoin, Subscription }         from 'rxjs';
-import { CreatedComponent }               from '../../../../@shared/render-component/created/created.component';
+import CarrierStatus                      from '@modules/server.common/enums/CarrierStatus';
+import OrderCarrierStatus                 from '@modules/server.common/enums/OrderCarrierStatus';
+import Carrier                            from '@modules/server.common/entities/Carrier';
+import GeoLocation                        from '@modules/server.common/entities/GeoLocation';
+import Order                              from '@modules/server.common/entities/Order';
+import { ICarrierOrdersRouterGetOptions } from '@modules/server.common/routers/ICarrierOrdersRouter';
+import { CarrierOrdersRouter }            from '@modules/client.common.angular2/routers/carrier-orders-router.service';
+import { OrderRouter }                    from '@modules/client.common.angular2/routers/order-router.service';
 import { CarriersService }                from '@app/@core/data/carriers.service';
 import { GeoLocationOrdersService }       from '@app/@core/data/geo-location-orders.service';
-import GeoLocation                        from '@modules/server.common/entities/GeoLocation';
+import { CreatedComponent }               from '@app/@shared/render-component/created/created.component';
 import { StoreOrderComponent }            from '@app/@shared/render-component/carrier-orders-table/store-order.component';
 import { UserOrderComponent }             from '@app/@shared/render-component/carrier-orders-table/user-order-component';
 
@@ -32,23 +35,27 @@ let searchCustomer: boolean;
 let oldSearch = '';
 
 @Component({
-	           selector: 'ea-carrier-orders',
+	           selector:    'ea-carrier-orders',
 	           templateUrl: '/carrier-orders.component.html',
-	           styleUrls: ['./carrier-orders.component.scss'],
+	           styleUrls:   ['./carrier-orders.component.scss'],
            })
 export class CarrierOrdersComponent
 		implements OnDestroy, OnChanges, AfterViewInit
 {
 	static $customerSearch = new EventEmitter<string>();
 	public selectedOrder: Order;
-	subscription: Subscription;
+	public subscription: Subscription;
 	public carrierOnlineStatus = CarrierStatus.Online;
+	
 	@Input()
 	protected carrierOrderOptions: ICarrierOrdersRouterGetOptions;
+	
 	@Input()
 	protected selectedCarrier: Carrier;
+	
 	@Output()
 	protected selectedOrderEvent = new EventEmitter<Order>();
+	
 	protected currentOrders: Order[];
 	protected settingsSmartTable: object;
 	protected sourceSmartTable: LocalDataSource = new LocalDataSource();
@@ -69,7 +76,40 @@ export class CarrierOrdersComponent
 		this._setupSmartTable();
 	}
 	
-	get isCarrierPickupOrder(): boolean
+	public ngAfterViewInit()
+	{
+		this.loadSmartTableTranslates();
+		this.smartTableChange();
+		
+		this.subscription = CarrierOrdersComponent.$customerSearch.subscribe(
+				async(searchText: string) =>
+				{
+					await this.loadDataCount({
+						                         byRegex: [{ key: 'user.firstName', value: searchText }],
+					                         });
+					await this.loadSmartTableData(1, {
+						byRegex: [{ key: 'user.firstName', value: searchText }],
+					});
+				}
+		);
+	}
+	
+	public ngOnChanges()
+	{
+		this.loadDataCount();
+		this.getAllAvailableOrders();
+		this._isWork = true;
+	}
+	
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+		this.subscription.unsubscribe();
+		this.$locationOrders.unsubscribe();
+	}
+	
+	public get isCarrierPickupOrder(): boolean
 	{
 		return (
 				this.selectedOrder &&
@@ -79,7 +119,7 @@ export class CarrierOrdersComponent
 		);
 	}
 	
-	get isCarrierArrivedToCustomer(): boolean
+	public get isCarrierArrivedToCustomer(): boolean
 	{
 		return (
 				this.selectedOrder &&
@@ -100,89 +140,12 @@ export class CarrierOrdersComponent
 		);
 	}
 	
-	ngAfterViewInit()
+	public async getAllAvailableOrders()
 	{
-		this.loadSmartTableTranslates();
-		this.smartTableChange();
-		
-		this.subscription = CarrierOrdersComponent.$customerSearch.subscribe(
-				async(searchText: string) =>
-				{
-					await this.loadDataCount({
-						                         byRegex: [{ key: 'user.firstName', value: searchText }],
-					                         });
-					await this.loadSmartTableData(1, {
-						byRegex: [{ key: 'user.firstName', value: searchText }],
-					});
-				}
-		);
+		await this.loadSmartTableData();
 	}
 	
-	ngOnChanges()
-	{
-		this.loadDataCount();
-		this.getAllAvailableOrders();
-		this._isWork = true;
-	}
-	
-	async getAllAvailableOrders()
-	{
-		this.loadSmartTableData();
-		
-		// Old code for load all available order
-		// this.carrierOrdersRouter
-		// 	.getAvailable(this.selectedCarrier.id, this.carrierOrderOptions)
-		// 	.pipe(takeUntil(this.ngDestroy$))
-		// 	.subscribe((orders: Order[]) => {
-		// 		console.log('ORDERS LOAD:');
-		// 		console.log(orders);
-		
-		// 		this._isWork = false;
-		// 		this.currentOrders = orders;
-		
-		// 		orders.every((o: Order) => {
-		// 			if (
-		// 				o.carrierId === this.selectedCarrier.id &&
-		// 				o.isPaid === false &&
-		// 				o.carrierStatus !==
-		// 					OrderCarrierStatus.IssuesDuringDelivery &&
-		// 				o.carrierStatus !==
-		// 					OrderCarrierStatus.ClientRefuseTakingOrder
-		// 			) {
-		// 				this.currentOrders = [o];
-		// 				this._isWork = true;
-		// 			}
-		
-		// 			return !this._isWork;
-		// 		});
-		
-		// 		if (!this._isWork) {
-		// 			let filter = (order: Order): boolean =>
-		// 				order.carrierStatus !==
-		// 					OrderCarrierStatus.IssuesDuringDelivery &&
-		// 				order.carrierStatus !==
-		// 					OrderCarrierStatus.ClientRefuseTakingOrder &&
-		// 				this.selectedCarrier.status ===
-		// 					CarrierStatus.Online &&
-		// 				OrderWarehouseStatus.PackagingFinished ===
-		// 					order.warehouseStatus &&
-		// 				OrderCarrierStatus.DeliveryCompleted !==
-		// 					order.carrierStatus &&
-		// 				(order.carrier === undefined ||
-		// 					order.carrier === null ||
-		// 					(order.carrierId === this.selectedCarrier.id &&
-		// 						order.isPaid === false));
-		
-		// 			this.currentOrders = orders.filter(filter);
-		// 		}
-		// 		console.log('ORDERS FINAL:');
-		// 		console.log(this.currentOrders);
-		
-		// 		this.sourceSmartTable.load(this.currentOrders);
-		// 	});
-	}
-	
-	async smartTableChange()
+	public async smartTableChange()
 	{
 		this.subscription = this.sourceSmartTable
 		                        .onChanged()
@@ -196,7 +159,7 @@ export class CarrierOrdersComponent
 		                                   });
 	}
 	
-	selectOrder(ev)
+	public selectOrder(ev)
 	{
 		const order = ev.data as Order;
 		
@@ -214,20 +177,12 @@ export class CarrierOrdersComponent
 		}
 	}
 	
-	loadSmartTableTranslates()
+	public loadSmartTableTranslates()
 	{
 		this._translateService.onLangChange.subscribe(() =>
 		                                              {
 			                                              this._setupSmartTable();
 		                                              });
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-		this.subscription.unsubscribe();
-		this.$locationOrders.unsubscribe();
 	}
 	
 	protected async updateOrderCarrierStatus(status: OrderCarrierStatus)
@@ -266,17 +221,17 @@ export class CarrierOrdersComponent
 					this.settingsSmartTable = {
 						actions: false,
 						columns: {
-							Warehouse: {
-								title: warehouse,
-								type: 'custom',
+							Warehouse:       {
+								title:           warehouse,
+								type:            'custom',
 								renderComponent: StoreOrderComponent,
-								width: '20%',
+								width:           '20%',
 							},
-							Customer: {
-								title: customer,
-								type: 'custom',
+							Customer:        {
+								title:           customer,
+								type:            'custom',
 								renderComponent: UserOrderComponent,
-								width: '20%',
+								width:           '20%',
 								filterFunction(
 										cell?: string,
 										search?: string
@@ -301,44 +256,44 @@ export class CarrierOrdersComponent
 								},
 							},
 							WarehouseStatus: {
-								title: warehouseStatus,
-								type: 'string',
+								title:                warehouseStatus,
+								type:                 'string',
 								valuePrepareFunction: (_, order: Order) =>
-								{
-									let warehouseStat = 'BAD_STATUS';
-									getTranslate(
-											order.warehouseStatusText
-									).subscribe((y) =>
-									            {
-										            warehouseStat = y;
-									            });
+								                      {
+									                      let warehouseStat = 'BAD_STATUS';
+									                      getTranslate(
+											                      order.warehouseStatusText
+									                      ).subscribe((y) =>
+									                                  {
+										                                  warehouseStat = y;
+									                                  });
 									
-									return warehouseStat;
-								},
+									                      return warehouseStat;
+								                      },
 							},
-							CarrierStatus: {
-								title: carrierStatus,
-								type: 'string',
+							CarrierStatus:   {
+								title:                carrierStatus,
+								type:                 'string',
 								valuePrepareFunction: (_, order: Order) =>
-								{
-									let carrierStat = 'No Status';
-									getTranslate(order.carrierStatusText).subscribe(
-											(y) =>
-											{
-												carrierStat = y;
-											}
-									);
+								                      {
+									                      let carrierStat = 'No Status';
+									                      getTranslate(order.carrierStatusText).subscribe(
+											                      (y) =>
+											                      {
+												                      carrierStat = y;
+											                      }
+									                      );
 									
-									return carrierStat;
-								},
+									                      return carrierStat;
+								                      },
 							},
-							Created: {
-								title: created,
-								type: 'custom',
+							Created:         {
+								title:           created,
+								type:            'custom',
 								renderComponent: CreatedComponent,
 							},
 						},
-						pager: {
+						pager:   {
 							display: true,
 							perPage,
 						},
@@ -353,7 +308,7 @@ export class CarrierOrdersComponent
 	{
 		const getOrdersGeoObj = {
 			loc: {
-				type: 'Point',
+				type:        'Point',
 				coordinates: this.selectedCarrier.geoLocation.loc.coordinates,
 			},
 		};
@@ -371,7 +326,7 @@ export class CarrierOrdersComponent
 	{
 		const getOrdersGeoObj = {
 			loc: {
-				type: 'Point',
+				type:        'Point',
 				coordinates: this.selectedCarrier.geoLocation.loc.coordinates,
 			},
 		};
@@ -386,7 +341,7 @@ export class CarrierOrdersComponent
 				                           getOrdersGeoObj as GeoLocation,
 				                           this.selectedCarrier.skippedOrderIds,
 				                           {
-					                           skip: perPage * (page - 1),
+					                           skip:  perPage * (page - 1),
 					                           limit: perPage,
 				                           },
 				                           searchObj
