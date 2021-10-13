@@ -8,11 +8,11 @@ import { DomSanitizer }                   from '@angular/platform-browser';
 import ProductInfo                        from '@modules/server.common/entities/ProductInfo';
 import Warehouse                          from '@modules/server.common/entities/Warehouse';
 import { CustomerRouter }                 from '@modules/client.common.angular2/routers/customer-router.service';
+import { GeoLocationService }             from '@app/@core/data/geo-location.service';
 import { WarehousesService }              from '@app/@core/data/warehouses.service';
 import { ProductOrderProductsComponent }  from '@app/@shared/render-component/customer-products-table/product-order-products.component';
 import { StoreOrderProductsComponent }    from '@app/@shared/render-component/customer-products-table/store-order-products.component';
 import { OrderBtnOrderProductsComponent } from '@app/@shared/render-component/customer-products-table/order-btn-order-products/order-btn-order-products.component';
-import { GeoLocationService }             from '@app/@core/data/geo-location.service';
 
 @Component({
 	           selector:  'ea-customer-products',
@@ -48,27 +48,30 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 			private _translateService: TranslateService
 	)
 	{
-		this.params$ = this._router.params.subscribe(async(res) =>
-		                                             {
-			                                             this.customerId = res.id;
-			                                             const user = await this.customerRouter
-			                                                                    .get(this.customerId)
-			                                                                    .pipe(first())
-			                                                                    .toPromise();
-			
-			                                             if(user == null)
-			                                             {
-				                                             throw new Error(`User can't be found (id: ${this.customerId})`);
-			                                             }
-			
-			                                             this.availableProductsSubscription$ = this.geoLocationProductService
-			                                                                                       .getGeoLocationProducts(user.geoLocation)
-			                                                                                       .subscribe((products) =>
-			                                                                                                  {
-				                                                                                                  this.availableProducts = products;
-				                                                                                                  this.sourceSmartTable.load(products);
-			                                                                                                  });
-		                                             });
+		this.params$ = this._router.params.subscribe(
+				async(res) =>
+				{
+					this.customerId = res.id;
+					const customer = await this.customerRouter
+					                           .get(this.customerId)
+					                           .pipe(first())
+					                           .toPromise();
+					
+					if(customer == null)
+					{
+						throw new Error(`User can't be found (id: ${this.customerId})`);
+					}
+					
+					this.availableProductsSubscription$ =
+							this.geoLocationProductService
+							    .getGeoLocationProducts(customer.geoLocation)
+							    .subscribe((products) =>
+							               {
+								               this.availableProducts = products;
+								               this.sourceSmartTable.load(products);
+							               });
+				}
+		);
 		
 		this._applyTranslationOnSmartTable();
 	}
@@ -93,10 +96,8 @@ export class CustomerProductsComponent implements OnDestroy, OnInit
 	
 	private _applyTranslationOnSmartTable()
 	{
-		this._translateService.onLangChange.subscribe(() =>
-		                                              {
-			                                              this._setupSmartTable();
-		                                              });
+		this._translateService.onLangChange
+		    .subscribe(() => this._setupSmartTable());
 	}
 	
 	private _setupSmartTable()
