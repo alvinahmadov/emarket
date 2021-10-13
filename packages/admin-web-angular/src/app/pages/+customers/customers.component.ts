@@ -326,7 +326,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			const customerIds = customers.map((u) => u?.id);
 			
 			const customersOrders = await this._ordersService
-			                                  .getUsersOrdersCountInfo(customerIds);
+			                                  .getCustomersOrdersCountInfo(customerIds);
 			
 			let customersVM = customers.map(
 					(customer) =>
