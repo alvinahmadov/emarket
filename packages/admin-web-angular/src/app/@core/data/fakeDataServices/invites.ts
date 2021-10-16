@@ -25,10 +25,7 @@ export default class FakeDataInvites
 					countryId:     1,
 					loc:           {
 						type:        'Point',
-						coordinates: {
-							lng: lng + 0.05,
-							lat: lat - 0.01
-						},
+						coordinates: [lng + 0.05, lat - 0.01],
 					},
 				},
 				apartment:   '3',
@@ -43,10 +40,7 @@ export default class FakeDataInvites
 					countryId:     1,
 					loc:           {
 						type:        'Point',
-						coordinates: {
-							lng: lng + 0.09,
-							lat: lat - 0.1
-						},
+						coordinates: [lng + 0.09, lat - 0.1],
 					},
 				},
 				apartment:   '2',
@@ -61,10 +55,7 @@ export default class FakeDataInvites
 					countryId:     1,
 					loc:           {
 						type:        'Point',
-						coordinates: {
-							lng: lng,
-							lat: lat - 0.01
-						},
+						coordinates: [lng, lat - 0.01],
 					},
 				},
 				apartment:   '6',
@@ -79,10 +70,7 @@ export default class FakeDataInvites
 					countryId:     1,
 					loc:           {
 						type:        'Point',
-						coordinates: {
-							lng: lng + 0.06,
-							lat: lat
-						},
+						coordinates: [lng + 0.06, lat],
 					},
 				},
 				apartment:   '6',
@@ -111,7 +99,7 @@ export default class FakeDataInvites
 					countryId:     faker.random.number(1) as Country,
 					loc:           {
 						type:        'Point',
-						coordinates: { lng, lat },
+						coordinates: [lng, lat],
 					},
 				},
 				apartment:   faker.random.number(199).toString(),
