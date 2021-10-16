@@ -4,10 +4,11 @@ import {
 	Input,
 	OnInit,
 }                                from '@angular/core';
+import { Platform }              from '@ionic/angular';
+import { IProductImage }         from '@modules/server.common/interfaces/IProduct';
 import OrderProduct              from '@modules/server.common/entities/OrderProduct';
 import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
-import { Store }                 from '../../../../services/store.service';
-import { Platform }              from '@ionic/angular';
+import { StorageService }        from 'services/storage.service';
 
 @Component({
 	           selector:        'e-cu-order-product',
@@ -17,28 +18,31 @@ import { Platform }              from '@ionic/angular';
            })
 export class ProductComponent implements OnInit
 {
-	private static MAX_DESCRIPTION_LENGTH: number = 53;
+	private static MAX_DESCRIPTION_LENGTH: number = 140;
 	
 	@Input()
-	orderProduct: OrderProduct;
+	public orderProduct: OrderProduct;
+	
 	@Input()
-	showDetailsButton: boolean = false;
+	public showDetailsButton: boolean = false;
 	
 	constructor(
 			private readonly translateProductLocales: ProductLocalesService,
-			private readonly store: Store,
+			private readonly storageService: StorageService,
 			public platform: Platform
 	)
 	{}
 	
-	get title()
+	public ngOnInit(): void {}
+	
+	public get title(): string
 	{
 		return this.translateProductLocales.getTranslate(
 				this.orderProduct.product.title
 		);
 	}
 	
-	get description()
+	public get description(): string
 	{
 		let description = this.translateProductLocales.getTranslate(
 				this.orderProduct.product.description
@@ -52,11 +56,11 @@ export class ProductComponent implements OnInit
 		) + '...';
 	}
 	
-	get image()
+	public get image(): IProductImage
 	{
 		return (
 				this.orderProduct.product.images.find(
-						(product) => product.locale === this.store.language
+						(product) => product.locale === this.storageService.language
 				) ||
 				this.orderProduct.product.images.find(
 						(product) => product.locale === 'en-US'
@@ -65,7 +69,7 @@ export class ProductComponent implements OnInit
 		);
 	}
 	
-	get imageClass()
+	public get imageClass(): string
 	{
 		switch(this.image.orientation)
 		{
@@ -78,17 +82,17 @@ export class ProductComponent implements OnInit
 		}
 	}
 	
-	get count()
+	public get count(): number
 	{
 		return this.orderProduct.count;
 	}
 	
-	get price(): number
+	public get price(): number
 	{
 		return this.orderProduct.count * this.orderProduct.price;
 	}
 	
-	get showInsideDetailsButton()
+	public get showInsideDetailsButton(): boolean
 	{
 		const description = this.translateProductLocales.getTranslate(
 				this.orderProduct.product.description
@@ -103,7 +107,7 @@ export class ProductComponent implements OnInit
 		);
 	}
 	
-	get showOutsideDetailsButton()
+	public get showOutsideDetailsButton(): boolean
 	{
 		const description = this.translateProductLocales.getTranslate(
 				this.orderProduct.product.description
@@ -116,6 +120,4 @@ export class ProductComponent implements OnInit
 				(this.image.orientation !== 1 || isTwoRowsDesc)
 		);
 	}
-	
-	ngOnInit() {}
 }
