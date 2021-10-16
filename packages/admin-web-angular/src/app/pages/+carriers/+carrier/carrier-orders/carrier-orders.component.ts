@@ -34,6 +34,7 @@ const perPage = 3;
 let searchCustomer: boolean;
 let oldSearch = '';
 
+// noinspection JSUnusedLocalSymbols
 @Component({
 	           selector:    'ea-carrier-orders',
 	           templateUrl: '/carrier-orders.component.html',
@@ -277,12 +278,8 @@ export class CarrierOrdersComponent
 								valuePrepareFunction: (_, order: Order) =>
 								                      {
 									                      let carrierStat = 'No Status';
-									                      getTranslate(order.carrierStatusText).subscribe(
-											                      (y) =>
-											                      {
-												                      carrierStat = y;
-											                      }
-									                      );
+									                      getTranslate(order.carrierStatusText)
+											                      .subscribe((y) => carrierStat = y);
 									
 									                      return carrierStat;
 								                      },
