@@ -27,13 +27,13 @@
 			<span>{{ 'MAIN_VIEW.DRIVER' | translate }}</span>
 		</ion-title>
 	</ion-header>
-	<ion-content class="ion-padding" class="background-content" fullscreen>
+	<ion-content class="ion-padding background-content" fullscreen>
 		<ion-slides>
 			<ion-slide
 					*ngFor="let imageUrl of selectedProductImages; let i = index"
 			>
 				<div class="slide">
-					<img src="{{imageUrl}}"/>
+					<img src="{{imageUrl}}" alt="{{carrierId}}"/>
 					<ion-text style="color: white;">
 						<h3 class="description">
 							{{selectedProductTitles[i]}}
