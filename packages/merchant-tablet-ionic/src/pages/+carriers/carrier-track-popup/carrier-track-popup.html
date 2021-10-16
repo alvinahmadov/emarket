@@ -47,8 +47,7 @@
 		</li>
 		<li>
 			<i class="fa fa-map-marker"></i>
-			{{ warehouse.geoLocation.loc.coordinates[0].toFixed(6) + ', ' +
-		warehouse.geoLocation.loc.coordinates[1].toFixed(6) }}
+			{{ longitude + ', ' + latitude }}
 		</li>
 	</ul>
 	<ul *ngIf="customer">
@@ -64,8 +63,7 @@
 		</li>
 		<li>
 			<i class="fa fa-map-marker"></i>
-			{{ customer.geoLocation.loc.coordinates[0].toFixed(6) + ', ' +
-		customer.geoLocation.loc.coordinates[1].toFixed(6) }}
+			{{ longitude + ', ' + latitude }}
 		</li>
 	</ul>
 </div>
