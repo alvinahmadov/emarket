@@ -75,14 +75,14 @@ export class OrderMapPopupPage implements OnInit
 					carrierIcon
 			);
 			
-			const [uLng, uLat] = customer.geoLocation.coordinatesArray;
+			const [uLng, uLat] = customer.geoLocation.loc.coordinates;
 			this.userMarker = this.addMarker(
 					new google.maps.LatLng(uLat, uLng),
 					this.map,
 					customerIcon
 			);
 			
-			const [wLng, wLat] = warehouse['geoLocation'].coordinatesArray;
+			const [wLng, wLat] = warehouse.geoLocation.loc.coordinates;
 			this.warehouseMarker = this.addMarker(
 					new google.maps.LatLng(wLat, wLng),
 					this.map,
@@ -105,7 +105,7 @@ export class OrderMapPopupPage implements OnInit
 	public showMap()
 	{
 		const [lng, lat] = this.warehouse
-		                   ? this.warehouse.geoLocation.coordinatesArray
+		                   ? this.warehouse.geoLocation.loc.coordinates
 		                   : [
 					environment.DEFAULT_LONGITUDE,
 					environment.DEFAULT_LATITUDE
