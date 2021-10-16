@@ -35,7 +35,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		this.existence = new Subject<ExistenceEvent<T>>();
 	}
 	
-	get(id: T['id']): Observable<T | null>
+	public get(id: T['id']): Observable<T | null>
 	{
 		const callId = uuid();
 		
@@ -76,7 +76,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		);
 	}
 	
-	async getCurrent(id: T['id']): Promise<T | null>
+	public async getCurrent(id: T['id']): Promise<T | null>
 	{
 		const callId = uuid();
 		
@@ -90,7 +90,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return this.parse(obj as RawObject<T>);
 	}
 	
-	getMultiple(ids: T['id'][]): Observable<T[]>
+	public getMultiple(ids: T['id'][]): Observable<T[]>
 	{
 		const callId = uuid();
 		
@@ -123,7 +123,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		);
 	}
 	
-	async getCurrentMultiple(ids: T['id'][]): Promise<T[]>
+	public async getCurrentMultiple(ids: T['id'][]): Promise<T[]>
 	{
 		const callId = uuid();
 		
@@ -144,7 +144,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return _.map(objs as RawObject<T>[], (obj) => this.parse(obj));
 	}
 	
-	async create(createObject: CreateObject<T>): Promise<T>
+	public async create(createObject: CreateObject<T>): Promise<T>
 	{
 		const callId = uuid();
 		
@@ -187,7 +187,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async deleteAll(): Promise<void>
+	public async deleteAll(): Promise<void>
 	{
 		if(env.isProd)
 		{
@@ -219,7 +219,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async delete(objectId: T['id']): Promise<void>
+	public async delete(objectId: T['id']): Promise<void>
 	{
 		const callId = uuid();
 		
@@ -272,7 +272,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async deleteMultiple(conditions: FindObject<T>): Promise<void>
+	public async deleteMultiple(conditions: FindObject<T>): Promise<void>
 	{
 		const callId = uuid();
 		
@@ -328,7 +328,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async deleteMultipleByIds(ids: T['id'][]): Promise<void>
+	public async deleteMultipleByIds(ids: T['id'][]): Promise<void>
 	{
 		this.Model
 		    .deleteMany(
@@ -347,7 +347,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async removeAll(): Promise<void>
+	public async removeAll(): Promise<void>
 	{
 		if(env.isProd)
 		{
@@ -379,7 +379,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async remove(objectId: T['id']): Promise<void>
+	public async remove(objectId: T['id']): Promise<void>
 	{
 		const callId = uuid();
 		
@@ -432,7 +432,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async removeMultiple(conditions: FindObject<T>): Promise<void>
+	public async removeMultiple(conditions: FindObject<T>): Promise<void>
 	{
 		const callId = uuid();
 		
@@ -488,7 +488,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * @returns {Promise<void>}
 	 * @memberof DBService
 	 */
-	async removeMultipleByIds(ids: T['id'][]): Promise<void>
+	public async removeMultipleByIds(ids: T['id'][]): Promise<void>
 	{
 		this.Model
 		    .update(
@@ -501,7 +501,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		    .exec();
 	}
 	
-	async find(conditions: FindObject<RawObject<T>>): Promise<T[]>
+	public async find(conditions: FindObject<RawObject<T>>): Promise<T[]>
 	{
 		const callId = uuid();
 		
@@ -536,7 +536,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return results;
 	}
 	
-	async findOne(conditions: FindObject<RawObject<T>>): Promise<T>
+	public async findOne(conditions: FindObject<RawObject<T>>): Promise<T>
 	{
 		const callId = uuid();
 		
@@ -569,7 +569,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return result;
 	}
 	
-	async update(objectId: T['id'], updateObj: UpdateObject<T>): Promise<T>
+	public async update(objectId: T['id'], updateObj: UpdateObject<T>): Promise<T>
 	{
 		const callId = uuid();
 		this.log.debug(
@@ -636,7 +636,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return updatedObject;
 	}
 	
-	async updateMultiple(
+	public async updateMultiple(
 			findObj: FindObject<T>,
 			updateObj: UpdateObject<T>
 	): Promise<T[]>
@@ -699,7 +699,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return updatedObjects;
 	}
 	
-	async updateMultipleByIds(
+	public async updateMultipleByIds(
 			ids: T['id'][],
 			updateObj: UpdateObject<T>
 	): Promise<T[]>
@@ -748,7 +748,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 		return updatedObjects;
 	}
 	
-	async count(findObj: FindObject<T>): Promise<number>
+	public async count(findObj: FindObject<T>): Promise<number>
 	{
 		const callId = uuid();
 		
@@ -784,7 +784,7 @@ export abstract class DBService<T extends DBObject<any, any>>
 	 * Return all store documents with specified fields
 	 * @param selectFields Example { field: 1 } = true, { field: 0 } = false.
 	 */
-	async findAll(selectFields: any = {})
+	public async findAll(selectFields: any = {})
 	{
 		return this.Model
 		           .find({})
