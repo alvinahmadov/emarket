@@ -54,10 +54,7 @@ export default class FakeDataWarehouses
 								          countryId:     faker.random.number(1) as Country,
 								          loc:           {
 									          type:        'Point',
-									          coordinates: {
-										          lng: lng,
-										          lat: lat
-									          },
+									          coordinates: [lng, lat]
 								          },
 							          },
 							          _createdAt:         FakeDataWarehouses._getRandomDateRange(),
@@ -92,10 +89,7 @@ export default class FakeDataWarehouses
 							                 countryId:     Country.RU,
 							                 loc:           {
 								                 type:        'Point',
-								                 coordinates: {
-									                 lng: lng + 0.05,
-									                 lat: lat + 0.09
-								                 },
+								                 coordinates: [lng + 0.05, lat + 0.09],
 							                 },
 						                 },
 						                 _createdAt:            FakeDataWarehouses._getRandomDateRange(),
@@ -129,10 +123,7 @@ export default class FakeDataWarehouses
 							          countryId:     Country.RU,
 							          loc:           {
 								          type:        'Point',
-								          coordinates: {
-									          lng: lng - 0.05,
-									          lat: lat - 0.09
-								          },
+								          coordinates: [lng - 0.05, lat - 0.09],
 							          },
 						          },
 						          _createdAt:            FakeDataWarehouses._getRandomDateRange(),
@@ -166,10 +157,7 @@ export default class FakeDataWarehouses
 							           countryId:     Country.RU,
 							           loc:           {
 								           type:        'Point',
-								           coordinates: {
-									           lng: lng + 0.08,
-									           lat: lat + 0.07
-								           },
+								           coordinates: [lng + 0.08, lat + 0.07],
 							           },
 						           },
 						           _createdAt:            FakeDataWarehouses._getRandomDateRange(),
@@ -203,10 +191,7 @@ export default class FakeDataWarehouses
 							           countryId:     Country.RU,
 							           loc:           {
 								           type:        'Point',
-								           coordinates: {
-									           lng: lng - 0.08,
-									           lat: lat - 0.07
-								           },
+								           coordinates: [lng - 0.08, lat - 0.07],
 							           },
 						           },
 						           _createdAt:            FakeDataWarehouses._getRandomDateRange(),
@@ -228,10 +213,7 @@ export default class FakeDataWarehouses
 				countryId:     Country.RU,
 				loc:           {
 					type:        'Point',
-					coordinates: {
-						lng: lng,
-						lat: lat
-					},
+					coordinates: [lng, lat],
 				},
 			};
 		}
@@ -254,10 +236,7 @@ export default class FakeDataWarehouses
 				countryId:     faker.random.number(1) as Country,
 				loc:           {
 					type:        'Point',
-					coordinates: {
-						lng: lng + 0.05,
-						lat: lat - 0.08
-					},
+					coordinates: [lng + 0.05, lat - 0.08],
 					
 				},
 			};
