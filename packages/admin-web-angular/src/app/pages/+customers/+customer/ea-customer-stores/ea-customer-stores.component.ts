@@ -104,16 +104,26 @@ export class CustomerStoresComponent implements OnInit, OnDestroy
 		
 		this._warehousesService
 		    .removeByIds(idsForDelete)
-		    .subscribe(() =>
+		    .subscribe((res: boolean) =>
 		               {
-			               this._selectedWarehouses
-			                   .forEach((warehouse) => this._toasterService.pop(
-					                            `success`,
-					                            `Warehouse '${warehouse.name}' DELETED`
-			                            )
-			                   );
-			
-			               this._selectedWarehouses = [];
+			               if(res)
+			               {
+				               this._selectedWarehouses
+				                   .forEach((warehouse) => this._toasterService.pop(
+						                            `success`,
+						                            `Warehouse '${warehouse.name}' DELETED`
+				                            )
+				                   );
+				
+				               this._selectedWarehouses = [];
+			               }
+			               else
+			               {
+				               this._toasterService.pop(
+						               `fail`,
+						               `Stores are not DELETED`
+				               )
+			               }
 		               });
 	}
 	
@@ -176,10 +186,6 @@ export class CustomerStoresComponent implements OnInit, OnDestroy
 		
 		combineLatest(stores$)
 				.pipe(takeUntil(this._ngDestroy$))
-				.subscribe((res) =>
-				           {
-					           const stores: Warehouse[] = res[0];
-					           emitSource(stores);
-				           });
+				.subscribe((res) => emitSource(res[0]));
 	}
 }
