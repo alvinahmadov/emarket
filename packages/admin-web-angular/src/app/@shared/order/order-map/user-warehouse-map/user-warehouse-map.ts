@@ -16,13 +16,15 @@ const userIcon = environment.MAP_USER_ICON_LINK;
 
 @Component({
 	           selector: 'ea-user-warehouse-location',
-	           template: ` <div style="height:100%" #gmap></div> `,
+	           template: `
+		                     <div style="height:100%" #gmap></div>
+	                     `,
            })
 export class UserWarehouseLocationComponent
 		implements AfterViewInit, OnDestroy, OnChanges
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: ElementRef;
+	public gmapElement: ElementRef;
 	
 	public map: google.maps.Map;
 	
@@ -31,46 +33,51 @@ export class UserWarehouseLocationComponent
 	public warehouseMarker: any;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
 	public isLoaded: boolean;
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
 		this.loadMap();
 	}
 	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		this.loadMarkers();
 	}
 	
-	loadMap()
+	public ngOnDestroy(): void
+	{
+		this.removeMarkers();
+	}
+	
+	public loadMap()
 	{
 		const mapProp = {
-			center: new google.maps.LatLng(
+			center:            new google.maps.LatLng(
 					environment.DEFAULT_LATITUDE,
 					environment.DEFAULT_LONGITUDE
 			),
-			zoom: 15,
-			mapTypeId: google.maps.MapTypeId.ROADMAP,
-			mapTypeControl: false,
+			zoom:              15,
+			mapTypeId:         google.maps.MapTypeId.ROADMAP,
+			mapTypeControl:    false,
 			streetViewControl: false,
 		};
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 		this.loadMarkers();
 	}
 	
-	loadMarkers()
+	public loadMarkers()
 	{
 		if(this.order && !this.isLoaded && this.map)
 		{
 			this.isLoaded = true;
-			const user = this.order.user;
+			const customer = this.order.customer;
 			const warehouse = this.order.warehouse;
 			
 			this.userMarker = this.addMarker(
-					user['geoLocation'],
+					customer['geoLocation'],
 					this.map,
 					userIcon
 			);
@@ -89,7 +96,7 @@ export class UserWarehouseLocationComponent
 		}
 	}
 	
-	addMarker(geoLocation: IGeoLocation, map, icon)
+	public addMarker(geoLocation: IGeoLocation, map, icon): google.maps.Marker
 	{
 		const [lng, lat] = geoLocation.loc.coordinates;
 		const position = new google.maps.LatLng(lat, lng);
@@ -100,7 +107,7 @@ export class UserWarehouseLocationComponent
 		                              });
 	}
 	
-	removeMarkers()
+	public removeMarkers()
 	{
 		if(this.userMarker)
 		{
@@ -110,10 +117,5 @@ export class UserWarehouseLocationComponent
 		{
 			this.warehouseMarker.setMap(null);
 		}
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.removeMarkers();
 	}
 }
