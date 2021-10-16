@@ -10,7 +10,10 @@ export interface ICoordinate
 export interface ILocation
 {
 	type: 'Point';
-	coordinates: ICoordinate;
+	coordinates: [
+		number /*longitude*/,
+		number /*latitude */
+	];
 }
 
 export interface IAddress
