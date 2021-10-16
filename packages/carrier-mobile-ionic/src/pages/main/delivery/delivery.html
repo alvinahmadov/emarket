@@ -3,8 +3,7 @@
 		class="money-amount-container"
 >
 	<div class="money-amount">
-		{{ 'DELIVERY_VIEW.THE_CUSTOMER_HAS_TO_PAY' | translate }} ${{
-		selectedOrder?.totalPrice }}!
+		{{ 'DELIVERY_VIEW.THE_CUSTOMER_HAS_TO_PAY' | translate }} ${{ selectedOrder?.totalPrice }}!
 	</div>
 </div>
 
@@ -21,10 +20,10 @@
 
 <div class="bottom-container">
 	<div class="info">
-		<span class="left-info">{{ selectedOrder?.user.fullAddress }}</span>
-		<span *ngIf="carrierUserDistance" class="right-text"
-		>{{ carrierUserDistance + 'km' }}</span
-		>
+		<span class="left-info">{{ selectedOrder?.customer.fullAddress }}</span>
+		<span *ngIf="carrierUserDistance" class="right-text">
+			{{ carrierUserDistance + 'km' }}
+		</span>
 	</div>
 	
 	<div class="buttons">
@@ -43,12 +42,12 @@
 					[disabled]="disabledButtons"
 					class="button button-assertive"
 			>
-				<span *ngIf="!selectedOrder?.isCancelled"
-				>{{ 'DELIVERY_VIEW.CANCEL' | translate }}</span
-				>
-				<span *ngIf="selectedOrder?.isCancelled"
-				>{{ 'OK' | translate }}</span
-				>
+				<span *ngIf="!selectedOrder?.isCancelled">
+					{{ 'DELIVERY_VIEW.CANCEL' | translate }}
+				</span>
+				<span *ngIf="selectedOrder?.isCancelled">
+					{{ 'OK' | translate }}
+				</span>
 			</button>
 		</div>
 	</div>
