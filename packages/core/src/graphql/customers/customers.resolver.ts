@@ -76,7 +76,7 @@ export class CustomerResolver
 	@Query('customers')
 	async getCustomers(_, { pagingOptions = {} })
 	{
-		return this.findCustomers(_, { findInput: null, pagingOptions });
+		return this.findCustomers(_, { findInput: {}, pagingOptions });
 	}
 	
 	@Query('findCustomers')
