@@ -1,11 +1,16 @@
-import { Component, ViewChild, ElementRef, Input, OnInit } from '@angular/core';
-
-import Carrier               from '@modules/server.common/entities/Carrier';
-import { CarrierService }    from '../../../../src/services/carrier.service';
+import {
+	Component,
+	ViewChild,
+	ElementRef,
+	Input,
+	OnInit
+}                            from '@angular/core';
 import { ModalController }   from '@ionic/angular';
-import { WarehousesService } from '../../../../src/services/warehouses.service';
+import Carrier               from '@modules/server.common/entities/Carrier';
 import Warehouse             from '@modules/server.common/entities/Warehouse';
-import User                  from '@modules/server.common/entities/User';
+import Customer              from '@modules/server.common/entities/Customer';
+import { CarrierService }    from 'services/carrier.service';
+import { WarehousesService } from 'services/warehouses.service';
 
 declare var google: any;
 
@@ -13,28 +18,28 @@ const directionsDisplay = new google.maps.DirectionsRenderer();
 const directionsService = new google.maps.DirectionsService();
 
 @Component({
-	           selector: 'carrier-track-popup',
-	           templateUrl: 'carrier-track-popup.html',
-	           styleUrls: ['./carrier-track-popup.scss'],
+	           selector:    'carrier-track-popup',
+	           styleUrls:   ['./carrier-track-popup.scss'],
+	           templateUrl: './carrier-track-popup.html',
            })
 export class CarrierTrackPopup implements OnInit
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: ElementRef;
+	public gmapElement: ElementRef;
 	
 	@Input()
-	carrier: Carrier;
+	public carrier: Carrier;
 	
-	map: google.maps.Map;
+	public map: google.maps.Map;
 	
-	myLatLng = { lat: 0, lng: 0 };
+	public myLatLng = { lat: 0, lng: 0 };
 	
 	private coordinates: any;
-	warehouse: Warehouse;
-	user: User;
-	storeIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon21.png';
-	userIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon48.png';
-	carrierIcon = 'http://maps.google.com/mapfiles/kml/pal4/icon54.png';
+	public warehouse: Warehouse;
+	public customer: Customer;
+	public storeIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon21.png';
+	public userIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon48.png';
+	public carrierIcon = 'http://maps.google.com/mapfiles/kml/pal4/icon54.png';
 	
 	constructor(
 			public modalCtrl: ModalController,
@@ -43,7 +48,7 @@ export class CarrierTrackPopup implements OnInit
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		const geoLocation = this.carrier.geoLocation;
 		
@@ -58,16 +63,26 @@ export class CarrierTrackPopup implements OnInit
 		this.loadMap();
 	}
 	
-	get warehouseId()
+	public get warehouseId(): string
 	{
 		return localStorage.getItem('_warehouseId');
 	}
 	
-	async loadMap()
+	public get longitude(): string
+	{
+		return this.carrier.geoLocation.loc.coordinates[0].toFixed(6);
+	}
+	
+	public get latitude(): string
+	{
+		return this.carrier.geoLocation.loc.coordinates[1].toFixed(6);
+	}
+	
+	public async loadMap()
 	{
 		const mapProp = {
-			center: this.myLatLng,
-			zoom: 15,
+			center:    this.myLatLng,
+			zoom:      15,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		
@@ -203,31 +218,28 @@ export class CarrierTrackPopup implements OnInit
 			
 			if(order)
 			{
-				this.user = order.user;
+				this.customer = order.customer as Customer;
 				const userMarker = this.addMarker(
 						{
-							lat: this.user.geoLocation.loc.coordinates[1],
-							lng: this.user.geoLocation.loc.coordinates[0],
+							lat: this.customer.geoLocation.loc.coordinates[1],
+							lng: this.customer.geoLocation.loc.coordinates[0],
 						},
 						this.map,
 						this.userIcon
 				);
 				const userInfoContent = `
                                 <div class="carrier-info">
-									<h3>  ${this.user.firstName + ' ' + this.user.lastName}</h3>
-									<ul>
-										<li><i style='margin-right:5px;' class="fa fa-envelope-open"></i>${
-						this.user.email
-				}</li>
-                                             <li><i style='margin-right:5px;' class="fa fa-phone"></i>${
-						this.user.phone
-				}</li>
-										<li><i style='margin-right:5px;' class="fa fa-address-card"></i>${
-						this.user.geoLocation.streetAddress
-				}</li>
-                                    </ul>
+                                    <h3>  ${this.customer.fullName}</h3>
+                                        <ul>
+                                            <li><i style='margin-right:5px;' class="fa fa-envelope-open"></i>
+												${this.customer.email}</li>
+                                            <li><i style='margin-right:5px;' class="fa fa-phone"></i>
+												${this.customer.phone}</li>
+											<li><i style='margin-right:5px;' class="fa fa-address-card"></i>
+												${this.customer.geoLocation.streetAddress}</li>
+                                        </ul>
                                 <div class="carrier-info">
-									`;
+								`;
 				
 				const userInfoWindow = new google.maps.InfoWindow({
 					                                                  content: userInfoContent,
@@ -238,8 +250,8 @@ export class CarrierTrackPopup implements OnInit
 					userInfoWindow.open(this.map, userMarker);
 				});
 				const start = new google.maps.LatLng(
-						this.user.geoLocation.loc.coordinates[1],
-						this.user.geoLocation.loc.coordinates[0]
+						this.customer.geoLocation.loc.coordinates[1],
+						this.customer.geoLocation.loc.coordinates[0]
 				);
 				
 				const end = new google.maps.LatLng(
@@ -248,9 +260,9 @@ export class CarrierTrackPopup implements OnInit
 				);
 				
 				const request = {
-					origin: start,
+					origin:      start,
 					destination: end,
-					travelMode: 'DRIVING',
+					travelMode:  'DRIVING',
 				};
 				
 				directionsService.route(request, function(res, stat)
@@ -270,7 +282,7 @@ export class CarrierTrackPopup implements OnInit
 		}
 	}
 	
-	addMarker(position, map, icon)
+	public addMarker(position, map, icon)
 	{
 		return new google.maps.Marker({
 			                              position,
@@ -279,7 +291,7 @@ export class CarrierTrackPopup implements OnInit
 		                              });
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.modalCtrl.dismiss();
 	}
