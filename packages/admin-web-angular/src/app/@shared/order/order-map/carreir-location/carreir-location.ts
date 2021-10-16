@@ -8,6 +8,7 @@ import {
 }                      from '@angular/core';
 import Order           from '@modules/server.common/entities/Order';
 import { environment } from 'environments/environment';
+import Carrier         from '@modules/server.common/entities/Carrier';
 
 @Component({
 	           selector: 'ea-carrier-location',
@@ -18,12 +19,12 @@ import { environment } from 'environments/environment';
 export class CarrierLocationComponent implements OnInit, OnDestroy
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: ElementRef;
+	public gmapElement: ElementRef;
 	
 	public map: google.maps.Map;
 	
 	@Input()
-	order: Order;
+	public order: Order;
 	
 	private directionsDisplay = new google.maps.DirectionsRenderer();
 	private directionsService = new google.maps.DirectionsService();
@@ -59,8 +60,9 @@ export class CarrierLocationComponent implements OnInit, OnDestroy
 	{
 		if(this.order)
 		{
-			const [carrierLng, carrierLat] = this.order.carrier['geoLocation'].coordinatesArray;
-			const [userLng, userLat] = this.order.customer['geoLocation'].coordinatesArray;
+			const carrier = <Carrier>this.order.carrier;
+			const [carrierLng, carrierLat] = carrier.geoLocation.loc.coordinates;
+			const [userLng, userLat] = this.order.customer.geoLocation.loc.coordinates;
 			const origin = new google.maps.LatLng(carrierLat, carrierLng);
 			const destination = new google.maps.LatLng(userLat, userLng);
 			
