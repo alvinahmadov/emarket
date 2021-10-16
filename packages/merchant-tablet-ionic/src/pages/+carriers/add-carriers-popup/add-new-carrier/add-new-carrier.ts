@@ -1,70 +1,65 @@
-import {
-	Component,
-	EventEmitter,
-	Input,
-	OnChanges,
-	OnDestroy,
-	OnInit,
-	Output,
-	ViewChild,
-}                                 from '@angular/core';
-import { ICarrierCreateObject }   from '@modules/server.common/interfaces/ICarrier';
-import CommonUtils                from '@modules/server.common/utilities/common';
-import { FileUploader }           from 'ng2-file-upload';
-import { BasicInfoFormComponent } from './basic-info/basic-info-form.component';
-import { AccountFormComponent }   from './account/account-form.component';
-import { Subject }                from 'rxjs';
-import { LocationFormComponent }  from './location/location-form.component';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, } from '@angular/core';
+import { ICarrierCreateObject }                                                             from '@modules/server.common/interfaces/ICarrier';
+import CommonUtils                                                                          from '@modules/server.common/utilities/common';
+import { FileUploader }                                                                     from 'ng2-file-upload';
+import { BasicInfoFormComponent }                                                           from './basic-info/basic-info-form.component';
+import { AccountFormComponent }                                                             from './account/account-form.component';
+import { Subject }                                                                          from 'rxjs';
+import { LocationFormComponent }                                                            from './location/location-form.component';
 
 @Component({
-	           selector: 'add-new-carrier',
+	           selector:    'add-new-carrier',
+	           styleUrls:   ['./add-new-carrier.scss'],
 	           templateUrl: './add-new-carrier.html',
-	           styleUrls: ['./add-new-carrier.scss'],
            })
 export class AddNewCarrierComponent implements OnInit, OnDestroy, OnChanges
 {
-	uploader: FileUploader;
-	emptyLogo: boolean = false;
+	public uploader: FileUploader;
+	public emptyLogo: boolean = false;
 	
 	private _ngDestroy$ = new Subject<void>();
 	
 	@Output()
-	buttonClickEvent = new EventEmitter();
+	public buttonClickEvent = new EventEmitter();
 	
 	@Output()
-	onCompleteEvent = new EventEmitter();
+	public onCompleteEvent = new EventEmitter();
 	
 	@Input()
-	isDone: boolean;
+	public isDone: boolean;
 	
 	@ViewChild('basicInfoForm', { static: true })
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('accountForm', { static: true })
-	accountForm: AccountFormComponent;
+	public accountForm: AccountFormComponent;
 	
 	@ViewChild('locationForm', { static: true })
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
-	isNextStepOneAvailable: boolean = true;
-	isNextStepTwoAvailable: boolean = false;
-	isNextStepThreeAvailable: boolean = false;
-	backToPrevPage: boolean = false;
+	public isNextStepOneAvailable: boolean = true;
+	public isNextStepTwoAvailable: boolean = false;
+	public isNextStepThreeAvailable: boolean = false;
+	public backToPrevPage: boolean = false;
 	
-	$password: any;
+	public $password: any;
 	
-	constructor() {}
+	public ngOnInit(): void {}
 	
-	ngOnInit(): void {}
+	public ngOnChanges(): void {}
 	
-	ngOnChanges() {}
+	public ngOnDestroy(): void
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
 	
-	get password()
+	public get password(): string
 	{
 		return this.accountForm.password.value;
 	}
 	
-	getCarrierCreateObject(): ICarrierCreateObject
+	public getCarrierCreateObject(): ICarrierCreateObject
 	{
 		const letter = this.basicInfoForm.firstName.value
 		                   .charAt(0)
@@ -78,73 +73,66 @@ export class AddNewCarrierComponent implements OnInit, OnDestroy, OnChanges
 		
 		return {
 			firstName: this.basicInfoForm.firstName.value,
-			lastName: this.basicInfoForm.lastName.value,
-			email: this.basicInfoForm.email.value,
+			lastName:  this.basicInfoForm.lastName.value,
+			email:     this.basicInfoForm.email.value,
 			logo,
-			phone: this.basicInfoForm.phone.value,
+			phone:     this.basicInfoForm.phone.value,
 			
-			username: this.accountForm.userName.value,
+			username:        this.accountForm.userName.value,
 			isSharedCarrier: this.accountForm.isSharedCarrier.value,
 			
 			geoLocation: {
-				city: this.locationForm.city.value,
+				city:          this.locationForm.city.value,
 				streetAddress: this.locationForm.street.value,
-				house: this.locationForm.house.value,
-				loc: {
-					type: 'Point',
+				house:         this.locationForm.house.value,
+				loc:           {
+					type:        'Point',
 					coordinates: [
 						this.locationForm.lng.value,
 						this.locationForm.lat.value,
 					],
 				},
-				countryId: this.locationForm.country.value,
-				postcode: this.locationForm.postcode.value,
+				countryId:     this.locationForm.country.value,
+				postcode:      this.locationForm.postcode.value,
 			},
 		};
 	}
 	
-	backToStep1()
+	public backToStep1()
 	{
 		this.isNextStepOneAvailable = true;
 		this.isNextStepTwoAvailable = false;
 		this.isNextStepThreeAvailable = false;
 	}
 	
-	toStep2event($event)
+	public toStep2event($event)
 	{
 		this.isNextStepOneAvailable = false;
 		this.isNextStepTwoAvailable = true;
 		this.isNextStepThreeAvailable = false;
 	}
 	
-	nextToStep2()
+	public nextToStep2()
 	{
 		this.isNextStepOneAvailable = false;
 		this.isNextStepTwoAvailable = true;
 		this.isNextStepThreeAvailable = false;
 	}
 	
-	nextToStep3()
+	public nextToStep3()
 	{
 		this.isNextStepOneAvailable = false;
 		this.isNextStepTwoAvailable = false;
 		this.isNextStepThreeAvailable = true;
 	}
 	
-	clickPrevOrComplete(data)
+	public clickPrevOrComplete(data)
 	{
-		const prevOrComplete = data;
-		this.buttonClickEvent.emit(prevOrComplete);
+		this.buttonClickEvent.emit(data);
 	}
 	
-	onClickComplete(data)
+	public onClickComplete(data)
 	{
 		this.onCompleteEvent.emit(data);
-	}
-	
-	ngOnDestroy(): void
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
 	}
 }
