@@ -52,10 +52,10 @@ export default class FakeDataCarriers
 								          countryId:     faker.random.number(220) as Country,
 								          loc:           {
 									          type:        'Point',
-									          coordinates: {
-										          lat: FakeDataCarriers.getCloseCoordinate(lat),
-										          lng: FakeDataCarriers.getCloseCoordinate(lng),
-									          },
+									          coordinates: [
+										          FakeDataCarriers.getCloseCoordinate(lng),
+										          FakeDataCarriers.getCloseCoordinate(lat),
+									          ],
 								          },
 							          },
 						          },
@@ -89,10 +89,10 @@ export default class FakeDataCarriers
 							countryId:     Country.RU,
 							loc:           {
 								type:        'Point',
-								coordinates: {
-									lat: FakeDataCarriers.getCloseCoordinate(lat),
-									lng: FakeDataCarriers.getCloseCoordinate(lng),
-								},
+								coordinates: [
+									FakeDataCarriers.getCloseCoordinate(lng),
+									FakeDataCarriers.getCloseCoordinate(lat),
+								],
 							},
 						},
 					},
@@ -125,10 +125,10 @@ export default class FakeDataCarriers
 							countryId:     Country.RU,
 							loc:           {
 								type:        'Point',
-								coordinates: {
-									lat: FakeDataCarriers.getCloseCoordinate(lat),
-									lng: FakeDataCarriers.getCloseCoordinate(lng),
-								},
+								coordinates: [
+									FakeDataCarriers.getCloseCoordinate(lng),
+									FakeDataCarriers.getCloseCoordinate(lat),
+								],
 							},
 						},
 					},
@@ -160,10 +160,10 @@ export default class FakeDataCarriers
 							countryId:     Country.RU,
 							loc:           {
 								type:        'Point',
-								coordinates: {
-									lat: FakeDataCarriers.getCloseCoordinate(lat),
-									lng: FakeDataCarriers.getCloseCoordinate(lng),
-								},
+								coordinates: [
+									FakeDataCarriers.getCloseCoordinate(lng),
+									FakeDataCarriers.getCloseCoordinate(lat),
+								],
 							},
 						},
 					},
