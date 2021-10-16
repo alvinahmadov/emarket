@@ -12,7 +12,7 @@ export abstract class EntityService<T extends DBObject<any, any>>
 		modelName: string;
 	};
 	
-	get Model(): any
+	public get Model(): any
 	{
 		return getModel<RawObject<T> & mongoose.Document>(this.DBObject);
 	}
