@@ -7,64 +7,62 @@ import {
 	Output,
 	OnInit,
 	OnChanges,
-} from '@angular/core';
+}                           from '@angular/core';
 import {
 	FormBuilder,
 	FormGroup,
 	Validators,
 	AbstractControl,
-} from '@angular/forms';
-
-import { Subject } from 'rxjs';
-
+}                           from '@angular/forms';
+import { isEmpty }          from 'lodash';
+import { Subject }          from 'rxjs';
+import { first }            from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import {
 	countriesIdsToNamesArray,
-	CountryName,
-	Country,
-	getCountryName,
-}                           from '@modules/server.common/entities/GeoLocation';
-
-import { isEmpty }         from 'lodash';
-import { Store }           from 'services/store.service';
-import { WarehouseRouter } from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { first }           from 'rxjs/operators';
+	TCountryName,
+	getDefaultCountryName,
+	
+}                           from '@modules/server.common/data/countries';
+import Country              from '@modules/server.common/enums/Country';
+import { WarehouseRouter }  from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { StorageService }   from 'services/storage.service';
 
 @Component({
-	           selector: 'carrier-location-form',
-	           styleUrls: ['./location-form.component.scss'],
-	           templateUrl: 'location-form.component.html',
+	           selector:    'carrier-location-form',
+	           styleUrls:   ['./location-form.component.scss'],
+	           templateUrl: './location-form.component.html',
            })
 export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 {
 	@ViewChild('autocomplete', { static: true })
-	searchElement: ElementRef;
+	public searchElement: ElementRef;
 	
 	@Output()
-	buttonClickEventComplete = new EventEmitter();
+	public buttonClickEventComplete = new EventEmitter();
 	
 	@Output()
-	backToStep2event = new EventEmitter();
+	public backToStep2event = new EventEmitter();
 	
-	mapCoordEmitter = new EventEmitter<google.maps.LatLng>();
-	mapGeometryEmitter = new EventEmitter<google.maps.GeocoderGeometry | google.maps.places.PlaceGeometry>();
+	public mapCoordEmitter = new EventEmitter<google.maps.LatLng>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.GeocoderGeometry | google.maps.places.PlaceGeometry>();
 	
-	form: FormGroup;
+	public form: FormGroup;
 	
-	showCoordinates: boolean = false;
+	public showCoordinates: boolean = false;
 	
-	city: AbstractControl;
-	street: AbstractControl;
-	house: AbstractControl;
-	country: AbstractControl;
-	lng: AbstractControl;
-	lat: AbstractControl;
-	// apartment: AbstractControl;
-	postcode: AbstractControl;
+	public city: AbstractControl;
+	public street: AbstractControl;
+	public house: AbstractControl;
+	public country: AbstractControl;
+	public lng: AbstractControl;
+	public lat: AbstractControl;
+	// public apartment: AbstractControl;
+	public postcode: AbstractControl;
 	
-	OK: string = 'OK';
-	CANCEL: string = 'CANCEL';
-	PREFIX: string = 'CARRIERS_VIEW.ADD_CARRIER.';
+	public OK: string = 'OK';
+	public CANCEL: string = 'CANCEL';
+	public PREFIX: string = 'CARRIERS_VIEW.ADD_CARRIER.';
 	
 	private _ngDestroy$ = new Subject<void>();
 	private _lastUsedAddress: string;
@@ -72,27 +70,12 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 	constructor(
 			private formBuilder: FormBuilder,
 			private translate: TranslateService,
-			private store: Store,
+			private storageService: StorageService,
 			private warehouseRouter: WarehouseRouter
 	)
 	{}
 	
-	get buttonOK()
-	{
-		return this._translate(this.PREFIX + this.OK);
-	}
-	
-	get buttonCancel()
-	{
-		return this._translate(this.PREFIX + this.CANCEL);
-	}
-	
-	get countries(): Array<{ id: Country; name: CountryName }>
-	{
-		return countriesIdsToNamesArray;
-	}
-	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this._initGoogleAutocompleteApi();
 		// this._tryFindNewCoordinates();
@@ -103,33 +86,48 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 		this._loadInitialData();
 	}
 	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
 	
-	buildForm(formBuilder: FormBuilder)
+	public get buttonOK()
+	{
+		return this._translate(this.PREFIX + this.OK);
+	}
+	
+	public get buttonCancel()
+	{
+		return this._translate(this.PREFIX + this.CANCEL);
+	}
+	
+	public get countries(): Array<{ id: Country; name: TCountryName }>
+	{
+		return countriesIdsToNamesArray;
+	}
+	
+	public buildForm(formBuilder: FormBuilder)
 	{
 		this.form = formBuilder.group({
-			                              city: ['', Validators.required],
-			                              street: ['', Validators.required],
-			                              house: ['', Validators.required],
-			                              lat: ['', Validators.required],
-			                              lng: ['', Validators.required],
-			                              country: ['', Validators.required],
+			                              city:     ['', Validators.required],
+			                              street:   ['', Validators.required],
+			                              house:    ['', Validators.required],
+			                              lat:      ['', Validators.required],
+			                              lng:      ['', Validators.required],
+			                              country:  ['', Validators.required],
 			                              postcode: [''],
 			                              // apartment: ['']
 		                              });
 	}
 	
-	bindFormControls()
+	public bindFormControls()
 	{
 		this.city = this.form.get('city');
 		this.street = this.form.get('street');
@@ -141,13 +139,12 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 		this.postcode = this.form.get('postcode');
 	}
 	
-	toggleCoordinates()
+	public toggleCoordinates()
 	{
 		this.showCoordinates = !this.showCoordinates;
-		console.log('Toggle Cordinates');
 	}
 	
-	textInputChange(val, input)
+	public textInputChange(val, input)
 	{
 		if(input === 'lat' || input === 'lng')
 		{
@@ -159,12 +156,12 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 		}
 	}
 	
-	toStep2()
+	public toStep2()
 	{
 		this.backToStep2event.emit();
 	}
 	
-	clickComplete()
+	public clickComplete()
 	{
 		// let prevOrComplete = data;
 		console.log('send event to parent');
@@ -230,14 +227,14 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 		const shortName = 'short_name';
 		
 		const neededAddressTypes = {
-			country: shortName,
+			country:  shortName,
 			locality: longName,
 			// 'neighborhood' is not need for now
 			// neighborhood: longName,
-			route: longName,
-			intersection: longName,
-			street_number: longName,
-			postal_code: longName,
+			route:                       longName,
+			intersection:                longName,
+			street_number:               longName,
+			postal_code:                 longName,
 			administrative_area_level_1: shortName,
 			administrative_area_level_2: shortName,
 			administrative_area_level_3: shortName,
@@ -351,12 +348,12 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 					inputElement
 			);
 			
-			this._setupGoogleAutocompleteOptions(autocomplete);
+			LocationFormComponent._setupGoogleAutocompleteOptions(autocomplete);
 			this._listenForGoogleAutocompleteAddressChanges(autocomplete);
 		}
 	}
 	
-	private _setupGoogleAutocompleteOptions(
+	private static _setupGoogleAutocompleteOptions(
 			autocomplete: google.maps.places.Autocomplete
 	)
 	{
@@ -380,7 +377,7 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 		const house = this.house.value;
 		const city = this.city.value;
 		const streetAddress = this.street.value;
-		const countryName = getCountryName(+this.country.value);
+		const countryName = getDefaultCountryName(+this.country.value);
 		
 		if(
 				isEmpty(streetAddress) ||
@@ -402,7 +399,7 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 			
 			geocoder.geocode(
 					{
-						address: `${streetAddress} ${house}, ${city}`,
+						address:               `${streetAddress} ${house}, ${city}`,
 						componentRestrictions: { country: countryName },
 					},
 					(results, status) =>
@@ -432,7 +429,7 @@ export class LocationFormComponent implements OnDestroy, OnInit, OnChanges
 	private async _loadInitialData()
 	{
 		const { geoLocation } = await this.warehouseRouter
-		                                  .get(this.store.warehouseId, false)
+		                                  .get(this.storageService.warehouseId, false)
 		                                  .pipe(first())
 		                                  .toPromise();
 		
