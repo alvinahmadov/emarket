@@ -7,7 +7,7 @@ import { WarehouseRouter }     from '@modules/client.common.angular2/routers/war
 import { WarehouseAuthRouter } from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 
 @Injectable()
-export class Storage
+export class StorageService
 {
 	constructor(
 			private readonly translate: TranslateService,
@@ -102,20 +102,20 @@ export class Storage
 		}
 	}
 	
-	public get language(): string
+	public get locale(): string
 	{
-		return localStorage.getItem('_language') || null;
+		return localStorage.getItem('_locale') || null;
 	}
 	
-	public set language(language: string)
+	public set locale(language: string)
 	{
 		if(language == null)
 		{
-			localStorage.removeItem('_language');
+			localStorage.removeItem('_locale');
 		}
 		else
 		{
-			localStorage.setItem('_language', language);
+			localStorage.setItem('_locale', language);
 		}
 		
 		this.translate.use(language);
