@@ -1,51 +1,50 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-
-import IOrder                      from '@modules/server.common/interfaces/IOrder';
-import { OrderRouter }             from '@modules/client.common.angular2/routers/order-router.service';
-import Utils                       from '@modules/server.common/utils';
-import ICarrier                    from '@modules/server.common/interfaces/ICarrier';
-import { CarrierRouter }           from '@modules/client.common.angular2/routers/carrier-router.service';
-import GeoLocation                 from '@modules/server.common/entities/GeoLocation';
-import OrderCarrierStatus          from '@modules/server.common/enums/OrderCarrierStatus';
-import { CarrierOrdersRouter }     from '@modules/client.common.angular2/routers/carrier-orders-router.service';
-import { Store }                   from '../../../services/store.service';
-import { Geolocation }             from '@ionic-native/geolocation/ngx';
-import IGeoLocation                from '@modules/server.common/interfaces/IGeoLocation';
-import { GeoLocationService }      from '../../../services/geo-location.service';
-import { MapComponent }            from '../common/map/map.component';
-import { Router }                  from '@angular/router';
-import { NavController, Platform } from '@ionic/angular';
-import { getIdFromTheDate }        from '@modules/server.common/utils';
+import { Router }                       from '@angular/router';
+import { NavController, Platform }      from '@ionic/angular';
+import { Geolocation }                  from '@ionic-native/geolocation/ngx';
+import ICarrier                         from '@modules/server.common/interfaces/ICarrier';
+import IGeoLocation                     from '@modules/server.common/interfaces/IGeoLocation';
+import IOrder                           from '@modules/server.common/interfaces/IOrder';
+import OrderCarrierStatus               from '@modules/server.common/enums/OrderCarrierStatus';
+import GeoLocation                      from '@modules/server.common/entities/GeoLocation';
+import { CarrierRouter }                from '@modules/client.common.angular2/routers/carrier-router.service';
+import { CarrierOrdersRouter }          from '@modules/client.common.angular2/routers/carrier-orders-router.service';
+import { OrderRouter }                  from '@modules/client.common.angular2/routers/order-router.service';
+import { CommonUtils, GeoUtils }        from '@modules/server.common/utilities';
+import { StorageService }               from 'services/storage.service';
+import { GeoLocationService }           from 'services/geo-location.service';
+import { MapComponent }                 from '../common/map/map.component';
 
 declare var google: any;
 
+// noinspection ES6MissingAwait
 @Component({
 	           selector:    'page-drive-to-warehouse',
-	           templateUrl: 'drive-to-warehouse.html',
 	           styleUrls:   ['drive-to-warehouse.scss'],
+	           templateUrl: 'drive-to-warehouse.html',
            })
 export class DriveToWarehousePage implements OnInit
 {
 	@ViewChild('map')
-	carrierMap: MapComponent;
+	public carrierMap: MapComponent;
 	
-	selectedOrder: IOrder;
-	carrier: ICarrier;
-	carrierUserDistance: string;
-	workTaken: boolean;
-	fromDelivery: boolean;
-	selectedOrderID: string;
-	orderCarrierCompetition: boolean;
-	isTakenFromAnotherCarrier: boolean = false;
+	public selectedOrder: IOrder;
+	public carrier: ICarrier;
+	public carrierUserDistance: string;
+	public workTaken: boolean;
+	public fromDelivery: boolean;
+	public selectedOrderID: string;
+	public orderCarrierCompetition: boolean;
+	public isTakenFromAnotherCarrier: boolean = false;
 	
-	carrier$;
-	order$;
+	public carrier$;
+	public order$;
 	
 	constructor(
 			private orderRouter: OrderRouter,
 			private carrierRouter: CarrierRouter,
 			private carrierOrdersRouter: CarrierOrdersRouter,
-			private store: Store,
+			private storageService: StorageService,
 			private geoLocationService: GeoLocationService,
 			private geolocation: Geolocation,
 			private router: Router,
@@ -54,15 +53,15 @@ export class DriveToWarehousePage implements OnInit
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.fromDelivery = this.store.driveToWarehouseFrom === 'delivery';
+		this.fromDelivery = this.storageService.driveToWarehouseFrom === 'delivery';
 	}
 	
-	ionViewWillEnter()
+	public ionViewWillEnter()
 	{
 		this.carrier$ = this.carrierRouter
-		                    .get(this.store.carrierId)
+		                    .get(this.storageService.carrierId)
 		                    .subscribe(async(c) =>
 		                               {
 			                               this.carrier = c;
@@ -71,7 +70,7 @@ export class DriveToWarehousePage implements OnInit
 			                                                ? this.geoLocationService.defaultLocation()
 			                                                : await this.geolocation.getCurrentPosition();
 			
-			                               // MongoDb store coordinates lng => lat
+			                               // MongoDb storageService coordinates lng => lat
 			                               let dbGeoInput = {
 				                               loc: {
 					                               type:        'Point',
@@ -87,7 +86,7 @@ export class DriveToWarehousePage implements OnInit
 				                               await this.order$.unsubscribe();
 			                               }
 			
-			                               const orderId = localStorage.getItem('orderId');
+			                               const orderId = this.storageService.orderId;
 			                               if(orderId)
 			                               {
 				                               this.order$ = this.orderRouter
@@ -108,8 +107,8 @@ export class DriveToWarehousePage implements OnInit
 							                                                             : OrderCarrierStatus.NoCarrier);
 					
 					                                                            this.selectedOrder = order;
-					                                                            this.store.selectedOrder = order;
-					                                                            this.selectedOrderID = getIdFromTheDate(order);
+					                                                            this.storageService.selectedOrder = order;
+					                                                            this.selectedOrderID = CommonUtils.getIdFromTheDate(order);
 					
 					                                                            if(!this.orderCarrierCompetition)
 					                                                            {
@@ -125,7 +124,7 @@ export class DriveToWarehousePage implements OnInit
 					
 					                                                            const merchantGeo = order.warehouse['geoLocation'];
 					
-					                                                            this.carrierUserDistance = Utils.getDistance(
+					                                                            this.carrierUserDistance = GeoUtils.getDistance(
 							                                                            merchantGeo,
 							                                                            dbGeoInput as GeoLocation
 					                                                            ).toFixed(2);
@@ -142,7 +141,7 @@ export class DriveToWarehousePage implements OnInit
 		                               });
 	}
 	
-	async takeWork()
+	public async takeWork()
 	{
 		if(this.carrier && this.selectedOrder)
 		{
@@ -158,7 +157,7 @@ export class DriveToWarehousePage implements OnInit
 		}
 	}
 	
-	async skipWork()
+	public async skipWork()
 	{
 		if(this.carrier && this.selectedOrder)
 		{
@@ -170,11 +169,11 @@ export class DriveToWarehousePage implements OnInit
 		}
 	}
 	
-	async carrierInWarehouse()
+	public async carrierInWarehouse()
 	{
 		if(this.fromDelivery)
 		{
-			this.store.returnProductFrom = 'driveToWarehouse';
+			this.storageService.returnProductFrom = 'driveToWarehouse';
 			
 			this.router.navigate(['/product/return'], {
 				skipLocationChange: false,
@@ -191,7 +190,7 @@ export class DriveToWarehousePage implements OnInit
 		this.unsubscribeAll();
 	}
 	
-	async cancelWork()
+	public async cancelWork()
 	{
 		if(this.fromDelivery)
 		{
@@ -213,16 +212,16 @@ export class DriveToWarehousePage implements OnInit
 		}
 	}
 	
-	ionViewWillLeave()
+	public ionViewWillLeave()
 	{
 		this.unselectDriveToWarehouseFrom();
 		this.unsubscribeAll();
 	}
 	
-	unselectOrder()
+	public unselectOrder()
 	{
-		this.store.selectedOrder = null;
-		localStorage.removeItem('orderId');
+		this.storageService.selectedOrder = null;
+		this.storageService.orderId = null;
 		this.navCtrl.navigateRoot('/main/home');
 	}
 	
@@ -240,6 +239,6 @@ export class DriveToWarehousePage implements OnInit
 	
 	private unselectDriveToWarehouseFrom()
 	{
-		localStorage.removeItem('driveToWarehouseFrom');
+		this.storageService.driveToWarehouseFrom = null;
 	}
 }
