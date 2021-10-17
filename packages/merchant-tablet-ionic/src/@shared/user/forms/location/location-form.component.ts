@@ -1,4 +1,4 @@
-import { isEmpty, pick }             from 'lodash';
+import { isEmpty, pick }            from 'lodash';
 import {
 	Component,
 	ElementRef,
@@ -8,29 +8,28 @@ import {
 	ViewChild,
 	OnInit,
 	AfterViewInit
-}                                    from '@angular/core';
+}                                   from '@angular/core';
 import {
 	AbstractControl,
 	FormArray,
 	FormBuilder,
 	FormGroup,
 	Validators
-}                                    from '@angular/forms';
-import { AlertController }           from '@ionic/angular';
-import { TranslateService }          from '@ngx-translate/core';
+}                                   from '@angular/forms';
+import { AlertController }          from '@ionic/angular';
+import { TranslateService }         from '@ngx-translate/core';
 import {
 	countriesIdsToNamesArrayFn,
-	getCountryName
-}                                    from '@modules/server.common/data/countries';
-import { IGeoLocationCreateObject }  from '@modules/server.common/interfaces/IGeoLocation';
-import Country                       from '@modules/server.common/enums/Country';
-import GeoLocation                   from '@modules/server.common/entities/GeoLocation';
-import Customer                      from '@modules/server.common/entities/Customer';
-import { ProductLocalesService }     from '@modules/client.common.angular2/locale/product-locales.service';
-import { FormHelpers }               from '../../../forms/helpers';
-import { Storage as StorageService } from '../../../../services/storage.service';
-
-type CountryData = { id: Country; name: string };
+	getCountryName,
+	TCountryData
+}                                   from '@modules/server.common/data/countries';
+import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
+import Country                      from '@modules/server.common/enums/Country';
+import GeoLocation                  from '@modules/server.common/entities/GeoLocation';
+import Customer                     from '@modules/server.common/entities/Customer';
+import { ProductLocalesService }    from '@modules/client.common.angular2/locale/product-locales.service';
+import { StorageService }           from 'services/storage.service';
+import { FormHelpers }              from '../../../forms/helpers';
 
 @Component({
 	           selector:    'location-form',
@@ -39,15 +38,15 @@ type CountryData = { id: Country; name: string };
            })
 export class LocationFormComponent implements OnInit, AfterViewInit
 {
-	OK: string = 'OK';
-	CANCEL: string = 'CANCEL';
-	PREFIX: string = 'WAREHOUSE_VIEW.SELECT_POP_UP.';
+	public OK: string = 'OK';
+	public CANCEL: string = 'CANCEL';
+	public PREFIX: string = 'WAREHOUSE_VIEW.SELECT_POP_UP.';
 	
 	@Input()
-	readonly form: FormGroup;
+	public readonly form: FormGroup;
 	
 	@Input()
-	readonly apartment?: AbstractControl;
+	public readonly apartment?: AbstractControl;
 	
 	@Input()
 	public customerData: Customer;
@@ -66,7 +65,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 	
 	public showCoordinates: boolean = false;
 	
-	public readonly _countries: CountryData[]
+	public readonly _countries: TCountryData[]
 	public locale: string;
 	
 	private _lastUsedAddressText: string;
@@ -80,7 +79,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 			public readonly localeTranslateService: ProductLocalesService
 	)
 	{
-		this.locale = this._storage.language ?? 'en-US';
+		this.locale = this._storage.locale ?? 'en-US';
 		this._countries = countriesIdsToNamesArrayFn(this.locale);
 	}
 	
@@ -104,7 +103,7 @@ export class LocationFormComponent implements OnInit, AfterViewInit
 		return this._translate(this.PREFIX + this.CANCEL);
 	}
 	
-	public get countries(): CountryData[]
+	public get countries(): TCountryData[]
 	{
 		return this._countries;
 	}
