@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute }                          from '@angular/router';
+import { ActivatedRoute, Params }                  from '@angular/router';
+import { Subscription }                            from 'rxjs';
 import { first }                                   from 'rxjs/operators';
 import { CustomersService }                        from '@app/@core/data/customers.service';
+import { Marker } from '@agm/core/services/google-maps-types';
 
 declare var google: any;
 
@@ -13,10 +15,11 @@ declare var google: any;
 export class CustomerLocationComponent implements OnDestroy, OnInit
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: any;
-	map: google.maps.Map;
-	marker: any;
-	params$: any;
+	public gmapElement: any;
+	
+	public map: google.maps.Map;
+	public marker: any;
+	public params$: Subscription;
 	
 	constructor(
 			private readonly _customerService: CustomersService,
@@ -24,20 +27,21 @@ export class CustomerLocationComponent implements OnDestroy, OnInit
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.params$ = this._router
 		                   .params
 		                   .subscribe(
-				                   async(r) =>
+				                   async(params: Params) =>
 				                   {
 					                   const customer = await this._customerService
-					                                              .getCustomerById(r.id)
+					                                              .getCustomerById(params['id'])
 					                                              .pipe(first())
 					                                              .toPromise();
+					                   console.debug(customer.geoLocation);
 					                   const coordinates = new google.maps.LatLng(
-							                   customer['geoLocation'].coordinates.lat,
-							                   customer['geoLocation'].coordinates.lng
+							                   customer.geoLocation.coordinates.lat,
+							                   customer.geoLocation.coordinates.lng
 					                   );
 					                   this.showMap(coordinates);
 					                   this.marker = this.addMarker(coordinates, this.map);
@@ -45,7 +49,17 @@ export class CustomerLocationComponent implements OnDestroy, OnInit
 		                   );
 	}
 	
-	showMap(coordinates)
+	public ngOnDestroy(): void
+	{
+		this.marker.setMap(null);
+		
+		if(this.params$)
+		{
+			this.params$.unsubscribe();
+		}
+	}
+	
+	public showMap(coordinates)
 	{
 		const mapProp = {
 			center:    coordinates,
@@ -55,22 +69,12 @@ export class CustomerLocationComponent implements OnDestroy, OnInit
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 	}
 	
-	addMarker(coordinates, map)
+	public addMarker(coordinates, map): Marker
 	{
 		return new google.maps
 		                 .Marker({
 			                         position: coordinates,
 			                         map,
 		                         });
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.marker.setMap(null);
-		
-		if(this.params$)
-		{
-			this.params$.unsubscribe();
-		}
 	}
 }
