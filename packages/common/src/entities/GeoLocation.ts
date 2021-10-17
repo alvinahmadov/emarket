@@ -5,20 +5,14 @@ import {
 	default as IGeoLocation,
 	IGeoLocationCreateObject,
 	ILocation,
-	ICoordinate
+    ICoordinate
 }                                             from '../interfaces/IGeoLocation';
 import Country                                from '../enums/Country';
 import { getCountryName }                     from '../data/countries';
 
-class Coordinate implements ICoordinate
-{
-	public lat: number;
-	public lng: number;
-}
-
 export const locationPreSchema = {
 	type:        { type: String },
-	coordinates: Coordinate
+	coordinates: [Number]
 };
 
 /**
@@ -76,12 +70,11 @@ class GeoLocation extends DBObject<IGeoLocation, IGeoLocationCreateObject>
 	
 	public get isLocValid(): any
 	{
-		const coordinates: number[] = Object.values(this.loc.coordinates)
 		return (
 				this.loc.type === 'Point' &&
-				typeof _.isArray(coordinates) &&
-				coordinates.length === 2 &&
-				_.every(coordinates, (c) => _.isFinite(c))
+				typeof _.isArray(this.loc.coordinates) &&
+				this.loc.coordinates.length === 2 &&
+				_.every(this.loc.coordinates, (c) => _.isFinite(c))
 		);
 	}
 	
@@ -105,12 +98,7 @@ class GeoLocation extends DBObject<IGeoLocation, IGeoLocationCreateObject>
 	
 	public set coordinates(coords: ICoordinate)
 	{
-		this.loc.coordinates = coords;
-	}
-	
-	public get coordinatesArray(): Array<number>
-	{
-		return Object.values(this.loc.coordinates);
+		this.loc.coordinates = [coords.lng, coords.lat];
 	}
 }
 
