@@ -27,6 +27,10 @@ export class WarehouseTrackComponent implements OnInit
 	public merchantName: string;
 	public merchantCountry: TCountryName;
 	
+	//TODO: Set values
+	selectedStore: any = null;
+	selectedCarrier: any = null;
+	
 	constructor(
 			private warehouseService: WarehousesService,
 			private location: Location
@@ -180,16 +184,16 @@ export class WarehouseTrackComponent implements OnInit
 	
 	public updateMarkers(merchantArray: Warehouse[])
 	{
-		merchantArray.forEach((mer, index) =>
+		merchantArray.forEach((store) =>
 		                      {
 			                      const newCoords = new google.maps.LatLng(
-					                      mer.geoLocation.loc.coordinates[1],
-					                      mer.geoLocation.loc.coordinates[0]
+					                      store.geoLocation.loc.coordinates[1],
+					                      store.geoLocation.loc.coordinates[0]
 			                      );
 			                      let markerIndex;
 			                      const marker = this.merchantMarkers.find((markerItem, i) =>
 			                                                               {
-				                                                               if(markerItem.id === mer.id)
+				                                                               if(markerItem.id === store.id)
 				                                                               {
 					                                                               markerIndex = i;
 					                                                               return true;
