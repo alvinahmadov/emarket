@@ -168,7 +168,12 @@ export class CustomersAuthService extends EntityService<Customer>
 			password: string
 	): Promise<ICustomerLoginResponse | null>
 	{
-		const res = await this.authService.login({ emailOrUsername }, password);
+		const res = await this.authService.login({
+			                                         $or: [
+				                                         { email: emailOrUsername },
+				                                         { username: emailOrUsername }
+			                                         ]
+		                                         }, password);
 		
 		if(!res || res.entity.isDeleted)
 		{
