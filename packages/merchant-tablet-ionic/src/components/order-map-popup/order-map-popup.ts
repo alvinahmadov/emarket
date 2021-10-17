@@ -1,15 +1,21 @@
-import { Component, ViewChild, ElementRef, Input, OnInit } from '@angular/core';
-
-import Order               from '@modules/server.common/entities/Order';
-import { WarehouseRouter } from '@modules/client.common.angular2/routers/warehouse-router.service';
-import Warehouse           from '@modules/server.common/entities/Warehouse';
-import { first }           from 'rxjs/operators';
-import { environment }     from 'environments/environment';
+import {
+	Component,
+	ViewChild,
+	ElementRef,
+	Input,
+	OnInit
+}                          from '@angular/core';
 import {
 	LoadingController,
 	ActionSheetController,
 	ModalController,
 }                          from '@ionic/angular';
+import { first }           from 'rxjs/operators';
+import Carrier             from '@modules/server.common/entities/Carrier';
+import Order               from '@modules/server.common/entities/Order';
+import Warehouse           from '@modules/server.common/entities/Warehouse';
+import { WarehouseRouter } from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { environment }     from 'environments/environment';
 
 declare var google: any;
 
@@ -62,13 +68,13 @@ export class OrderMapPopupPage implements OnInit
 		{
 			const customer = this.order.customer;
 			const warehouse = this.warehouse;
-			const carrier = this.order.carrier;
+			const carrier = this.order.carrier as Carrier;
 			const warehouseIcon = this.merchantIcon;
 			const customerIcon = this.customerIcon;
 			
 			const carrierIcon = this.carrierIcon;
 			
-			const [cLng, cLat] = carrier['geoLocation'].loc.coordinates;
+			const [cLng, cLat] = carrier.geoLocation.loc.coordinates;
 			this.marker = this.addMarker(
 					new google.maps.LatLng(cLat, cLng),
 					this.map,
