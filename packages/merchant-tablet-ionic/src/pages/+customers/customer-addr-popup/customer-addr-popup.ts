@@ -29,7 +29,7 @@ export class CustomerAddrPopupPage implements OnInit
 	public get coordinatesStr()
 	{
 		return this.customer
-		       ? this.customer.geoLocation.coordinatesArray
+		       ? this.customer.geoLocation.loc.coordinates
 		             .map((c) => c.toFixed(6))
 		             .reverse()
 		             .join(', ')
@@ -46,7 +46,9 @@ export class CustomerAddrPopupPage implements OnInit
 		this.apartment = customer.apartment;
 		
 		// We use reverse because MongoDB store lnt => lat
-		this.coordinates = customer.geoLocation.coordinatesArray;
+		this.coordinates = Array.from(
+				customer.geoLocation.loc.coordinates
+		).reverse()
 		
 		this.myLatLng.lat = this.coordinates[0];
 		this.myLatLng.lng = this.coordinates[1];
