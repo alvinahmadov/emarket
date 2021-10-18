@@ -37,30 +37,30 @@ export interface IAuthable
 interface AuthServiceConfig<T extends IAuthable>
 {
 	role: string;
-	Entity: any; // AuthService<T>['DBObject'];
+	Entity: any;
 	saltRounds: number;
 }
 
 @injectable()
 export class AuthService<T extends IAuthable> extends EntityService<T>
 {
-	role: string;
-	DBObject: { new(arg: RawObject<T>): T; modelName: string };
-	saltRounds: number;
+	public DBObject: { new(arg: RawObject<T>): T; modelName: string };
+	protected role: string;
+	protected saltRounds: number;
 	
-	setConfig(config: AuthServiceConfig<T>)
+	public setConfig(config: AuthServiceConfig<T>)
 	{
 		this.role = config.role;
 		this.DBObject = config.Entity;
 		this.saltRounds = config.saltRounds;
 	}
 	
-	async getPasswordHash(password: string): Promise<string>
+	public async getPasswordHash(password: string): Promise<string>
 	{
 		return bcrypt.hash(password, this.saltRounds);
 	}
 	
-	async addPassword(id: T['id'], password: string)
+	public async addPassword(id: T['id'], password: string)
 	{
 		const query: Promise<T> = this.Model
 		                              .findById(id)
@@ -80,7 +80,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 		await this.savePassword(id, password);
 	}
 	
-	async updatePassword(
+	public async updatePassword(
 			id: T['id'],
 			password: { current: string; new: string }
 	): Promise<void>
@@ -102,7 +102,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 		await this.savePassword(id, password.new);
 	}
 	
-	async savePassword(id: T['id'], password: string)
+	public async savePassword(id: T['id'], password: string)
 	{
 		const hash = await this.getPasswordHash(password);
 		
@@ -113,7 +113,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 		          .exec();
 	}
 	
-	async login(
+	public async login(
 			findObj: any,
 			password: string
 	): Promise<{ entity: T; token: string } | null>
@@ -165,7 +165,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 	 * @param {string} token - the jwt token
 	 * @returns {Promise<boolean>}
 	 */
-	async isAuthenticated(token: string): Promise<boolean>
+	public async isAuthenticated(token: string): Promise<boolean>
 	{
 		try
 		{
@@ -199,13 +199,9 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 	}
 }
 
-export type AuthServiceFactory = <T extends IAuthable>(
-		config: AuthServiceConfig<T>
-) => AuthService<T>;
+export type AuthServiceFactory = <T extends IAuthable>(config: AuthServiceConfig<T>) => AuthService<T>;
 
-export const authServiceFactory = (
-		context: interfaces.Context
-): AuthServiceFactory =>
+export const authServiceFactory = (context: interfaces.Context): AuthServiceFactory =>
 {
 	return <T extends IAuthable>(config: AuthServiceConfig<T>) =>
 	{
