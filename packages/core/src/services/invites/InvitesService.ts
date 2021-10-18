@@ -50,7 +50,7 @@ export class InvitesService extends DBService<Invite>
 	}
 	
 	@observableListener()
-	get(id: string)
+	public get(id: string)
 	{
 		return super.get(id)
 		            .pipe(
@@ -67,26 +67,26 @@ export class InvitesService extends DBService<Invite>
 	}
 	
 	@observableListener()
-	getInvitedStreetLocations()
+	public getInvitedStreetLocations()
 	{
 		return this._invitedStreetLocations;
 	}
 	
 	@asyncListener()
-	create(invite: IInviteCreateObject): Promise<Invite>
+	public create(invite: IInviteCreateObject): Promise<Invite>
 	{
 		if(!invite.code)
 		{
-			invite.code = FakeDataUtils.getRandomInt(1001, 9999) + '';
+			invite.code = FakeDataUtils.getRandomInt(1001, 9999).toString();
 		}
 		return super.create(invite);
 	}
 	
 	@asyncListener()
-	getInvitesSettings(): Promise<{ isEnabled: boolean }>
+	public getInvitesSettings(): Promise<{ isEnabled: boolean }>
 	{
 		return new Promise<{ isEnabled: boolean }>(
-				(resolve, reject) => resolve({ isEnabled: env.SETTING_INVITES_ENABLED })
+				(resolve) => resolve({ isEnabled: env.SETTING_INVITES_ENABLED })
 		);
 	}
 	
@@ -99,7 +99,7 @@ export class InvitesService extends DBService<Invite>
 	 * @memberof InvitesService
 	 */
 	@observableListener()
-	getByCode(info: IEnterByCode): Observable<Invite | null>
+	public getByCode(info: IEnterByCode): Observable<Invite | null>
 	{
 		const findObject = {
 			code: info.inviteCode
@@ -113,7 +113,7 @@ export class InvitesService extends DBService<Invite>
 						type: 'Point',
 						coordinates: info.location.coordinates
 					},
-					$maxDistance: InvitesService.InviteWorkingDistance // 50Km distance for testing only!
+					// $maxDistance: InvitesService.InviteWorkingDistance // 50Km distance for testing only!
 				}
 			};
 		}
@@ -151,7 +151,7 @@ export class InvitesService extends DBService<Invite>
 	 * @memberof InvitesService
 	 */
 	@observableListener()
-	getByLocation(info: IEnterByLocation): Observable<Invite | null>
+	public getByLocation(info: IEnterByLocation): Observable<Invite | null>
 	{
 		const findObject = {
 			'geoLocation.city': info.city,
@@ -192,7 +192,7 @@ export class InvitesService extends DBService<Invite>
 	}
 	
 	@asyncListener()
-	async getInvites(
+	public async getInvites(
 			findInput: any,
 			pagingOptions: IPagingOptions
 	): Promise<any>
@@ -214,7 +214,7 @@ export class InvitesService extends DBService<Invite>
 		           .exec();
 	}
 	
-	async throwIfNotExists(inviteId: string)
+	public async throwIfNotExists(inviteId: string)
 	{
 		const invite = await super.get(inviteId).pipe(first()).toPromise();
 		
