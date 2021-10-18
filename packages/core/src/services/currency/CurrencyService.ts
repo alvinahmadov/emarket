@@ -24,7 +24,7 @@ export class CurrenciesService extends DBService<Currency> implements IService
 		                                              name: 'currenciesService'
 	                                              });
 	
-	async createCurrency(
+	public async createCurrency(
 			currency: ICurrencyCreateObject
 	): Promise<CurrencyMutationRespone>
 	{
@@ -46,7 +46,7 @@ export class CurrenciesService extends DBService<Currency> implements IService
 		return { success, message, data };
 	}
 	
-	async getAllCurrencies(): Promise<Currency[]>
+	public async getAllCurrencies(): Promise<Currency[]>
 	{
 		return this.find({ isDeleted: { $eq: false } });
 	}
