@@ -1,20 +1,19 @@
 import { injectable }                                                   from 'inversify';
 import Logger                                                           from 'bunyan';
 import _                                                                from 'lodash';
-import { GeoUtils }                                                     from '@modules/server.common/utilities';
-import { createLogger }                                                 from '../../helpers/Log';
-import { WarehousesService }                                            from '../warehouses';
+import { Observable, of }                                               from 'rxjs';
+import { concat, exhaustMap, filter, share }                            from 'rxjs/operators';
+import { asyncListener, observableListener, routerName, serialization } from '@pyro/io';
+import { ExistenceEventType }                                           from '@pyro/db-server';
+import IWarehouse                                                       from '@modules/server.common/interfaces/IWarehouse';
+import IGeoLocation                                                     from '@modules/server.common/interfaces/IGeoLocation';
 import GeoLocation                                                      from '@modules/server.common/entities/GeoLocation';
 import Warehouse                                                        from '@modules/server.common/entities/Warehouse';
-import IWarehouse                                                       from '@modules/server.common/interfaces/IWarehouse';
-import { Observable }                                                   from 'rxjs';
-import { asyncListener, observableListener, routerName, serialization } from '@pyro/io';
-import IGeoLocation                                                     from '@modules/server.common/interfaces/IGeoLocation';
 import IGeoLocationWarehousesRouter                                     from '@modules/server.common/routers/IGeoLocationWarehousesRouter';
-import IService                                                         from '../IService';
-import { ExistenceEventType }                                           from '@pyro/db-server';
-import { of }                                                           from 'rxjs/observable/of';
-import { concat, exhaustMap, filter, share }                            from 'rxjs/operators';
+import { GeoUtils }                                                     from '@modules/server.common/utilities';
+import { WarehousesService }                                            from '../../services/warehouses';
+import IService                                                         from '../../services/IService';
+import { createLogger }                                                 from '../../helpers/Log';
 
 @injectable()
 @routerName('geo-location-warehouses')
@@ -22,14 +21,14 @@ export class GeoLocationsWarehousesService
 		implements IGeoLocationWarehousesRouter, IService
 {
 	// TODO: this should be something dynamic and stored in DB (per Warehouse?)
-	static TrackingDistance: number = 50000;
+	public static TrackingDistance: number = 50000;
 	protected log: Logger = createLogger({
 		                                     name: 'geoLocationsWarehousesService'
 	                                     });
 	
 	constructor(protected warehousesService: WarehousesService) {}
 	
-	static isNearly(warehouse: Warehouse, geoLocation: GeoLocation): boolean
+	public static isNearly(warehouse: Warehouse, geoLocation: GeoLocation): boolean
 	{
 		return (
 				GeoUtils.getDistance(warehouse.geoLocation, geoLocation) <=
@@ -38,7 +37,7 @@ export class GeoLocationsWarehousesService
 	}
 	
 	@observableListener()
-	get(
+	public get(
 			@serialization((g: IGeoLocation) => new GeoLocation(g))
 					geoLocation: GeoLocation,
 			@serialization((o: any) => _.omit(o, ['fullProducts', 'activeOnly']))
@@ -48,84 +47,86 @@ export class GeoLocationsWarehousesService
 		const options = {
 			fullProducts: _options != null && _options.fullProducts != null,
 			activeOnly:
-					_options != null && _options.activeOnly != null
-					? _options.activeOnly
-					: false
+			              _options != null && _options.activeOnly != null
+			              ? _options.activeOnly
+			              : false
 		};
 		
 		return of(null).pipe(
 				concat(
-						this.warehousesService.existence.pipe(
-								filter((existenceEvent) =>
-								       {
-									       let warehouse: Warehouse | null;
-									       let oldWarehouse: Warehouse | null;
+						this.warehousesService.existence
+						    .pipe(
+								    filter((existenceEvent) =>
+								           {
+									           let warehouse: Warehouse | null;
+									           let oldWarehouse: Warehouse | null;
 									
-									       switch(existenceEvent.type as ExistenceEventType)
-									       {
-										       case ExistenceEventType.Created:
-											       warehouse = existenceEvent.value;
+									           switch(existenceEvent.type as ExistenceEventType)
+									           {
+										           case ExistenceEventType.Created:
+											           warehouse = existenceEvent.value;
 											
-											       if(warehouse == null)
-											       {
-												       return false;
-											       }
+											           if(warehouse == null)
+											           {
+												           return false;
+											           }
 											
-											       return (
-													       GeoLocationsWarehousesService.isNearly(
-															       warehouse,
-															       geoLocation
-													       ) &&
-													       (options.activeOnly
-													        ? warehouse.isActive
-													        : true)
-											       );
+											           const isNearly = GeoLocationsWarehousesService.isNearly(
+													           warehouse,
+													           geoLocation
+											           );
+											
+											           return (
+													           isNearly &&
+													           (options.activeOnly
+													            ? warehouse.isActive
+													            : true)
+											           );
 										
-										       case ExistenceEventType.Updated:
-											       warehouse = existenceEvent.value;
-											       oldWarehouse = existenceEvent.lastValue;
+										           case ExistenceEventType.Updated:
+											           warehouse = existenceEvent.value;
+											           oldWarehouse = existenceEvent.lastValue;
+											           if(warehouse == null || oldWarehouse == null)
+											           {
+												           return false;
+											           }
 											
-											       if(warehouse == null || oldWarehouse == null)
-											       {
-												       return false;
-											       }
-											
-											       return (
-													       GeoLocationsWarehousesService.isNearly(
-															       warehouse,
-															       geoLocation
-													       ) !==
-													       GeoLocationsWarehousesService.isNearly(
-															       oldWarehouse,
-															       geoLocation
-													       ) &&
-													       (options.activeOnly
-													        ? warehouse.isActive !==
-													          oldWarehouse.isActive
-													        : true)
-											       );
+											           return (
+													           GeoLocationsWarehousesService.isNearly(
+															           warehouse,
+															           geoLocation
+													           ) !==
+													           GeoLocationsWarehousesService.isNearly(
+															           oldWarehouse,
+															           geoLocation
+													           ) &&
+													           (options.activeOnly
+													            ? warehouse.isActive !==
+													              oldWarehouse.isActive
+													            : true)
+											           );
 										
-										       case ExistenceEventType.Removed:
-											       oldWarehouse = existenceEvent.lastValue;
+										           case ExistenceEventType.Removed:
+											           oldWarehouse = existenceEvent.lastValue;
 											
-											       if(oldWarehouse == null)
-											       {
-												       return false;
-											       }
+											           if(oldWarehouse == null)
+											           {
+												           return false;
+											           }
 											
-											       return (
-													       GeoLocationsWarehousesService.isNearly(
-															       oldWarehouse,
-															       geoLocation
-													       ) &&
-													       (options.activeOnly
-													        ? oldWarehouse.isActive
-													        : true)
-											       );
-									       }
-								       }),
-								share()
-						)
+											           return (
+													           GeoLocationsWarehousesService.isNearly(
+															           oldWarehouse,
+															           geoLocation
+													           ) &&
+													           (options.activeOnly
+													            ? oldWarehouse.isActive
+													            : true)
+											           );
+									           }
+								           }),
+								    share()
+						    )
 				),
 				exhaustMap(() =>
 						           this._get(
@@ -139,7 +140,7 @@ export class GeoLocationsWarehousesService
 	}
 	
 	@asyncListener()
-	async getMerchants(
+	public async getStores(
 			geoLocation: IGeoLocation,
 			maxDistance: number,
 			options: {
@@ -151,31 +152,53 @@ export class GeoLocationsWarehousesService
 	): Promise<IWarehouse[]>
 	{
 		const merchantsIds = options.merchantsIds;
-		return (await this.warehousesService.Model.find(
-				                  _.assign(
-						                  {
-							                  'geoLocation.loc': {
-								                  $near: {
-									                  $geometry: {
-										                  type: 'Point',
-										                  coordinates: geoLocation.loc.coordinates
-									                  },
-									                  $maxDistance: maxDistance
-								                  }
-							                  }
-						                  },
-						                  options.activeOnly ? { isActive: true } : {},
-						                  options.inStoreMode ? { inStoreMode: true } : {},
-						                  merchantsIds && merchantsIds.length > 0
-						                  ? {
-									                  _id: { $in: merchantsIds }
-								                  }
-						                  : {}
-				                  )
-		                  )
-		                  .populate(options.fullProducts ? 'products.product' : '')
-		                  .lean()
-		                  .exec()) as IWarehouse[];
+		
+		let findObjOpts = _.assign({},
+		                           options.activeOnly ? { isActive: true } : {},
+		                           options.inStoreMode ? { inStoreMode: true } : {},
+		                           merchantsIds && merchantsIds.length > 0
+		                           ? {
+					                           _id: { $in: merchantsIds }
+				                           }
+		                           : {}
+		);
+		
+		let warehouses: IWarehouse[] = await this.warehousesService
+		                                         .Model
+		                                         .find(_.assign(
+				                                         {
+					                                         'geoLocation.countryId': geoLocation.countryId
+				                                         },
+				                                         findObjOpts
+		                                         ))
+		                                         .populate(options.fullProducts ? 'products.product' : '')
+		                                         .lean()
+		                                         .exec();
+		
+		if(!warehouses || !warehouses.length)
+		{
+			warehouses = await this.warehousesService
+			                       .Model
+			                       .find(_.assign(
+					                       {
+						                       'geoLocation.loc': {
+							                       $near: {
+								                       $geometry:    {
+									                       type:        'Point',
+									                       coordinates: geoLocation.loc.coordinates
+								                       },
+								                       $maxDistance: maxDistance
+							                       }
+						                       }
+					                       },
+					                       findObjOpts
+			                       ))
+			                       .populate(options.fullProducts ? 'products.product' : '')
+			                       .lean()
+			                       .exec();
+		}
+		
+		return warehouses;
 	}
 	
 	/**
@@ -195,31 +218,52 @@ export class GeoLocationsWarehousesService
 	): Promise<Warehouse[]>
 	{
 		// TODO: first filter by City / Country and only then look up by coordinates
-		const warehouses = (await this.warehousesService
-		                              .Model
-		                              .find(_.assign(
-				                                    {
-					                                    'geoLocation.loc': {
-						                                    $near: {
-							                                    $geometry: {
-								                                    type: 'Point',
-								                                    coordinates: geoLocation.loc.coordinates
-							                                    },
-							
-							                                    // TODO: set distance PER warehouse?
-							                                    // It's hard to make this work however, as seems this should be constant value...
-							                                    // however we may want to check MongoDB docs!
-							                                    $maxDistance: maxDistance
-						                                    }
-					                                    }
-				                                    },
-				                                    options.activeOnly ? { isActive: true } : {}
-		                                    )
-		                              )
-		                              .populate(options.fullProducts ? 'products.product' : '')
-		                              .lean()
-		                              .exec()) as IWarehouse[];
+		let warehouses: IWarehouse[] = await this._getByCountryIdOrLocation(
+				geoLocation,
+				maxDistance,
+				options
+		);
 		
 		return warehouses.map((warehouse) => new Warehouse(warehouse));
+	}
+	
+	private async _getByCountryIdOrLocation(geoLocation: GeoLocation, maxDistance: number, options: any)
+	{
+		let warehouses: IWarehouse[] = this.warehousesService
+		                                   .Model
+		                                   .find({ 'geoLocation.countryId': geoLocation.countryId })
+		                                   .populate(options.fullProducts ? 'products.product' : '')
+		                                   .lean()
+		                                   .exec();
+		
+		if(!warehouses || !warehouses.length)
+		{
+			warehouses = (await this.warehousesService
+			                        .Model
+			                        .find(_.assign(
+					                              {
+						                              'geoLocation.loc': {
+							                              $near: {
+								                              $geometry: {
+									                              type:        'Point',
+									                              coordinates: geoLocation.loc.coordinates
+								                              },
+								
+								                              // TODO: set distance PER warehouse?
+								                              // It's hard to make this work however, as seems this should be constant value...
+								                              // however we may want to check MongoDB docs!
+								                              // $maxDistance: maxDistance
+							                              }
+						                              }
+					                              },
+					                              options.activeOnly ? { isActive: true } : {}
+			                              )
+			                        )
+			                        .populate(options.fullProducts ? 'products.product' : '')
+			                        .lean()
+			                        .exec()) as IWarehouse[];
+		}
+		
+		return warehouses;
 	}
 }
