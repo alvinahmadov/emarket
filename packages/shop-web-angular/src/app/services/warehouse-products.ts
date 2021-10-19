@@ -1,21 +1,52 @@
-import { Apollo }     from 'apollo-angular';
 import { Injectable } from '@angular/core';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
+import { Apollo }     from 'apollo-angular';
+import { map }        from 'rxjs/operators';
+import IPagingOptions from '@modules/server.common/interfaces/IPagingOptions';
+import StoreProduct   from '@modules/server.common/entities/WarehouseProduct';
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }   from 'graphql/definitions';
 
 @Injectable()
-export class WarehouseProductsService
+export class WarehouseProductsService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
-	
-	async getWarehouseProduct(warehouseId, warehouseProductId)
+	constructor(apollo: Apollo)
 	{
-		const res = await this.apollo
-		                      .query({
-			                             query: GQLQueries.WarehouseProduct,
-			                             variables: { warehouseId, warehouseProductId },
-		                             })
-		                      .toPromise();
+		super(apollo, {
+			serviceName: "Shop::WarehouseProductsService",
+			debug:       true
+		});
+	}
+	
+	public async getWarehouseProduct(
+			storeId: string,
+			productId: string
+	): Promise<StoreProduct>
+	{
+		return this.apollo
+		           .query<{
+			           products: StoreProduct
+		           }>({
+			              query:     GQLQuery.Store.Product.Get,
+			              variables: { storeId, productId },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
+	}
+	
+	public async getWarehouseProducts(
+			storeId: string,
+			pagingOptions?: IPagingOptions
+	): Promise<StoreProduct[]>
+	{
+		return this.apollo
+		           .query<{
+			           products: StoreProduct[]
+		           }>({
+			              query:     GQLQuery.Store.Product.GetWithPagination,
+			              variables: { storeId, pagingOptions },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 		
-		return res.data['getWarehouseProduct'];
 	}
 }
