@@ -4,54 +4,54 @@ import {
 	EventEmitter,
 	AfterViewInit,
 }                                                           from '@angular/core';
-import { NgbActiveModal }                                   from '@ng-bootstrap/ng-bootstrap';
-import { WarehouseAuthRouter }                              from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
-import { ToasterService }                                   from 'angular2-toaster';
 import { FormBuilder, FormControl, FormGroup }              from '@angular/forms';
-import { BasicInfoFormComponent, ContactInfoFormComponent } from '../forms';
-import { LocationFormComponent }                            from '../../forms/location';
+import { NgbActiveModal }                                   from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService }                                 from '@ngx-translate/core';
+import { ToasterService }                                   from 'angular2-toaster';
+import { WarehouseAuthRouter }                              from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
+import { BasicInfoFormComponent, ContactInfoFormComponent } from '../forms';
 import { PaymentsSettingsFormComponent }                    from '../forms/payments-settings/payments-settings-form.component';
+import { LocationFormComponent }                            from '../../forms/location';
 
 @Component({
-	           selector: 'ea-warehouse-mutation',
+	           selector:    'ea-warehouse-mutation',
+	           styleUrls:   ['./warehouse-mutation.component.scss'],
 	           templateUrl: './warehouse-mutation.component.html',
-	           styleUrls: ['./warehouse-mutation.component.scss'],
            })
 export class WarehouseMutationComponent implements AfterViewInit
 {
-	loading: boolean;
+	public loading: boolean;
 	
 	public BUTTON_DONE: string = 'BUTTON_DONE';
 	public BUTTON_NEXT: string = 'BUTTON_NEXT';
 	public BUTTON_PREV: string = 'BUTTON_PREV';
 	
 	@ViewChild('basicInfoForm')
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('contactInfoForm', { static: true })
-	contactInfoForm: ContactInfoFormComponent;
+	public contactInfoForm: ContactInfoFormComponent;
 	
 	@ViewChild('locationForm')
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
 	@ViewChild('paymentsSettingsForm')
-	paymentsSettingsForm: PaymentsSettingsFormComponent;
+	public paymentsSettingsForm: PaymentsSettingsFormComponent;
 	
-	mapCoordEmitter = new EventEmitter<number[]>();
-	mapGeometryEmitter = new EventEmitter<any>();
+	public mapCoordEmitter = new EventEmitter<number[]>();
+	public mapGeometryEmitter = new EventEmitter<any>();
 	
-	readonly form: FormGroup = this.formBuilder.group({
-		                                                  basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
-		                                                  password: BasicInfoFormComponent.buildPasswordForm(this.formBuilder),
-		                                                  contactInfo: ContactInfoFormComponent.buildForm(this.formBuilder),
-		                                                  location: LocationFormComponent.buildForm(this.formBuilder),
-	                                                  });
+	public readonly form: FormGroup = this.formBuilder.group({
+		                                                         basicInfo:   BasicInfoFormComponent.buildForm(this.formBuilder),
+		                                                         password:    BasicInfoFormComponent.buildPasswordForm(this.formBuilder),
+		                                                         contactInfo: ContactInfoFormComponent.buildForm(this.formBuilder),
+		                                                         location:    LocationFormComponent.buildForm(this.formBuilder),
+	                                                         });
 	
-	readonly basicInfo = this.form.get('basicInfo') as FormControl;
-	readonly contactInfo = this.form.get('contactInfo') as FormControl;
-	readonly location = this.form.get('location') as FormControl;
-	readonly password = this.form.get('password') as FormControl;
+	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
+	public readonly contactInfo = this.form.get('contactInfo') as FormControl;
+	public readonly location = this.form.get('location') as FormControl;
+	public readonly password = this.form.get('password') as FormControl;
 	
 	constructor(
 			private readonly activeModal: NgbActiveModal,
@@ -62,29 +62,29 @@ export class WarehouseMutationComponent implements AfterViewInit
 	)
 	{}
 	
-	get buttonDone()
+	public get buttonDone()
 	{
 		return this._translate(this.BUTTON_DONE);
 	}
 	
-	get buttonNext()
+	public get buttonNext()
 	{
 		return this._translate(this.BUTTON_NEXT);
 	}
 	
-	get buttonPrevious()
+	public get buttonPrevious()
 	{
 		return this._translate(this.BUTTON_PREV);
 	}
 	
-	get isValidContactInfo()
+	public get isValidContactInfo()
 	{
 		return this.contactInfoForm.validForm !== undefined
 		       ? this.contactInfoForm.validForm
 		       : true;
 	}
 	
-	ngAfterViewInit()
+	public ngAfterViewInit()
 	{
 		// This hack is need because the styles of 'ng-bootstrap' modal and google autocomplete api
 		// collide and autocomplete field just doesn't show without larger z-index.
@@ -106,24 +106,24 @@ export class WarehouseMutationComponent implements AfterViewInit
 		}
 	}
 	
-	onCoordinatesChanges(coords: number[])
+	public onCoordinatesChanges(coords: number[])
 	{
 		this.mapCoordEmitter.emit(coords);
 	}
 	
-	onGeometrySend(geometry: any)
+	public onGeometrySend(geometry: any)
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	async createWarehouse()
+	public async createWarehouse()
 	{
 		try
 		{
 			// GeoJSON use reversed order for coordinates from our implementation.
 			// we use lat => lng but GeoJSON use lng => lat.
 			const geoLocationInput = this.locationForm.getValue();
-			geoLocationInput.loc.coordinates.reverse();
+			// geoLocationInput.loc.coordinates.reverse();
 			
 			this.loading = true;
 			const w = await this.warehouseAuthRouter
@@ -131,14 +131,14 @@ export class WarehouseMutationComponent implements AfterViewInit
 				                              warehouse: {
 					                              ...this.basicInfoForm.getValue(),
 					                              ...this.contactInfoForm.getValue(),
-					                              geoLocation: geoLocationInput,
-					                              isPaymentEnabled: this.paymentsSettingsForm
-							                              .isPaymentEnabled,
-					                              paymentGateways: this.paymentsSettingsForm.paymentsGateways,
+					                              geoLocation:          geoLocationInput,
+					                              isPaymentEnabled:     this.paymentsSettingsForm
+							                                                    .isPaymentEnabled,
+					                              paymentGateways:      this.paymentsSettingsForm.paymentsGateways,
 					                              isCashPaymentEnabled: this.paymentsSettingsForm
-							                              .isCashPaymentEnabled,
+							                                                    .isCashPaymentEnabled,
 				                              },
-				                              password: this.basicInfoForm.getPassword(),
+				                              password:  this.basicInfoForm.getPassword(),
 			                              });
 			this.loading = false;
 			this.toasterService.pop(
@@ -157,7 +157,7 @@ export class WarehouseMutationComponent implements AfterViewInit
 		}
 	}
 	
-	cancel()
+	public cancel()
 	{
 		this.activeModal.dismiss('canceled');
 	}
