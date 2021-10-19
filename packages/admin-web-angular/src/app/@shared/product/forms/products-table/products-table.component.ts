@@ -5,24 +5,24 @@ import {
 	OnInit,
 	EventEmitter,
 }                                                      from '@angular/core';
-import { DomSanitizer }                                from '@angular/platform-browser';
-import { LocalDataSource }                             from 'ng2-smart-table';
-import Product                                         from '@modules/server.common/entities/Product';
-import { ProductsService }                             from '../../../../@core/data/products.service';
 import { Router }                                      from '@angular/router';
-import { first, takeUntil }                            from 'rxjs/operators';
+import { DomSanitizer }                                from '@angular/platform-browser';
 import { TranslateService }                            from '@ngx-translate/core';
-import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
-import { ILocaleMember }                               from '@modules/server.common/interfaces/ILocale';
-import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
-import { ProductCategoriesComponent }                  from '../../../render-component/product-categories/product-categories';
-import { ProductsCategoryService }                     from '../../../../@core/data/productsCategory.service';
-import { NotifyService }                               from '@app/@core/services/notify/notify.service';
 import { NgbModal }                                    from '@ng-bootstrap/ng-bootstrap';
-import { ConfimationModalComponent }                   from '../../../confirmation-modal/confirmation-modal.component';
+import { LocalDataSource }                             from 'ng2-smart-table';
+import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
+import { first, takeUntil }                            from 'rxjs/operators';
+import { ILocaleMember }                               from '@modules/server.common/interfaces/ILocale';
+import Product                                         from '@modules/server.common/entities/Product';
+import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
+import { ProductsService }                             from '@app/@core/data/products.service';
+import { ProductsCategoryService }                     from '@app/@core/data/productsCategory.service';
+import { NotifyService }                               from '@app/@core/services/notify/notify.service';
 import { ProductCheckboxComponent }                    from '@app/@shared/render-component/product-checkbox/product-checkbox';
 import { ProductTitleComponent }                       from '@app/@shared/render-component/product-title/product-title.component';
 import { ProductImageComponent }                       from '@app/@shared/render-component/product-image/product-image.component';
+import { ConfimationModalComponent }                   from '../../../confirmation-modal/confirmation-modal.component';
+import { ProductCategoriesComponent }                  from '../../../render-component/product-categories/product-categories';
 
 interface ProductViewModel
 {
@@ -34,31 +34,38 @@ interface ProductViewModel
 	images: string[];
 }
 
+// noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 @Component({
-	           selector: 'ea-products-table',
-	           styleUrls: ['./products-table.component.scss'],
-	           templateUrl: 'products-table.component.html',
+	           selector:    'ea-products-table',
+	           styleUrls:   ['./products-table.component.scss'],
+	           templateUrl: './products-table.component.html',
            })
 export class ProductsTableComponent implements OnInit, OnDestroy
 {
 	private static noInfoSign = '';
-	confirmSub$: Subscription;
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
-	loading: boolean;
-	selectProducts$: EventEmitter<any> = new EventEmitter();
-	$subSlectProducts: Subscription;
-	pagesChanges$: EventEmitter<number> = new EventEmitter();
+	
 	@Input()
-	perPage: number = 0;
+	public perPage: number = 0;
+	
 	@Input()
-	hiddenTableActions: boolean;
+	public hiddenTableActions: boolean;
+	
 	@Input()
-	boxShadow: string;
+	public boxShadow: string;
+	
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
+	public selectProducts$: EventEmitter<any> = new EventEmitter();
+	public pagesChanges$: EventEmitter<number> = new EventEmitter();
+	public loading: boolean;
+	public $subSlectProducts: Subscription;
+	public confirmSub$: Subscription;
+	
 	private products: Product[];
 	private categoriesInfo: any;
-	private ngDestroy$ = new Subject<void>();
 	private dataCount: number;
+	private _selectedProducts: ProductViewModel[] = [];
+	private ngDestroy$ = new Subject<void>();
 	
 	constructor(
 			private readonly _sanitizer: DomSanitizer,
@@ -72,7 +79,19 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	private _selectedProducts: ProductViewModel[] = [];
+	public ngOnInit(): void
+	{
+		this.getCategories();
+		this._loadSettingsSmartTable();
+		this._applyTranslationOnSmartTable();
+		this.smartTableChange();
+	}
+	
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
 	
 	public get selectedProducts()
 	{
@@ -89,38 +108,55 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 		return this._selectedProducts.length > 0;
 	}
 	
-	ngOnInit(): void
-	{
-		this.getCategories();
-		this._loadSettingsSmartTable();
-		this._applyTranslationOnSmartTable();
-		this.smartTableChange();
-	}
-	
-	edit(event)
+	public edit(event)
 	{
 		this._router.navigate(['/products/list/' + event.data.id + '/edit']);
 	}
 	
-	async deleteProduct(event)
+	public getCategories()
+	{
+		this._productsCategoryService
+		    .getCategories()
+		    .subscribe((categories) =>
+		               {
+			               this.categoriesInfo = categories;
+			               this.loadDataSmartTable(
+					               this.products || [],
+					               this.dataCount || 0
+			               );
+		               });
+	}
+	
+	public selectProductTmp(ev)
+	{
+		if(ev.data)
+		{
+			this.selectProducts$.emit({
+				                          current: ev.data,
+				                          allData: ev.source.data,
+			                          });
+		}
+	}
+	
+	public async deleteProduct(event)
 	{
 		const activeModal = this.modalService.open(ConfimationModalComponent, {
-			size: 'sm',
+			size:      'sm',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 		const modalComponent: ConfimationModalComponent =
-				activeModal.componentInstance;
+				      activeModal.componentInstance;
 		
 		this.confirmSub$ = await modalComponent.confirmEvent
 		                                       .pipe(takeUntil(modalComponent.ngDestroy$))
-		                                       .subscribe((dataEvent) =>
+		                                       .subscribe(() =>
 		                                                  {
 			                                                  try
 			                                                  {
 				                                                  this.loading = true;
 				                                                  const productTitle =
-						                                                  event.data.title || ProductsTableComponent.noInfoSign;
+						                                                        event.data.title || ProductsTableComponent.noInfoSign;
 				                                                  this._productsService
 				                                                      .removeByIds([event.data.id])
 				                                                      .pipe(first())
@@ -142,32 +178,7 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 		                                                  });
 	}
 	
-	getCategories()
-	{
-		this._productsCategoryService
-		    .getCategories()
-		    .subscribe((categories) =>
-		               {
-			               this.categoriesInfo = categories;
-			               this.loadDataSmartTable(
-					               this.products || [],
-					               this.dataCount || 0
-			               );
-		               });
-	}
-	
-	selectProductTmp(ev)
-	{
-		if(ev.data)
-		{
-			this.selectProducts$.emit({
-				                          current: ev.data,
-				                          allData: ev.source.data,
-			                          });
-		}
-	}
-	
-	async loadDataSmartTable(
+	public async loadDataSmartTable(
 			products: Product[],
 			dataCount: number,
 			page: number = 1
@@ -175,40 +186,42 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 	{
 		this.dataCount = dataCount;
 		this.products = products;
-		let productsVM = products.map((product) =>
-		                              {
-			                              return {
-				                              checked: this.selectedProducts.find(
-						                              (d) => d.id === product['id']
-				                              ),
-				                              title:
-						                              this.localeTranslate(product.title) ||
-						                              ProductsTableComponent.noInfoSign,
-				                              description:
-						                              this.localeTranslate(product.description) ||
-						                              ProductsTableComponent.noInfoSign,
-				                              details: product.details[0]
-				                                       ? this.localeTranslate(product.details) ||
-				                                         ProductsTableComponent.noInfoSign
-				                                       : ProductsTableComponent.noInfoSign,
-				                              categories: {
-					                              ids: product.categories,
-					                              search:
-							                              this.categoriesInfo &&
-							                              this.categoriesInfo
-							                                  .filter((c) => product.categories.includes(c.id))
-							                                  .map((c) =>
-									                                       this._productLocalesService.getTranslate(c.name)
-							                                  )
-							                                  .toString(),
-				                              },
-				                              image:
-						                              this.localeTranslate(product.images) ||
-						                              ProductsTableComponent.noInfoSign,
-				                              id: product.id,
-				                              allCategories: this.categoriesInfo,
-			                              };
-		                              });
+		let productsVM = products.map(
+				(product) =>
+				{
+					return {
+						checked:       this.selectedProducts.find(
+								(d) => d.id === product['id']
+						),
+						title:
+						               this.localeTranslate(product.title) ||
+						               ProductsTableComponent.noInfoSign,
+						description:
+						               this.localeTranslate(product.description) ||
+						               ProductsTableComponent.noInfoSign,
+						details:       product.details[0]
+						               ? this.localeTranslate(product.details) ||
+						                 ProductsTableComponent.noInfoSign
+						               : ProductsTableComponent.noInfoSign,
+						categories:    {
+							ids: product.categories,
+							search:
+							     this.categoriesInfo &&
+							     this.categoriesInfo
+							         .filter((c) => product.categories.includes(c.id))
+							         .map((c) =>
+									              this._productLocalesService.getTranslate(c.name)
+							         )
+							         .toString(),
+						},
+						image:
+						               this.localeTranslate(product.images) ||
+						               ProductsTableComponent.noInfoSign,
+						id:            product.id,
+						allCategories: this.categoriesInfo,
+					};
+				}
+		);
 		productsVM = productsVM.filter((p) => p);
 		if(this.$subSlectProducts)
 		{
@@ -241,13 +254,7 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 				this.perPage,
 				...productsVM
 		);
-		this.sourceSmartTable.load(productsData);
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
+		await this.sourceSmartTable.load(productsData);
 	}
 	
 	protected localeTranslate(member: ILocaleMember[])
@@ -289,57 +296,50 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 				           {
 					           this.settingsSmartTable = {
 						           actions: !this.hiddenTableActions && {
-							           add: false,
+							           add:      false,
 							           position: 'left',
 						           },
-						           edit: {
+						           edit:    {
 							           editButtonContent: '<i class="ion-md-create"></i>',
 						           },
-						           delete: {
+						           delete:  {
 							           deleteButtonContent: '<i class="ion-md-trash"></i>',
-							           confirmDelete: true,
+							           confirmDelete:       true,
 						           },
-						           mode: 'external',
+						           mode:    'external',
 						           columns: {
-							           checkbox: {
-								           title: '',
-								           filter: false,
-								           type: 'custom',
+							           checkbox:    {
+								           title:           '',
+								           filter:          false,
+								           type:            'custom',
 								           renderComponent: ProductCheckboxComponent,
 							           },
-							           title: {
-								           title: name,
-								           type: 'custom',
+							           title:       {
+								           title:           name,
+								           type:            'custom',
 								           renderComponent: ProductTitleComponent,
 							           },
 							           description: { title: description },
-							           details: { title: details },
-							           categories: {
-								           title: category,
-								           type: 'custom',
+							           details:     { title: details },
+							           categories:  {
+								           title:           category,
+								           type:            'custom',
 								           renderComponent: ProductCategoriesComponent,
 								           filterFunction(
 										           cell?: any,
 										           search?: string
 								           ): boolean
 								           {
-									           if(cell.search.includes(search))
-									           {
-										           return true;
-									           }
-									           else
-									           {
-										           return false;
-									           }
+									           return !!cell.search.includes(search);
 								           },
 							           },
-							           images: {
-								           title: images,
-								           type: 'custom',
+							           images:      {
+								           title:           images,
+								           type:            'custom',
 								           renderComponent: ProductImageComponent,
 							           },
 						           },
-						           pager: {
+						           pager:   {
 							           display: true,
 							           perPage: this.perPage,
 						           },
@@ -351,7 +351,7 @@ export class ProductsTableComponent implements OnInit, OnDestroy
 	{
 		this._translateService.onLangChange
 		    .pipe(takeUntil(this.ngDestroy$))
-		    .subscribe((res) =>
+		    .subscribe(() =>
 		               {
 			               this._loadSettingsSmartTable();
 			               this.loadDataSmartTable(
