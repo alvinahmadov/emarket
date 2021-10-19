@@ -12,6 +12,13 @@ import {
 	Validators,
 	AbstractControl,
 }                                from '@angular/forms';
+import { TranslateService }      from '@ngx-translate/core';
+import { IMultiSelectOption }    from 'angular-2-dropdown-multiselect';
+import { Subject }               from 'rxjs';
+import { takeUntil, first }      from 'rxjs/operators';
+import _                         from 'lodash';
+import isUrl                     from 'is-url';
+import { LanguageCodesEnum }     from '@modules/server.common/interfaces/ILanguage';
 import {
 	IProductImage,
 	IProductCreateObject,
@@ -20,54 +27,46 @@ import {
 	IProductDetails,
 }                                from '@modules/server.common/interfaces/IProduct';
 import Product                   from '@modules/server.common/entities/Product';
-import { Subject }               from 'rxjs';
 import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
-import { IMultiSelectOption }    from 'angular-2-dropdown-multiselect';
-import { FormHelpers }           from '../../../forms/helpers';
-import _                         from 'lodash';
-import isUrl                     from 'is-url';
-import { takeUntil, first }      from 'rxjs/operators';
-import { TranslateService }      from '@ngx-translate/core';
-import {
-	LanguageCodesEnum,
-	LanguagesEnum,
-}                                from '@modules/server.common/interfaces/ILanguage';
+import { FormHelpers }           from '@app/@shared/forms/helpers';
 
 @Component({
-	           selector: 'ea-product-basic-info-form',
-	           styleUrls: ['./basic-info-form.component.scss'],
-	           templateUrl: 'basic-info-form.component.html',
+	           selector:    'ea-product-basic-info-form',
+	           styleUrls:   ['./basic-info-form.component.scss'],
+	           templateUrl: './basic-info-form.component.html',
            })
 export class BasicInfoFormComponent implements OnDestroy, OnInit
 {
 	@ViewChild('fileInput')
-	fileInput: any;
+	public fileInput: any;
+	
 	@ViewChild('productImagePreview')
-	productImagePreview: ElementRef;
+	public productImagePreview: ElementRef;
 	
 	@Input()
-	readonly form: FormGroup;
-	@Input()
-	productCategories: any;
-	@Input()
-	currentProduct: Product;
+	public readonly form: FormGroup;
 	
-	uploaderPlaceholder: string;
-	product: any;
-	uploaderChanged: boolean;
+	@Input()
+	public productCategories: any;
 	
-	title: AbstractControl;
-	description: AbstractControl;
-	details: AbstractControl;
-	image: AbstractControl;
-	locale: AbstractControl;
-	category: AbstractControl;
-	selectedProductCategories: AbstractControl;
+	@Input()
+	public currentProduct: Product;
+	
+	public uploaderPlaceholder: string;
+	public product: any;
+	public uploaderChanged: boolean;
+	
+	public title: AbstractControl;
+	public description: AbstractControl;
+	public details: AbstractControl;
+	public image: AbstractControl;
+	public locale: AbstractControl;
+	public category: AbstractControl;
+	public selectedProductCategories: AbstractControl;
 	public categoryOptions: IMultiSelectOption[];
 	public languages = Object.keys(LanguageCodesEnum);
 	private _selectedProductCategories: string[];
 	private actualCategories: any = [];
-	private _category: string;
 	private _title: string;
 	private _description: string;
 	private _details: string;
@@ -85,17 +84,55 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		this.getUploaderPlaceholderText();
 	}
 	
-	get imageControl()
+	public ngOnInit()
+	{
+		if(this.productCategories)
+		{
+			this.categoryOptions = this.productCategories.map((category) =>
+			                                                  {
+				                                                  return {
+					                                                  id:   category.id,
+					                                                  name: category.name[0].value,
+				                                                  };
+			                                                  });
+		}
+		
+		this._bindFormControls();
+		this._setDefaultLocaleValue();
+		
+		this.onLocaleChanges = this.locale.valueChanges
+		                           .pipe(takeUntil(this._ngDestroy$))
+		                           .subscribe((v) =>
+		                                      {
+			                                      if(v !== this._productLocalesService.currentLocale)
+			                                      {
+				                                      this._productLocalesService.currentLocale = v;
+				                                      this.setValue(this.product);
+			                                      }
+		                                      });
+		
+		this.laodData();
+	}
+	
+	public ngOnDestroy()
+	{
+		this.onLocaleChanges.unsubscribe();
+		this.form.reset();
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public get imageControl()
 	{
 		return this.form.get('image');
 	}
 	
-	get imagesUrls()
+	public get imagesUrls()
 	{
 		return this.images ? this.images.map((i) => i.url).join(' ') : '';
 	}
 	
-	get imagesArr()
+	public get imagesArr()
 	{
 		if(this.imagesUrls)
 		{
@@ -109,7 +146,7 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		return null;
 	}
 	
-	static hasValidImage(images)
+	public static hasValidImage(images)
 	{
 		if(images)
 		{
@@ -131,16 +168,16 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		return false;
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		// would be used in the parent component and injected into this.form
 		return formBuilder.group({
-			                         title: ['', [Validators.required, Validators.maxLength(255)]],
-			                         description: ['', [Validators.required, Validators.maxLength(255)]],
-			                         details: [''],
-			                         locale: ['', Validators.required],
+			                         title:                     ['', [Validators.required, Validators.maxLength(255)]],
+			                         description:               ['', [Validators.required, Validators.maxLength(255)]],
+			                         details:                   [''],
+			                         locale:                    ['', Validators.required],
 			                         selectedProductCategories: [[]],
-			                         image: [
+			                         image:                     [
 				                         '',
 				                         [
 					                         Validators.required,
@@ -164,57 +201,19 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		                         });
 	}
 	
-	ngOnInit()
-	{
-		if(this.productCategories)
-		{
-			this.categoryOptions = this.productCategories.map((category) =>
-			                                                  {
-				                                                  return {
-					                                                  id: category.id,
-					                                                  name: category.name[0].value,
-				                                                  };
-			                                                  });
-		}
-		
-		this._bindFormControls();
-		this._setDefaultLocaleValue();
-		
-		this.onLocaleChanges = this.locale.valueChanges
-		                           .pipe(takeUntil(this._ngDestroy$))
-		                           .subscribe((v) =>
-		                                      {
-			                                      if(v !== this._productLocalesService.currentLocale)
-			                                      {
-				                                      this._productLocalesService.currentLocale = v;
-				                                      this.setValue(this.product);
-			                                      }
-		                                      });
-		
-		this.laodData();
-	}
-	
-	ngOnDestroy()
-	{
-		this.onLocaleChanges.unsubscribe();
-		this.form.reset();
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-	}
-	
-	getLanguageCode(language: LanguagesEnum)
+	public getLanguageCode(language: string)
 	{
 		return LanguageCodesEnum[language];
 	}
 	
-	deleteImg(image)
+	public deleteImg(image)
 	{
 		this.images = this.images.filter((i) => i.url !== image);
 		
 		this.image.setValue(this.imagesUrls);
 	}
 	
-	addImageObj(imgData: IProductImage)
+	public addImageObj(imgData: IProductImage)
 	{
 		this.uploaderChanged = true;
 		if(imgData)
@@ -229,19 +228,19 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		}
 	}
 	
-	getValue(): IProductCreateObject
+	public getValue(): IProductCreateObject
 	{
 		return this.form.getRawValue() as IProductCreateObject;
 	}
 	
-	setValue<T extends IProductCreateObject>(product: Product)
+	public setValue<T extends IProductCreateObject>(product: Product)
 	{
 		if(this.productCategories)
 		{
 			this.categoryOptions = this.productCategories.map((category) =>
 			                                                  {
 				                                                  return {
-					                                                  id: category.id,
+					                                                  id:   category.id,
 					                                                  name: category.name[0].value,
 				                                                  };
 			                                                  });
@@ -267,17 +266,17 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 			this.images = imgs;
 			
 			const product1 = {
-				title: this._productLocalesService.getMemberValue(
+				title:                     this._productLocalesService.getMemberValue(
 						product.title
 				),
-				description: this._productLocalesService.getMemberValue(
+				description:               this._productLocalesService.getMemberValue(
 						product.description
 				),
-				details: this._productLocalesService.getMemberValue(
+				details:                   this._productLocalesService.getMemberValue(
 						product.details
 				),
 				image,
-				locale: this.locale.value,
+				locale:                    this.locale.value,
 				selectedProductCategories: [...this.product.categories],
 			};
 			
@@ -285,7 +284,7 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		}
 	}
 	
-	async setupProductCreateObject(): Promise<IProductCreateObject>
+	public async setupProductCreateObject(): Promise<IProductCreateObject>
 	{
 		this._bindModelProperties();
 		
@@ -297,37 +296,37 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		
 		const productTitle: IProductTitle = {
 			locale: productLocale,
-			value: this._title,
+			value:  this._title,
 		};
 		
 		const productDescription: IProductDescription = {
 			locale: productLocale,
-			value: this._description,
+			value:  this._description,
 		};
 		
 		const productDetails: IProductDetails = {
 			locale: productLocale,
-			value: this._details || '',
+			value:  this._details || '',
 		};
 		
 		let productCreateObject: IProductCreateObject = {
-			title: [productTitle],
+			title:       [productTitle],
 			description: [productDescription],
-			details: [productDetails],
-			categories: this.actualCategories.map((c) =>
-			                                      {
-				                                      return {
-					                                      _id: c.id,
-					                                      name: c.name,
-				                                      };
-			                                      }),
-			images: productImages,
+			details:     [productDetails],
+			categories:  this.actualCategories.map((c) =>
+			                                       {
+				                                       return {
+					                                       _id:  c.id,
+					                                       name: c.name,
+				                                       };
+			                                       }),
+			images:      productImages,
 		};
 		
 		if(this.product)
 		{
 			productCreateObject = {
-				title: [
+				title:       [
 					...this.product.title
 					       .filter((t) => t.locale !== this._locale)
 					       .map((t) => ({ locale: t.locale, value: t.value })),
@@ -339,24 +338,24 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 					       .map((d) => ({ locale: d.locale, value: d.value })),
 					productDescription,
 				],
-				details: [
+				details:     [
 					...this.product.details
 					       .filter((d) => d.locale !== this._locale)
 					       .map((d) => ({ locale: d.locale, value: d.value })),
 					productDetails,
 				],
-				categories: this.actualCategories.map((c) =>
-				                                      {
-					                                      return {
-						                                      _id: c.id,
-						                                      name: c.name,
-					                                      };
-				                                      }),
-				images: [
+				categories:  this.actualCategories.map((c) =>
+				                                       {
+					                                       return {
+						                                       _id:  c.id,
+						                                       name: c.name,
+					                                       };
+				                                       }),
+				images:      [
 					...this.product.images
 					       .filter((i) => i.locale !== this._locale)
-					       .map((i) => this.getProductImage(i)),
-					...productImages.map((i) => this.getProductImage(i)),
+					       .map((i) => BasicInfoFormComponent.getProductImage(i)),
+					...productImages.map((i) => BasicInfoFormComponent.getProductImage(i)),
 				],
 			};
 		}
@@ -364,12 +363,12 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		return productCreateObject;
 	}
 	
-	imgOnLoad()
+	public imgOnLoad()
 	{
 		this.imageControl.setErrors(null);
 	}
 	
-	imgOnError()
+	public imgOnError()
 	{
 		if(this.imageControl.value !== '')
 		{
@@ -460,14 +459,14 @@ export class BasicInfoFormComponent implements OnDestroy, OnInit
 		                                     .toPromise();
 	}
 	
-	private getProductImage(data: IProductImage): IProductImage
+	private static getProductImage(data: IProductImage): IProductImage
 	{
 		return {
-			locale: data.locale,
-			url: data.url,
+			locale:      data.locale,
+			url:         data.url,
 			orientation: data.orientation,
-			width: data.width,
-			height: data.height,
+			width:       data.width,
+			height:      data.height,
 		};
 	}
 	
