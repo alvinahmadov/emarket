@@ -6,28 +6,40 @@ import Warehouse                    from '@modules/server.common/entities/Wareho
 import { Observable }               from 'rxjs';
 
 @Component({
-	           styleUrls: ['redirect-store.component.scss'],
+	           styles:   [
+		           `
+                       .warehouse-name {
+                           padding-top: 5px;
+                           font-weight: bold;
+                       }
+
+                       .warehouse-image {
+                           width: 30px;
+                           height: 30px;
+                       }
+		           `
+	           ],
 	           template: `
-		<div
-			*ngIf="store$ | async as store"
-			(click)="redirect()"
-			class="redirectBtn"
-		>
-			<h6>
-				<img class="warehouse-image" alt="" src="{{ store.logo }}" />
-				<div class="warehouse-name">{{ store.name }}</div>
-			</h6>
-			<h6>{{ warehouseStatusText | translate }}</h6>
-		</div>
-	`,
+		                     <div
+				                     *ngIf="store$ | async as store"
+				                     (click)="redirect()"
+				                     class="redirectBtn"
+		                     >
+			                     <h6>
+				                     <img class="warehouse-image" alt="" src="{{ store.logo }}"/>
+				                     <div class="warehouse-name">{{ store.name }}</div>
+			                     </h6>
+			                     <h6>{{ warehouseStatusText | translate }}</h6>
+		                     </div>
+	                     `,
            })
 export class RedirectStoreComponent implements ViewCell, OnInit
 {
-	value: string | number;
+	public value: string | number;
 	
 	@Input()
-	rowData: any;
-	store$: Observable<Warehouse>;
+	public rowData: any;
+	public store$: Observable<Warehouse>;
 	
 	public warehouseStatusText: string;
 	
@@ -37,7 +49,7 @@ export class RedirectStoreComponent implements ViewCell, OnInit
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.store$ = this.warehousesService.getStoreById(
 				this.rowData.warehouseId
@@ -46,11 +58,16 @@ export class RedirectStoreComponent implements ViewCell, OnInit
 				'STATUS_TEXT.' + this.rowData.warehouseStatusText;
 	}
 	
-	redirect()
+	public get storeId(): string
+	{
+		return this.rowData.warehouseId;
+	}
+	
+	public redirect()
 	{
 		if(this.rowData.warehouseId)
 		{
-			this.router.navigate([`stores/${this.rowData.warehouseId}`]);
+			this.router.navigate([`stores/${this.storeId}`]);
 		}
 	}
 }

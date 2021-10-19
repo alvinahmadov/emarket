@@ -1,21 +1,35 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ViewCell }                 from 'ng2-smart-table';
 import { Router }                   from '@angular/router';
+import { ViewCell }                 from 'ng2-smart-table';
 import { Observable }               from 'rxjs';
 import Carrier                      from '@modules/server.common/entities/Carrier';
 import { CarriersService }          from '@app/@core/data/carriers.service';
 
 @Component({
-	           styleUrls: ['./redirect-carrier.component.scss'],
-	           template:  `
-		                      <div (click)="redirect()" class="redirectBtn">
-			                      <h6 *ngIf="carrier$ | async as carrier">
-				                      <img class="carrier-image" alt="" src="{{ carrier.logo }}"/>
-				                      <div class="carrier-name">{{ carrier.firstName }}</div>
-			                      </h6>
-			                      <h6>{{ carrierStatusText | translate }}</h6>
-		                      </div>
-	                      `,
+	           styles:   [
+		           `
+                       .carrier-name {
+                           padding-top: 5px;
+                           font-weight: bold;
+                       }
+
+                       .carrier-image {
+                           width: 30px;
+                           height: 30px;
+                       }
+		           `
+	           ],
+	           template: `
+		                     <div (click)="redirect()" class="redirectBtn">
+			                     <h6 *ngIf="carrier$ | async as carrier">
+				                     <img class="carrier-image"
+				                          [alt]="carrier.username"
+				                          [src]="carrier.logo"/>
+				                     <div class="carrier-name">{{ carrier.firstName }}</div>
+			                     </h6>
+			                     <h6>{{ carrierStatusText | translate }}</h6>
+		                     </div>
+	                     `,
            })
 export class RedirectCarrierComponent implements ViewCell, OnInit
 {
