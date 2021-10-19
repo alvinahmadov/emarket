@@ -1,39 +1,52 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ViewCell }                 from 'ng2-smart-table';
-import { Router }                   from '@angular/router';
-import { Observable }               from 'rxjs';
-import Warehouse                    from '@modules/server.common/entities/Warehouse';
-import { WarehousesService }        from '../../../../@core/data/warehouses.service';
+import { Component, Input, OnInit }           from '@angular/core';
+import { Router }                             from '@angular/router';
+import { Observable }                         from 'rxjs';
+import { ViewCell }                           from 'ng2-smart-table';
+import { default as Store }                   from '@modules/server.common/entities/Warehouse';
+import { WarehousesService as StoresService } from '@app/@core/data/warehouses.service';
 
 @Component({
-	           templateUrl: './store-order-products.component.html',
+	           template: `
+		                     <div class="product">
+			                     <p *ngIf="store$ | async as store" class="text-center">
+				                     <span (click)="redirect()" class="button-redirect warhouseBtn">
+					                     <span class="productTitle">{{ store.name }}</span>
+				                     </span>
+			                     </p>
+		                     </div>
+	                     `
            })
 export class StoreOrderProductsComponent implements ViewCell, OnInit
 {
-	value: string | number;
-	store$: Observable<Warehouse>;
+	public value: string | number;
+	public store$: Observable<Store>;
 	
 	@Input()
-	rowData: any;
+	public rowData: any;
 	
 	constructor(
 			private readonly router: Router,
-			private readonly warehousesService: WarehousesService
+			private readonly storesService: StoresService
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.store$ = this.warehousesService.getStoreById(
+		this.store$ = this.storesService.getStoreById(
 				this.rowData.warehouseId
 		);
 	}
 	
-	redirect()
+	public get storeId(): string
+	{
+		return this.rowData.warehouseId;
+	}
+	
+	public redirect()
 	{
 		if(this.rowData)
 		{
-			this.router.navigate([`stores/${this.rowData.warehouseId}`]);
+			this.router.navigate([`stores/${this.storeId}`]);
 		}
 	}
 }
