@@ -1,28 +1,28 @@
 import { Component, ViewChild, EventEmitter }  from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal }                      from '@ng-bootstrap/ng-bootstrap';
+import { TranslateService }                    from '@ngx-translate/core';
 import { ToasterService }                      from 'angular2-toaster';
 import { BasicInfoFormComponent }              from '../forms/basic-info';
 import { LocationFormComponent }               from '../../forms/location';
-import { UserAuthRouter }                      from '@modules/client.common.angular2/routers/user-auth-router.service';
-import { TranslateService }                    from '@ngx-translate/core';
+import { CustomerAuthRouter }                  from '@modules/client.common.angular2/routers/customer-auth-router.service';
 
 @Component({
-	           selector: 'ea-user-mutation',
+	           selector:    'ea-user-mutation',
+	           styleUrls:   ['/user-mutation.component.scss'],
 	           templateUrl: './user-mutation.component.html',
-	           styleUrls: ['/user-mutation.component.scss'],
            })
 export class UserMutationComponent
 {
 	@ViewChild('basicInfoForm')
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('locationForm')
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
-	mapTypeEmitter = new EventEmitter<string>();
-	mapCoordEmitter = new EventEmitter<number[]>();
-	mapGeometryEmitter = new EventEmitter<any>();
+	public mapTypeEmitter = new EventEmitter<string>();
+	public mapCoordEmitter = new EventEmitter<number[]>();
+	public mapGeometryEmitter = new EventEmitter<any>();
 	
 	public BUTTON_DONE: string = 'BUTTON_DONE';
 	public BUTTON_NEXT: string = 'BUTTON_NEXT';
@@ -31,7 +31,7 @@ export class UserMutationComponent
 	readonly form: FormGroup = this.formBuilder.group({
 		                                                  basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
 		                                                  apartment: LocationFormComponent.buildApartmentForm(this.formBuilder),
-		                                                  location: LocationFormComponent.buildForm(this.formBuilder),
+		                                                  location:  LocationFormComponent.buildForm(this.formBuilder),
 	                                                  });
 	
 	readonly basicInfo = this.form.get('basicInfo') as FormControl;
@@ -41,7 +41,7 @@ export class UserMutationComponent
 	public loading: boolean;
 	
 	constructor(
-			protected readonly userAuthRouter: UserAuthRouter,
+			protected readonly customerAuthRouter: CustomerAuthRouter,
 			private readonly toasterService: ToasterService,
 			private readonly activeModal: NgbActiveModal,
 			private readonly formBuilder: FormBuilder,
@@ -49,37 +49,37 @@ export class UserMutationComponent
 	)
 	{}
 	
-	get buttonDone()
+	public get buttonDone()
 	{
 		return this._translate(this.BUTTON_DONE);
 	}
 	
-	get buttonNext()
+	public get buttonNext()
 	{
 		return this._translate(this.BUTTON_NEXT);
 	}
 	
-	get buttonPrevious()
+	public get buttonPrevious()
 	{
 		return this._translate(this.BUTTON_PREV);
 	}
 	
-	onCoordinatesChanges(coords: number[])
+	public onCoordinatesChanges(coords: number[])
 	{
 		this.mapCoordEmitter.emit(coords);
 	}
 	
-	onGeometrySend(geometry: any)
+	public onGeometrySend(geometry: any)
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	emitMapType(mapType: string)
+	public emitMapType(mapType: string)
 	{
 		this.mapTypeEmitter.emit(mapType);
 	}
 	
-	async create()
+	public async create()
 	{
 		try
 		{
@@ -87,15 +87,25 @@ export class UserMutationComponent
 			
 			// GeoJSON in MongoDB save coordinates lng-lat, but locationForm return lat-lng for that we reverse them
 			const location = this.locationForm.getValue();
-			location.loc.coordinates.reverse();
+			// location.loc.coordinates.reverse();
 			
-			const user = await this.userAuthRouter.register({
-				                                                user: {
-					                                                ...this.basicInfoForm.getValue(),
-					                                                geoLocation: location,
-					                                                apartment: this.locationForm.getApartment(),
-				                                                },
-			                                                });
+			const userInfo = this.basicInfoForm.getValue();
+			let username = userInfo.username;
+			if(userInfo.lastName)
+				username += ' ' + userInfo.lastName;
+			
+			const user = await this.customerAuthRouter.register({
+				                                                    user:     {
+					                                                    username:    username,
+					                                                    email:       userInfo.email,
+					                                                    firstName:   userInfo.firstName,
+					                                                    lastName:    userInfo.lastName,
+					                                                    avatar:      userInfo.avatar,
+					                                                    geoLocation: location,
+					                                                    apartment:   this.locationForm.getApartment(),
+				                                                    },
+				                                                    password: this.basicInfoForm.password.value
+			                                                    });
 			this.loading = false;
 			this.toasterService.pop(
 					'success',
@@ -112,7 +122,7 @@ export class UserMutationComponent
 		}
 	}
 	
-	cancel()
+	public cancel()
 	{
 		this.activeModal.dismiss('canceled');
 	}
