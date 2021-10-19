@@ -1,111 +1,146 @@
 import {
 	Component,
 	Input,
-	OnDestroy,
 	ViewChild,
 	ElementRef,
-	AfterViewInit,
 	OnInit,
-}                                         from '@angular/core';
+	OnDestroy,
+	AfterViewInit,
+}                                from '@angular/core';
 import {
 	FormBuilder,
 	FormGroup,
 	Validators,
 	FormControl,
 	AbstractControl,
-}                                         from '@angular/forms';
-import { Subject }                        from 'rxjs';
-import { IUserCreateObject }              from '@modules/server.common/interfaces/IUser';
-import { UsersService }                   from '../../../../@core/data/users.service';
-import { FormHelpers }                    from '../../../forms/helpers';
-import { ActivatedRoute }                 from '@angular/router';
+}                                from '@angular/forms';
+import { ActivatedRoute }        from '@angular/router';
+import { TranslateService }      from '@ngx-translate/core';
+import { Subject }               from 'rxjs';
+import { first, debounceTime }   from 'rxjs/operators';
 import 'rxjs/add/operator/debounceTime';
-import { TranslateService }               from '@ngx-translate/core';
-import { first, takeUntil, debounceTime } from 'rxjs/operators';
+import { ICustomerCreateObject } from '@modules/server.common/interfaces/ICustomer';
+import { CustomersService }      from '@app/@core/data/customers.service';
+import { FormHelpers }           from '../../../forms/helpers';
 
-export type CustomerBasicInfo = Pick<IUserCreateObject,
-		'firstName' | 'lastName' | 'email' | 'image'>;
+export type CustomerBasicInfo = Pick<ICustomerCreateObject,
+		'username' | 'firstName' | 'lastName' | 'email' | 'avatar'>;
 
 @Component({
-	           selector: 'ea-user-basic-info-form',
-	           styleUrls: ['./basic-info-form.component.scss'],
+	           selector:    'ea-user-basic-info-form',
+	           styleUrls:   ['./basic-info-form.component.scss'],
 	           templateUrl: 'basic-info-form.component.html',
            })
 export class BasicInfoFormComponent
 		implements OnInit, OnDestroy, AfterViewInit
 {
-	private static _usersService: UsersService;
+	private static _customersService: CustomersService;
 	private static _customerId: string;
+	
 	@ViewChild('logoImagePreview')
-	logoImagePreview: ElementRef;
+	public logoImagePreview: ElementRef;
+	
 	@Input()
-	readonly form: FormGroup;
+	public readonly form: FormGroup;
+	
 	@Input()
-	showBasicInfoLabel: boolean = false;
-	uploaderPlaceholder: string;
+	public showBasicInfoLabel: boolean = false;
+	
+	public uploaderPlaceholder: string;
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(
 			private translateService: TranslateService,
-			private readonly _usersService: UsersService,
+			private readonly _customersService: CustomersService,
 			private readonly _route: ActivatedRoute
 	)
 	{
 		const customerId = this._route.snapshot.paramMap.get('id');
-		BasicInfoFormComponent.initialize(this._usersService, customerId);
+		BasicInfoFormComponent.initialize(this._customersService, customerId);
 	}
 	
-	get firstName()
+	public ngOnInit(): void
+	{
+		this.getUploaderPlaceholderText();
+	}
+	
+	public ngAfterViewInit()
+	{
+		this._setupUserLogoUrlValidation();
+	}
+	
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+		BasicInfoFormComponent.destroy();
+	}
+	
+	public get username(): AbstractControl
+	{
+		return this.form.get('username');
+	}
+	
+	public get firstName(): AbstractControl
 	{
 		return this.form.get('firstName');
 	}
 	
-	get lastName()
+	public get lastName(): AbstractControl
 	{
 		return this.form.get('lastName');
 	}
 	
-	get image()
+	public get avatar(): AbstractControl
 	{
-		return this.form.get('image');
+		return this.form.get('avatar');
 	}
 	
-	get showLogoMeta()
+	public get showLogoMeta(): boolean
 	{
-		return this.image && this.image.value !== '';
+		return this.avatar && this.avatar.value !== '';
 	}
 	
-	get email()
+	public get email(): AbstractControl
 	{
 		return this.form.get('email');
 	}
 	
-	static initialize(usersService: UsersService, customerId: string)
+	public get password(): AbstractControl
 	{
-		this._usersService = usersService;
+		return this.form.get('password');
+	}
+	
+	public static initialize(customersService: CustomersService, customerId: string)
+	{
+		this._customersService = customersService;
 		this._customerId = customerId;
 	}
 	
-	static destroy()
+	public static destroy()
 	{
-		BasicInfoFormComponent._usersService = null;
+		BasicInfoFormComponent._customersService = null;
 		BasicInfoFormComponent._customerId = null;
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		const emailSearch$ = new Subject();
 		let isSearchRdy = false;
 		
 		return formBuilder.group({
-			                         firstName: [''],
-			                         lastName: [''],
-			                         image: [''],
-			                         email: [
+			                         password:  [
+				                         null,
+				                         [
+					                         Validators.required,
+					                         Validators.minLength(5)
+				                         ],
+			                         ],
+			                         email:     [
 				                         '',
 				                         [
-					                         (control: AbstractControl) =>
-							                         control.value ? Validators.email(control) : null,
+					                         Validators.required,
+					                         Validators.email,
 				                         ],
 				                         async(ctrlEmail: FormControl) =>
 				                         {
@@ -115,12 +150,12 @@ export class BasicInfoFormComponent
 								                         .pipe(debounceTime(500))
 								                         .subscribe(async() =>
 								                                    {
-									                                    const hasExistedEmail = await this._usersService
-									                                                                      .isUserExists({
-										                                                                                    exceptCustomerId: this._customerId,
-										                                                                                    memberKey: 'email',
-										                                                                                    memberValue: ctrlEmail.value,
-									                                                                                    })
+									                                    const hasExistedEmail = await this._customersService
+									                                                                      .isCustomerExists({
+										                                                                                        exceptCustomerId: this._customerId,
+										                                                                                        memberKey:        'email',
+										                                                                                        memberValue:      ctrlEmail.value,
+									                                                                                        })
 									                                                                      .toPromise();
 									
 									                                    if(hasExistedEmail)
@@ -142,58 +177,47 @@ export class BasicInfoFormComponent
 					                         }
 				                         },
 			                         ],
+			                         firstName: [''],
+			                         lastName:  [''],
+			                         avatar:    [''],
 		                         });
 	}
 	
-	ngOnInit(): void
-	{
-		this.getUploaderPlaceholderText();
-	}
-	
-	ngAfterViewInit()
-	{
-		this._setupUserLogoUrlValidation();
-	}
-	
-	getValue(): CustomerBasicInfo
+	public getValue(): CustomerBasicInfo
 	{
 		const basicInfo = this.form.getRawValue() as {
+			email: string;
 			firstName: string;
 			lastName: string;
-			image: string;
-			email: string;
+			avatar: string;
 		};
 		
 		return {
-			...(basicInfo.firstName ? { firstName: basicInfo.firstName } : {}),
-			...(basicInfo.lastName ? { lastName: basicInfo.lastName } : {}),
-			...(basicInfo.image ? { image: basicInfo.image } : {}),
-			...(basicInfo.email ? { email: basicInfo.email } : {}),
+			email:     basicInfo.email,
+			username:  basicInfo.email,
+			firstName: basicInfo.firstName ?? "",
+			lastName:  basicInfo.lastName ?? "",
+			avatar:    basicInfo.avatar ?? "https://via.placeholder.com/60x60"
 		};
 	}
 	
-	setValue<T extends CustomerBasicInfo>(basicInfo: T)
+	public setValue<T extends CustomerBasicInfo>(basicInfo: T)
 	{
 		FormHelpers.deepMark(this.form, 'dirty');
 		
-		this.form.setValue({
-			                   firstName: basicInfo.firstName ? basicInfo.firstName : '',
-			                   lastName: basicInfo.lastName ? basicInfo.lastName : '',
-			                   image: basicInfo.image ? basicInfo.image : '',
-			                   email: basicInfo.email ? basicInfo.email : '',
-		                   });
+		const formValue = {
+			email:     basicInfo.email ? basicInfo.email : '',
+			firstName: basicInfo.firstName ? basicInfo.firstName : '',
+			lastName:  basicInfo.lastName ? basicInfo.lastName : '',
+			avatar:    basicInfo.avatar ? basicInfo.avatar : '',
+		};
+		
+		this.form.setValue(formValue);
 	}
 	
-	deleteImg()
+	public deleteImg()
 	{
-		this.image.setValue('');
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-		BasicInfoFormComponent.destroy();
+		this.avatar.setValue('');
 	}
 	
 	private _setupUserLogoUrlValidation()
@@ -202,7 +226,7 @@ export class BasicInfoFormComponent
 		{
 			if(this.showLogoMeta)
 			{
-				this.image.setErrors(null);
+				this.avatar.setErrors(null);
 			}
 		};
 		
@@ -210,7 +234,7 @@ export class BasicInfoFormComponent
 		{
 			if(this.showLogoMeta)
 			{
-				this.image.setErrors({ invalidUrl: true });
+				this.avatar.setErrors({ invalidUrl: true });
 			}
 		};
 	}
