@@ -6,33 +6,46 @@ import { ProductLocalesService }         from '@modules/client.common.angular2/l
 import { IProductsCategoryCreateObject } from '@modules/server.common/interfaces/IProductsCategory';
 import ProductsCategory                  from '@modules/server.common/entities/ProductsCategory';
 import { CommonUtils }                   from '@modules/server.common/utilities';
-import { GQLMutations, GQLQueries }      from '@modules/server.common/utilities/graphql';
+import ApolloService                     from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation, GQLQuery }         from 'graphql/definitions';
+
+interface IRemoveResponse
+{
+	n?: number
+	ok?: number
+}
 
 @Injectable()
-export class ProductsCategoryService
+export class ProductsCategoryService extends ApolloService
 {
 	constructor(
-			private readonly apollo: Apollo,
+			apollo: Apollo,
 			private readonly productLocalesService: ProductLocalesService
 	)
-	{}
+	{
+		super(apollo,
+		      {
+			      serviceName:  "Admin::ProductsCategoryService",
+			      pollInterval: 5000
+		      });
+	}
 	
-	getCategories(): Observable<ProductsCategory[]>
+	public getCategories(): Observable<ProductsCategory[]>
 	{
 		return this.apollo
 		           .watchQuery<{
 			           productsCategories: ProductsCategory[]
 		           }>({
-			              query: GQLQueries.ProductCategoryAllWithImage,
-			              pollInterval: 1000,
+			              query:        GQLQuery.ProductCategory.GetAllWithImage,
+			              pollInterval: this.pollInterval,
 		              })
 		           .valueChanges.pipe(
-						map((res) => res.data.productsCategories),
+						map((result) => this.get(result)),
 						share()
 				);
 	}
 	
-	create(
+	public create(
 			productsCategory: IProductsCategoryCreateObject
 	): Observable<ProductsCategory>
 	{
@@ -41,18 +54,17 @@ export class ProductsCategoryService
 		           .mutate<{
 			           productsCategory: IProductsCategoryCreateObject
 		           }>({
-			              mutation: GQLMutations.ProductCategoryCreate,
-			              variables: {
-				              productsCategory,
-			              },
+			              mutation:  GQLMutation.ProductCategory.Create,
+			              variables: { productsCategory },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.createProductsCategory),
+				           map((result) => <ProductsCategory>
+						           this.factory(result, ProductsCategory)),
 				           share()
 		           );
 	}
 	
-	update(
+	public update(
 			id: string,
 			productsCategory: IProductsCategoryCreateObject
 	): Observable<ProductsCategory>
@@ -60,31 +72,37 @@ export class ProductsCategoryService
 		this.getDefaultImage(productsCategory);
 		return this.apollo
 		           .mutate<{
-			           id: string;
 			           productsCategory: IProductsCategoryCreateObject;
 		           }>({
-			              mutation: GQLMutations.ProductCategoryUpdate,
+			              mutation:  GQLMutation.ProductCategory.Update,
 			              variables: {
 				              id,
 				              productsCategory,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.updateProductsCategory),
+				           map((result) => <ProductsCategory>
+						           this.factory(result, ProductsCategory)),
 				           share()
 		           );
 	}
 	
-	removeByIds(ids: string[])
+	public removeByIds(ids: string[]): Observable<IRemoveResponse>
 	{
 		return this.apollo
-		           .mutate({
-			                   mutation: GQLMutations.ProductsCategoryRemoveByIds,
-			                   variables: { ids },
-		                   });
+		           .mutate<{
+			           response: IRemoveResponse
+		           }>({
+			              mutation:  GQLMutation.ProductCategory.RemoveByIds,
+			              variables: { ids },
+		              })
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
-	private getDefaultImage(data: IProductsCategoryCreateObject)
+	private getDefaultImage(data: IProductsCategoryCreateObject): void
 	{
 		if(!data.image)
 		{
