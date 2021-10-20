@@ -1,20 +1,28 @@
-import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
-import Order          from '@modules/server.common/entities/Order';
-import { map, share } from 'rxjs/operators';
-import IGeoLocation   from '@modules/server.common/interfaces/IGeoLocation';
-import { Observable } from 'rxjs';
+import { Injectable }     from '@angular/core';
+import { Apollo }         from 'apollo-angular';
+import { Observable }     from 'rxjs';
+import { map, share }     from 'rxjs/operators';
+import IGeoLocation       from '@modules/server.common/interfaces/IGeoLocation';
+import IPaginationOptions from '@modules/server.common/interfaces/IPaginationOptions';
+import Order              from '@modules/server.common/entities/Order';
+import ApolloService      from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }       from 'graphql/definitions';
 
 @Injectable()
-export class GeoLocationOrdersService
+export class GeoLocationOrdersService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName: "Admin::GeoLocationOrdersService"
+		      });
+	}
 	
-	getOrdersForWork(
+	public getOrdersForWork(
 			geoLocation: IGeoLocation,
-			skippedOrderIds: string[] = [],
-			options: { sort?: string; skip?: number; limit?: number } = {
+			skippedOrderIds: string[]   = [],
+			options: IPaginationOptions = {
 				sort: 'asc',
 			},
 			searchObj?: { byRegex: Array<{ key: string; value: string }> }
@@ -24,29 +32,31 @@ export class GeoLocationOrdersService
 		           .watchQuery<{
 			           getOrdersForWork: Order[]
 		           }>({
-			              query: GQLQueries.GeoLocationOrdersForTask,
-			              variables: { geoLocation, skippedOrderIds, options, searchObj },
-			              pollInterval: 1000,
+			              query:        GQLQuery.GeoLocation.Order.ForWork,
+			              variables:    { geoLocation, skippedOrderIds, options, searchObj },
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.getOrdersForWork),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
 	async getCountOfOrdersForWork(
 			geoLocation: IGeoLocation,
 			skippedOrderIds: string[] = [],
 			searchObj?: { byRegex: Array<{ key: string; value: string }> }
-	)
+	): Promise<number>
 	{
-		const res = await this.apollo
-		                      .query({
-			                             query: GQLQueries.GeoLocationOrdersForTaskCount,
-			                             variables: { geoLocation, skippedOrderIds, searchObj },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfOrdersForWork'];
+		return await this.apollo
+		                 .query<{
+			                 count: number
+		                 }>({
+			                    query:     GQLQuery.GeoLocation.Order.ForWorkCount,
+			                    variables: { geoLocation, skippedOrderIds, searchObj },
+		                    })
+		                 .pipe(map((result) => this.get(result)))
+		                 .toPromise();
 	}
 }
