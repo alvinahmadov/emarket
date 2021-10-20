@@ -1,20 +1,23 @@
-import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
+import {
+	Component, Input,
+	OnChanges, OnDestroy
+}                                         from '@angular/core';
 import {
 	FormGroup,
 	AbstractControl,
 	FormBuilder,
 	Validators,
-}                                                 from '@angular/forms';
-import Admin                                      from '@modules/server.common/entities/Admin';
-import { takeUntil, first, debounceTime }         from 'rxjs/operators';
-import { Subject }                                from 'rxjs';
-import { IAdminUpdateObject }                     from '@modules/server.common/interfaces/IAdmin';
-import { AdminsService }                          from '../../../../@core/data/admins.service';
-import { CommonUtils }                            from '@modules/server.common/utilities';
-import { ToasterService }                         from 'angular2-toaster';
-import { TranslateService }                       from '@ngx-translate/core';
+}                                         from '@angular/forms';
+import { TranslateService }               from '@ngx-translate/core';
+import { ToasterService }                 from 'angular2-toaster';
+import { Subject }                        from 'rxjs';
+import { takeUntil, first, debounceTime } from 'rxjs/operators';
+import { IAdminUpdateObject }             from '@modules/server.common/interfaces/IAdmin';
+import Admin                              from '@modules/server.common/entities/Admin';
+import { CommonUtils }                    from '@modules/server.common/utilities';
 import 'rxjs/add/operator/debounceTime';
-import { Store }                                  from '@app/@core/data/store.service';
+import { AdminsService }                  from '@app/@core/data/admins.service';
+import { StorageService }                 from '@app/@core/data/store.service';
 
 @Component({
 	           selector:    'ea-basic-info',
@@ -24,25 +27,25 @@ import { Store }                                  from '@app/@core/data/store.se
 export class BasicInfoComponent implements OnChanges, OnDestroy
 {
 	@Input()
-	admin: Admin;
+	public admin: Admin;
 	
-	uploaderPlaceholder: string;
-	basicInfoForm: FormGroup;
-	usernameControl: AbstractControl;
-	emailControl: AbstractControl;
-	avatarControl: AbstractControl;
-	firstNameControl: AbstractControl;
-	lastNameControl: AbstractControl;
+	public uploaderPlaceholder: string;
+	public basicInfoForm: FormGroup;
+	public usernameControl: AbstractControl;
+	public emailControl: AbstractControl;
+	public avatarControl: AbstractControl;
+	public firstNameControl: AbstractControl;
+	public lastNameControl: AbstractControl;
 	
-	usernameErrorMsg: string;
-	emailErrorMsg: string;
-	firstNameErrorMsg: string;
-	lastNameErrorMsg: string;
-	INVALID_EMAIL_ADDRESS: string = 'INVALID_EMAIL_ADDRESS';
-	INVALID_URL: string = 'INVALID_URL';
-	NAME_MUST_CONTAIN_ONLY_LETTERS: string = 'NAME_MUST_CONTAIN_ONLY_LETTERS';
-	PREFIX: string = 'PROFILE_VIEW.';
-	loading: boolean;
+	public usernameErrorMsg: string;
+	public emailErrorMsg: string;
+	public firstNameErrorMsg: string;
+	public lastNameErrorMsg: string;
+	public INVALID_EMAIL_ADDRESS: string = 'INVALID_EMAIL_ADDRESS';
+	public INVALID_URL: string = 'INVALID_URL';
+	public NAME_MUST_CONTAIN_ONLY_LETTERS: string = 'NAME_MUST_CONTAIN_ONLY_LETTERS';
+	public PREFIX: string = 'PROFILE_VIEW.';
+	public loading: boolean;
 	
 	private ngDestroy$ = new Subject<void>();
 	// Use "errors[0]" because to show messages one by one till all are fixed
@@ -114,7 +117,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 			private formBuilder: FormBuilder,
 			private adminsService: AdminsService,
 			private toasterService: ToasterService,
-			private storageService: Store,
+			private storageService: StorageService,
 			private _translateService: TranslateService
 	)
 	{
@@ -126,14 +129,14 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		this.loadControls();
 	}
 	
-	get pictureUrlErrorMsg()
+	public get pictureUrlErrorMsg()
 	{
 		return this.avatarControl.errors.pattern
 		       ? this.invalidURL()
 		       : Object.keys(this.avatarControl.errors)[0];
 	}
 	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		this._applyTranslationOnSmartTable();
 		if(this.admin)
@@ -146,30 +149,30 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		}
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy(): void
 	{
 		this.ngDestroy$.next();
 		this.ngDestroy$.complete();
 	}
 	
-	invalidEmailAddress()
+	public invalidEmailAddress(): string
 	{
 		return this._translate(this.PREFIX + this.INVALID_EMAIL_ADDRESS);
 	}
 	
-	invalidURL()
+	public invalidURL(): string
 	{
 		return this._translate(this.PREFIX + this.INVALID_URL);
 	}
 	
-	nameMustContainOnlyLetters()
+	public nameMustContainOnlyLetters(): string
 	{
 		return this._translate(
 				this.PREFIX + this.NAME_MUST_CONTAIN_ONLY_LETTERS
 		);
 	}
 	
-	async saveChanges()
+	public async saveChanges()
 	{
 		try
 		{
@@ -188,7 +191,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		}
 	}
 	
-	buildForm()
+	public buildForm()
 	{
 		const imgUrlRegex: RegExp = new RegExp(
 				`(http(s?):)s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|svg))`
@@ -206,7 +209,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		);
 	}
 	
-	bindFormControls()
+	public bindFormControls()
 	{
 		this.usernameControl = this.basicInfoForm.get('username');
 		this.emailControl = this.basicInfoForm.get('email');
@@ -215,7 +218,7 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		this.lastNameControl = this.basicInfoForm.get('lastName');
 	}
 	
-	loadControls()
+	public loadControls()
 	{
 		this.validations.usernameControl();
 		this.validations.emailControl();
@@ -224,13 +227,13 @@ export class BasicInfoComponent implements OnChanges, OnDestroy
 		this.validations.avatarControl();
 	}
 	
-	deleteImg()
+	public deleteImg()
 	{
 		this.avatarControl.setValue('');
 		this.basicInfoForm.markAsDirty();
 	}
 	
-	loadClass(control: AbstractControl)
+	public loadClass(control: AbstractControl)
 	{
 		return control.dirty || control.touched
 		       ? control.errors
