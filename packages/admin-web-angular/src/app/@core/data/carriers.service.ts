@@ -1,122 +1,132 @@
-import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import Carrier        from '@modules/server.common/entities/Carrier';
-import { map, share } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import ICarrier       from '@modules/server.common/interfaces/ICarrier';
-import IPagingOptions from '@modules/server.common/interfaces/IPagingOptions';
-import {
-	GQLQueries,
-	GQLMutations,
-}                     from '@modules/server.common/utilities/graphql';
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { map, share }            from 'rxjs/operators';
+import ICarrier                  from '@modules/server.common/interfaces/ICarrier';
+import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
+import Carrier                   from '@modules/server.common/entities/Carrier';
+import Order                     from '@modules/server.common/entities/Order';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation, GQLQuery } from 'graphql/definitions';
 
 @Injectable()
-export class CarriersService
+export class CarriersService extends ApolloService
 {
 	private readonly carriers$: Observable<Carrier[]>;
 	
-	constructor(private readonly _apollo: Apollo)
+	constructor(apollo: Apollo)
 	{
-		this.carriers$ = this._apollo
+		super(apollo,
+		      {
+			      serviceName:  CarriersService.name,
+			      pollInterval: 3000
+		      });
+		this.carriers$ = this.apollo
 		                     .watchQuery<{
-			                     getCarriers: ICarrier[]
+			                     carriers: ICarrier[]
 		                     }>({
-			                        query: GQLQueries.CarrierAll,
-			                        pollInterval: 1000,
+			                        query:        GQLQuery.Carrier.GetAll,
+			                        pollInterval: this.pollInterval,
 		                        })
-		                     .valueChanges.pipe(
-						map((res) => res.data.getCarriers),
-						map((carriers) => carriers.map((c) => this._carrierFactory(c))),
-						share()
-				);
+		                     .valueChanges
+		                     .pipe(
+				                     map((res) => <Carrier[]>
+						                     this.factory(res, Carrier)),
+				                     share()
+		                     );
 	}
 	
-	getAllCarriers(): Observable<Carrier[]>
+	public getAllCarriers(): Observable<Carrier[]>
 	{
 		return this.carriers$;
 	}
 	
-	getCarriers(
+	public getCarriers(
 			pagingOptions?: IPagingOptions,
 			carriersFindInput?: any
 	): Observable<Carrier[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
-			           getCarriers: ICarrier[]
+			           carriers: ICarrier[]
 		           }>({
-			              query: GQLQueries.CarrierCarriersBy,
-			              variables: { pagingOptions, carriersFindInput },
-			              pollInterval: 2000,
+			              query:        GQLQuery.Carrier.Find,
+			              variables:    {
+				              pagingOptions,
+				              carriersFindInput
+			              },
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.getCarriers),
-						map((carriers) => carriers.map((c) => this._carrierFactory(c))),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((result) => <Carrier[]>
+						           this.factory(result, Carrier)),
+				           share()
+		           );
 	}
 	
-	removeByIds(ids: string[]): Observable<any>
+	public removeByIds(ids: string[]): Observable<any>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate({
-			                   mutation: GQLMutations.AdminRemoveCarriersByIds,
+			                   mutation:  GQLMutation.Carrier.RemoveByIds,
 			                   variables: { ids },
 		                   });
 	}
 	
-	getCarrierByUsername(username: string): Observable<any>
+	public getCarrierByUsername(username: string): Observable<Carrier | null>
 	{
-		return this._apollo
-		           .query({
-			                  query: GQLQueries.CarrierByUsername,
-			                  variables: { username },
-		                  })
+		return this.apollo
+		           .query<{
+			           carrier: Carrier
+		           }>({
+			              query:     GQLQuery.Carrier.GetByUsername,
+			              variables: { username },
+		              })
 		           .pipe(
-				           map((res) => res.data['getCarrierByUsername']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	getCarrierById(id: string): Observable<any>
+	public getCarrierById(id: string): Observable<Carrier | null>
 	{
-		return this._apollo
-		           .query({
-			                  query: GQLQueries.CarrierById,
-			                  variables: { id },
-		                  })
+		return this.apollo
+		           .query<{
+			           carrier: Carrier
+		           }>({
+			              query:     GQLQuery.Carrier.GetById,
+			              variables: { id },
+		              })
 		           .pipe(
-				           map((res) => res.data['getCarrier']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	async getCarrierCurrentOrder(carrierId: string): Promise<any>
+	public async getCarrierCurrentOrder(carrierId: string): Promise<Order | null>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.CarrierCurrentOrder,
-			                             variables: { carrierId },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCarrierCurrentOrder'];
+		return this.apollo
+		           .query<{
+			           order: Order
+		           }>({
+			              query:     GQLQuery.Carrier.GetCurrentOrder,
+			              variables: { carrierId },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 	
-	async getCountOfCarriers(carriersFindInput?: any): Promise<any>
+	public async getCountOfCarriers(carriersFindInput?: any): Promise<number>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.CarrierCount,
-			                             variables: { carriersFindInput },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfCarriers'];
-	}
-	
-	protected _carrierFactory(carrier: ICarrier)
-	{
-		return carrier == null ? null : new Carrier(carrier);
+		return this.apollo
+		           .query<{
+			           count: number
+		           }>({
+			              query:     GQLQuery.Carrier.Count,
+			              variables: { carriersFindInput },
+		              })
+		           .pipe(map(result => this.get(result)))
+		           .toPromise();
 	}
 }
