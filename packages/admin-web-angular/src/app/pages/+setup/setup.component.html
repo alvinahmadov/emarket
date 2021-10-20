@@ -1,24 +1,31 @@
 <nb-card [nbSpinner]="loading" class="col-12">
-    <nb-card-header>
-        <h1>{{ 'FAKE_DATA.SETUP' | translate }}</h1>
-    </nb-card-header>
-
-    <nb-card-body>
-        <button
-                (click)="navigateToFakeDataPage()"
-                [disabled]="!fakeDataGenerator"
-                class="mr-3"
-                nbButton
-                status="primary"
-        >
-            {{ 'FAKE_DATA.GENERATE_INITIAL_DATA' | translate }}
-        </button>
-        <button
-                (click)="navigateToSetupMerchantsPage()"
-                nbButton
-                status="primary"
-        >
-            {{ 'FAKE_DATA.SETUP_MERCHANTS.SETUP_MERCHANTS' | translate }}
-        </button>
-    </nb-card-body>
+	<nb-card-header>
+		<h1>{{ 'FAKE_DATA.SETUP' | translate }}</h1>
+	</nb-card-header>
+	<nb-card-body>
+		<button
+				(click)="navigateToFakeDataPage()"
+				*ngIf="fakeDataGenerator"
+				class="mr-3"
+				nbButton
+				status="primary"
+		>
+			{{ 'FAKE_DATA.GENERATE_INITIAL_DATA' | translate }}
+		</button>
+		<button
+				(click)="navigateToSetupMarketPage()"
+				nbButton
+				class="mr-3"
+				status="primary"
+		>
+			{{ 'SETTINGS_VIEW.SETUP_MARKET.TITLE' | translate }}
+		</button>
+		<button
+				(click)="navigateToSetupMerchantsPage()"
+				nbButton
+				status="primary"
+		>
+			{{ 'FAKE_DATA.SETUP_MERCHANTS.SETUP_MERCHANTS' | translate }}
+		</button>
+	</nb-card-body>
 </nb-card>
