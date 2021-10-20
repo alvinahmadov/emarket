@@ -1,46 +1,50 @@
 import { Component, Input, ViewChild, OnChanges } from '@angular/core';
 import { first }                                  from 'rxjs/operators';
 import { CurrenciesService }                      from '@app/@core/data/currencies.service';
+import { getCurrency }                            from '@modules/server.common/data/currencies';
 import IPaymentGatewayCreateObject                from '@modules/server.common/interfaces/IPaymentGateway';
+import Country                                    from '@modules/server.common/enums/Country';
 import PaymentGateways                            from '@modules/server.common/enums/PaymentGateways';
-import { Country }                                from '@modules/server.common/entities';
+import Currency                                   from '@modules/server.common/entities/Currency';
 import Warehouse                                  from '@modules/server.common/entities/Warehouse';
-import { countriesDefaultCurrencies }             from '@modules/server.common/entities/Currency';
 import { StripeGatewayComponent }                 from './stripe-gateway/stripe-gateway.component';
 import { PayPalGatewayComponent }                 from './paypal-gateway/paypal-gateway.component';
 import { YooMoneyGatewayComponent }               from './yoomoney-gateway/yoomoney-gateway.component';
 import { BitpayGatewayComponent }                 from './bitpay-gateway/bitpay-gateway.component';
 
 @Component({
-	           selector: 'ea-payment-gateways',
+	           selector:    'ea-payment-gateways',
 	           templateUrl: './payment-gateways.component.html',
            })
 export class PaymentGatewaysComponent implements OnChanges
 {
 	@ViewChild('stripeGateway')
-	stripeGateway: StripeGatewayComponent;
+	public stripeGateway: StripeGatewayComponent;
 	
 	@ViewChild('payPalGateway')
-	payPalGateway: PayPalGatewayComponent;
+	public payPalGateway: PayPalGatewayComponent;
 	
 	@ViewChild('yooMoneyGateway')
-	yooMoneyGateway: YooMoneyGatewayComponent;
+	public yooMoneyGateway: YooMoneyGatewayComponent;
 	
 	@ViewChild('bitpayGateway')
-	bitpayGateway: BitpayGatewayComponent;
+	public bitpayGateway: BitpayGatewayComponent;
 	
 	@Input()
-	warehouseLogo: string;
-	@Input()
-	warehouseCountry: Country;
-	@Input()
-	isEdit: boolean;
+	public warehouseLogo: string;
 	
-	currenciesCodes: string[] = [];
+	@Input()
+	public warehouseCountry: Country;
+	
+	@Input()
+	public isEdit: boolean;
+	
+	public currencies: Currency[] = [];
+	public locale: string = 'ru-RU';
 	
 	public constructor(private currenciesService: CurrenciesService)
 	{
-		this.loadCurrenciesCodes().then().catch(e => console.log(e));
+		this.loadCurrenciesCodes();
 	}
 	
 	public get isValid(): boolean
@@ -135,8 +139,7 @@ export class PaymentGatewaysComponent implements OnChanges
 		
 		if(merchantCountry)
 		{
-			const defaultCurrency =
-					countriesDefaultCurrencies[merchantCountry.toString()] || '';
+			const defaultCurrency = getCurrency(merchantCountry.toString()).code || 'RUB';
 			
 			if(
 					this.stripeGateway &&
@@ -216,14 +219,14 @@ export class PaymentGatewaysComponent implements OnChanges
 	
 	private async loadCurrenciesCodes()
 	{
-		const res: any = await this.currenciesService
-		                           .getCurrencies()
-		                           .pipe(first())
-		                           .toPromise();
+		const currencies: Currency[] = await this.currenciesService
+		                                         .getCurrencies()
+		                                         .pipe(first())
+		                                         .toPromise();
 		
-		if(res)
+		if(currencies)
 		{
-			this.currenciesCodes = res.map(r => r.currencyCode);
+			this.currencies = currencies;
 		}
 	}
 }
