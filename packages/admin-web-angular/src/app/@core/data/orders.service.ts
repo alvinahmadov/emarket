@@ -1,202 +1,222 @@
-import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import Order          from '@modules/server.common/entities/Order';
-import { map, share } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
+import { Injectable }         from '@angular/core';
+import { Apollo }             from 'apollo-angular';
+import { ApolloQueryResult, } from 'apollo-client';
+import { Observable }         from 'rxjs';
+import { map, share }         from 'rxjs/operators';
+import Order                  from '@modules/server.common/entities/Order';
+import ApolloService          from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }           from 'graphql/definitions';
+
+interface ICompletedOrderInfo
+{
+	totalOrders: number
+	totalRevenue: number
+}
+
+interface IOrderCountTnfo
+{
+	id?: string
+	ordersCount?: number
+}
 
 @Injectable()
-export class OrdersService
+export class OrdersService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
-	
-	generatePastOrdersPerCarrier()
+	constructor(apollo: Apollo)
 	{
-		return this._apollo
+		super(apollo,
+		      {
+			      serviceName:  "Admin::OrdersService",
+			      pollInterval: 5000
+		      });
+	}
+	
+	public addOrdersToTake(): Observable<ApolloQueryResult<void>>
+	{
+		return this.apollo
 		           .query({
-			                  query: GQLQueries.OrderPastGeneratePerCarrier,
+			                  query: GQLQuery.Order.AddToTake,
 		                  });
 	}
 	
-	generateActiveAndAvailableOrdersPerCarrier()
+	public addTakenOrders(carrierIds: string[]): Observable<ApolloQueryResult<void>>
 	{
-		return this._apollo
+		return this.apollo
 		           .query({
-			                  query: GQLQueries.OrderGenerateActiveAndAvailablePerCarrier,
-		                  });
-	}
-	
-	addOrdersToTake(): Observable<any>
-	{
-		return this._apollo
-		           .query({
-			                  query: GQLQueries.OrderAddToTake,
-		                  });
-	}
-	
-	addTakenOrders(carrierIds: string[]): Observable<any>
-	{
-		return this._apollo
-		           .query({
-			                  query: GQLQueries.OrderAddTaken,
+			                  query:     GQLQuery.Order.AddTaken,
 			                  variables: { carrierIds },
 		                  });
 	}
 	
-	generateRandomOrdersCurrentStore(
+	public generateRandomOrdersCurrentStore(
 			storeId: string,
 			storeCreatedAt: Date,
 			ordersLimit: number
 	): Observable<{ error: boolean; message: string }>
 	{
-		return this._apollo
+		return this.apollo
 		           .query<{
 			           generateRandomOrdersCurrentStore: {
 				           error: boolean;
 				           message: string;
 			           };
 		           }>({
-			              query: GQLQueries.OrderGenerateRandomCurrentStore,
+			              query:     GQLQuery.Order.GenerateRandomForCurrentStore,
 			              variables: { storeId, storeCreatedAt, ordersLimit },
 		              })
-		           .pipe(map((res) => res.data.generateRandomOrdersCurrentStore));
+		           .pipe(map((result) => this.get(result)));
 	}
 	
-	getOrdersChartTotalOrders(): Observable<Order[]>
+	public getOrdersChartTotalOrders(): Observable<Order[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           getOrdersChartTotalOrders: Order[]
 		           }>({
-			              // no needed
-			              // isCompleted
-			              query: GQLQueries.OrderChartTotalOrders,
+			              query: GQLQuery.Order.GetChartTotal,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.getOrdersChartTotalOrders),
-						share()
-				);
-	}
-	
-	async getOrdersChartTotalOrdersNew()
-	{
-		const res = await this._apollo
-		                      .query<{
-			                      getOrdersChartTotalOrders: Order[];
-		                      }>({
-			                         query: GQLQueries.OrderChartTotalOrdersIsCompleted,
-		                         })
-		                      .toPromise();
-		return res.data.getOrdersChartTotalOrders;
-	}
-	
-	getDashboardCompletedOrders(): Observable<Order[]>
-	{
-		return this._apollo
-		           .watchQuery<{
-			           getDashboardCompletedOrders: Order[]
-		           }>({
-			              query: GQLQueries.OrderDashboardCompleted,
-		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.getDashboardCompletedOrders),
-						share()
-				);
-	}
-	
-	async getComplatedOrdersInfo(storeId?: string)
-	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.OrderCompletedInfo,
-			                             variables: { storeId },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCompletedOrdersInfo'];
-	}
-	
-	getDashboardCompletedOrdersToday(): Observable<Order[]>
-	{
-		return this._apollo
-		           .watchQuery<{
-			           getDashboardCompletedOrdersToday: Order[]
-		           }>({
-			              query: GQLQueries.OrderDashboardCompletedToday,
-		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.getDashboardCompletedOrdersToday),
-						share()
-				);
-	}
-	
-	getOrders(): Observable<Order[]>
-	{
-		return this._apollo
-		           .watchQuery<{
-			           orders: Order[]
-		           }>({
-			              query: GQLQueries.OrderDetails,
-			              pollInterval: 4000,
-		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.orders),
-						share()
-				);
-	}
-	
-	getOrderById(id: string)
-	{
-		return this._apollo
-		           .watchQuery({
-			                       query: GQLQueries.OrderById,
-			                       pollInterval: 4000,
-			                       variables: { id },
-		                       })
 		           .valueChanges
 		           .pipe(
-				           map((res) => res.data['getOrder']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	async getUsersOrdersCountInfo(usersIds?: string[])
+	public async getOrdersChartTotalOrdersNew(): Promise<Order[]>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.OrderUsersCountInfo,
-			                             variables: { usersIds },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getUsersOrdersCountInfo'];
+		return this.apollo
+		           .query({
+			                  query: GQLQuery.Order.GetChartTotalIsCompleted,
+		                  })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 	
-	async getMerchantsOrdersCountInfo(merchantsIds?: string[])
+	public getDashboardCompletedOrders(): Observable<Order[]>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.OrderMerchantsCountInfo,
-			                             variables: { merchantsIds },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getMerchantsOrdersCountInfo'];
+		return this.apollo
+		           .watchQuery<{
+			           getDashboardCompletedOrders: Order[]
+		           }>({
+			              query: GQLQuery.Order.GetDashboardCompleted,
+		              })
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
-	async getMerchantsOrders()
+	public getDashboardCompletedOrdersToday(): Observable<Order[]>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.OrderMerchants,
-		                             })
-		                      .toPromise();
-		
-		return res.data['getMerchantsOrders'];
+		return this.apollo
+		           .watchQuery<{
+			           getDashboardCompletedOrdersToday: Order[]
+		           }>({
+			              query: GQLQuery.Order.GetDashboardCompletedToday,
+		              })
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
-	protected _orderFactory(order: Order)
+	public async getComplatedOrdersInfo(storeId?: string): Promise<ICompletedOrderInfo>
 	{
-		return order == null ? null : new Order(order);
+		return this.apollo
+		           .query<{
+			           getCompletedOrdersInfo: ICompletedOrderInfo
+		           }>({
+			              query:     GQLQuery.Order.GetCompletedInfo,
+			              variables: { storeId },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
+	}
+	
+	public getOrders(): Observable<Order[]>
+	{
+		return this.apollo
+		           .watchQuery<{
+			           orders: Order[]
+		           }>({
+			              query:        GQLQuery.Order.GetWithCustomer,
+			              pollInterval: this.pollInterval,
+		              })
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
+	}
+	
+	public getOrderById(id: string): Observable<Order | null>
+	{
+		return this.apollo
+		           .watchQuery<{
+			           order: Order
+		           }>({
+			              query:        GQLQuery.Order.GetById,
+			              pollInterval: this.pollInterval,
+			              variables:    { id },
+		              })
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
+	}
+	
+	public async getCustomersOrdersCountInfo(usersIds?: string[]): Promise<IOrderCountTnfo[]>
+	{
+		return this.apollo
+		           .query({
+			                  query:     GQLQuery.Order.GetCustomersCountInfo,
+			                  variables: { usersIds },
+		                  })
+		           .pipe(map((result) => this.get(result) || []))
+		           .toPromise();
+	}
+	
+	public async getMerchantsOrdersCountInfo(merchantsIds?: string[]): Promise<IOrderCountTnfo[]>
+	{
+		return this.apollo
+		           .query<{
+			           getMerchantsOrdersCountInfo: IOrderCountTnfo[]
+		           }>({
+			              query:     GQLQuery.Order.GetMerchantsCountInfo,
+			              variables: { merchantsIds },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
+	}
+	
+	public async getMerchantsOrders(): Promise<Order[]>
+	{
+		return this.apollo
+		           .query<{
+			           getMerchantsOrders: Order[]
+		           }>({
+			              query: GQLQuery.Order.GerMerchantsOrders,
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
+	}
+	
+	public generatePastOrdersPerCarrier(): Observable<ApolloQueryResult<void>>
+	{
+		return this.apollo
+		           .query({
+			                  query: GQLQuery.Order.GeneratePastPerCarrier,
+		                  });
+	}
+	
+	public generateActiveAndAvailableOrdersPerCarrier(): Observable<ApolloQueryResult<void>>
+	{
+		return this.apollo
+		           .query({
+			                  query: GQLQuery.Order.GenerateActiveAndAvailablePerCarrier,
+		                  });
 	}
 }
