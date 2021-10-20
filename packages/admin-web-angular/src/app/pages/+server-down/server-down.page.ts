@@ -1,22 +1,22 @@
 import { Component, OnDestroy }    from '@angular/core';
-import { HttpClient }              from '@angular/common/http';
 import { Location }                from '@angular/common';
-import { Store }                   from '@app/@core/data/store.service';
-import { environment }             from 'environments/environment';
+import { HttpClient }              from '@angular/common/http';
 import { TranslateService }        from '@ngx-translate/core';
 import { ServerConnectionService } from '@modules/client.common.angular2/services/server-connection.service';
+import { StorageService }          from '@app/@core/data/store.service';
+import { environment }             from 'environments/environment';
 
 @Component({
-	           styleUrls: ['./server-down.page.scss'],
+	           styleUrls:   ['./server-down.page.scss'],
 	           templateUrl: 'server-down.page.html',
            })
 export class ServerDownPage implements OnDestroy
 {
-	noInternetLogo: string;
-	interval;
+	public noInternetLogo: string;
+	public interval;
 	
 	constructor(
-			private store: Store,
+			private storage: StorageService,
 			private readonly http: HttpClient,
 			private location: Location,
 			private translate: TranslateService,
@@ -24,13 +24,16 @@ export class ServerDownPage implements OnDestroy
 	)
 	{
 		const browserLang = translate.getBrowserLang();
-		translate.use(browserLang.match(/en|bg|he|ru/) ? browserLang : 'en-US');
+		const availableLocales = environment.AVAILABLE_LOCALES;
+		translate.use(browserLang.match(availableLocales)
+		              ? browserLang
+		              : environment.DEFAULT_LANGUAGE);
 		
 		this.noInternetLogo = environment['NO_INTERNET_LOGO'];
 		this.testConnection();
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		clearInterval(this.interval);
 	}
@@ -41,10 +44,10 @@ export class ServerDownPage implements OnDestroy
 		                            {
 			                            await this.serverConnectionService.checkServerConnection(
 					                            environment.HTTP_SERVICES_ENDPOINT,
-					                            this.store
+					                            this.storage
 			                            );
 			
-			                            if(Number(this.store.serverConnection) !== 0)
+			                            if(Number(this.storage.serverConnection) !== 0)
 			                            {
 				                            clearInterval(this.interval);
 				                            this.location.back();
