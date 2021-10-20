@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router }            from '@angular/router';
-import { environment }       from 'environments/environment';
-import { Store }             from '@app/@core/data/store.service';
+import { StorageService }    from '@app/@core/data/store.service';
 
 @Component({
-	           styleUrls: ['./setup.component.scss'],
+	           styleUrls:   ['./setup.component.scss'],
 	           templateUrl: './setup.component.html',
            })
 export class SetupComponent implements OnInit
@@ -14,26 +13,33 @@ export class SetupComponent implements OnInit
 	
 	constructor(
 			private readonly _router: Router,
-			private readonly _store: Store
+			private readonly _storageService: StorageService
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		this.fakeDataGenerator = !!+this._store.fakeDataGenerator;
+		this.fakeDataGenerator = !!+this._storageService.fakeDataGenerator;
 	}
 	
-	navigateToFakeDataPage()
+	public navigateToFakeDataPage()
 	{
 		this.loading = true;
 		this._router.navigate(['/generate-initial-data']);
 		this.loading = false;
 	}
 	
-	navigateToSetupMerchantsPage()
+	public navigateToSetupMerchantsPage()
 	{
 		this.loading = true;
 		this._router.navigate(['/setup/merchants']);
+		this.loading = false;
+	}
+	
+	public navigateToSetupMarketPage()
+	{
+		this.loading = true;
+		this._router.navigate(['/setup/market']);
 		this.loading = false;
 	}
 }
