@@ -10,7 +10,7 @@ import { ProductsService }               from './products.service';
 import { ProductsCategoryService }       from './productsCategory.service';
 import { WarehousesService }             from './warehouses.service';
 import { WarehouseOrdersService }        from './warehouseOrders.service';
-import { Store }                         from './store.service';
+import { StorageService }                from './store.service';
 import { DataService }                   from './data.service';
 
 const SERVICES = [
@@ -23,7 +23,7 @@ const SERVICES = [
 	ProductsCategoryService,
 	WarehousesService,
 	WarehouseOrdersService,
-	Store,
+	StorageService,
 	StateService,
 	SmartTableService,
 ];
