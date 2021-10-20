@@ -1,30 +1,32 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { LocalDataSource }                     from 'ng2-smart-table';
-import Product                                 from '@modules/server.common/entities/Product';
-import { first, takeUntil }                    from 'rxjs/operators';
-import { Subject, Observable, forkJoin }       from 'rxjs';
-import { PriceCountInputComponent }            from '../../../render-component/price-countInput/price-countInput.component';
 import { TranslateService }                    from '@ngx-translate/core';
+import { LocalDataSource }                     from 'ng2-smart-table';
+import { Subject, Observable, forkJoin }       from 'rxjs';
+import { first, takeUntil }                    from 'rxjs/operators';
+import Product                                 from '@modules/server.common/entities/Product';
 import Warehouse                               from '@modules/server.common/entities/Warehouse';
+import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
 import { WarehouseRouter }                     from '@modules/client.common.angular2/routers/warehouse-router.service';
 import { CheckboxComponent }                   from '@app/@shared/render-component/customer-orders-table/checkbox/checkbox.component';
+import { PriceCountInputComponent }            from '@app/@shared/render-component/price-countInput/price-countInput.component';
 
 @Component({
-	           selector: 'ea-add-warehouse-products-table',
+	           selector:    'ea-add-warehouse-products-table',
 	           templateUrl: './add-warehouse-products-table.component.html',
            })
 export class AddWarehouseProductsComponent implements OnInit, OnDestroy
 {
 	@Input()
-	boxShadow: string;
-	@Input()
-	perPage = 5;
+	public boxShadow: string;
 	
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
+	@Input()
+	public perPage = 5;
+	
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
 	
 	private ngDestroy$ = new Subject<void>();
-	private warehouseProducts: any[];
+	private warehouseProducts: WarehouseProduct[];
 	private warehouse: Warehouse;
 	
 	constructor(
@@ -33,64 +35,73 @@ export class AddWarehouseProductsComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	get allWarehouseProducts()
-	{
-		return [...this.warehouseProducts];
-	}
-	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this._loadSettingsSmartTable();
 	}
 	
-	productsIsValid()
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public get allWarehouseProducts()
+	{
+		return [...this.warehouseProducts];
+	}
+	
+	public productsIsValid()
 	{
 		if(this.warehouseProducts)
 		{
-			const notRedy = this.warehouseProducts.filter(
+			const notReady = this.warehouseProducts.filter(
 					(p) =>
 							!p.count ||
 							!p.price ||
 							(!p['isTakeaway'] && !p['isDeliveryRequired'])
 			)[0];
 			
-			return notRedy ? false : true;
+			return !notReady;
 		}
 	}
 	
-	async loadDataSmartTable(products: Product[], warehouseId?: string)
+	public async loadDataSmartTable(products: Product[], storeId?: string)
 	{
+		//TODO: WATCH
 		this.warehouseProducts = products.map((p) =>
-		                                      {
-			                                      return { product: p.id };
-		                                      });
+		                                  {
+			                                  return {
+				                                  product: p.id,
+			                                  } as WarehouseProduct;
+		                                  });
 		
-		if(warehouseId)
+		if(storeId)
 		{
 			this.warehouse = await this.warehouseRouter
-			                           .get(warehouseId)
-			                           .pipe(first())
-			                           .toPromise();
+			                       .get(storeId)
+			                       .pipe(first())
+			                       .toPromise();
 			if(this.warehouseProducts)
 			{
-				this.warehouseProducts.map((p) =>
-				                           {
-					                           p['isTakeaway'] = this.warehouse.productsTakeaway;
-					                           p['isDeliveryRequired'] = this.warehouse.productsDelivery;
-					                           if(!p['isTakeaway'] && !p['isDeliveryRequired'])
-					                           {
-						                           p['isDeliveryRequired'] = true;
-						                           p['isTakeaway'] = true;
-					                           }
-				                           });
+				this.warehouseProducts.map((storeProduct: WarehouseProduct) =>
+				                       {
+					                       storeProduct.isTakeaway = this.warehouse.productsTakeaway;
+					                       storeProduct.isDeliveryRequired = this.warehouse.productsDelivery;
+					                       if(!storeProduct.isTakeaway && !storeProduct.isDeliveryRequired)
+					                       {
+						                       storeProduct.isDeliveryRequired = true;
+						                       storeProduct.isTakeaway = true;
+					                       }
+				                       });
 			}
 		}
 		
-		const productsVM = products.map((product) =>
+		const productsVM = products.map((product: Product) =>
 		                                {
 			                                const resObj = {
-				                                name: product.title,
-				                                id: product.id,
+				                                name:                product.title,
+				                                id:                  product.id,
 				                                takeProductDelivery: this.warehouse.productsDelivery,
 				                                takeProductTakeaway: this.warehouse.productsTakeaway,
 			                                };
@@ -103,13 +114,7 @@ export class AddWarehouseProductsComponent implements OnInit, OnDestroy
 			                                return resObj;
 		                                });
 		
-		this.sourceSmartTable.load(productsVM);
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
+		await this.sourceSmartTable.load(productsVM);
 	}
 	
 	private _loadSettingsSmartTable()
@@ -129,119 +134,119 @@ export class AddWarehouseProductsComponent implements OnInit, OnDestroy
 				.subscribe(([name, price, count, delivery, takeaway]) =>
 				           {
 					           this.settingsSmartTable = {
-						           actions: false,
+						           actions:       false,
 						           hideSubHeader: true,
 						           // selectMode: 'multi',
 						           columns: {
-							           name: {
-								           title: name,
+							           name:     {
+								           title:  name,
 								           filter: false,
 							           },
-							           price: {
-								           title: price,
-								           type: 'custom',
-								           filter: false,
-								           renderComponent: PriceCountInputComponent,
+							           price:    {
+								           title:                   price,
+								           type:                    'custom',
+								           filter:                  false,
+								           renderComponent:         PriceCountInputComponent,
 								           onComponentInitFunction: async(instance) =>
-								           {
-									           instance.placeholder = price;
+								                                    {
+									                                    instance.placeholder = price;
 									
-									           const id = await instance.id
-									                                    .pipe(first())
-									                                    .toPromise();
-									           const warehouseProd = this.warehouseProducts.filter(
-											           (p) => p.product === id
-									           )[0];
+									                                    const id = await instance.id
+									                                                             .pipe(first())
+									                                                             .toPromise();
+									                                    const warehouseProd = this.warehouseProducts.filter(
+											                                    (p) => p.product === id
+									                                    )[0];
 									
-									           instance.newValue
-									                   .pipe(takeUntil(this.ngDestroy$))
-									                   .subscribe((v) =>
-									                              {
-										                              warehouseProd['initialPrice'] = v;
-										                              warehouseProd['price'] = v;
-									                              });
-								           },
+									                                    instance.newValue
+									                                            .pipe(takeUntil(this.ngDestroy$))
+									                                            .subscribe((v) =>
+									                                                       {
+										                                                       warehouseProd['initialPrice'] = v;
+										                                                       warehouseProd['price'] = v;
+									                                                       });
+								                                    },
 							           },
-							           count: {
-								           title: count,
-								           type: 'custom',
-								           filter: false,
-								           renderComponent: PriceCountInputComponent,
+							           count:    {
+								           title:                   count,
+								           type:                    'custom',
+								           filter:                  false,
+								           renderComponent:         PriceCountInputComponent,
 								           onComponentInitFunction: async(instance) =>
-								           {
-									           instance.placeholder = count;
-									           const id = await instance.id
-									                                    .pipe(first())
-									                                    .toPromise();
-									           const warehouseProd = this.warehouseProducts.filter(
-											           (p) => p.product === id
-									           )[0];
-									           warehouseProd['count'] = 1;
-									           instance.newValue
-									                   .pipe(takeUntil(this.ngDestroy$))
-									                   .subscribe((v) =>
-									                              {
-										                              warehouseProd['count'] = v;
-									                              });
-								           },
+								                                    {
+									                                    instance.placeholder = count;
+									                                    const id = await instance.id
+									                                                             .pipe(first())
+									                                                             .toPromise();
+									                                    const warehouseProd = this.warehouseProducts.filter(
+											                                    (p) => p.product === id
+									                                    )[0];
+									                                    warehouseProd['count'] = 1;
+									                                    instance.newValue
+									                                            .pipe(takeUntil(this.ngDestroy$))
+									                                            .subscribe((v) =>
+									                                                       {
+										                                                       warehouseProd['count'] = v;
+									                                                       });
+								                                    },
 							           },
 							           delivery: {
-								           title: delivery,
-								           type: 'custom',
-								           filter: false,
-								           renderComponent: CheckboxComponent,
+								           title:                   delivery,
+								           type:                    'custom',
+								           filter:                  false,
+								           renderComponent:         CheckboxComponent,
 								           onComponentInitFunction: async(instance) =>
-								           {
-									           instance.type = 'delivery';
-									           const id = await instance.id
-									                                    .pipe(first())
-									                                    .toPromise();
-									           const warehouseProd = this.warehouseProducts.filter(
-											           (p) => p.product === id
-									           )[0];
-									           instance.newValue
-									                   .pipe(takeUntil(this.ngDestroy$))
-									                   .subscribe((res) =>
-									                              {
-										                              if(res.type === 'delivery')
-										                              {
-											                              warehouseProd[
-													                              'isDeliveryRequired'
-													                              ] = res.checked;
-										                              }
-									                              });
-								           },
+								                                    {
+									                                    instance.type = 'delivery';
+									                                    const id = await instance.id
+									                                                             .pipe(first())
+									                                                             .toPromise();
+									                                    const warehouseProd = this.warehouseProducts.filter(
+											                                    (p) => p.product === id
+									                                    )[0];
+									                                    instance.newValue
+									                                            .pipe(takeUntil(this.ngDestroy$))
+									                                            .subscribe((res) =>
+									                                                       {
+										                                                       if(res.type === 'delivery')
+										                                                       {
+											                                                       warehouseProd[
+													                                                       'isDeliveryRequired'
+													                                                       ] = res.checked;
+										                                                       }
+									                                                       });
+								                                    },
 							           },
 							           takeaway: {
-								           title: takeaway,
-								           type: 'custom',
-								           filter: false,
-								           renderComponent: CheckboxComponent,
+								           title:                   takeaway,
+								           type:                    'custom',
+								           filter:                  false,
+								           renderComponent:         CheckboxComponent,
 								           onComponentInitFunction: async(
 										           instance: CheckboxComponent
 								           ) =>
-								           {
-									           instance.type = 'takeaway';
-									           const id = await instance.id
-									                                    .pipe(first())
-									                                    .toPromise();
-									           const warehouseProd = this.warehouseProducts.filter(
-											           (p) => p.product === id
-									           )[0];
-									           instance.newValue
-									                   .pipe(takeUntil(this.ngDestroy$))
-									                   .subscribe((res) =>
-									                              {
-										                              if(res.type === 'takeaway')
-										                              {
-											                              warehouseProd['isTakeaway'] =
-													                              res.checked;
-										                              }
-									                              });
-								           },
+								                                    {
+									                                    instance.type = 'takeaway';
+									                                    const id = await instance.id
+									                                                             .pipe(first())
+									                                                             .toPromise();
+									                                    const warehouseProd = this.warehouseProducts.filter(
+											                                    (p) => p.product === id
+									                                    )[0];
+									                                    instance.newValue
+									                                            .pipe(takeUntil(this.ngDestroy$))
+									                                            .subscribe((res) =>
+									                                                       {
+										                                                       if(res.type === 'takeaway')
+										                                                       {
+											                                                       warehouseProd['isTakeaway'] =
+													                                                       res.checked;
+										                                                       }
+									                                                       });
+								                                    },
 							           },
 						           },
-						           pager: {
+						           pager:   {
 							           display: true,
 							           perPage: this.perPage,
 						           },
