@@ -609,6 +609,11 @@
 			"DELIVERY": "Delivery",
 			"TAKEAWAY": "Takeaway"
 		},
+		"MANAGE_CARRIERS": {
+			"ALL": "Использовать всех курьеров",
+			"ONLY_STORE": "Использовать только курьеров магазина",
+			"PREFER_STORE": "Использовать предпочтительно курьеров магазина"
+		},
 		"NEW_PRODUCT_TYPE": "New Type Product",
 		"ADD_PRODUCTS": "Add Products",
 		"CREATE_ORDER": "Create Order",
