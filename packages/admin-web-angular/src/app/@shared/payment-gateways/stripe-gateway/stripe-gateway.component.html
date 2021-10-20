@@ -55,7 +55,7 @@
         </div>
 
         <div class="form-group col-md-6">
-            <label for="currency">
+            <label>
                 {{
                 'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.CURRENCY'
                     | translate
@@ -75,9 +75,9 @@
                     }}</option
                 >
                 <option
-                        *ngFor="let code of currenciesCodes"
-                        value="{{ code }}"
-                >{{ code }}</option
+                        *ngFor="let currency of currencies"
+                        value="{{ currency.code }}"
+                >{{ currency.code }}</option
                 >
             </select>
             <small
@@ -96,7 +96,7 @@
 
     <div class="row mt-0 mr-0 ml-0 form-group">
         <div class="col-md-12">
-            <label for="logo">
+            <label>
                 {{
                 'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.CURRENCY_TEXT_IS_REQUIRED'
                     | translate
@@ -170,7 +170,7 @@
 
     <div class="row m-0">
         <div class="form-group col-md-12">
-            <label for="publishableKey">
+            <label for="stripePublishableKey">
                 {{
                 'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PUBLISHABLE_KEY'
                     | translate
@@ -188,8 +188,8 @@
 						(publishableKey.dirty || publishableKey.touched)
 				}"
                 class="form-control"
-                id="publishableKey"
-                name="publishable-key"
+                id="stripePublishableKey"
+                name="stripe-publishable-key"
                 nbInput
                 placeholder="{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PUBLISHABLE_KEY'
