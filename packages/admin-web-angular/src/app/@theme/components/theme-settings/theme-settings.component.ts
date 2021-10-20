@@ -1,96 +1,63 @@
 import { Component }        from '@angular/core';
-import { StateService }     from '../../../@core/data/state.service';
 import { TranslateService } from '@ngx-translate/core';
 import { NbThemeService }   from '@nebular/theme';
+import { getLanguage }      from '@modules/server.common/data/languages';
+import { StateService }     from '@app/@core/data/state.service';
+import { StorageService }   from '@app/@core/data/store.service';
 import { environment }      from 'environments/environment';
 
 @Component({
-	           selector: 'ngx-theme-settings',
-	           styleUrls: ['./theme-settings.component.scss'],
+	           selector:    'ngx-theme-settings',
+	           styleUrls:   ['./theme-settings.component.scss'],
 	           templateUrl: './theme-settings.component.html',
            })
 export class ThemeSettingsComponent
 {
-	layouts = [];
-	sidebars = [];
+	public layouts = [];
+	public sidebars = [];
 	
-	languages = [
-		{
-			value: 'en-US',
-			name: 'English',
-		},
-		{
-			value: 'bg-BG',
-			name: 'Bulgarian',
-		},
-		{
-			value: 'he-IL',
-			name: 'Hebrew',
-		},
-		{
-			value: 'ru-RU',
-			name: 'Russian',
-		},
-		{
-			value: 'es-ES',
-			name: 'Spanish',
-		},
-	];
+	public languages: Array<{ name: string; value: string }> = [];
 	
-	themes = [
+	public readonly themes = [
 		{
 			value: 'everlight',
-			name: 'Ever Light',
+			name:  'Ever Light',
 		},
 		{
 			value: 'everdark',
-			name: 'Ever Dark',
+			name:  'Ever Dark',
 		},
 		{
 			value: 'default',
-			name: 'White',
+			name:  'White',
 		},
 		{
 			value: 'cosmic',
-			name: 'Cosmic',
+			name:  'Cosmic',
 		},
 		{
 			value: 'corporate',
-			name: 'Corporate',
+			name:  'Corporate',
 		},
 		{
 			value: 'dark',
-			name: 'Dark',
+			name:  'Dark',
 		},
 	];
 	
-	currentTheme = 'everlight';
-	defaultLanguage = '';
+	public currentTheme = 'corporate';
+	public defaultLanguage = '';
+	public selectedLanguage = '';
 	
 	constructor(
 			protected stateService: StateService,
 			public translate: TranslateService,
+			private storageService: StorageService,
 			private themeService: NbThemeService
 	)
 	{
-		this.defaultLanguage = environment['DEFAULT_LANGUAGE'];
-		
-		translate.addLangs(['en-US', 'bg-BG', 'he-IL', 'ru-RU', 'es-ES']);
-		translate.setDefaultLang('en-US');
-		
-		const browserLang = translate.getBrowserLang();
-		if(this.defaultLanguage)
-		{
-			translate.use(this.defaultLanguage);
-		}
-		else
-		{
-			translate.use(
-					browserLang.match(/en-US|bg-BG|he-IL|ru-RU|es-ES/)
-					? browserLang
-					: 'en-US'
-			);
-		}
+		this.defaultLanguage = environment.DEFAULT_LANGUAGE;
+		this.initialize();
 		
 		this.stateService
 		    .getLayoutStates()
@@ -101,14 +68,72 @@ export class ThemeSettingsComponent
 		    .subscribe((sidebars: any[]) => (this.sidebars = sidebars));
 	}
 	
-	toggleTheme()
+	private initialize()
 	{
-		this.themeService.changeTheme(this.currentTheme);
+		const availableLanguages = environment.AVAILABLE_LOCALES.split('|');
+		
+		if(availableLanguages)
+		{
+			for(const language of availableLanguages)
+			{
+				this.languages.push({
+					                    name:  getLanguage(language),
+					                    value: language
+				                    });
+			}
+		}
+		else
+		{
+			this.languages.push({
+				                    name:  getLanguage(this.defaultLanguage ?? 'en-US'),
+				                    value: this.defaultLanguage
+			                    });
+		}
+		
+		this.translate.addLangs(availableLanguages);
+		this.translate.setDefaultLang(this.defaultLanguage);
+		
+		const browserLang = this.translate.getBrowserLang();
+		
+		if(this.storageService.locale)
+		{
+			this.selectedLanguage = this.storageService.locale;
+		}
+		else
+		{
+			if(this.defaultLanguage)
+			{
+				this.selectedLanguage = this.defaultLanguage;
+			}
+			else
+			{
+				this.selectedLanguage = browserLang.match(environment.AVAILABLE_LOCALES)
+				                        ? browserLang
+				                        : 'ru-RU'
+			}
+		}
+		
+		this.storageService.locale = this.selectedLanguage;
+		this.translate.use(this.selectedLanguage);
+		
+		if(this.storageService.theme)
+		{
+			this.currentTheme = this.storageService.theme;
+			this.themeService.changeTheme(this.currentTheme);
+		}
 	}
 	
-	switchLanguage(language: string)
+	public toggleTheme()
 	{
-		if(this.defaultLanguage === 'he-IL')
+		this.themeService.changeTheme(this.currentTheme);
+		this.storageService.theme = this.currentTheme;
+	}
+	
+	public switchLanguage()
+	{
+		this.translate.use(this.selectedLanguage);
+		this.storageService.locale = this.selectedLanguage;
+		if(this.translate.currentLang.includes('he') || this.translate.currentLang.includes('ar'))
 		{
 			this.stateService.setSidebarState(this.sidebars[1]);
 		}
@@ -116,11 +141,9 @@ export class ThemeSettingsComponent
 		{
 			this.stateService.setSidebarState(this.sidebars[0]);
 		}
-		
-		this.translate.use(this.defaultLanguage);
 	}
 	
-	layoutSelect(layout: any): boolean
+	public layoutSelect(layout: any): boolean
 	{
 		this.layouts = this.layouts.map((l: any) =>
 		                                {
@@ -133,7 +156,7 @@ export class ThemeSettingsComponent
 		return false;
 	}
 	
-	sidebarSelect(sidebars: any): boolean
+	public sidebarSelect(sidebars: any): boolean
 	{
 		this.sidebars = this.sidebars.map((s: any) =>
 		                                  {
