@@ -68,6 +68,32 @@ export class DashboardComponent implements OnInit, OnDestroy
 	)
 	{}
 	
+	public ngOnInit()
+	{
+		this._currenciesService
+		    .getCurrencies()
+		    .pipe(takeUntil(this._ngDestroy$))
+		    .subscribe(currencies => this.currencies = currencies);
+		try
+		{
+			this.loadAllStoresData();
+		} catch(e)
+		{
+			console.error(e)
+		}
+	}
+	
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+		
+		if(this._dashboardOrdersChartOrdersSubscription)
+		{
+			this._dashboardOrdersChartOrdersSubscription.unsubscribe();
+		}
+	}
+	
 	public get labelAvgPercent()
 	{
 		const maxPercentRate = 100;
@@ -119,26 +145,6 @@ export class DashboardComponent implements OnInit, OnDestroy
 		};
 	}
 	
-	public ngOnInit()
-	{
-		this._currenciesService
-		    .getCurrencies()
-		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe(currencies => this.currencies = currencies);
-		this.loadAllStoresData();
-	}
-	
-	public ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-		
-		if(this._dashboardOrdersChartOrdersSubscription)
-		{
-			this._dashboardOrdersChartOrdersSubscription.unsubscribe();
-		}
-	}
-	
 	public async onSelectStore(storeOrId: Warehouse | string)
 	{
 		if(storeOrId)
@@ -186,10 +192,7 @@ export class DashboardComponent implements OnInit, OnDestroy
 		this._storesService
 		    .getStores()
 		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe((stores) =>
-		               {
-			               this.stores = stores;
-		               });
+		    .subscribe((stores) => this.stores = stores);
 	}
 	
 	private _toggleLoadingDashboardMetrics(isLoading: boolean)
@@ -207,12 +210,6 @@ export class DashboardComponent implements OnInit, OnDestroy
 		this.isChartPanelOrdersLoad = true;
 		this.chartPanelOrders = await this._ordersService.getOrdersChartTotalOrdersNew();
 		this.isChartPanelOrdersLoad = false;
-		// .pipe(takeUntil(this._ngDestroy$))
-		// .subscribe((orders) => {
-		// 	if (!this.hasSelectedStore) {
-		// 		this.chartPanelOrders = orders;
-		// 	}
-		// });
 	}
 	
 	private _listenChartPanelPerStoreOrders()
@@ -224,30 +221,14 @@ export class DashboardComponent implements OnInit, OnDestroy
 			this._dashboardOrdersChartOrdersSubscription = null;
 		}
 		
-		this._dashboardOrdersChartOrdersSubscription = this._storeOrdersService
-		                                                   .getDashboardOrdersChartOrders(this.selectedStoreId)
-		                                                   .subscribe((orders) =>
-		                                                              {
-			                                                              this.chartPanelOrders = orders;
-		                                                              });
+		this._dashboardOrdersChartOrdersSubscription =
+				this._storeOrdersService
+				    .getDashboardOrdersChartOrders(this.selectedStoreId)
+				    .subscribe((orders) => this.chartPanelOrders = orders);
 	}
 	
 	private async _listenTotalOrders()
 	{
-		// Old logic for orders info
-		// this._ordersService
-		// 	.getDashboardCompletedOrders()
-		// 	.pipe(takeUntil(this._ngDestroy$))
-		// 	.subscribe((orders) => {
-		// 		this.completedOrders = orders;
-		// 		if (this.hasSelectedStore) {
-		// 			this._calculatePerMerchantMetrics();
-		// 		} else {
-		// 			this._calculateGlobalMetrics();
-		// 		}
-		// 		this._calculateAveragePercentagesToday();
-		// 	});
-		
 		this._toggleLoading.totalOrders(true);
 		this._toggleLoading.totalRevenue(true);
 		
