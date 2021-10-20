@@ -37,8 +37,7 @@ export class DeviceService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName:  DeviceService.name,
-			      pollInterval: 5000
+			      serviceName: "Admin::DeviceService"
 		      });
 		
 		this.devices$ = this.apollo
@@ -81,7 +80,10 @@ export class DeviceService extends ApolloService
 	// noinspection JSUnusedGlobalSymbols
 	public getWithWebsocket(): any
 	{
-		return this.apollo.watchQuery({ query: GQLQuery.Device.GetByWebsocket });
+		return this.apollo
+		           .watchQuery({
+			                       query: GQLQuery.Device.GetByWebsocket
+		                       });
 	}
 	
 	public getDevices(): Observable<Device[]>
