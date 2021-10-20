@@ -1,66 +1,69 @@
-import { Injectable }         from '@angular/core';
-import { Apollo }             from 'apollo-angular';
-import Admin                  from '@modules/server.common/entities/Admin';
-import { map, share }         from 'rxjs/operators';
-import { Observable }         from 'rxjs';
-import { IAdminUpdateObject } from '@modules/server.common/interfaces/IAdmin';
-import {
-	GQLQueries,
-	GQLMutations
-}                             from '@modules/server.common/utilities/graphql';
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { map, share }            from 'rxjs/operators';
+import Admin                     from '@modules/server.common/entities/Admin';
+import { IAdminUpdateObject }    from '@modules/server.common/interfaces/IAdmin';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery, GQLMutation } from 'graphql/definitions';
 
 @Injectable()
-export class AdminsService
+export class AdminsService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
-	
-	getAdmin(id: string): Observable<Admin>
+	constructor(apollo: Apollo)
 	{
-		return this._apollo
+		super(apollo, {
+			serviceName:  AdminsService.name,
+			pollInterval: 6000
+		});
+	}
+	
+	public getAdmin(id: string): Observable<Admin>
+	{
+		return this.apollo
 		           .watchQuery<{
-			           admin: Admin
+			           admin: Admin | null
 		           }>({
-			              query:        GQLQueries.Admin,
+			              query:        GQLQuery.Admin.GetById,
 			              variables:    { id },
-			              pollInterval: 10000,
+			              pollInterval: this.pollInterval,
 		              })
 		           .valueChanges
 		           .pipe(
-				           map((res) => res.data['admin']),
+				           map((res) => this.get(res)),
 				           share()
 		           );
 	}
 	
-	updatePassword(
+	public updatePassword(
 			id: string,
 			password: { new: string; current: string }
 	): Observable<any>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate({
-			                   mutation:  GQLMutations.AdminUpdatePassword,
+			                   mutation:  GQLMutation.Admin.UpdatePassword,
 			                   variables: { id, password },
 		                   });
 	}
 	
-	updateById(
+	public updateById(
 			id: string,
 			updateInput: IAdminUpdateObject
 	): Observable<Admin>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate<{
-			           id: string;
-			           updateInput: IAdminUpdateObject
+			           admin: Admin
 		           }>({
-			              mutation:  GQLMutations.AdminUpdate,
+			              mutation:  GQLMutation.Admin.Update,
 			              variables: {
 				              id,
 				              updateInput,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.updateAdmin),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
