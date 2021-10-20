@@ -1,24 +1,32 @@
-import { Injectable }               from '@angular/core';
-import { Apollo }                   from 'apollo-angular';
-import Product                      from '@modules/server.common/entities/Product';
-import { IProductCreateObject }     from '@modules/server.common/interfaces/IProduct';
-import { Observable }               from 'rxjs';
-import { map, share }               from 'rxjs/operators';
-import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
-import { GQLMutations, GQLQueries } from "@modules/server.common/utilities/graphql";
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { map, share }            from 'rxjs/operators';
+import { IProductCreateObject }  from '@modules/server.common/interfaces/IProduct';
+import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
+import Product                   from '@modules/server.common/entities/Product';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery, GQLMutation } from 'graphql/definitions';
 
-interface RemovedObject
+interface IRemovedObjectResponse
 {
 	n: number;
 	ok: number;
 }
 
 @Injectable()
-export class ProductsService
+export class ProductsService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName:  "Admin::ProductsService",
+			      pollInterval: 5000
+		      });
+	}
 	
-	getProducts(
+	public getProducts(
 			pagingOptions?: IPagingOptions,
 			existedProductsIds: string[] = []
 	): Observable<Product[]>
@@ -27,85 +35,92 @@ export class ProductsService
 		           .watchQuery<{
 			           products: Product[]
 		           }>({
-			              query: GQLQueries.ProductAll,
-			              variables: { pagingOptions, existedProductsIds },
-			              pollInterval: 2000,
+			              query:        GQLQuery.Product.GetAll,
+			              variables:    { pagingOptions, existedProductsIds },
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.products),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
-	create(product: IProductCreateObject): Observable<Product>
+	public create(product: IProductCreateObject): Observable<Product>
 	{
 		return this.apollo
 		           .mutate<{
 			           product: IProductCreateObject
 		           }>({
-			              mutation: GQLMutations.ProductCreate,
+			              mutation:  GQLMutation.Product.Create,
 			              variables: {
 				              product,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.createProduct),
+				           map((result) => <Product>
+						           this.factory(result, Product)),
 				           share()
 		           );
 	}
 	
-	save(product: Product)
+	public save(product: Product)
 	{
 		return this.apollo
 		           .mutate<{
 			           product: Product
 		           }>({
-			              mutation: GQLMutations.ProductSave,
+			              mutation:  GQLMutation.Product.Save,
 			              variables: {
 				              product,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.saveProduct),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	removeByIds(ids: string[]): Observable<RemovedObject>
+	public removeByIds(ids: string[]): Observable<IRemovedObjectResponse>
 	{
 		return this.apollo
-		           .mutate({
-			                   mutation: GQLMutations.ProductRemoveByIds,
-			                   variables: { ids },
-		                   })
+		           .mutate<{
+			           response: IRemovedObjectResponse
+		           }>({
+			              mutation:  GQLMutation.Product.RemoveByIds,
+			              variables: { ids },
+		              })
 		           .pipe(
-				           map((result: any) => result.data.removeProductsByIds),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	getProductById(id: string)
+	public getProductById(id: string): Observable<Product | null>
 	{
 		return this.apollo
-		           .query({
-			                  query: GQLQueries.ProductById,
-			                  variables: { id },
-		                  })
+		           .query<{
+			           product: Product
+		           }>({
+			              query:     GQLQuery.Product.GetById,
+			              variables: { id },
+		              })
 		           .pipe(
-				           map((res) => res.data['product']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	async getCountOfProducts(existedProductsIds: string[] = [])
+	public async getCountOfProducts(existedProductsIds: string[] = []): Promise<number>
 	{
-		const res = await this.apollo
-		                      .query({
-			                             query: GQLQueries.ProductCount,
-			                             variables: { existedProductsIds },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfProducts'];
+		return this.apollo
+		           .query<{
+			           count: number
+		           }>({
+			              query:     GQLQuery.Product.GetCount,
+			              variables: { existedProductsIds },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 }
