@@ -1,24 +1,29 @@
 import { Component, Input, OnDestroy, OnInit }         from '@angular/core';
 import { NbMenuService, NbSidebarService, NbMenuItem } from '@nebular/theme';
-import { Subject, Observable }                         from 'rxjs';
-import { AdminsService }                               from '../../../@core/data/admins.service';
-import { Store }                                       from '../../../@core/data/store.service';
-import Admin                                           from '@modules/server.common/entities/Admin';
 import { TranslateService }                            from '@ngx-translate/core';
+import { Subject, Observable }                         from 'rxjs';
+import * as rxops                                      from 'rxjs/operators';
+import Admin                                           from '@modules/server.common/entities/Admin';
+import { ChatService }                                 from '@modules/client.common.angular2/services/chat.service';
+import { AdminsService }                               from '@app/@core/data/admins.service';
+import { StorageService }                              from '@app/@core/data/store.service';
 
 @Component({
-	           selector: 'ngx-header',
-	           styleUrls: ['./header.component.scss'],
+	           selector:    'ngx-header',
+	           styleUrls:   ['./header.component.scss'],
 	           templateUrl: './header.component.html',
            })
 export class HeaderComponent implements OnInit, OnDestroy
 {
 	@Input()
-	position = 'normal';
+	public position = 'normal';
 	
-	admin$: Observable<Admin>;
+	public admin$: Observable<Admin>;
 	
-	adminMenu: NbMenuItem[];
+	public adminMenu: NbMenuItem[];
+	
+	public notificationCount: number = 0;
+	public unreadMessageCount: number = 0;
 	
 	private ngDestroy$ = new Subject<void>();
 	
@@ -26,32 +31,42 @@ export class HeaderComponent implements OnInit, OnDestroy
 			private sidebarService: NbSidebarService,
 			private menuService: NbMenuService,
 			private adminsService: AdminsService,
-			private store: Store,
+			private chatsService: ChatService,
+			private storage: StorageService,
 			private translateService: TranslateService
 	)
 	{
 		this.initialize();
 		this._applyTranslationOnSmartTable();
-		this.admin$ = this.adminsService.getAdmin(this.store.adminId);
+		this.admin$ = this.adminsService.getAdmin(this.storage.adminId);
 	}
 	
-	ngOnInit() {}
+	public ngOnInit()
+	{
+		this.admin$
+		    .pipe(rxops.takeUntil(this.ngDestroy$))
+		    .subscribe(
+				    (admin) => this.chatsService
+				                   .createCurrentSession(admin)
+				                   .then(() => this.unreadMessageCount = this.chatsService.unreadCount)
+		    );
+	}
 	
-	initialize()
+	private async initialize()
 	{
 		this.adminMenu = [
 			{
 				title: this.getTranslation('HEADER_VIEW.PROFILE'),
-				link: '/profile',
+				link:  '/profile',
 			},
 			{
 				title: this.getTranslation('HEADER_VIEW.LOG_OUT'),
-				link: '/auth/logout',
+				link:  '/auth/logout',
 			},
 		];
 	}
 	
-	getTranslation(prefix: string)
+	public getTranslation(prefix: string)
 	{
 		let result = '';
 		this.translateService.get(prefix).subscribe((res) =>
@@ -61,29 +76,39 @@ export class HeaderComponent implements OnInit, OnDestroy
 		return result;
 	}
 	
-	toggleSidebar(): boolean
+	public get chatBadge()
+	{
+		return this.unreadMessageCount > 0 ? this.unreadMessageCount.toString() : '';
+	}
+	
+	public get notificationBadge()
+	{
+		return this.notificationCount > 0 ? this.notificationCount.toString() : '';
+	}
+	
+	public toggleSidebar(): boolean
 	{
 		this.sidebarService.toggle(true, 'menu-sidebar');
 		return false;
 	}
 	
-	toggleSettings(): boolean
+	public toggleSettings(): boolean
 	{
 		this.sidebarService.toggle(false, 'settings-sidebar');
 		return false;
 	}
 	
-	navigateHome()
+	public navigateHome()
 	{
-		this.menuService.navigateHome();
+		this.menuService.navigateHome('/dashboard');
 	}
 	
-	startSearch()
+	public startSearch()
 	{
 		return false;
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.ngDestroy$.next();
 		this.ngDestroy$.complete();
@@ -91,9 +116,6 @@ export class HeaderComponent implements OnInit, OnDestroy
 	
 	private _applyTranslationOnSmartTable()
 	{
-		this.translateService.onLangChange.subscribe(() =>
-		                                             {
-			                                             this.initialize();
-		                                             });
+		this.translateService.onLangChange.subscribe(() => this.initialize());
 	}
 }
