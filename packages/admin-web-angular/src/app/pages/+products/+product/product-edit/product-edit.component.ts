@@ -1,31 +1,33 @@
 import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
-import { BasicInfoFormComponent }                  from '../../../../@shared/product/forms/basic-info';
-import { FormGroup, FormBuilder, FormControl }     from '@angular/forms';
-import Product                                     from '@modules/server.common/entities/Product';
-import { Observable, Subject }                     from 'rxjs';
-import { ActivatedRoute, Router }                  from '@angular/router';
-import { ProductsService }                         from '../../../../@core/data/products.service';
-import { takeUntil, first, switchMap }             from 'rxjs/operators';
-import { ToasterService }                          from 'angular2-toaster';
-import { ProductsCategoryService }                 from '../../../../@core/data/productsCategory.service';
-import 'rxjs/add/operator/switchMap';
 import { Location }                                from '@angular/common';
+import { ActivatedRoute, Router }                  from '@angular/router';
+import { FormGroup, FormBuilder, FormControl }     from '@angular/forms';
+import { ToasterService }                          from 'angular2-toaster';
+import { Subject }                                 from 'rxjs';
+import { takeUntil, first, switchMap }             from 'rxjs/operators';
+import Product                                     from '@modules/server.common/entities/Product';
+import ProductsCategory                            from '@modules/server.common/entities/ProductsCategory';
+import { ProductsService }                         from '@app/@core/data/products.service';
+import { ProductsCategoryService }                 from '@app/@core/data/productsCategory.service';
+import { BasicInfoFormComponent }                  from '@app/@shared/product/forms/basic-info';
 
 @Component({
-	           styleUrls: ['./product-edit.component.scss'],
+	           styleUrls:   ['./product-edit.component.scss'],
 	           templateUrl: './product-edit.component.html',
            })
 export class ProductEditComponent implements OnInit, OnDestroy
 {
 	@ViewChild('basicInfoForm', { static: true })
 	public basicInfoForm: BasicInfoFormComponent;
-	public readonly form: FormGroup = this.formBuilder.group({
-		                                                         basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
-	                                                         });
-	storeId: string;
+	
+	public readonly form: FormGroup = this.formBuilder
+	                                      .group({
+		                                             basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
+	                                             });
+	public storeId: string;
 	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
-	product: any;
-	public productsCategories: any;
+	public product: Product;
+	public productsCategories: ProductsCategory[];
 	public loading: boolean;
 	protected product$: any;
 	protected status;
@@ -44,10 +46,7 @@ export class ProductEditComponent implements OnInit, OnDestroy
 		this.loadProductCategories();
 		
 		this.product$ = this.activatedRoute.params.pipe(
-				switchMap((p) =>
-				          {
-					          return this.productsService.getProductById(p.id);
-				          })
+				switchMap((p) => this.productsService.getProductById(p.id))
 		);
 	}
 	
@@ -56,36 +55,35 @@ export class ProductEditComponent implements OnInit, OnDestroy
 		return this.basicInfo.valid && this.status === 'changes';
 	}
 	
-	back()
+	public back()
 	{
 		this.location.back();
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.basicInfoForm.productCategories = this.productsCategories;
 		
-		this.product$.pipe(takeUntil(this.ngDestroy$)).subscribe((product) =>
-		                                                         {
-			                                                         this.basicInfoForm.productCategories = this.productsCategories;
-			                                                         this.basicInfoForm.setValue(product);
-			                                                         this.product = product;
-			                                                         this.changes();
-		                                                         });
+		this.product$
+		    .pipe(takeUntil(this.ngDestroy$))
+		    .subscribe((product: Product) =>
+		               {
+			               this.basicInfoForm.productCategories = this.productsCategories;
+			               this.basicInfoForm.setValue(product);
+			               this.product = product;
+			               this.changes();
+		               });
 	}
 	
-	async changes()
+	public async changes()
 	{
 		this.basicInfo.valueChanges
 		    .pipe(first())
 		    .toPromise()
-		    .then(() =>
-		          {
-			          this.status = 'changes';
-		          });
+		    .then(() => this.status = 'changes');
 	}
 	
-	async loadProductCategories()
+	public async loadProductCategories()
 	{
 		this.productsCategories = await this.productsCategoryService
 		                                    .getCategories()
@@ -93,27 +91,30 @@ export class ProductEditComponent implements OnInit, OnDestroy
 		                                    .toPromise();
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.ngDestroy$.next();
 		this.ngDestroy$.complete();
 	}
 	
-	protected async updateProduct()
+	public async updateProduct()
 	{
 		try
 		{
 			const res = await this.basicInfoForm.setupProductCreateObject();
 			this.loading = true;
+			
+			const product: Product = (<unknown>{
+				_id:         this.product.id,
+				title:       res.title,
+				description: res.description,
+				details:     res.details,
+				images:      res.images,
+				categories:  res.categories,
+			}) as Product;
+			
 			const updatedProd = await this.productsService
-			                              .save({
-				                                    _id: this.product.id,
-				                                    title: res.title,
-				                                    description: res.description,
-				                                    details: res.details,
-				                                    images: res.images,
-				                                    categories: res.categories,
-			                                    } as Product)
+			                              .save(product)
 			                              .pipe(first())
 			                              .toPromise();
 			
