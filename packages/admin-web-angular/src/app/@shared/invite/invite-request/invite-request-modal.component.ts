@@ -8,25 +8,25 @@ import { InviteRequestRouter }                 from '@modules/client.common.angu
 
 @Component({
 	           selector: 'ea-invite-request-modal',
-	           templateUrl: './invite-request-modal.component.html',
 	           styleUrls: ['/invite-request-modal.component.scss'],
+	           templateUrl: './invite-request-modal.component.html',
            })
 export class InviteRequestModalComponent
 {
 	@ViewChild('locationForm', { static: true })
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
-	mapTypeEmitter = new EventEmitter<string>();
-	mapCoordEmitter = new EventEmitter<number[]>();
-	mapGeometryEmitter = new EventEmitter<any>();
+	public mapTypeEmitter = new EventEmitter<string>();
+	public mapCoordEmitter = new EventEmitter<number[]>();
+	public mapGeometryEmitter = new EventEmitter<any>();
 	
-	readonly form: FormGroup = this.formBuilder.group({
+	public readonly form: FormGroup = this.formBuilder.group({
 		                                                  location: LocationFormComponent.buildForm(this.formBuilder),
 		                                                  apartment: LocationFormComponent.buildApartmentForm(this.formBuilder),
 	                                                  });
 	
-	readonly location = this.form.get('location') as FormControl;
-	readonly apartment = this.form.get('apartment') as FormControl;
+	public readonly location = this.form.get('location') as FormControl;
+	public readonly apartment = this.form.get('apartment') as FormControl;
 	
 	constructor(
 			private readonly toasterService: ToasterService,
@@ -36,22 +36,22 @@ export class InviteRequestModalComponent
 	)
 	{}
 	
-	onCoordinatesChanges(coords: number[])
+	public onCoordinatesChanges(coords: number[])
 	{
 		this.mapCoordEmitter.emit(coords);
 	}
 	
-	onGeometrySend(geometry: any)
+	public onGeometrySend(geometry: any)
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	emitMapType(mapType: string)
+	public emitMapType(mapType: string)
 	{
 		this.mapTypeEmitter.emit(mapType);
 	}
 	
-	async create()
+	public async create()
 	{
 		try
 		{
@@ -72,7 +72,7 @@ export class InviteRequestModalComponent
 		}
 	}
 	
-	closeModal()
+	public closeModal()
 	{
 		this.activeModal.close();
 	}
