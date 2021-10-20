@@ -27,6 +27,35 @@ export namespace GQLMutation
 			}
 		`;
 		
+		export const Register = gql`
+			mutation Register(
+				$email: String!
+				$fullName: String!
+				$avatar: String!
+				$password: String!
+			)
+			{
+				registerAdmin(
+					registerInput:
+					{
+						admin:
+						{
+							email: $email
+							username: $fullName
+							avatar: $avatar
+						}
+						password: $password
+					}
+				)
+				{
+					_id
+					id
+					email
+					avatar
+				}
+			}
+		`;
+		
 		export const UpdatePassword = gql`
 			mutation UpdateAdminPassword(
 				$id: String!
