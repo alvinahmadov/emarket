@@ -6,44 +6,43 @@ import {
 }                                              from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ToasterService }                      from 'angular2-toaster';
+import { NgbActiveModal }                      from '@ng-bootstrap/ng-bootstrap';
+import { TranslateService }                    from '@ngx-translate/core';
 
-import { CarrierRouter }  from '@modules/client.common.angular2/routers/carrier-router.service';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-
+import { ICarrierCreateObject }   from '@modules/server.common/interfaces/ICarrier';
+import CommonUtils                from '@modules/server.common/utilities/common';
+import { CarrierRouter }          from '@modules/client.common.angular2/routers/carrier-router.service';
 import { BasicInfoFormComponent } from '../forms';
 import { LocationFormComponent }  from '../../forms/location';
 
-import CommonUtils          from '@modules/server.common/utilities/common';
-import { TranslateService } from '@ngx-translate/core';
-
 @Component({
-	           selector: 'ea-carrier-mutation',
+	           selector:    'ea-carrier-mutation',
+	           styleUrls:   ['./carrier-mutation.component.scss'],
 	           templateUrl: './carrier-mutation.component.html',
-	           styleUrls: ['./carrier-mutation.component.scss'],
            })
 export class CarrierMutationComponent implements AfterViewInit
 {
 	@ViewChild('basicInfoForm')
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('locationForm')
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
-	readonly form: FormGroup = this.formBuilder
-	                               .group({
-		                                      basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
-		                                      location: LocationFormComponent.buildForm(this.formBuilder),
-		                                      password: BasicInfoFormComponent.buildPasswordForm(this.formBuilder),
-	                                      });
+	public readonly form: FormGroup = this.formBuilder
+	                                      .group({
+		                                             basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
+		                                             location:  LocationFormComponent.buildForm(this.formBuilder),
+		                                             password:  BasicInfoFormComponent.buildPasswordForm(this.formBuilder),
+	                                             });
 	
-	readonly basicInfo = this.form.get('basicInfo') as FormControl;
-	readonly location = this.form.get('location') as FormControl;
-	readonly password = this.form.get('password') as FormControl;
+	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
+	public readonly location = this.form.get('location') as FormControl;
+	public readonly password = this.form.get('password') as FormControl;
 	
 	public loading: boolean;
 	
-	mapCoordEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
-	mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
+	public mapCoordEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
 	
 	public BUTTON_DONE: string = 'BUTTON_DONE';
 	public BUTTON_NEXT: string = 'BUTTON_NEXT';
@@ -58,22 +57,22 @@ export class CarrierMutationComponent implements AfterViewInit
 	)
 	{}
 	
-	get buttonDone()
+	public get buttonDone()
 	{
 		return this._translate(this.BUTTON_DONE);
 	}
 	
-	get buttonNext()
+	public get buttonNext()
 	{
 		return this._translate(this.BUTTON_NEXT);
 	}
 	
-	get buttonPrevious()
+	public get buttonPrevious()
 	{
 		return this._translate(this.BUTTON_PREV);
 	}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
 		if(this.locationForm)
 		{
@@ -81,7 +80,7 @@ export class CarrierMutationComponent implements AfterViewInit
 		}
 	}
 	
-	onGeometrySend(
+	public onGeometrySend(
 			geometry:
 					| google.maps.places.PlaceGeometry
 					| google.maps.GeocoderGeometry
@@ -90,14 +89,14 @@ export class CarrierMutationComponent implements AfterViewInit
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	onCoordinatesChanges(
+	public onCoordinatesChanges(
 			location: google.maps.LatLng | google.maps.LatLngLiteral
 	)
 	{
 		this.mapCoordEmitter.emit(location);
 	}
 	
-	async createCarrier()
+	public async createCarrier()
 	{
 		try
 		{
@@ -107,7 +106,7 @@ export class CarrierMutationComponent implements AfterViewInit
 			geoLocationInput.loc.coordinates.reverse();
 			
 			this.loading = true;
-			const carrierCreateObj = {
+			const carrierCreateObj: ICarrierCreateObject = {
 				...this.basicInfoForm.getValue(),
 				geoLocation: geoLocationInput,
 			};
@@ -120,10 +119,11 @@ export class CarrierMutationComponent implements AfterViewInit
 				carrierCreateObj.logo = CommonUtils.getDummyImage(300, 300, letter);
 			}
 			
-			const carrier = await this.carrierRouter.register({
-				                                                  carrier: carrierCreateObj,
-				                                                  password: this.basicInfoForm.getPassword(),
-			                                                  });
+			const carrier = await this.carrierRouter
+			                          .register({
+				                                    carrier:  carrierCreateObj,
+				                                    password: this.basicInfoForm.getPassword(),
+			                                    });
 			this.loading = false;
 			this.toasterService.pop(
 					'success',
@@ -142,7 +142,7 @@ export class CarrierMutationComponent implements AfterViewInit
 		}
 	}
 	
-	cancel()
+	public cancel()
 	{
 		this.activeModal.dismiss('canceled');
 	}
@@ -151,10 +151,8 @@ export class CarrierMutationComponent implements AfterViewInit
 	{
 		let translationResult = '';
 		
-		this._translateService.get(key).subscribe((res) =>
-		                                          {
-			                                          translationResult = res;
-		                                          });
+		this._translateService.get(key)
+		    .subscribe((res) => translationResult = res);
 		
 		return translationResult;
 	}
