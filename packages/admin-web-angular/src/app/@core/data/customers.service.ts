@@ -1,172 +1,195 @@
-import { Injectable }                             from '@angular/core';
-import { Apollo }                                 from 'apollo-angular';
-import { Observable }                             from 'rxjs';
-import { map, share }                             from 'rxjs/operators';
-import ICustomer, { IResponseGenerateCustomers, } from '@modules/server.common/interfaces/ICustomer';
-import IPagingOptions                             from '@modules/server.common/interfaces/IPagingOptions';
-import Customer                                   from '@modules/server.common/entities/Customer';
-import { ICustomerRegistrationInput }             from '@modules/server.common/routers/ICustomerAuthRouter';
-import { GQLMutations, GQLQueries }               from '@modules/server.common/utilities';
+import { Injectable }                            from '@angular/core';
+import { Apollo }                                from 'apollo-angular';
+import { FetchResult }                           from 'apollo-link';
+import { Observable }                            from 'rxjs';
+import { map, share }                            from 'rxjs/operators';
+import ICustomer, { IResponseGenerateCustomers } from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions                            from '@modules/server.common/interfaces/IPagingOptions';
+import Customer                                  from '@modules/server.common/entities/Customer';
+import { ICustomerRegistrationInput }            from '@modules/server.common/routers/ICustomerAuthRouter';
+import ApolloService                             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation, GQLQuery }                 from 'graphql/definitions';
+
+export interface ICustomerMetrics
+{
+	totalOrders: number;
+	canceledOrders: number;
+	completedOrdersTotalSum: number;
+}
 
 @Injectable()
-export class CustomersService
+export class CustomersService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
-	
-	isCustomerEmailExists(email: string): Promise<boolean>
+	constructor(apollo: Apollo)
 	{
-		return this._apollo
+		super(apollo,
+		      {
+			      serviceName:  CustomersService.name,
+			      pollInterval: 5000
+		      });
+	}
+	
+	public isCustomerEmailExists(email: string): Promise<boolean>
+	{
+		return this.apollo
 		           .query<{
-			           isUserEmailExists: boolean
+			           isCustomerEmailExists: boolean
 		           }>({
-			              query:     GQLQueries.CustomerEmailExists,
+			              query:     GQLQuery.Customer.IsEmailExists,
 			              variables: { email },
 		              })
-		           .pipe(map((res) => res.data.isUserEmailExists))
+		           .pipe(map((result) => this.get(result)))
 		           .toPromise();
 	}
 	
-	isCustomerExists(conditions: {
+	public isCustomerExists(conditions: {
 		exceptCustomerId: string;
 		memberKey: string;
 		memberValue: string;
 	}): Observable<boolean>
 	{
-		return this._apollo
-		           .query({
-			                  query:     GQLQueries.CustomerExists,
-			                  variables: { conditions },
-		                  })
-		           .pipe(map((res) => res.data['isUserExists']));
+		return this.apollo
+		           .query<{
+			           isCustomerExists: boolean
+		           }>({
+			              query:     GQLQuery.Customer.IsExists,
+			              variables: { conditions },
+		              })
+		           .pipe(map((result) => this.get(result)));
 	}
 	
-	getCustomers(pagingOptions?: IPagingOptions): Observable<Customer[]>
+	public getCustomers(pagingOptions?: IPagingOptions): Observable<Customer[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           customers: ICustomer[]
 		           }>(
 				           {
-					           query:        GQLQueries.CustomerAllPaging,
+					           query:        GQLQuery.Customer.GetAllWithPaging,
 					           variables:    { pagingOptions },
-					           pollInterval: 5000,
+					           pollInterval: this.pollInterval,
 				           }
 		           )
 		           .valueChanges
 		           .pipe(
-				           map((res) => res.data.customers),
-				           map((customers) => customers.map((customer) => this._customerFactory(customer))),
+				           map((result) => <Customer[]>
+						           this.factory(result, Customer)),
 				           share()
 		           );
 	}
 	
-	getCustomerById(id: string)
+	public getCustomerById(id: string): Observable<Customer>
 	{
-		return this._apollo
-		           .query({
-			                  query:     GQLQueries.CustomerById,
-			                  variables: { id },
-		                  })
+		return this.apollo
+		           .query<{
+			           customer: ICustomer
+		           }>({
+			              query:     GQLQuery.Customer.GetById,
+			              variables: { id },
+		              })
 		           .pipe(
-				           map((res) => res.data['customer']),
-				           map((user) => this._customerFactory(user)),
+				           map((result) => <Customer>
+						           this.factory(result, Customer)),
 				           share()
 		           );
 	}
 	
-	removeByIds(ids: string[])
+	public removeByIds(ids: string[]): Observable<FetchResult<string>>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate({
-			                   mutation:  GQLMutations.CustomerRemoveByIds,
+			                   mutation:  GQLMutation.Customer.RemoveByIds,
 			                   variables: { ids },
 		                   });
 	}
 	
-	async registerCustomer(registerInput: ICustomerRegistrationInput)
+	public async registerCustomer(registerInput: ICustomerRegistrationInput): Promise<Customer>
 	{
-		const res = await this._apollo
-		                      .mutate({
-			                              mutation:  GQLMutations.CustomerRegister,
-			                              variables: { registerInput },
-		                              })
-		                      .toPromise();
+		return await this.apollo
+		                 .mutate<{
+			                 customer: ICustomer
+		                 }>({
+			                    mutation:  GQLMutation.Customer.Register,
+			                    variables: { registerInput },
+		                    })
+		                 .pipe(
+				                 map((result) => <Customer>
+						                 this.factory(result, Customer)),
+				                 share()
+		                 )
+		                 .toPromise();
 		
-		return res.data['registerCustomer'];
 	}
 	
-	async banCustomer(id: string)
+	public async banCustomer(id: string): Promise<Customer | null>
 	{
-		return this._apollo
-		           .mutate({
-			                   mutation:  GQLMutations.CustomerBan,
-			                   variables: { id },
-		                   })
+		return this.apollo
+		           .mutate<{
+			           customer: Customer | null
+		           }>({
+			              mutation:  GQLMutation.Customer.Ban,
+			              variables: { id },
+		              })
+		           .pipe(map((result) => this.get(result)))
 		           .toPromise();
 	}
 	
-	async unbanCustomer(id: string)
+	public async unbanCustomer(id: string): Promise<Customer | null>
 	{
-		return this._apollo
-		           .mutate({
-			                   mutation:  GQLMutations.CustomerUnban,
-			                   variables: { id },
-		                   })
+		return this.apollo
+		           .mutate<{
+			           customer: Customer | null
+		           }>({
+			              mutation:  GQLMutation.Customer.Unban,
+			              variables: { id },
+		              })
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           )
 		           .toPromise();
 	}
 	
-	async getCountOfCustomers()
+	public async getCountOfCustomers(): Promise<number>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.CustomersCount,
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfCustomers'];
+		return await this.apollo
+		                 .query<{
+			                 count: number
+		                 }>({
+			                    query: GQLQuery.Customer.Count,
+		                    })
+		                 .pipe(map((result) => this.get(result)))
+		                 .toPromise();
 	}
 	
-	async getCustomerMetrics(
+	public async getCustomerMetrics(
 			id: string
-	): Promise<{
-		totalOrders: number;
-		canceledOrders: number;
-		completedOrdersTotalSum: number;
-	}>
+	): Promise<ICustomerMetrics>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query:     GQLQueries.UserMetrics,
-			                             variables: { id },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCustomerMetrics'];
+		return await this.apollo
+		                 .query<{
+			                 metrics: ICustomerMetrics
+		                 }>({
+			                    query:     GQLQuery.Customer.Metrics,
+			                    variables: { id },
+		                    })
+		                 .pipe(map((result) => this.get(result)))
+		                 .toPromise();
 	}
 	
-	generateCustomCustomers(
+	public generateCustomCustomers(
 			qty: number = 1000,
 			defaultLng: number,
 			defaultLat: number
 	): Observable<IResponseGenerateCustomers>
 	{
-		return this._apollo
+		return this.apollo
 		           .query<{
 			           generateCustomers: IResponseGenerateCustomers
 		           }>({
-			              query:     GQLQueries.UserGenerateCustom,
+			              query:     GQLQuery.Customer.GenerateCustom,
 			              variables: { qty, defaultLng, defaultLat },
 		              })
-		           .pipe(
-				           map((res) =>
-				               {
-					               return res.data.generateCustomers;
-				               })
-		           );
-	}
-	
-	protected _customerFactory(customer: ICustomer)
-	{
-		return customer == null ? null : new Customer(customer);
+		           .pipe(map((result) => this.get(result)));
 	}
 }
