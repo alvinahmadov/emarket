@@ -1,45 +1,62 @@
 import { Injectable } from '@angular/core';
 import { Apollo }     from 'apollo-angular';
-import Order          from '@modules/server.common/entities/Order';
-import { map, share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
+import { map, share } from 'rxjs/operators';
+import Order          from '@modules/server.common/entities/Order';
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }   from 'graphql/definitions';
+
+export interface IGeoLocationOrdersOptions
+{
+	sort?: string;
+	skip?: number;
+	limit?: number
+}
 
 @Injectable()
-export class CarriersOrdersService
+export class CarriersOrdersService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName:  CarriersOrdersService.name,
+			      pollInterval: 5000
+		      });
+	}
 	
-	getCarrierOrdersHistory(
+	public getCarrierOrdersHistory(
 			carrierId: string,
-			options: { sort?: string; skip?: number; limit?: number } = {
+			options: IGeoLocationOrdersOptions = {
 				sort: 'asc',
 			}
 	): Observable<Order[]>
 	{
 		return this.apollo
 		           .watchQuery<{
-			           getCarrierOrdersHistory: Order[]
+			           ordersHistory: Order[]
 		           }>({
-			              query: GQLQueries.CarrierOrdersHistory,
-			              variables: { carrierId, options },
-			              pollInterval: 2000,
+			              query:        GQLQuery.Carrier.Orders.GetHistory,
+			              variables:    { carrierId, options },
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.getCarrierOrdersHistory),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((res) => this.get(res)),
+				           share()
+		           );
 	}
 	
-	async getCountOfCarrierOrdersHistory(carrierId: string)
+	public async getCountOfCarrierOrdersHistory(carrierId: string): Promise<number>
 	{
-		const res = await this.apollo
-		                      .query({
-			                             query: GQLQueries.CarrierOrdersHistoryCount,
-			                             variables: { carrierId },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfCarrierOrdersHistory'];
+		return this.apollo
+		           .query<{
+			           count: number
+		           }>({
+			              query:     GQLQuery.Carrier.Orders.GetHistoryCount,
+			              variables: { carrierId },
+		              })
+		           .pipe(map((res) => this.get(res)))
+		           .toPromise();
 	}
 }
