@@ -24,8 +24,7 @@ export class CustomersService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName:  CustomersService.name,
-			      pollInterval: 5000
+			      serviceName:  "Admin::CustomersService"
 		      });
 	}
 	
