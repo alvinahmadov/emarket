@@ -5,12 +5,13 @@ import { map, share }                                from 'rxjs/operators';
 import { ApolloQueryResult }                         from 'apollo-client';
 import { countries, getCountryName, }                from '@modules/server.common/data/countries';
 import { IInviteCreateObject, IInviteUpdateObject, } from '@modules/server.common/interfaces/IInvite';
-import { IGeoLocationCreateObject, ICoordinate }     from '@modules/server.common/interfaces/IGeoLocation';
+import { ICoordinate, IGeoLocationCreateObject }     from '@modules/server.common/interfaces/IGeoLocation';
 import IPagingOptions                                from '@modules/server.common/interfaces/IPagingOptions';
 import Invite                                        from '@modules/server.common/entities/Invite';
-import { GQLMutations, GQLQueries }                  from '@modules/server.common/utilities/graphql';
+import ApolloService                                 from '@modules/client.common.angular2/services/apollo.service';
+import { InviteViewModel }                           from '@app/pages/+customers/+invites/invites.component';
 import { environment }                               from 'environments/environment'
-import { InviteViewModel }                           from '../../pages/+customers/+invites/invites.component';
+import { GQLMutation, GQLQuery }                     from 'graphql/definitions';
 
 interface IRemoveInviteResponse
 {
@@ -19,23 +20,28 @@ interface IRemoveInviteResponse
 }
 
 @Injectable()
-export class InvitesService
+export class InvitesService extends ApolloService
 {
 	private readonly invites$: Observable<Invite[]>;
 	
-	constructor(private readonly apollo: Apollo)
+	constructor(apollo: Apollo)
 	{
+		super(apollo,
+		      {
+			      serviceName:  "Admin::InvitesService",
+			      pollInterval: 5000
+		      });
 		this.invites$ = this.apollo
 		                    .watchQuery<{
 			                    invites: Invite[]
 		                    }>({
-			                       query:        GQLQueries.InviteAll,
-			                       pollInterval: 2000,
-		                       })
-		                    .valueChanges.pipe(
-						map((res) => res.data.invites),
-						share()
-				);
+			                       query:        GQLQuery.Invite.GetAll,
+			                       pollInterval: this.pollInterval,
+		                       }).valueChanges
+		                    .pipe(
+				                    map((result) => this.get(result)),
+				                    share()
+		                    );
 	}
 	
 	public getAllInvitesRequests(): Observable<Invite[]>
@@ -49,12 +55,12 @@ export class InvitesService
 		           .watchQuery<{
 			           invites: Invite[]
 		           }>({
-			              query:        GQLQueries.InviteByPaging,
+			              query:        GQLQuery.Invite.GetAllWithPaging,
 			              variables:    { pagingOptions },
-			              pollInterval: 2000,
+			              pollInterval: this.pollInterval,
 		              })
 		           .valueChanges.pipe(
-						map((res) => res.data.invites),
+						map((result) => this.get(result)),
 						share()
 				);
 	}
@@ -63,15 +69,15 @@ export class InvitesService
 	{
 		return this.apollo
 		           .mutate<{
-			           createInput: IInviteCreateObject
+			           invite: IInviteCreateObject
 		           }>({
-			              mutation:  GQLMutations.InviteCreate,
+			              mutation:  GQLMutation.Invite.Create,
 			              variables: {
 				              createInput,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.createInvite),
+				           map((result) => this.get(result) as Invite),
 				           share()
 		           );
 	}
@@ -83,17 +89,17 @@ export class InvitesService
 	{
 		return this.apollo
 		           .mutate<{
-			           id: string;
 			           updateInput: IInviteUpdateObject
 		           }>({
-			              mutation:  GQLMutations.InviteUpdate,
+			              mutation:  GQLMutation.Invite.Update,
 			              variables: {
 				              id,
 				              updateInput,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.updateInvite),
+				           map((result) => <Invite>
+						           this.factory(result, Invite)),
 				           share()
 		           );
 	}
@@ -101,12 +107,14 @@ export class InvitesService
 	public removeByIds(ids: string[]): Observable<IRemoveInviteResponse>
 	{
 		return this.apollo
-		           .mutate({
-			                   mutation:  GQLMutations.InviteRemoveByIds,
-			                   variables: { ids },
-		                   })
+		           .mutate<{
+			           response: IRemoveInviteResponse
+		           }>({
+			              mutation:  GQLMutation.Invite.RemoveByIds,
+			              variables: { ids },
+		              })
 		           .pipe(
-				           map((result: any) => result.data.removeInvitesByIds),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
@@ -136,11 +144,8 @@ export class InvitesService
 			streetAddress: data.address,
 			house:         data.house,
 			loc:           {
-				coordinates: {
-					lng: lng,
-					lat: lat
-				},
 				type:        'Point',
+				coordinates: [Number(lng), Number(lat)],
 			},
 		};
 		
@@ -153,13 +158,14 @@ export class InvitesService
 	
 	public async getCountOfInvites(): Promise<number>
 	{
-		const res = await this.apollo
-		                      .query({
-			                             query: GQLQueries.InviteCount,
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfInvites'];
+		return this.apollo
+		           .query<{
+			           count: number
+		           }>({
+			              query: GQLQuery.Invite.Count,
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 	
 	public generate1000InvitesConnectedToInviteRequests(
@@ -169,12 +175,11 @@ export class InvitesService
 	{
 		return this.apollo
 		           .query({
-			                  query:     GQLQueries.InviteFake,
+			                  query:     GQLQuery.Invite.GenerateInvitesToInviteRequests,
 			                  variables: { defaultLng, defaultLat },
 		                  });
 	}
 	
-	// noinspection DuplicatedCode
 	private _tryFindNewAddress(
 			house: string,
 			streetAddress: string,
@@ -186,32 +191,34 @@ export class InvitesService
 		const countryName = getCountryName(locale, countryId);
 		const geocoder = new google.maps.Geocoder();
 		
-		return new Promise((resolve) =>
-		                   {
-			                   geocoder.geocode(
-					                   {
-						                   address:               `${streetAddress} ${house}, ${city}`,
-						                   componentRestrictions: {
-							                   country: countryName,
-						                   },
-					                   },
-					                   (results, status) =>
-					                   {
-						                   if(status === google.maps.GeocoderStatus.OK)
-						                   {
-							                   const place: google.maps.GeocoderResult = results[0];
-							
-							                   resolve(place.geometry.location.toJSON());
-						                   }
-						                   else
-						                   {
-							                   resolve({
-								                           lng: environment.DEFAULT_LONGITUDE,
-								                           lat: environment.DEFAULT_LATITUDE
-							                           });
-						                   }
-					                   }
-			                   );
-		                   });
+		return new Promise(
+				(resolve) =>
+				{
+					geocoder.geocode(
+							{
+								address:               `${streetAddress} ${house}, ${city}`,
+								componentRestrictions: {
+									country: countryName,
+								},
+							},
+							(results, status) =>
+							{
+								if(status === google.maps.GeocoderStatus.OK)
+								{
+									const place: google.maps.GeocoderResult = results[0];
+									
+									resolve(place.geometry.location.toJSON());
+								}
+								else
+								{
+									resolve({
+										        lng: environment.DEFAULT_LONGITUDE,
+										        lat: environment.DEFAULT_LATITUDE
+									        });
+								}
+							}
+					);
+				}
+		);
 	}
 }
