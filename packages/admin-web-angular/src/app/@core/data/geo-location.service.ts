@@ -4,14 +4,20 @@ import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import GeoLocation    from '@modules/server.common/entities/GeoLocation';
 import ProductInfo    from '@modules/server.common/entities/ProductInfo';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }   from 'graphql/definitions';
 
 @Injectable()
-export class GeoLocationService
+export class GeoLocationService extends ApolloService
 {
-	private static readonly pollInteral: number = 10000;
-	
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName:  GeoLocationService.name,
+			      pollInterval: 5000
+		      });
+	}
 	
 	public getGeoLocationProducts(geoLocation: GeoLocation): Observable<ProductInfo[]>
 	{
@@ -19,7 +25,7 @@ export class GeoLocationService
 		           .watchQuery<{
 			           geoLocationProducts: ProductInfo[]
 		           }>({
-			              query:        GQLQueries.GeoLocationProduct,
+			              query:        GQLQuery.GeoLocation.Product.Find,
 			              variables:    {
 				              geoLocation: {
 					              countryId:     geoLocation.countryId,
@@ -30,15 +36,14 @@ export class GeoLocationService
 					              loc:           geoLocation.loc,
 				              },
 			              },
-			              pollInterval: GeoLocationService.pollInteral,
-		              })
-		           .valueChanges.pipe(
-						map((res) =>
-								    res.data.geoLocationProducts.filter(
-										    (p) => p.warehouseProduct.isProductAvailable === true
-								    )
-						),
-						share()
-				);
+			              pollInterval: this.pollInterval,
+		              }).valueChanges
+		           .pipe(
+				           map((result) =>
+						               this.get(result)
+						                   ?.filter((p) => p.warehouseProduct.isProductAvailable === true)
+				           ),
+				           share()
+		           );
 	}
 }
