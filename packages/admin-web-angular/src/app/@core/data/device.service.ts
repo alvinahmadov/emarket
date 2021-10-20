@@ -1,10 +1,11 @@
-import { Injectable }               from '@angular/core';
-import { Apollo }                   from 'apollo-angular';
-import { Observable }               from 'rxjs';
-import { map, share, first }        from 'rxjs/operators';
-import Device                       from '@modules/server.common/entities/Device';
-import { IDeviceRawObject }         from '@modules/server.common/interfaces/IDevice';
-import { GQLQueries, GQLMutations } from "@modules/server.common/utilities/graphql";
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { first, map, share }     from 'rxjs/operators';
+import Device                    from '@modules/server.common/entities/Device';
+import { IDeviceRawObject }      from '@modules/server.common/interfaces/IDevice';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery, GQLMutation } from 'graphql/definitions';
 
 export interface DeviceInfo
 {
@@ -21,115 +22,122 @@ export interface DeviceFindInput
 	uuid?: string;
 }
 
-interface RemovedObject
+interface IRemovedObjectResponse
 {
 	n: number;
 	ok: number;
 }
 
 @Injectable()
-export class DeviceService
+export class DeviceService extends ApolloService
 {
 	private readonly devices$: Observable<Device[]>;
 	
-	constructor(private readonly apollo: Apollo)
+	constructor(apollo: Apollo)
 	{
+		super(apollo,
+		      {
+			      serviceName:  DeviceService.name,
+			      pollInterval: 5000
+		      });
+		
 		this.devices$ = this.apollo
 		                    .watchQuery<{
 			                    devices: IDeviceRawObject[]
 		                    }>({
-			                       query: GQLQueries.DeviceAll,
-			                       pollInterval: 2000,
+			                       query:        GQLQuery.Device.GetAll,
+			                       pollInterval: this.pollInterval,
 		                       })
-		                    .valueChanges.pipe(
-						map((result) => result.data.devices),
-						map((devices) => devices.map((d) => this._deviceFactory(d))),
-						share()
-				);
+		                    .valueChanges
+		                    .pipe(
+				                    map((result) => <Device[]>
+						                    this.factory(result, Device)),
+				                    share()
+		                    );
 	}
 	
-	getByFindInput(findInput: DeviceFindInput): Observable<Device[]>
+	public getByFindInput(findInput: DeviceFindInput): Observable<Device[]>
 	{
 		return this.apollo
-		           .query({
-			                  query: GQLQueries.DeviceByUuid,
-			                  variables: { findInput },
-		                  })
+		           .query<{
+			           devices: Device[]
+		           }>({
+			              query:     GQLQuery.Device.GetByUuid,
+			              variables: { findInput },
+		              })
 		           .pipe(
-				           map((res) => res.data['devices']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	async getDeviceByUuid(uuid: string)
+	public async getDeviceByUuid(uuid: string): Promise<Device[]>
 	{
-		return this.getByFindInput({ uuid }).pipe(first()).toPromise();
+		return this.getByFindInput({ uuid: uuid })
+		           .pipe(first())
+		           .toPromise();
 	}
 	
-	getWithWebsocket()
+	// noinspection JSUnusedGlobalSymbols
+	public getWithWebsocket(): any
 	{
-		return this.apollo
-		           .watchQuery({
-			                       query: GQLQueries.DeviceByWebsocket
-		                       });
+		return this.apollo.watchQuery({ query: GQLQuery.Device.GetByWebsocket });
 	}
 	
-	getDevices(): Observable<Device[]>
+	public getDevices(): Observable<Device[]>
 	{
 		return this.devices$;
 	}
 	
-	update(deviceId: string, updateInput: DeviceInfo): Observable<Device>
+	public update(deviceId: string, updateInput: DeviceInfo): Observable<Device>
 	{
 		return this.apollo
 		           .mutate<{
 			           updateDevice: IDeviceRawObject
 		           }>({
-			              mutation: GQLMutations.DeviceUpdate,
+			              mutation:  GQLMutation.Device.Update,
 			              variables: {
 				              deviceId,
 				              updateInput,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.updateDevice.update),
-				           map((d) => this._deviceFactory(d)),
+				           map((result) => <Device>
+						           this.factory(result, Device)),
 				           share()
 		           );
 	}
 	
-	removeByIds(ids: string[]): Observable<RemovedObject>
+	public removeByIds(ids: string[]): Observable<IRemovedObjectResponse>
 	{
 		return this.apollo
-		           .mutate({
-			                   mutation: GQLMutations.DeviceRemoveById,
-			                   variables: { ids },
-		                   })
+		           .mutate<{
+			           response: IRemovedObjectResponse
+		           }>({
+			              mutation:  GQLMutation.Device.RemoveById,
+			              variables: { ids },
+		              })
 		           .pipe(
-				           map((result: any) => result.data.removeDeviceByIds),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	create(createInput: DeviceInfo): Observable<Device>
+	public create(createInput: DeviceInfo): Observable<Device>
 	{
 		return this.apollo
 		           .mutate<{
 			           createDevice: IDeviceRawObject
 		           }>({
-			              mutation: GQLMutations.DeviceCreate,
+			              mutation:  GQLMutation.Device.Create,
 			              variables: {
 				              createInput,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.createDevice),
+				           map((result) => <Device>
+						           this.factory(result, Device)),
 				           share()
 		           );
-	}
-	
-	protected _deviceFactory(device: IDeviceRawObject)
-	{
-		return device == null ? null : new Device(device);
 	}
 }
