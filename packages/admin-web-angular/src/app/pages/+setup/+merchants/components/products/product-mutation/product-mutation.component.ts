@@ -6,41 +6,42 @@ import {
 	Input,
 }                                              from '@angular/core';
 import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
-import { BasicInfoFormComponent }              from '@app/@shared/product/forms/basic-info/basic-info-form.component';
-import ProductsCategory                        from '@modules/server.common/entities/ProductsCategory';
-import { ProductsCategoryService }             from '@app/@core/data/productsCategory.service';
 import { first }                               from 'rxjs/operators';
 import { IProductCreateObject }                from '@modules/server.common/interfaces/IProduct';
-import { ProductsService }                     from '@app/@core/data/products.service';
-import { ProductViewModel }                    from '@app/pages/+simulation/products/products.component';
-import { ProductLocalesService }               from '@modules/client.common.angular2/locale/product-locales.service';
 import Product                                 from '@modules/server.common/entities/Product';
+import ProductsCategory                        from '@modules/server.common/entities/ProductsCategory';
+import { ProductLocalesService }               from '@modules/client.common.angular2/locale/product-locales.service';
+import { ProductsCategoryService }             from '@app/@core/data/productsCategory.service';
+import { ProductsService }                     from '@app/@core/data/products.service';
+import { BasicInfoFormComponent }              from '@app/@shared/product/forms/basic-info/basic-info-form.component';
+import { ProductViewModel }                    from '@app/pages/+simulation/products/products.component';
 
 @Component({
-	           selector: 'ea-merchants-setup-product-mutation',
+	           selector:    'ea-merchants-setup-product-mutation',
 	           templateUrl: './product-mutation.component.html',
            })
 export class SetupMerchantProductMutationComponent
 {
 	@ViewChild('basicInfoForm', { static: true })
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@Output()
-	onCreate: EventEmitter<ProductViewModel> = new EventEmitter();
+	public onCreate: EventEmitter<ProductViewModel> = new EventEmitter();
+	
 	@Output()
-	onEdit: EventEmitter<boolean> = new EventEmitter();
+	public onEdit: EventEmitter<boolean> = new EventEmitter();
 	
 	@Input()
-	product: Product;
+	public product: Product;
 	
-	productsCategories: ProductsCategory[];
-	areCategoriesLoaded: boolean = false;
+	public productsCategories: ProductsCategory[];
+	public areCategoriesLoaded: boolean = false;
 	
-	readonly form: FormGroup = this._formBuilder.group({
-		                                                   basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
-	                                                   });
+	public readonly form: FormGroup = this._formBuilder.group({
+		                                                          basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
+	                                                          });
 	
-	readonly basicInfo = this.form.get('basicInfo') as FormControl;
+	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
 	
 	constructor(
 			private readonly _formBuilder: FormBuilder,
@@ -52,7 +53,7 @@ export class SetupMerchantProductMutationComponent
 		this.loadProductCategories();
 	}
 	
-	async loadProductCategories()
+	public async loadProductCategories()
 	{
 		try
 		{
@@ -70,7 +71,7 @@ export class SetupMerchantProductMutationComponent
 		this.areCategoriesLoaded = true;
 	}
 	
-	async create()
+	public async create()
 	{
 		const productCreateObject: IProductCreateObject = await this.basicInfoForm.setupProductCreateObject();
 		try
@@ -81,7 +82,7 @@ export class SetupMerchantProductMutationComponent
 			                          .toPromise();
 			
 			this.onCreate.emit({
-				                   id: product.id,
+				                   id:    product.id,
 				                   title: this._productLocalesService.getMemberValue(
 						                   product.title
 				                   ),
@@ -95,7 +96,7 @@ export class SetupMerchantProductMutationComponent
 		}
 	}
 	
-	async save()
+	public async save()
 	{
 		try
 		{
