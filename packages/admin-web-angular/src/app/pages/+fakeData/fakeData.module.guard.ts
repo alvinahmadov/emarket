@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable }     from '@angular/core';
 import {
 	CanActivate,
 	ActivatedRouteSnapshot,
 	Router,
 	RouterStateSnapshot,
-}                     from '@angular/router';
-import { Store }      from '@app/@core/data/store.service';
+}                         from '@angular/router';
+import { StorageService } from '@app/@core/data/store.service';
 
 @Injectable()
 export class FakeDataModuleGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{}
 	
@@ -21,7 +21,7 @@ export class FakeDataModuleGuard implements CanActivate
 			state: RouterStateSnapshot
 	): boolean
 	{
-		const fakeDataGenerator = !!+this.store.fakeDataGenerator;
+		const fakeDataGenerator = !!+this.storage.fakeDataGenerator;
 		
 		if(!fakeDataGenerator)
 		{
