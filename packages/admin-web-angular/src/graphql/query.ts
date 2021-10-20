@@ -21,6 +21,16 @@ export namespace GQLQuery
 			}
 		`;
 		
+		export const GetByEmail = gql`
+			query GetAdminByEmail($email: String!)
+			{
+				adminByEmail(email: $email)
+				{
+					_id
+				}
+			}
+		`;
+		
 		export const GetAppSettings = gql`
 			query adminAppSettings
 			{
