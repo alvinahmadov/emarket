@@ -37,6 +37,7 @@ export interface CustomerViewModel
 
 const perPage = 10;
 
+// noinspection JSUnusedLocalSymbols
 @Component({
 	           selector:    'ea-customers',
 	           styleUrls:   ['/customers.component.scss'],
@@ -323,7 +324,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		}
 		const loadData = async(customers: Customer[]) =>
 		{
-			const customerIds = customers.map((u) => u?.id);
+			const customerIds = customers.map((customer) => customer?.id);
 			
 			const customersOrders = await this._ordersService
 			                                  .getCustomersOrdersCountInfo(customerIds);
@@ -392,10 +393,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 	{
 		this._translateService.onLangChange
 		    .pipe(takeUntil(this.ngDestroy$))
-		    .subscribe(() =>
-		               {
-			               this._loadSettingsSmartTable();
-		               });
+		    .subscribe(() => this._loadSettingsSmartTable());
 	}
 	
 	// This is just workaround to show some search
