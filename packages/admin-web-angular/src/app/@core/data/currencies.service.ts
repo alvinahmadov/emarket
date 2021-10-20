@@ -1,10 +1,11 @@
-import { Injectable }               from '@angular/core';
-import { Apollo }                   from 'apollo-angular';
-import { Observable }               from 'rxjs';
-import { map, share }               from 'rxjs/operators';
-import { ICurrencyCreateObject }    from '@modules/server.common/interfaces/ICurrency';
-import Currency                     from '@modules/server.common/entities/Currency';
-import { GQLQueries, GQLMutations } from '@modules/server.common/utilities/graphql';
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { map, share }            from 'rxjs/operators';
+import { ICurrencyCreateObject } from '@modules/server.common/interfaces/ICurrency';
+import Currency                  from '@modules/server.common/entities/Currency';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery, GQLMutation } from 'graphql/definitions';
 
 export interface ICurrencyMutationRespone
 {
@@ -14,23 +15,28 @@ export interface ICurrencyMutationRespone
 }
 
 @Injectable()
-export class CurrenciesService
+export class CurrenciesService extends ApolloService
 {
 	private readonly currencies$: Observable<Currency[]>;
-	private static readonly pollInterval: number = 10000;
 	
-	constructor(private readonly apollo: Apollo)
+	constructor(apollo: Apollo)
 	{
+		super(apollo,
+		      {
+			      serviceName:  CurrenciesService.name,
+			      pollInterval: 10000
+		      });
+		
 		this.currencies$ = this.apollo
 		                       .watchQuery<{
 			                       currencies: Currency[]
 		                       }>({
-			                          query:        GQLQueries.CurrenciesAll,
-			                          pollInterval: CurrenciesService.pollInterval,
+			                          query:        GQLQuery.Currency.GetAll,
+			                          pollInterval: this.pollInterval,
 		                          })
 		                       .valueChanges
 		                       .pipe(
-				                       map((result) => result.data.currencies),
+				                       map((result) => this.get(result)),
 				                       share()
 		                       );
 	}
@@ -46,11 +52,11 @@ export class CurrenciesService
 		           .mutate<{
 			           createCurrency: ICurrencyMutationRespone
 		           }>({
-			              mutation:  GQLMutations.CurrencyCreate,
+			              mutation:  GQLMutation.Currency.Create,
 			              variables: { createInput },
 		              })
 		           .pipe(
-				           map((result) => result.data.createCurrency),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
