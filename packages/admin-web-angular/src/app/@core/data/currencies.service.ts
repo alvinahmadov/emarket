@@ -23,8 +23,8 @@ export class CurrenciesService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName:  CurrenciesService.name,
-			      pollInterval: 10000
+			      serviceName:  "Admin::CurrenciesService",
+			      pollInterval: 8000
 		      });
 		
 		this.currencies$ = this.apollo
