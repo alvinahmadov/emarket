@@ -6,28 +6,28 @@ import {
 	Output,
 	EventEmitter,
 }                                        from '@angular/core';
-import { AddWarehouseProductsComponent } from '@app/@shared/warehouse-product/forms/add-warehouse-products-table';
-import Product                           from '@modules/server.common/entities/Product';
-import { WarehousesService }             from '@app/@core/data/warehouses.service';
 import { first }                         from 'rxjs/operators';
+import Product                           from '@modules/server.common/entities/Product';
+import { AddWarehouseProductsComponent } from '@app/@shared/warehouse-product/forms/add-warehouse-products-table';
+import { WarehousesService }             from '@app/@core/data/warehouses.service';
 import { NotifyService }                 from '@app/@core/services/notify/notify.service';
 
 @Component({
-	           selector: 'ea-merchants-setup-add-products',
+	           selector:    'ea-merchants-setup-add-products',
 	           templateUrl: './add-products.component.html',
            })
 export class SetupMerchantAddProductsComponent implements OnInit
 {
 	@ViewChild('addWarehouseProductsTable', { static: true })
-	addWarehouseProductsTable: AddWarehouseProductsComponent;
+	public addWarehouseProductsTable: AddWarehouseProductsComponent;
 	
 	@Input()
-	products: Product[];
+	public products: Product[];
 	@Input()
-	storeId: string;
+	public storeId: string;
 	
 	@Output()
-	successAdd: EventEmitter<boolean> = new EventEmitter<boolean>();
+	public successAdd: EventEmitter<boolean> = new EventEmitter<boolean>();
 	
 	constructor(
 			private warehousesService: WarehousesService,
@@ -35,7 +35,7 @@ export class SetupMerchantAddProductsComponent implements OnInit
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.addWarehouseProductsTable.loadDataSmartTable(
 				this.products || [],
@@ -43,12 +43,11 @@ export class SetupMerchantAddProductsComponent implements OnInit
 		);
 	}
 	
-	async add()
+	public async add()
 	{
 		try
 		{
-			const productsForAdd = this.addWarehouseProductsTable
-					.allWarehouseProducts;
+			const productsForAdd = this.addWarehouseProductsTable.allWarehouseProducts;
 			
 			await this.warehousesService
 			          .addProducts(this.storeId, productsForAdd)
