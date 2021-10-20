@@ -3,8 +3,10 @@
 		"SAVE": "Save",
 		"CANCEL": "Cancel",
 		"USA": "USA",
-		"ISRAEL": "Israel",
-		"BULGARIA": "Bulgaria"
+		"LAYOUTS": "Layouts",
+		"SIDEBAR": "Sidebar",
+		"THEMES": "Themes",
+		"LANGUAGE": "Language"
 	},
 	"ORDER_VIEW": {
 		"ORDER_HEADER_INFO": {
