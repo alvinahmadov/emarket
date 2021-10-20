@@ -191,10 +191,7 @@
                             formControlName="carrierCompetition"
                             status="success"
                     >
-                        {{
-                        'WAREHOUSE_VIEW.MUTATION.CARRIER_WORK_COMPETITION'
-                            | translate
-                        }}
+                        {{ 'WAREHOUSE_VIEW.MUTATION.CARRIER_WORK_COMPETITION' | translate }}
                     </nb-checkbox>
                 </div>
             </div>
@@ -229,7 +226,6 @@
             </div>
         </div>
 
-        <!-- TODO add translate -->
         <div
                 *ngIf="hasRestrictedCarriers.value && carriersIds?.value.length"
                 class="form-group row"
@@ -244,12 +240,15 @@
                 >
                     <nb-radio [value]="'all'" name="size">
                         Use All Carriers
+	                    {{ 'WAREHOUSE_VIEW.MANAGE_CARRIERS.ALL' | translate }}
                     </nb-radio>
                     <nb-radio [value]="'onlyStore'" name="size">
                         Use Only Store Carriers
+	                    {{ 'WAREHOUSE_VIEW.MANAGE_CARRIERS.ONLY_STORE' | translate }}
                     </nb-radio>
                     <nb-radio [value]="'preferStore'" name="size">
                         Prefer Store Carriers
+	                    {{ 'WAREHOUSE_VIEW.MANAGE_CARRIERS.PREFER_STORE' | translate }}
                     </nb-radio>
                 </nb-radio-group>
             </div>
