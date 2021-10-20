@@ -3,9 +3,9 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class SmartTableService
 {
-	data = [];
+	public data = [];
 	
-	getData()
+	public getData()
 	{
 		return this.data;
 	}
