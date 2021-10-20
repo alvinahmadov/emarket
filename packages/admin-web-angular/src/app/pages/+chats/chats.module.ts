@@ -6,7 +6,7 @@ import { ToasterModule }                              from 'angular2-toaster';
 import { environment }                                from 'environments/environment';
 import { CommonModule }                               from '@modules/client.common.angular2/common.module';
 import { ChatService }                                from '@modules/client.common.angular2/services/chat.service';
-import { Store }                                      from '@app/@core/data/store.service';
+import { StorageService }                             from '@app/@core/data/store.service';
 import { ThemeModule }                                from '@app/@theme';
 import { ChatsRoutingModule }                         from '@app/pages/+chats/chats-routing.module';
 import { ChatsComponent }                             from '@app/pages/+chats/chats.component';
@@ -27,7 +27,7 @@ const commonModConf = { apiUrl: environment.HTTP_SERVICES_ENDPOINT }
 		          NbListModule
 	          ],
 	          providers:    [
-		          Store,
+		          StorageService,
 		          ChatService
 	          ]
           })
