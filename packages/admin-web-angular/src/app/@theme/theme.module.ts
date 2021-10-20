@@ -21,6 +21,7 @@ import {
 	NbIconModule,
 	NbSelectModule,
 	NbRadioModule,
+	NbButtonModule,
 } from '@nebular/theme';
 
 import { NbEvaIconsModule } from '@nebular/eva-icons';
@@ -53,8 +54,9 @@ import { EVERLIGHT_THEME } from './styles/theme.everlight';
 import { HttpClient, HttpClientModule }     from '@angular/common/http';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
-import { AdminsService }                    from '../@core/data/admins.service';
 import { PipesModule }                      from '@modules/client.common.angular2/pipes/pipes.module';
+import { ChatService }                      from '@modules/client.common.angular2/services/chat.service';
+import { AdminsService }                    from '@app/@core/data/admins.service';
 import { DARK_THEME }                       from './styles/theme.dark';
 import { SampleLayoutComponent }            from './layouts/sample/sample.layout';
 
@@ -122,24 +124,26 @@ const NB_THEME_PROVIDERS = [
 	...NbSidebarModule.forRoot().providers,
 	...NbMenuModule.forRoot().providers,
 	AdminsService,
+	ChatService,
 ];
 
 @NgModule({
-	          imports: [
+	          imports:         [
 		          ...BASE_MODULES,
 		          ...NB_MODULES,
 		          HttpClientModule,
 		          TranslateModule.forChild({
 			                                   loader: {
-				                                   provide: TranslateLoader,
+				                                   provide:    TranslateLoader,
 				                                   useFactory: HttpLoaderFactory,
-				                                   deps: [HttpClient],
+				                                   deps:       [HttpClient],
 			                                   },
 		                                   }),
 		          PipesModule,
+		          NbButtonModule
 	          ],
-	          exports: [...BASE_MODULES, ...NB_MODULES, ...COMPONENTS],
-	          declarations: [...COMPONENTS],
+	          exports:         [...BASE_MODULES, ...NB_MODULES, ...COMPONENTS],
+	          declarations:    [...COMPONENTS],
 	          entryComponents: [...ENTRY_COMPONENTS],
           })
 export class ThemeModule
@@ -147,7 +151,7 @@ export class ThemeModule
 	static forRoot(): ModuleWithProviders<ThemeModule>
 	{
 		return {
-			ngModule: ThemeModule,
+			ngModule:  ThemeModule,
 			providers: [...NB_THEME_PROVIDERS],
 		};
 	}
