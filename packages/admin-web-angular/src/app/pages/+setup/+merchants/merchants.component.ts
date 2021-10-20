@@ -1,4 +1,10 @@
 import { Component, ViewChild }                      from '@angular/core';
+import { NbStepperComponent }                        from '@nebular/theme';
+import { ToasterService }                            from 'angular2-toaster';
+import { IWarehouseCreateObject }                    from '@modules/server.common/interfaces/IWarehouse';
+import GeoLocation                                   from '@modules/server.common/entities/GeoLocation';
+import Warehouse                                     from '@modules/server.common/entities/Warehouse';
+import { WarehouseAuthRouter }                       from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 import { SetupMerchantAccountComponent }             from './components/account/account.component';
 import { SetupMerchantBasicInfoComponent }           from './components/basic-info/basic-info.component';
 import { SetupMerchantContactInfoComponent }         from './components/contact-info/contact-info.component';
@@ -7,12 +13,6 @@ import { SetupMerchantPaymentsComponent }            from './components/payments
 import { SetupMerchantManufacturingComponent }       from './components/manufacturing/manufacturing.component';
 import { SetupMerchantDeliveryAndTakeawayComponent } from './components/settings/delivery-takeaway/delivery-takeaway.component';
 import { SetupMerchantOrdersSettingsComponent }      from './components/settings/orders/orders.component';
-import { IWarehouseCreateObject }                    from '@modules/server.common/interfaces/IWarehouse';
-import GeoLocation                                   from '@modules/server.common/entities/GeoLocation';
-import Warehouse                                     from '@modules/server.common/entities/Warehouse';
-import { WarehouseAuthRouter }                       from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
-import { ToasterService }                            from 'angular2-toaster';
-import { NbStepperComponent }                        from '@nebular/theme';
 
 @Component({
 	           styleUrls:   ['./merchants.component.scss'],
@@ -21,26 +21,33 @@ import { NbStepperComponent }                        from '@nebular/theme';
 export class SetupMerchantsComponent
 {
 	@ViewChild('nbStepper')
-	nbStepper: NbStepperComponent;
+	public nbStepper: NbStepperComponent;
 	
 	@ViewChild('account', { static: true })
-	stepAccount: SetupMerchantAccountComponent;
-	@ViewChild('basicInfo', { static: true })
-	stepBasicInfo: SetupMerchantBasicInfoComponent;
-	@ViewChild('contactInfo', { static: true })
-	stepContactInfo: SetupMerchantContactInfoComponent;
-	@ViewChild('location', { static: true })
-	stepLocation: SetupMerchantLocationComponent;
-	@ViewChild('payments')
-	stepPayments: SetupMerchantPaymentsComponent;
-	@ViewChild('manufacturing')
-	stepManufacturing: SetupMerchantManufacturingComponent;
-	@ViewChild('deliveryAndTakeaway')
-	stepDeliveryAndTakeaway: SetupMerchantDeliveryAndTakeawayComponent;
-	@ViewChild('ordersSettings')
-	stepOrdersSettings: SetupMerchantOrdersSettingsComponent;
+	public stepAccount: SetupMerchantAccountComponent;
 	
-	currentStore: Warehouse;
+	@ViewChild('basicInfo', { static: true })
+	public stepBasicInfo: SetupMerchantBasicInfoComponent;
+	
+	@ViewChild('contactInfo', { static: true })
+	public stepContactInfo: SetupMerchantContactInfoComponent;
+	
+	@ViewChild('location', { static: true })
+	public stepLocation: SetupMerchantLocationComponent;
+	
+	@ViewChild('payments')
+	public stepPayments: SetupMerchantPaymentsComponent;
+	
+	@ViewChild('manufacturing')
+	public stepManufacturing: SetupMerchantManufacturingComponent;
+	
+	@ViewChild('deliveryAndTakeaway')
+	public stepDeliveryAndTakeaway: SetupMerchantDeliveryAndTakeawayComponent;
+	
+	@ViewChild('ordersSettings')
+	public stepOrdersSettings: SetupMerchantOrdersSettingsComponent;
+	
+	public currentStore: Warehouse;
 	
 	constructor(
 			private warehouseAuthRouter: WarehouseAuthRouter,
@@ -48,7 +55,7 @@ export class SetupMerchantsComponent
 	)
 	{}
 	
-	get canCreateMerchant()
+	public get canCreateMerchant()
 	{
 		return (
 				this.stepAccount.formValid &&
@@ -58,7 +65,7 @@ export class SetupMerchantsComponent
 		);
 	}
 	
-	async createMerchant()
+	public async createMerchant()
 	{
 		try
 		{
@@ -91,7 +98,7 @@ export class SetupMerchantsComponent
 		if(this.canCreateMerchant)
 		{
 			const geoLocationInput = this.stepLocation.locationForm.getValue();
-			geoLocationInput.loc.coordinates.reverse();
+			// geoLocationInput.loc.coordinates.reverse();
 			
 			const accountModel = this.stepAccount.accountModel;
 			
