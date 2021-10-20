@@ -10,7 +10,7 @@
 <form #payPalConfigForm="ngForm" [hidden]="!isPayPalEnabled">
 	<div class="row m-0">
 		<div class="form-group col-md-6">
-			<label for="mode">
+			<label for="paypalMode">
 				{{
 				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.MODE' | translate
 				}}
@@ -19,7 +19,8 @@
 					#mode="ngModel"
 					[(ngModel)]="configModel.mode"
 					class="form-control"
-					name="mode"
+					id="paypalMode"
+					name="paypalMode"
 					required
 			>
 				<option disabled hidden selected value="">{{
@@ -33,7 +34,7 @@
 		</div>
 		
 		<div class="form-group col-md-6">
-			<label for="currency">
+			<label for="paypalCurrency">
 				{{
 				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.CURRENCY'
 						| translate
@@ -43,7 +44,8 @@
 					#currency="ngModel"
 					[(ngModel)]="configModel.currency"
 					class="form-control"
-					name="currency"
+					id="paypalCurrency"
+					name="paypalCurrency"
 					required
 			>
 				<option disabled hidden selected value="">{{
@@ -51,9 +53,9 @@
 							| translate
 					}}</option>
 				<option
-						*ngFor="let code of currenciesCodes"
-						value="{{ code }}"
-				>{{ code }}</option
+						*ngFor="let currency of currencies"
+						value="{{ currency.code }}"
+				>{{ currency.name }} ({{currency.sign}})</option
 				>
 			</select>
 			<small
@@ -72,7 +74,7 @@
 	
 	<div class="row m-0">
 		<div class="form-group col-md-12">
-			<label for="publishableKey">
+			<label for="paypalPublishableKey">
 				{{
 				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.PUBLISHABLE_KEY'
 						| translate
@@ -90,8 +92,8 @@
 						(publishableKey.dirty || publishableKey.touched)
 				}"
 					class="form-control"
-					id="publishableKey"
-					name="publishable-key"
+					id="paypalPublishableKey"
+					name="paypalPublishableKey"
 					nbInput
 					placeholder="{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.PUBLISHABLE_KEY'
@@ -119,7 +121,7 @@
 	
 	<div class="row m-0">
 		<div class="form-group col-md-12">
-			<label for="secretKey">
+			<label for="paypalSecretKey">
 				{{
 				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.SECRET_KEY'
 						| translate
@@ -137,8 +139,8 @@
 						(secretKey.dirty || secretKey.touched)
 				}"
 					class="form-control"
-					id="secretKey"
-					name="secret-key"
+					id="paypalSecretKey"
+					name="paypalSecretKey"
 					nbInput
 					placeholder="{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.SECRET_KEY'
@@ -165,7 +167,7 @@
 	
 	<div class="row m-0">
 		<div class="form-group col-md-12">
-			<label for="description">
+			<label for="paypalDescription">
 				{{
 				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.PAYMENT_DESCRIPTION'
 						| translate
@@ -183,8 +185,8 @@
 						(description.dirty || description.touched)
 				}"
 					class="form-control"
-					id="description"
-					name="description"
+					id="paypalDescription"
+					name="paypalDescription"
 					nbInput
 					placeholder="{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.PAYMENT_DESCRIPTION'
