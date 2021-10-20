@@ -20,7 +20,7 @@ export class CarriersOrdersService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName:  CarriersOrdersService.name,
+			      serviceName:  "Admin::CarriersOrdersService",
 			      pollInterval: 5000
 		      });
 	}
