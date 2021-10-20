@@ -1,15 +1,15 @@
-import { Input, Component, ViewChild, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder }                    from '@angular/forms';
-import { IWarehouseCreateObject }                    from '@modules/server.common/interfaces/IWarehouse';
-import { WarehouseManageTabsDetailsComponent }       from './details/warehouse-manage-tabs-details.component';
-import { WarehouseManageTabsAccountComponent }       from './account/warehouse-manage-tabs-account.component';
-import { ContactInfoFormComponent }                  from '../contact-info';
-import Warehouse                                     from '@modules/server.common/entities/Warehouse';
-import ForwardOrdersMethod                           from '@modules/server.common/enums/ForwardOrdersMethod';
-import { LocationFormComponent }                     from '../../../forms/location';
+import { Component, EventEmitter, Input, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup }   from '@angular/forms';
 import IGeoLocation                                  from '@modules/server.common/interfaces/IGeoLocation';
+import { IWarehouseCreateObject }                    from '@modules/server.common/interfaces/IWarehouse';
+import ForwardOrdersMethod                           from '@modules/server.common/enums/ForwardOrdersMethod';
+import Warehouse                                     from '@modules/server.common/entities/Warehouse';
+import { WarehouseManageTabsAccountComponent }       from './account/warehouse-manage-tabs-account.component';
+import { WarehouseManageTabsDetailsComponent }       from './details/warehouse-manage-tabs-details.component';
 import { WarehouseManageTabsDeliveryAreasComponent } from './delivery-areas/warehouse-manage-tabs-delivery-areas.component';
+import { ContactInfoFormComponent }                  from '../contact-info';
 import { PaymentsSettingsFormComponent }             from '../payments-settings/payments-settings-form.component';
+import { LocationFormComponent }                     from '../../../forms/location';
 
 export type WarehouseManageTabs = Pick<IWarehouseCreateObject,
 		| 'name'
@@ -21,86 +21,114 @@ export type WarehouseManageTabs = Pick<IWarehouseCreateObject,
 		| 'isManufacturing'
 		| 'isCarrierRequired'>;
 
+type TabValue = {
+	basicInfo: WarehouseManageTabs;
+	password: {
+		current: string;
+		new: string;
+	};
+	contactInfo: {
+		contactEmail: string;
+		contactPhone: string;
+		forwardOrdersUsing: ForwardOrdersMethod[];
+		ordersEmail: string;
+		ordersPhone: string;
+	};
+	location: IGeoLocation;
+	deliveryAreas: any; // add type
+	isPaymentEnabled: boolean;
+	paymentsGateways: object[];
+	isCashPaymentEnabled: boolean;
+}
+
 @Component({
-	           selector: 'ea-warehouse-manage-tabs',
-	           styleUrls: ['./warehouse-manage-tabs.component.scss'],
+	           selector:    'ea-warehouse-manage-tabs',
+	           styleUrls:   ['./warehouse-manage-tabs.component.scss'],
 	           templateUrl: './warehouse-manage-tabs.component.html',
            })
 export class WarehouseManageTabsComponent
 {
 	@Input()
-	readonly form: FormGroup;
-	@ViewChild('detailsComponent')
-	readonly detailsComponent: WarehouseManageTabsDetailsComponent;
-	@ViewChild('accountComponent')
-	readonly accountComponent: WarehouseManageTabsAccountComponent;
-	@ViewChild('contactInfoForm')
-	readonly contactInfoForm: ContactInfoFormComponent;
-	@ViewChild('locationForm')
-	readonly locationForm: LocationFormComponent;
-	@ViewChild('paymentsSettingsForm')
-	readonly paymentsSettingsForm: PaymentsSettingsFormComponent;
-	@ViewChild('deliveryAreasForm')
-	readonly deliveryAreasForm: WarehouseManageTabsDeliveryAreasComponent;
-	@ViewChild('tabSet')
-	readonly tabSet;
-	mapCoordEmitter = new EventEmitter<number[]>();
-	mapGeometryEmitter = new EventEmitter<any>();
+	public readonly form: FormGroup;
 	
-	get details()
+	@ViewChild('detailsComponent')
+	public readonly detailsComponent: WarehouseManageTabsDetailsComponent;
+	
+	@ViewChild('accountComponent')
+	public readonly accountComponent: WarehouseManageTabsAccountComponent;
+	
+	@ViewChild('contactInfoForm')
+	public readonly contactInfoForm: ContactInfoFormComponent;
+	
+	@ViewChild('locationForm')
+	public readonly locationForm: LocationFormComponent;
+	
+	@ViewChild('paymentsSettingsForm')
+	public readonly paymentsSettingsForm: PaymentsSettingsFormComponent;
+	
+	@ViewChild('deliveryAreasForm')
+	public readonly deliveryAreasForm: WarehouseManageTabsDeliveryAreasComponent;
+	
+	@ViewChild('tabSet')
+	public readonly tabSet;
+	
+	public mapCoordEmitter = new EventEmitter<number[]>();
+	public mapGeometryEmitter = new EventEmitter<any>();
+	
+	public get details(): AbstractControl
 	{
 		return this.form.get('details');
 	}
 	
-	get account()
+	public get account(): AbstractControl
 	{
 		return this.form.get('account');
 	}
 	
-	get contactInfo()
+	public get contactInfo(): AbstractControl
 	{
 		return this.form.get('contactInfo');
 	}
 	
-	get location()
+	public get location(): AbstractControl
 	{
 		return this.form.get('location');
 	}
 	
-	get validForm()
+	public get validForm(): boolean
 	{
 		return this.form.valid && this.paymentsSettingsForm.isPaymentValid;
 	}
 	
-	get deliveryAreas()
+	public get deliveryAreas(): AbstractControl
 	{
 		return this.form.get('deliverAreas');
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		return formBuilder.group({
-			                         details: WarehouseManageTabsDetailsComponent.buildForm(formBuilder),
-			                         account: WarehouseManageTabsAccountComponent.buildForm(formBuilder),
-			                         contactInfo: ContactInfoFormComponent.buildForm(formBuilder),
-			                         location: LocationFormComponent.buildForm(formBuilder),
+			                         details:      WarehouseManageTabsDetailsComponent.buildForm(formBuilder),
+			                         account:      WarehouseManageTabsAccountComponent.buildForm(formBuilder),
+			                         contactInfo:  ContactInfoFormComponent.buildForm(formBuilder),
+			                         location:     LocationFormComponent.buildForm(formBuilder),
 			                         deliverAreas: WarehouseManageTabsDeliveryAreasComponent.buildForm(
 					                         formBuilder
 			                         ),
 		                         });
 	}
 	
-	onCoordinatesChanges(coords: number[])
+	public onCoordinatesChanges(coords: number[])
 	{
 		this.mapCoordEmitter.emit(coords);
 	}
 	
-	onGeometrySend(geometry: any)
+	public onGeometrySend(geometry: any)
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	getValue()
+	public getValue(): TabValue
 	{
 		// GeoJSON use reversed order for coordinates from our implementation.
 		// we use lat => lng but GeoJSON use lng => lat.
@@ -113,39 +141,19 @@ export class WarehouseManageTabsComponent
 		const locationRaw = geoLocationInput;
 		const deliveryAreasRaw = this.deliveryAreasForm.getValue();
 		
-		const inputResult: {
-			basicInfo: WarehouseManageTabs;
-			password: {
-				current: string;
-				new: string;
-			};
-			contactInfo: {
-				contactEmail: string;
-				contactPhone: string;
-				forwardOrdersUsing: ForwardOrdersMethod[];
-				ordersEmail: string;
-				ordersPhone: string;
-			};
-			location: IGeoLocation;
-			deliveryAreas: any; // add type
-			isPaymentEnabled: boolean;
-			paymentsGateways: object[];
-			isCashPaymentEnabled: boolean;
-		} = {
-			basicInfo: { ...detailsRaw, username: accountRaw.username },
-			password: accountRaw.password,
-			contactInfo: contactRaw,
-			location: locationRaw as IGeoLocation,
-			deliveryAreas: deliveryAreasRaw,
-			isPaymentEnabled: this.paymentsSettingsForm.isPaymentEnabled,
-			paymentsGateways: this.paymentsSettingsForm.paymentsGateways,
-			isCashPaymentEnabled: this.paymentsSettingsForm
-					.isCashPaymentEnabled,
+		return {
+			basicInfo:            { ...detailsRaw, username: accountRaw.username },
+			password:             accountRaw.password,
+			contactInfo:          contactRaw,
+			location:             locationRaw as IGeoLocation,
+			deliveryAreas:        deliveryAreasRaw,
+			paymentsGateways:     this.paymentsSettingsForm.paymentsGateways,
+			isPaymentEnabled:     this.paymentsSettingsForm.isPaymentEnabled,
+			isCashPaymentEnabled: this.paymentsSettingsForm.isCashPaymentEnabled,
 		};
-		return inputResult;
 	}
 	
-	setValue(warehouse: Warehouse)
+	public setValue(warehouse: Warehouse)
 	{
 		// GeoJSON use reversed order of lat => lng
 		const geoLocationInput = warehouse.geoLocation;
@@ -159,7 +167,7 @@ export class WarehouseManageTabsComponent
 		this.paymentsSettingsForm.setValue(warehouse);
 	}
 	
-	warehouseUpdateFinish()
+	public warehouseUpdateFinish()
 	{
 		this.tabSet.tabs._results[0].activeValue = true;
 		this.tabSet.tabs._results[1].activeValue = false;
