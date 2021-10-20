@@ -1,194 +1,205 @@
-import { Injectable }               from '@angular/core';
-import { Observable }               from 'rxjs';
-import InviteRequest                from '@modules/server.common/entities/InviteRequest';
-import { Apollo }                   from 'apollo-angular';
-import { map, share }               from 'rxjs/operators';
+import { Injectable }                   from '@angular/core';
+import { Apollo }                       from 'apollo-angular';
+import { Observable }                   from 'rxjs';
+import { map, share }                   from 'rxjs/operators';
+import { getCountries, getCountryName } from '@modules/server.common/data/countries';
 import {
 	IInviteRequestCreateObject,
-	IInviteRequestUpdateObject,
-}                                   from '@modules/server.common/interfaces/IInviteRequest';
-import { getCountryName }           from '@modules/server.common/entities/GeoLocation';
-import { IGeoLocationCreateObject } from '@modules/server.common/interfaces/IGeoLocation';
-import { InviteRequestViewModel }   from '../../pages/+customers/+invites/+invites-requests/invites-requests.component';
-import { countries }                from '@modules/server.common/data/abbreviation-to-country';
-import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
-import { GQLMutations, GQLQueries } from '@modules/server.common/utilities/graphql';
+	IInviteRequestUpdateObject
+}                                       from '@modules/server.common/interfaces/IInviteRequest';
+import {
+	ICoordinate,
+	IGeoLocationCreateObject
+}                                       from '@modules/server.common/interfaces/IGeoLocation';
+import IPagingOptions                   from '@modules/server.common/interfaces/IPagingOptions';
+import InviteRequest                    from '@modules/server.common/entities/InviteRequest';
+import ApolloService                    from '@modules/client.common.angular2/services/apollo.service';
+import { InviteRequestViewModel }       from '@app/pages/+customers/+invites/+invites-requests/invites-requests.component';
+import { GQLQuery, GQLMutation }        from 'graphql/definitions';
 
-interface RemovedObject
+interface IRemovedObjectResponse
 {
 	n: number;
 	ok: number;
 }
 
 @Injectable()
-export class InvitesRequestsService
+export class InvitesRequestsService extends ApolloService
 {
 	private readonly invitesRequests$: Observable<InviteRequest[]>;
 	
-	constructor(private readonly _apollo: Apollo)
+	constructor(apollo: Apollo)
 	{
-		this.invitesRequests$ = this._apollo
+		super(apollo, {
+			serviceName:  "Admin::InvitesRequestsService",
+			pollInterval: 4000
+		});
+		this.invitesRequests$ = this.apollo
 		                            .watchQuery<{
 			                            invitesRequests: InviteRequest[]
 		                            }>({
-			                               query: GQLQueries.InviteRequestsAll,
-			                               pollInterval: 2000,
-		                               })
-		                            .valueChanges.pipe(
-						map((res) => res.data.invitesRequests),
-						share()
-				);
+			                               query:        GQLQuery.InviteRequest.GetAll,
+			                               pollInterval: this.pollInterval,
+		                               }).valueChanges
+		                            .pipe(
+				                            map((result) => this.get(result)),
+				                            share()
+		                            );
 	}
 	
-	getAllInvitesRequests(): Observable<InviteRequest[]>
+	public getAllInvitesRequests(): Observable<InviteRequest[]>
 	{
 		return this.invitesRequests$;
 	}
 	
-	getInvitesRequests(
+	public getInvitesRequests(
 			pagingOptions?: IPagingOptions,
 			invited?: boolean
 	): Observable<InviteRequest[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           invitesRequests: InviteRequest[]
 		           }>({
-			              query: GQLQueries.InviteBy,
-			              variables: { pagingOptions, invited },
-			              pollInterval: 2000,
-		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.invitesRequests),
-						share()
-				);
+			              query:        GQLQuery.InviteRequest.GetAllWithPaging,
+			              variables:    { pagingOptions, invited },
+			              pollInterval: this.pollInterval,
+		              }).valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
-	createInviteRequest(
+	public createInviteRequest(
 			createInput: IInviteRequestCreateObject
 	): Observable<InviteRequest>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate<{
-			           createInput: IInviteRequestCreateObject
+			           createInviteRequest: IInviteRequestCreateObject
 		           }>({
-			              mutation: GQLMutations.InviteRequestCreate,
+			              mutation:  GQLMutation.InviteRequest.Create,
 			              variables: {
 				              createInput,
 			              },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.createInviteRequest),
+				           map((result) => <InviteRequest>
+						           this.factory(result, InviteRequest)),
 				           share()
 		           );
 	}
 	
-	removeByIds(ids: string[]): Observable<RemovedObject>
+	public removeByIds(ids: string[]): Observable<IRemovedObjectResponse>
 	{
-		return this._apollo
-		           .mutate({
-			                   mutation: GQLMutations.InviteRequestsRemoveByIds,
-			                   variables: { ids },
-		                   })
+		return this.apollo
+		           .mutate<{
+			           response: IRemovedObjectResponse
+		           }>({
+			              mutation:  GQLMutation.InviteRequest.RemoveByIds,
+			              variables: { ids },
+		              })
 		           .pipe(
-				           map((result: any) => result.data.removeInvitesRequestsByIds),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
-	updateInviteRequest(
+	public updateInviteRequest(
 			id: string,
 			updateInput: IInviteRequestUpdateObject
 	): Observable<InviteRequest>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate<{
-			           id: string;
 			           updateInput: IInviteRequestUpdateObject
 		           }>
 		           ({
-			            mutation: GQLMutations.InviteRequestUpdate,
+			            mutation:  GQLMutation.InviteRequest.Update,
 			            variables: {
 				            id,
 				            updateInput,
 			            },
 		            })
 		           .pipe(
-				           map((result: any) => result.data.updateInviteRequest),
+				           map((result) => <InviteRequest>
+						           this.factory(result, InviteRequest)),
 				           share()
 		           );
 	}
 	
-	async getCreateInviteRequestObject(data: InviteRequestViewModel)
+	public async getCreateInviteRequestObject(
+			data: InviteRequestViewModel,
+			locale: string = 'en-US'
+	): Promise<IInviteRequestCreateObject>
 	{
-		// noinspection DuplicatedCode
 		const res = await this._tryFindNewAddress(
 				data.house,
 				data.address,
 				data.city,
-				Object.values(countries).indexOf(data.country)
+				Object.values(getCountries(locale)).indexOf(data.country)
 		);
 		
-		const lat = Number(res['lat']).toFixed(7);
-		const lng = Number(res['lng']).toFixed(7);
+		const lat = parseFloat(Number(res.lat).toFixed(7));
+		const lng = parseFloat(Number(res.lng).toFixed(7));
 		
 		const geoLocation: IGeoLocationCreateObject = {
-			countryId: Object.values(countries).indexOf(data.country),
-			city: data.city,
+			countryId:     Object.values(getCountries(locale)).indexOf(data.country),
+			city:          data.city,
 			streetAddress: data.address,
-			house: data.house,
-			loc: {
+			house:         data.house,
+			loc:           {
+				type:        'Point',
 				coordinates: [Number(lng), Number(lat)],
-				type: 'Point',
 			},
 		};
 		
-		const inviteRequest: IInviteRequestCreateObject = {
-			apartment: data.apartment,
-			isManual: true,
-			geoLocation,
+		return {
+			apartment:   data.apartment,
+			isManual:    true,
+			geoLocation: geoLocation,
 		};
-		
-		return inviteRequest;
 	}
 	
-	generate1000InviteRequests(defaultLng: number, defaultLat: number): any
+	public generate1000InviteRequests(defaultLng: number, defaultLat: number)
 	{
-		return this._apollo.query({
-			                          query: GQLQueries.InviteRequestFake,
-			                          variables: { defaultLng, defaultLat },
-		                          });
+		return this.apollo
+		           .query({
+			                  query:     GQLQuery.InviteRequest.Generate,
+			                  variables: { defaultLng, defaultLat },
+		                  });
 	}
 	
-	async getCountOfInvitesRequests(invited?: boolean)
+	public async getCountOfInvitesRequests(invited?: boolean): Promise<number>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query: GQLQueries.InviteRequestCount,
-			                             variables: { invited },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfInvitesRequests'];
+		return this.apollo
+		           .query<{
+			           count: number
+		           }>({
+			              query:     GQLQuery.InviteRequest.Count,
+			              variables: { invited },
+		              })
+		           .pipe(map(res => this.get(res)))
+		           .toPromise();
 	}
 	
-	// noinspection DuplicatedCode
 	private _tryFindNewAddress(
 			house: string,
 			streetAddress: string,
 			city: string,
 			countryId: number
-	)
+	): Promise<ICoordinate>
 	{
-		const countryName = getCountryName(countryId);
+		const countryName = getCountryName('en-US', countryId);
 		
 		const geocoder = new google.maps.Geocoder();
 		
-		return new Promise((resolve, reject) =>
+		return new Promise((resolve) =>
 		                   {
 			                   geocoder.geocode(
 					                   {
-						                   address: `${streetAddress} ${house}, ${city}`,
+						                   address:               `${streetAddress} ${house}, ${city}`,
 						                   componentRestrictions: {
 							                   country: countryName,
 						                   },
