@@ -5,9 +5,33 @@ import { NbAuthStrategyClass }          from '@nebular/auth/auth.options';
 import { Apollo }                       from 'apollo-angular';
 import { from, Observable, of }         from 'rxjs';
 import { catchError, map }              from 'rxjs/operators';
-import { GQLMutations, GQLQueries }     from '@modules/server.common/utilities/graphql'
+import Admin                            from '@modules/server.common/entities/Admin';
 import CommonUtils                      from '@modules/server.common/utilities/common';
+import { ApolloResult }                 from '@modules/client.common.angular2/services/apollo.service';
 import { StorageService }               from '@app/@core/data/store.service';
+import { GQLQuery, GQLMutation }        from 'graphql/definitions';
+
+interface IAdminLoginInfo
+{
+	admin: Admin
+	token: string
+}
+
+interface IAdminRegisterDto
+{
+	email: string;
+	fullName: string;
+	password: string;
+	confirmPassword: string;
+	terms: boolean;
+}
+
+interface IAuthOptions
+{
+	email: string;
+	password: string;
+	rememberMe?: boolean | null;
+}
 
 @Injectable()
 export class AdminAuthStrategy extends NbAuthStrategy
@@ -59,11 +83,12 @@ export class AdminAuthStrategy extends NbAuthStrategy
 			defaultMessages:       ['Your password has been successfully changed.'],
 		},
 	};
+	private debug: boolean = false;
 	
 	constructor(
 			private apollo: Apollo,
 			private route: ActivatedRoute,
-			private store: StorageService
+			private storageService: StorageService
 	)
 	{
 		super();
@@ -78,31 +103,31 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	public getByEmail(email: string)
 	{
 		return this.apollo
-		           .query({
-			                  query:     GQLQueries.AdminByEmail,
-			                  variables: { email },
-		                  })
-		           .pipe(map((res) => res.data['adminByEmail']));
+		           .query<{
+			           admin: Admin | null
+		           }>({
+			              query:     GQLQuery.Admin.GetByEmail,
+			              variables: { email },
+		              })
+		           .pipe(map((result) => this.get(result)));
 	}
 	
-	public authenticate(args: {
-		email: string;
-		password: string;
-		rememberMe?: boolean | null;
-	}): Observable<NbAuthResult>
+	public authenticate(args: IAuthOptions): Observable<NbAuthResult>
 	{
 		const { email, password } = args;
 		const rememberMe = !!args.rememberMe;
 		
 		return this.apollo
-		           .mutate({
-			                   mutation:    GQLMutations.AdminLogin,
-			                   variables:   { email, password },
-			                   errorPolicy: 'all',
-		                   })
+		           .mutate<{
+			           adminLogin: IAdminLoginInfo
+		           }>({
+			              mutation:    GQLMutation.Admin.Login,
+			              variables:   { email, password },
+			              errorPolicy: 'all',
+		              })
 		           .pipe(
 				           map(
-						           (res: any) =>
+						           (res) =>
 						           {
 							           const { data, errors } = res;
 							           const isSuccessful = !!data.adminLogin;
@@ -127,10 +152,10 @@ export class AdminAuthStrategy extends NbAuthStrategy
 								           );
 							           }
 							
-							           this.store.adminId = data.adminLogin.admin.id;
+							           this.storageService.adminId = data.adminLogin.admin.id;
 							
 							           if(rememberMe)
-								           this.store.token = data.adminLogin.token;
+								           this.storageService.token = data.adminLogin.token;
 							
 							           return new NbAuthResult(
 									           isSuccessful,
@@ -157,13 +182,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		           );
 	}
 	
-	public register(args: {
-		email: string;
-		fullName: string;
-		password: string;
-		confirmPassword: string;
-		terms: boolean;
-	}): Observable<NbAuthResult>
+	public register(args: IAdminRegisterDto): Observable<NbAuthResult>
 	{
 		const { email, fullName, password, confirmPassword, terms } = args;
 		
@@ -180,30 +199,31 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		const avatar = CommonUtils.getDummyImage(300, 300, letter);
 		
 		return this.apollo
-		           .mutate({
-			                   mutation:    GQLMutations.AdminRegister,
-			                   variables:   {
-				                   email,
-				                   fullName,
-				                   password,
-				                   avatar,
-			                   },
-			                   errorPolicy: 'all',
-		                   })
+		           .mutate<{
+			           registerAdmin: Admin
+		           }>({
+			              mutation:    GQLMutation.Admin.Register,
+			              variables:   {
+				              email,
+				              fullName,
+				              password,
+				              avatar,
+			              },
+			              errorPolicy: 'all',
+		              })
 		           .pipe(
 				           /*
 				            res: { data: { registerAdmin: Admin }; errors }
 				            */
-				           map((res: any) =>
+				           map((result) =>
 				               {
-					               const { data, errors } = res;
-					               const admin = data.registerAdmin;
+					               const { errors } = result;
 					
 					               if(errors)
 					               {
 						               return new NbAuthResult(
 								               false,
-								               res,
+								               result,
 								               AdminAuthStrategy.config.register.redirect.failure,
 								               errors.map((err) => JSON.stringify(err))
 						               );
@@ -211,7 +231,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 					
 					               return new NbAuthResult(
 							               true,
-							               res,
+							               result,
 							               AdminAuthStrategy.config.register.redirect.success,
 							               [],
 							               AdminAuthStrategy.config.register.defaultMessages
@@ -255,9 +275,9 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	
 	private async _logout(): Promise<NbAuthResult>
 	{
-		this.store.clear();
+		this.storageService.clear();
 		
-		this.store.serverConnection = '200';
+		this.storageService.serverConnection = '200';
 		
 		await this.apollo.getClient().resetStore();
 		
@@ -268,5 +288,56 @@ export class AdminAuthStrategy extends NbAuthStrategy
 				[],
 				AdminAuthStrategy.config.logout.defaultMessages
 		);
+	}
+	
+	/**
+	 * Property to get apollo result without specifying key of data
+	 *
+	 * @returns { R } Returns value of apollo result
+	 * */
+	protected get<T, R = T[keyof T]>(
+			result: ApolloResult<T>,
+			key?: string
+	): R
+	{
+		try
+		{
+			const keys = Object.keys(result.data);
+			
+			if(!key)
+			{
+				if(keys && keys.length === 1)
+				{
+					key = keys[0];
+				}
+				else
+				{
+					throw new Error(`No key provided for apollo result for ${AdminAuthStrategy.name}`);
+				}
+			}
+			
+			if(this.debug)
+			{
+				if(!result)
+				{
+					console.warn(`Apollo result of type '${typeof result}' ` +
+					             `returned null from service ${AdminAuthStrategy.name}`);
+				}
+				if(!result.data[key])
+				{
+					console.warn(`Apollo result of type '${typeof result.data[key]}' ` +
+					             `returned null from service ${AdminAuthStrategy.name}`);
+				}
+				
+				console.debug(`ApolloService get keys for service ${AdminAuthStrategy.name}`);
+				console.debug(`${Object.keys(result.data)}: ${Object.entries(result.data)}`);
+				console.debug(result.data[key]);
+			}
+			return result.data[key];
+		} catch(e)
+		{
+			console.error(e);
+			return null;
+		}
 	}
 }
