@@ -1,7 +1,7 @@
 <nb-layout [center]="layout.id === 'center-column'" withScroll>
 	<nb-layout-header fixed>
 		<ngx-header
-				[position]="sidebar.id === 'start' ? 'normal': 'inverse'"
+				[position]="sidebar.id === 'start' ? 'normal' : 'inverse'"
 		></ngx-header>
 	</nb-layout-header>
 	
@@ -9,38 +9,34 @@
 			[end]="sidebar.id === 'end'"
 			class="menu-sidebar"
 			responsive
-            tag="menu-sidebar"
-    >
-        <ng-content select="nb-menu"></ng-content>
-    </nb-sidebar>
-
-    <nb-layout-column class="main-content">
-        <ng-content select="router-outlet"></ng-content>
-    </nb-layout-column>
-
-    <nb-layout-column
-            *ngIf="layout.id === 'two-column' || layout.id === 'three-column'"
-            class="small"
-            start
-    >
-        <nb-menu [items]="subMenu"></nb-menu>
-    </nb-layout-column>
-
-    <nb-layout-column *ngIf="layout.id === 'three-column'" class="small">
-        <nb-menu [items]="subMenu"></nb-menu>
-    </nb-layout-column>
-
-    <nb-layout-footer fixed>
-        <ngx-footer></ngx-footer>
-    </nb-layout-footer>
-
-    <nb-sidebar
-            [end]="sidebar.id !== 'end'"
-            class="settings-sidebar"
-            fixed
-            state="collapsed"
-            tag="settings-sidebar"
-    >
-        <ngx-theme-settings></ngx-theme-settings>
-    </nb-sidebar>
+			tag="menu-sidebar"
+	>
+		<ng-content select="nb-menu"></ng-content>
+	</nb-sidebar>
+	
+	<nb-layout-column class="main-content">
+		<ng-content select="router-outlet"></ng-content>
+	</nb-layout-column>
+	
+	<nb-layout-column
+			*ngIf="layout.id === 'two-column' || layout.id === 'three-column'"
+			class="small"
+			start
+	>
+		<nb-menu [items]="subMenu"></nb-menu>
+	</nb-layout-column>
+	
+	<nb-layout-column *ngIf="layout.id === 'three-column'" class="small">
+		<nb-menu [items]="subMenu"></nb-menu>
+	</nb-layout-column>
+	
+	<nb-sidebar
+			[end]="sidebar.id !== 'end'"
+			class="settings-sidebar"
+			fixed
+			state="collapsed"
+			tag="settings-sidebar"
+	>
+		<ngx-theme-settings></ngx-theme-settings>
+	</nb-sidebar>
 </nb-layout>
