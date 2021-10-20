@@ -7,7 +7,7 @@ import { from, Observable, of }         from 'rxjs';
 import { catchError, map }              from 'rxjs/operators';
 import { GQLMutations, GQLQueries }     from '@modules/server.common/utilities/graphql'
 import CommonUtils                      from '@modules/server.common/utilities/common';
-import { Store }                        from '@app/@core/data/store.service';
+import { StorageService }               from '@app/@core/data/store.service';
 
 @Injectable()
 export class AdminAuthStrategy extends NbAuthStrategy
@@ -63,19 +63,19 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	constructor(
 			private apollo: Apollo,
 			private route: ActivatedRoute,
-			private store: Store
+			private store: StorageService
 	)
 	{
 		super();
 	}
 	
-	static setup(options: { name: string }): [NbAuthStrategyClass, any]
+	public static setup(options: { name: string }): [NbAuthStrategyClass, any]
 	{
 		return [AdminAuthStrategy, options];
 	}
 	
 	// noinspection JSUnusedGlobalSymbols
-	getByEmail(email: string)
+	public getByEmail(email: string)
 	{
 		return this.apollo
 		           .query({
@@ -85,7 +85,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		           .pipe(map((res) => res.data['adminByEmail']));
 	}
 	
-	authenticate(args: {
+	public authenticate(args: {
 		email: string;
 		password: string;
 		rememberMe?: boolean | null;
@@ -157,7 +157,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		           );
 	}
 	
-	register(args: {
+	public register(args: {
 		email: string;
 		fullName: string;
 		password: string;
@@ -169,7 +169,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		
 		if(password !== confirmPassword)
 		{
-			return Observable.of(
+			return of(
 					new NbAuthResult(false, null, null, [
 						"The passwords don't match.",
 					])
@@ -233,22 +233,22 @@ export class AdminAuthStrategy extends NbAuthStrategy
 		           );
 	}
 	
-	logout(): Observable<NbAuthResult>
+	public logout(): Observable<NbAuthResult>
 	{
 		return from(this._logout());
 	}
 	
-	requestPassword(data?: any): Observable<NbAuthResult>
+	public requestPassword(data?: any): Observable<NbAuthResult>
 	{
 		throw new Error('Not implemented yet');
 	}
 	
-	resetPassword(data: any = {}): Observable<NbAuthResult>
+	public resetPassword(data: any = {}): Observable<NbAuthResult>
 	{
 		throw new Error('Not implemented yet');
 	}
 	
-	refreshToken(data?: any): Observable<NbAuthResult>
+	public refreshToken(data?: any): Observable<NbAuthResult>
 	{
 		throw new Error('Not implemented yet');
 	}
