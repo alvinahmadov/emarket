@@ -4,6 +4,29 @@ export namespace GQLMutation
 {
 	export namespace Admin
 	{
+		export const Login = gql`
+			mutation AdminLogin(
+				$email: String!,
+				$password: String!
+			)
+			{
+				adminLogin(
+					email: $email,
+					password: $password
+				)
+				{
+					token
+					admin {
+						_id
+						id
+						email
+						username
+						avatar
+					}
+				}
+			}
+		`;
+		
 		export const UpdatePassword = gql`
 			mutation UpdateAdminPassword(
 				$id: String!
