@@ -8,20 +8,27 @@ import { NbSpinnerModule, NbButtonModule } from '@nebular/theme';
 
 const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: SetupComponent,
 	},
 	{
-		path: 'merchants',
+		path:         'merchants',
 		loadChildren: () =>
-				import('./+merchants/merchants.module').then(
-						(m) => m.SetupMerchantsModule
-				),
+				              import('./+merchants/merchants.module').then(
+						              (m) => m.SetupMerchantsModule
+				              ),
+	},
+	{
+		path:         'market',
+		loadChildren: () =>
+				              import('./+market/market.module').then(
+						              (m) => m.MarketModule
+				              ).catch(err => console.error(err)),
 	},
 ];
 
 @NgModule({
-	          imports: [
+	          imports:      [
 		          CommonModule,
 		          ThemeModule,
 		          RouterModule.forChild(routes),
