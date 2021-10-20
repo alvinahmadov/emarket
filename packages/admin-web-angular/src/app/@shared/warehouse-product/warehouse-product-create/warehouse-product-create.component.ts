@@ -1,70 +1,74 @@
 import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl }     from '@angular/forms';
-import { WarehouseAddChoiceComponent }             from '../forms';
-import { takeUntil, first }                        from 'rxjs/operators';
-import { Subject }                                 from 'rxjs';
-import { BasicInfoFormComponent }                  from '../../product/forms';
-import { ProductsTableComponent }                  from '../../product/forms/products-table';
-import { ProductsService }                         from '../../../@core/data/products.service';
-import Product                                     from '@modules/server.common/entities/Product';
-import { IProductCreateObject }                    from '@modules/server.common/interfaces/IProduct';
-import { AddWarehouseProductsComponent }           from '../forms/add-warehouse-products-table';
 import { NgbActiveModal }                          from '@ng-bootstrap/ng-bootstrap';
-import { WarehousesService }                       from '../../../@core/data/warehouses.service';
 import { WizardComponent }                         from '@ever-co/angular2-wizard';
 import { TranslateService }                        from '@ngx-translate/core';
 import { NbThemeService }                          from '@nebular/theme';
+import { Subject }                                 from 'rxjs';
+import { takeUntil, first }                        from 'rxjs/operators';
+import { IProductCreateObject }                    from '@modules/server.common/interfaces/IProduct';
+import Product                                     from '@modules/server.common/entities/Product';
 import ProductsCategory                            from '@modules/server.common/entities/ProductsCategory';
-import { ProductsCategoryService }                 from '@app/@core/data/productsCategory.service';
 import Warehouse                                   from '@modules/server.common/entities/Warehouse';
 import WarehouseProduct                            from '@modules/server.common/entities/WarehouseProduct';
+import { ProductsService }                         from '@app/@core/data/products.service';
+import { ProductsCategoryService }                 from '@app/@core/data/productsCategory.service';
+import { WarehousesService }                       from '@app/@core/data/warehouses.service';
 import { NotifyService }                           from '@app/@core/services/notify/notify.service';
+import { WarehouseAddChoiceComponent }             from '../forms';
+import { AddWarehouseProductsComponent }           from '../forms/add-warehouse-products-table';
+import { BasicInfoFormComponent }                  from '../../product/forms';
+import { ProductsTableComponent }                  from '../../product/forms/products-table';
 
 const perPage = 3;
 
 @Component({
-	           selector: 'ea-warehouse-product-create',
+	           selector:    'ea-warehouse-product-create',
+	           styleUrls:   ['./warehouse-product-create.component.scss'],
 	           templateUrl: './warehouse-product-create.component.html',
-	           styleUrls: ['./warehouse-product-create.component.scss'],
            })
 export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 {
-	loading: boolean;
+	public loading: boolean;
 	
-	currentThemeCosmic: boolean = false;
+	public currentThemeCosmic: boolean = false;
 	
-	warehouseId: string;
-	BUTTON_DONE: string = 'BUTTON_DONE';
-	BUTTON_NEXT: string = 'BUTTON_NEXT';
-	BUTTON_PREV: string = 'BUTTON_PREV';
-	productsCategories: ProductsCategory[];
-	selectedWarehouse: Warehouse;
-	perPage: number;
-	choiced: string;
+	public warehouseId: string;
+	public buttons = {
+		done: 'BUTTON_DONE',
+		next: 'BUTTON_NEXT',
+		prev: 'BUTTON_PREV',
+	}
+	public productsCategories: ProductsCategory[];
+	public selectedWarehouse: Warehouse;
+	public perPage: number;
+	public choiced: string;
 	
 	@ViewChild('warehouseAddChoice', { static: true })
-	warehouseAddChoice: WarehouseAddChoiceComponent;
+	public warehouseAddChoice: WarehouseAddChoiceComponent;
 	
 	@ViewChild('basicInfoForm')
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('productsTable')
-	productsTable: ProductsTableComponent;
+	public productsTable: ProductsTableComponent;
 	
 	@ViewChild('addWarehouseProductsTable')
-	addWarehouseProductsTable: AddWarehouseProductsComponent;
+	public addWarehouseProductsTable: AddWarehouseProductsComponent;
 	
 	@ViewChild('wizzardFrom')
-	wizzardFrom: WizardComponent;
+	public wizzardFrom: WizardComponent;
 	
 	@ViewChild('wizzardFromStep1', { static: true })
-	wizzardFromStep1: any;
-	readonly form: FormGroup = this._formBuilder.group({
-		                                                   basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
-	                                                   });
-	readonly basicInfo = this.form.get('basicInfo') as FormControl;
-	$productsTablePagesChanges: any;
-	isSetp2: boolean;
+	public wizzardFromStep1: any;
+	public readonly form: FormGroup = this._formBuilder.group(
+			{
+				basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
+			}
+	);
+	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
+	public $productsTablePagesChanges: any;
+	public isSetp2: boolean;
 	private ngDestroy$ = new Subject<void>();
 	private createdProducts: Product[] = [];
 	private selectedProducts: any[] = [];
@@ -85,36 +89,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		this.checkCurrentTheme();
 	}
 	
-	get buttonDone()
-	{
-		return this._translate(this.BUTTON_DONE);
-	}
-	
-	get buttonNext()
-	{
-		return this._translate(this.BUTTON_NEXT);
-	}
-	
-	get buttonPrevious()
-	{
-		return this._translate(this.BUTTON_PREV);
-	}
-	
-	get hasCoiced()
-	{
-		return this.choiced;
-	}
-	
-	get isValidBasicInfoForm()
-	{
-		return this.basicInfo && this.basicInfo.valid && this.isSetp2;
-	}
-	
-	hasSelectedProducts = () => false;
-	
-	validAllProducts = () => false;
-	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.wizzardFromStep1.showNext = false;
 		this.warehouseAddChoice.choice
@@ -125,7 +100,42 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		               });
 	}
 	
-	checkCurrentTheme()
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public get buttonDone(): string
+	{
+		return this._translate(this.buttons.done);
+	}
+	
+	public get buttonNext(): string
+	{
+		return this._translate(this.buttons.next);
+	}
+	
+	public get buttonPrevious(): string
+	{
+		return this._translate(this.buttons.prev);
+	}
+	
+	public get hasCoiced(): string
+	{
+		return this.choiced;
+	}
+	
+	public get isValidBasicInfoForm(): boolean
+	{
+		return this.basicInfo && this.basicInfo.valid && this.isSetp2;
+	}
+	
+	public hasSelectedProducts = () => false;
+	
+	public validAllProducts = () => false;
+	
+	public checkCurrentTheme()
 	{
 		if(this._themeService.currentTheme === 'cosmic')
 		{
@@ -133,13 +143,12 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	async addProducts()
+	public async addProducts()
 	{
 		this.loading = true;
 		try
 		{
-			const productsForAdd = this.addWarehouseProductsTable
-					.allWarehouseProducts;
+			const productsForAdd = this.addWarehouseProductsTable.allWarehouseProducts;
 			const res = await this._warehousesService
 			                      .addProducts(this.warehouseId, productsForAdd)
 			                      .pipe(first())
@@ -161,7 +170,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	async onStep1Next()
+	public async onStep1Next()
 	{
 		this.isSetp2 = true;
 		if(this.choiced === 'existing')
@@ -196,7 +205,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 				let products = await this._productsService
 				                         .getProducts(
 						                         {
-							                         skip: perPage * (page - 1),
+							                         skip:  perPage * (page - 1),
 							                         limit: perPage,
 						                         },
 						                         existedProductsIds
@@ -227,7 +236,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	selectedChoice()
+	public selectedChoice()
 	{
 		if(this.choiced)
 		{
@@ -236,7 +245,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	async onStep2Next()
+	public async onStep2Next()
 	{
 		this.isSetp2 = false;
 		if(this.choiced === 'new')
@@ -261,7 +270,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		const newCreatedProducts = this.createdProducts.map((p) =>
 		                                                    {
 			                                                    return {
-				                                                    id: p.id,
+				                                                    id:    p.id,
 				                                                    title: p.title[0].value,
 			                                                    };
 		                                                    });
@@ -274,7 +283,7 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 				this.addWarehouseProductsTable.productsIsValid();
 	}
 	
-	onStep2Prev()
+	public onStep2Prev()
 	{
 		if(this.choiced === 'existing')
 		{
@@ -284,12 +293,12 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		this.choiced = null;
 	}
 	
-	onStep3Prev()
+	public onStep3Prev()
 	{
 		this.isSetp2 = true;
 	}
 	
-	async loadProductCategories()
+	public async loadProductCategories()
 	{
 		this.productsCategories = await this._productsCategoryService
 		                                    .getCategories()
@@ -297,18 +306,12 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 		                                    .toPromise();
 	}
 	
-	cancel()
+	public cancel()
 	{
 		this._activeModal.dismiss('canceled');
 	}
 	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-	}
-	
-	private async getDataCount(existedProductsIds: string[])
+	private async getDataCount(existedProductsIds: string[]): Promise<number>
 	{
 		return this._productsService.getCountOfProducts(existedProductsIds);
 	}
@@ -317,10 +320,8 @@ export class WarehouseProductCreateComponent implements OnInit, OnDestroy
 	{
 		let translationResult = '';
 		
-		this._translateService.get(key).subscribe((res) =>
-		                                          {
-			                                          translationResult = res;
-		                                          });
+		this._translateService.get(key)
+		    .subscribe((res) => translationResult = res);
 		
 		return translationResult;
 	}
