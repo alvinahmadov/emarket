@@ -1,70 +1,70 @@
 <div class="modal-header">
 	<span class="modal-title">{{
-        'WAREHOUSE_VIEW.NEW_PRODUCT.ADD_PRODUCTS_TO_STORE' | translate
-        }}</span>
-    <button (click)="cancel()" aria-label="Close" class="close">
-        <span aria-hidden="true">&times;</span>
-    </button>
+		'WAREHOUSE_VIEW.NEW_PRODUCT.ADD_PRODUCTS_TO_STORE' | translate
+		}}</span>
+	<button (click)="cancel()" aria-label="Close" class="close">
+		<span aria-hidden="true">&times;</span>
+	</button>
 </div>
 <nb-card class="add-products-to-store-modal">
-    <form-wizard
-        #wizzardFrom
-        [buttonDone]="buttonDone"
-        [buttonNext]="buttonNext"
-        [buttonPrevious]="buttonPrevious"
-        [formGroup]="form"
-        [nbSpinner]="loading"
-        class="form-horizontal"
-    >
-        <wizard-step
-            #wizzardFromStep1
-            (onNext)="onStep1Next()"
-            [isValid]="hasCoiced"
-            [title]="'WAREHOUSE_VIEW.NEW_PRODUCT.HOW_TO_ADD' | translate"
-        >
-            <hr/>
-            <ea-warehouse-add-choice
-                #warehouseAddChoice
-                (click)="selectedChoice()"
-                class="warehouse-add-choice"
-            ></ea-warehouse-add-choice>
-        </wizard-step>
-
-        <wizard-step
-                (onComplete)="createProduct()"
-                (onNext)="onStep2Next()"
-                (onPrev)="onStep2Prev()"
-                [isValid]="isValidBasicInfoForm || hasSelectedProducts() || false"
-                [title]="'WAREHOUSE_VIEW.NEW_PRODUCT.ADD' | translate"
-        >
-            <hr class="hr-line"/>
-            <ea-product-basic-info-form
-                #basicInfoForm
-                *ngIf="hasCoiced === 'new' && isSetp2"
-                [form]="basicInfo"
-                [productCategories]="productsCategories"
-            >
-            </ea-product-basic-info-form>
-
-            <ea-products-table
-                #productsTable
-                *ngIf="hasCoiced === 'existing'"
-                [hiddenTableActions]="true"
-                [perPage]="perPage"
-            >
-            </ea-products-table>
-        </wizard-step>
-
-        <wizard-step
-                (onComplete)="addProducts()"
-                (onPrev)="onStep3Prev()"
-                [isValid]="validAllProducts()"
-                [title]="'WAREHOUSE_VIEW.NEW_PRODUCT.SAVE' | translate"
-        >
-            <hr/>
-            <ea-add-warehouse-products-table
-                #addWarehouseProductsTable
-            ></ea-add-warehouse-products-table>
-        </wizard-step>
-    </form-wizard>
+	<form-wizard
+			#wizzardFrom
+			[buttonDone]="buttonDone"
+			[buttonNext]="buttonNext"
+			[buttonPrevious]="buttonPrevious"
+			[formGroup]="form"
+			[nbSpinner]="loading"
+			class="form-horizontal"
+	>
+		<wizard-step
+				#wizzardFromStep1
+				(onNext)="onStep1Next()"
+				[isValid]="hasCoiced"
+				[title]="'WAREHOUSE_VIEW.NEW_PRODUCT.HOW_TO_ADD' | translate"
+		>
+			<hr/>
+			<ea-warehouse-add-choice
+					#warehouseAddChoice
+					(click)="selectedChoice()"
+					class="warehouse-add-choice"
+			></ea-warehouse-add-choice>
+		</wizard-step>
+		
+		<wizard-step
+				(onComplete)="addProducts()"
+				(onNext)="onStep2Next()"
+				(onPrev)="onStep2Prev()"
+				[isValid]="isValidBasicInfoForm || hasSelectedProducts() || false"
+				[title]="'WAREHOUSE_VIEW.NEW_PRODUCT.ADD' | translate"
+		>
+			<hr class="hr-line"/>
+			<ea-product-basic-info-form
+					#basicInfoForm
+					*ngIf="hasCoiced === 'new' && isSetp2"
+					[form]="basicInfo"
+					[productCategories]="productsCategories"
+			>
+			</ea-product-basic-info-form>
+			
+			<ea-products-table
+					#productsTable
+					*ngIf="hasCoiced === 'existing'"
+					[hiddenTableActions]="true"
+					[perPage]="perPage"
+			>
+			</ea-products-table>
+		</wizard-step>
+		
+		<wizard-step
+				(onComplete)="addProducts()"
+				(onPrev)="onStep3Prev()"
+				[isValid]="validAllProducts()"
+				[title]="'WAREHOUSE_VIEW.NEW_PRODUCT.SAVE' | translate"
+		>
+			<hr/>
+			<ea-add-warehouse-products-table
+					#addWarehouseProductsTable
+			></ea-add-warehouse-products-table>
+		</wizard-step>
+	</form-wizard>
 </nb-card>
