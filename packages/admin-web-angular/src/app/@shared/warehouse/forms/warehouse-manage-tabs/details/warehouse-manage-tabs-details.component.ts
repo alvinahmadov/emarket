@@ -12,14 +12,14 @@ import {
 	FormGroup,
 	Validators,
 }                                 from '@angular/forms';
-import { IWarehouseCreateObject } from '@modules/server.common/interfaces/IWarehouse';
+import { TranslateService }       from '@ngx-translate/core';
 import { first }                  from 'rxjs/operators';
-import { CarrierRouter }          from '@modules/client.common.angular2/routers/carrier-router.service';
 import { IMultiSelectOption }     from 'angular-2-dropdown-multiselect';
-import { FormHelpers }            from '../../../../forms/helpers';
 import _                          from 'lodash';
 import isUrl                      from 'is-url';
-import { TranslateService }       from '@ngx-translate/core';
+import { IWarehouseCreateObject } from '@modules/server.common/interfaces/IWarehouse';
+import { CarrierRouter }          from '@modules/client.common.angular2/routers/carrier-router.service';
+import { FormHelpers }            from '@app/@shared/forms/helpers';
 
 export type WarehouseManageTabsDetails = Pick<IWarehouseCreateObject,
 		| 'name'
@@ -36,6 +36,8 @@ export type WarehouseManageTabsDetails = Pick<IWarehouseCreateObject,
 		| 'inStoreMode'
 		| 'carrierCompetition'>;
 
+type TDelivery = 'all' | 'onlyStore' | 'preferStore';
+
 @Component({
 	           selector: 'ea-warehouse-manage-tabs-details',
 	           styleUrls: ['./warehouse-manage-tabs-details.component.scss'],
@@ -45,19 +47,19 @@ export class WarehouseManageTabsDetailsComponent
 		implements OnInit, AfterViewInit
 {
 	@ViewChild('fileInput')
-	fileInput: ElementRef;
+	public fileInput: ElementRef;
 	
 	@ViewChild('logoPreview')
-	logoPreviewElement: ElementRef;
+	public logoPreviewElement: ElementRef;
 	
 	@Input()
-	readonly form: FormGroup;
+	public readonly form: FormGroup;
 	
-	uploaderPlaceholder: string;
+	public uploaderPlaceholder: string;
 	
-	carriersOptions: IMultiSelectOption[];
+	public carriersOptions: IMultiSelectOption[];
 	// orderCancelationOptions can be moved to a separate file
-	orderCancelationOptions = [
+	public orderCancelationOptions = [
 		{ text: 'ORDERING', value: 1 },
 		{ text: 'START_PROCESSING', value: 2 },
 		{ text: 'START_ALLOCATION', value: 3 },
@@ -70,20 +72,20 @@ export class WarehouseManageTabsDetailsComponent
 		{ text: 'DELIVERED', value: 11 },
 	];
 	
+	private _delivery: TDelivery = 'all';
+	
 	constructor(
 			private readonly _carrierRouter: CarrierRouter,
 			private readonly _translateService: TranslateService
 	)
 	{}
 	
-	private _delivery: 'all' | 'onlyStore' | 'preferStore' = 'all';
-	
-	get delivery()
+	public get delivery()
 	{
 		return this._delivery;
 	}
 	
-	set delivery(value)
+	public set delivery(value)
 	{
 		this._delivery = value;
 		this.useOnlyRestrictedCarriersForDelivery.setValue(false);
@@ -100,72 +102,72 @@ export class WarehouseManageTabsDetailsComponent
 		}
 	}
 	
-	get inStoreMode()
+	public get inStoreMode()
 	{
 		return this.form.get('inStoreMode');
 	}
 	
-	get name()
+	public get name()
 	{
 		return this.form.get('name');
 	}
 	
-	get logo()
+	public get logo()
 	{
 		return this.form.get('logo');
 	}
 	
-	get isActive()
+	public get isActive()
 	{
 		return this.form.get('isActive');
 	}
 	
-	get hasRestrictedCarriers()
+	public get hasRestrictedCarriers()
 	{
 		return this.form.get('hasRestrictedCarriers');
 	}
 	
-	get carriersIds()
+	public get carriersIds()
 	{
 		return this.form.get('carriersIds');
 	}
 	
-	get showLogoMeta()
+	public get showLogoMeta()
 	{
 		return this.logo && this.logo.value !== '';
 	}
 	
-	get isManufacturing()
+	public get isManufacturing()
 	{
 		return this.form.get('isManufacturing');
 	}
 	
-	get isCarrierRequired()
+	public get isCarrierRequired()
 	{
 		return this.form.get('isCarrierRequired');
 	}
 	
-	get useOnlyRestrictedCarriersForDelivery()
+	public get useOnlyRestrictedCarriersForDelivery()
 	{
 		return this.form.get('useOnlyRestrictedCarriersForDelivery');
 	}
 	
-	get preferRestrictedCarriersForDelivery()
+	public get preferRestrictedCarriersForDelivery()
 	{
 		return this.form.get('preferRestrictedCarriersForDelivery');
 	}
 	
-	get ordersShortProcess()
+	public get ordersShortProcess()
 	{
 		return this.form.get('ordersShortProcess');
 	}
 	
-	get enabledOrderCancelation()
+	public get enabledOrderCancelation()
 	{
 		return this.form.get('enabledOrderCancelation');
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		// would be used in the parent component and injected into this.form
 		return formBuilder.group({
@@ -209,18 +211,18 @@ export class WarehouseManageTabsDetailsComponent
 		                         });
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.getUploaderPlaceholderText();
 		this.loadCarriersOptions();
 	}
 	
-	ngAfterViewInit()
+	public ngAfterViewInit()
 	{
 		this._setupLogoUrlValidation();
 	}
 	
-	getValue(): WarehouseManageTabsDetails
+	public getValue(): WarehouseManageTabsDetails
 	{
 		const basicInfo = this.form.getRawValue() as {
 			name: string;
@@ -278,7 +280,7 @@ export class WarehouseManageTabsDetailsComponent
 		};
 	}
 	
-	setValue<T extends WarehouseManageTabsDetails>(basicInfo: T)
+	public setValue<T extends WarehouseManageTabsDetails>(basicInfo: T)
 	{
 		FormHelpers.deepMark(this.form, 'dirty');
 		
@@ -333,7 +335,7 @@ export class WarehouseManageTabsDetailsComponent
 		}
 	}
 	
-	deleteImg()
+	public deleteImg()
 	{
 		this.logo.setValue('');
 	}
