@@ -31,27 +31,28 @@ export class OrdersChartService
 		}
 		
 		this.data = {
-			today: this.getDataForDayPeriod(),
-			lastWeek: this.getDataForWeekPeriod(),
+			today:       this.getDataForDayPeriod(),
+			lastWeek:    this.getDataForWeekPeriod(),
 			currentYear: this.getDataForMonthPeriod(),
-			years: this.getDataForYearPeriod(),
+			years:       this.getDataForYearPeriod(),
 		};
 	}
 	
-	getDataLabels(nPoints: number, labelsArray: string[]): string[]
+	public getDataLabels(nPoints: number, labelsArray: string[]): string[]
 	{
 		const labelsArrayLength = labelsArray.length;
 		const step = Math.round(nPoints / labelsArrayLength);
 		
-		return Array.from(Array(nPoints)).map((item, index) =>
-		                                      {
-			                                      const dataIndex = Math.round(index / step);
+		return Array.from(Array(nPoints))
+		            .map((item, index) =>
+		                 {
+			                 const dataIndex = Math.round(index / step);
 			
-			                                      return index % step === 0 ? labelsArray[dataIndex] : '';
-		                                      });
+			                 return index % step === 0 ? labelsArray[dataIndex] : '';
+		                 });
 	}
 	
-	getOrdersChartData(period: string): OrdersChart
+	public getOrdersChartData(period: string): OrdersChart
 	{
 		return this.data[period];
 	}
@@ -60,7 +61,7 @@ export class OrdersChartService
 	{
 		return {
 			chartLabel: this.getDataLabels(24, this.period.getHours()),
-			linesData: [[0, 2, 4, 2, 3, 4, 7, 5, 3, 1, 1, 2]],
+			linesData:  [[0, 2, 4, 2, 3, 4, 7, 5, 3, 1, 1, 2]],
 		};
 	}
 	
@@ -68,7 +69,7 @@ export class OrdersChartService
 	{
 		return {
 			chartLabel: this.getDataLabels(42, this.period.getWeekDays()),
-			linesData: [
+			linesData:  [
 				[
 					184,
 					267,
@@ -210,7 +211,7 @@ export class OrdersChartService
 	{
 		return {
 			chartLabel: this.getDataLabels(47, this.period.getMonths()),
-			linesData: [
+			linesData:  [
 				[
 					5,
 					63,
@@ -367,7 +368,7 @@ export class OrdersChartService
 	{
 		return {
 			chartLabel: this.getDataLabels(42, this.yearsRange),
-			linesData: [
+			linesData:  [
 				[
 					190,
 					269,
