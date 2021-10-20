@@ -1,8 +1,8 @@
-import { Component, OnDestroy } from '@angular/core';
-import { MaintenanceService }   from '@modules/client.common.angular2/services/maintenance.service';
-import { environment }          from 'environments/environment';
-import { Router }               from '@angular/router';
-import { Store }                from '@app/@core/data/store.service';
+import { Component }          from '@angular/core';
+import { Router }             from '@angular/router';
+import { MaintenanceService } from '@modules/client.common.angular2/services/maintenance.service';
+import { StorageService }     from '@app/@core/data/store.service';
+import { environment }        from 'environments/environment';
 
 @Component({
 	           templateUrl: './maintenance-info.component.html',
@@ -10,20 +10,20 @@ import { Store }                from '@app/@core/data/store.service';
 export class MaintenanceInfoComponent
 {
 	public message: string;
-	private maintenanceMode: string;
+	public maintenanceMode: string;
 	
 	constructor(
 			private maintenanceService: MaintenanceService,
 			private router: Router,
-			private store: Store
+			private storage: StorageService
 	)
 	{
-		this.maintenanceMode = this.store.maintenanceMode;
+		this.maintenanceMode = this.storage.maintenanceMode;
 		this.getMessage();
 		this.getStatus();
 	}
 	
-	async getMessage()
+	public async getMessage()
 	{
 		this.message = await this.maintenanceService.getMessage(
 				this.maintenanceMode,
@@ -44,7 +44,7 @@ export class MaintenanceInfoComponent
 			                             if(!status)
 			                             {
 				                             clearInterval(interval);
-				                             this.store.clearMaintenanceMode();
+				                             this.storage.clearMaintenanceMode();
 				                             this.router.navigate(['']);
 			                             }
 		                             }, 5000);
