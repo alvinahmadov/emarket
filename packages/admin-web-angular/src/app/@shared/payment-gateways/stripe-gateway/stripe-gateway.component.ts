@@ -1,40 +1,43 @@
-import { Component, Input, OnChanges, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
+import { Subject }                     from 'rxjs';
+import { takeUntil }                   from 'rxjs/operators';
+import { NgForm }                      from '@angular/forms';
+import { TranslateService }            from '@ngx-translate/core';
+import IPaymentGatewayCreateObject     from '@modules/server.common/interfaces/IPaymentGateway';
+import Country                         from '@modules/server.common/enums/Country';
 import PaymentGateways, {
 	paymentGatewaysToString,
 	paymentGatewaysLogo,
-}                                                 from '@modules/server.common/enums/PaymentGateways';
-import { Country }                                from '@modules/server.common/entities';
-import { NgForm }                                 from '@angular/forms';
-import IPaymentGatewayCreateObject                from '@modules/server.common/interfaces/IPaymentGateway';
-import { TranslateService }                       from '@ngx-translate/core';
-import { takeUntil }                              from 'rxjs/operators';
-import { Subject }                                from 'rxjs';
+}                                      from '@modules/server.common/enums/PaymentGateways';
+import Currency                        from '@modules/server.common/entities/Currency';
 
 @Component({
-	           selector: 'ea-stripe-gateway',
+	           selector:    'ea-stripe-gateway',
 	           templateUrl: './stripe-gateway.component.html',
            })
 export class StripeGatewayComponent
 {
 	@ViewChild('stripeConfigForm', { static: true })
-	stripeConfigForm: NgForm;
+	public stripeConfigForm: NgForm;
 	
-	isStripeEnabled: boolean;
-	name = paymentGatewaysToString(PaymentGateways.Stripe);
-	logo = paymentGatewaysLogo(PaymentGateways.Stripe);
-	invalidUrl: boolean;
-	COMPANY_BRAND_LOGO =
-			'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.COMPANY_BRAND_LOGO';
+	public isStripeEnabled: boolean;
+	public name = paymentGatewaysToString(PaymentGateways.Stripe);
+	public logo = paymentGatewaysLogo(PaymentGateways.Stripe);
+	public invalidUrl: boolean;
+	public COMPANY_BRAND_LOGO =
+			       'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.COMPANY_BRAND_LOGO';
 	@Input()
-	currenciesCodes: string[] = [];
+	public currencies: Currency[] = [];
+	
 	@Input()
-	warehouseCountry: Country;
-	configModel = {
-		payButtontext: '',
-		currency: '',
+	public warehouseCountry: Country;
+	
+	public configModel = {
+		payButtontext:    '',
+		currency:         '',
 		companyBrandLogo: '',
-		publishableKey: '',
-		allowRememberMe: true,
+		publishableKey:   '',
+		allowRememberMe:  true,
 	};
 	private _ngDestroy$ = new Subject<void>();
 	
@@ -53,7 +56,7 @@ export class StripeGatewayComponent
 	}
 	
 	@Input()
-	set companyBrandLogo(logo: string)
+	public set companyBrandLogo(logo: string)
 	{
 		if(!this.configModel.companyBrandLogo)
 		{
@@ -61,7 +64,7 @@ export class StripeGatewayComponent
 		}
 	}
 	
-	get isFormValid(): boolean
+	public get isFormValid(): boolean
 	{
 		let isValid = false;
 		
@@ -78,7 +81,7 @@ export class StripeGatewayComponent
 		return isValid;
 	}
 	
-	get createObject(): IPaymentGatewayCreateObject | null
+	public get createObject(): IPaymentGatewayCreateObject | null
 	{
 		if(!this.isFormValid || !this.isStripeEnabled)
 		{
@@ -86,27 +89,27 @@ export class StripeGatewayComponent
 		}
 		
 		return {
-			paymentGateway: PaymentGateways.Stripe,
+			paymentGateway:  PaymentGateways.Stripe,
 			configureObject: this.configModel,
 		};
 	}
 	
-	deleteImg()
+	public deleteImg()
 	{
 		this.configModel.companyBrandLogo = '';
 	}
 	
-	setValue(data)
+	public setValue(data)
 	{
 		this.isStripeEnabled = true;
 		this.configModel.payButtontext = data['payButtontext'] || '';
 		this.configModel.currency = data['currency'] || '';
 		this.configModel.companyBrandLogo = data['companyBrandLogo'] || '';
-		this.configModel.publishableKey = data['publishableKey'] || '';
+		this.configModel.publishableKey = data['stripePublishableKey'] || '';
 		this.configModel.allowRememberMe = data['allowRememberMe'];
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
