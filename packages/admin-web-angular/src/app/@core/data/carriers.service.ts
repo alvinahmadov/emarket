@@ -18,7 +18,7 @@ export class CarriersService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName:  CarriersService.name,
+			      serviceName:  "Admin::CarriersService",
 			      pollInterval: 3000
 		      });
 		this.carriers$ = this.apollo
