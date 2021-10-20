@@ -2148,8 +2148,7 @@ export class ChartsPanelComponent implements OnInit, OnDestroy
 		const orderWeek = ChartsPanelComponent._getDateWeekNumber(orderDate);
 		const orderYear = orderDate.getFullYear();
 		
-		// TODO
-		// See correctness of these conditions
+		// TODO: See correctness of these conditions
 		return (
 				(orderWeek === dateToCompareWeek &&
 				 orderYear === dateToCompareYear) ||
