@@ -1,31 +1,41 @@
-import { Injectable }               from '@angular/core';
-import { Apollo }                   from 'apollo-angular';
-import { Observable }               from 'rxjs';
-import { map }                      from 'rxjs/operators';
-import IPagingOptions               from '@modules/server.common/interfaces/IPagingOptions';
-import Order                        from '@modules/server.common/entities/Order';
-import { IOrderCreateInput }        from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import { GQLMutations, GQLQueries } from '@modules/server.common/utilities/graphql';
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { map }                   from 'rxjs/operators';
+import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
+import Order                     from '@modules/server.common/entities/Order';
+import { IOrderCreateInput }     from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation, GQLQuery } from 'graphql/definitions';
 
-export interface IRemovedUserOrdersResponse
+export interface IRemovedCustomerOrdersResponse
 {
 	num?: number
 	modified?: number
 }
 
 @Injectable()
-export class WarehouseOrdersService
+export class WarehouseOrdersService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName:  "Merchant::WarehouseOrdersService",
+			      pollInterval: 2000
+		      });
+	}
 	
 	public createOrder(createInput: IOrderCreateInput): Observable<Order>
 	{
-		return this._apollo
-		           .mutate({
-			                   mutation:  GQLMutations.StoreOrdersMakeOrder,
-			                   variables: { createInput },
-		                   })
-		           .pipe(map((result: any) => result.data['createOrder']));
+		return this.apollo
+		           .mutate<{
+			           order: IOrderCreateInput
+		           }>({
+			              mutation:  GQLMutation.Store.Order.Create,
+			              variables: { createInput },
+		              })
+		           .pipe(map((result) => <Order>this.get(result)));
 	}
 	
 	public getStoreOrdersTableData(
@@ -34,50 +44,58 @@ export class WarehouseOrdersService
 			status?: string
 	): Observable<Order[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery({
-			                       query:        GQLQueries.WarehouseOrdersTableData,
-			                       pollInterval: 2000,
+			                       query:        GQLQuery.Store.Order.GetTableData,
+			                       pollInterval: this.pollInterval,
 			                       variables:    { storeId, pagingOptions, status },
 		                       })
-		           .valueChanges.pipe(
-						map((res) => res.data['getStoreOrdersTableData'])
-				);
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result))
+		           );
 	}
 	
 	public async getCountOfStoreOrders(storeId: string, status?: string): Promise<number>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query:     GQLQueries.WarehouseOrdersCount,
-			                             variables: { storeId, status },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfStoreOrders'];
+		return this.apollo
+		           .query<{
+			           ordersCount: number
+		           }>({
+			              query:     GQLQuery.Store.Order.Count,
+			              variables: { storeId, status },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 	
-	public async removeCustomerOrders(storeId: string, customerId: string): Promise<IRemovedUserOrdersResponse>
+	public async removeCustomerOrders(
+			storeId: string,
+			customerId: string
+	): Promise<IRemovedCustomerOrdersResponse>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query:     GQLQueries.WarehouseOrdersRemoveOrders,
-			                             variables: { storeId, customerId },
-		                             })
-		                      .toPromise();
-		
-		return res.data['removeCustomerOrders'];
+		return this.apollo
+		           .query<{
+			           removedCustomerOrders?: IRemovedCustomerOrdersResponse
+		           }>({
+			              query:     GQLQuery.Store.Order.Remove,
+			              variables: { storeId, customerId },
+		              })
+		           .pipe(map((result) => this.get(result) || {}))
+		           .toPromise();
 	}
 	
 	public async getOrdersInDelivery(storeId: string): Promise<Order[]>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query:     GQLQueries.WarehouseOrdersInDelivery,
-			                             variables: { storeId },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getOrdersInDelivery'];
+		return this.apollo
+		           .query<{
+			           ordersInDelivery: Order[]
+		           }>
+		           ({
+			            query:     GQLQuery.Store.Order.GetInDelivery,
+			            variables: { storeId },
+		            })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 }
