@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
-import { TranslateService }                     from '@ngx-translate/core';
-import { DOCUMENT }                             from '@angular/common';
-import { getLanguage }                          from '@modules/server.common/data/languages';
-import { environment }                          from 'environments/environment';
-import { StorageService }                       from 'app/services/storage';
+import { Component, OnInit, Inject } from '@angular/core';
+import { TranslateService }          from '@ngx-translate/core';
+import { DOCUMENT }                  from '@angular/common';
+import { getLanguage }               from '@modules/server.common/data/languages';
+import { environment }               from 'environments/environment';
+import { StorageService }            from 'app/services/storage';
 
 @Component({
 	           selector:    'settings',
