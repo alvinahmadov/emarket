@@ -1,42 +1,48 @@
-import { Router }                                                     from '@angular/router';
-import { Component, EventEmitter, Inject, Input, OnChanges, Output, } from '@angular/core';
-import { animate, state, style, transition, trigger, }                from '@angular/animations';
-import { Observable }                                                 from 'rxjs';
-import 'rxjs/add/observable/fromEvent';
-import { ElementQueries }                                             from 'css-element-queries/src/ElementQueries';
-import ProductInfo                                                    from '@modules/server.common/entities/ProductInfo';
-import { OrderRouter }                                                from '@modules/client.common.angular2/routers/order-router.service';
-import { WarehouseOrdersRouter }                                      from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { ProductLocalesService }                                      from '@modules/client.common.angular2/locale/product-locales.service';
-import { ILocaleMember }                                              from '@modules/server.common/interfaces/ILocale';
-import { Store }                                                      from 'app/services/store';
-import RegistrationSystem                                             from '@modules/server.common/enums/RegistrationSystem';
-import { IProductImage }                                              from '@modules/server.common/interfaces/IProduct';
-import { DOCUMENT }                                                   from '@angular/common';
+import {
+	Component,
+	EventEmitter,
+	Inject,
+	Input,
+	Output,
+	OnChanges
+}                                                      from '@angular/core';
+import { DOCUMENT }                                    from '@angular/common';
+import { Router }                                      from '@angular/router';
+import { animate, state, style, transition, trigger, } from '@angular/animations';
+import { Observable }                                  from 'rxjs';
+import { ElementQueries }                              from 'css-element-queries/src/ElementQueries';
+import ProductInfo                                     from '@modules/server.common/entities/ProductInfo';
+import { OrderRouter }                                 from '@modules/client.common.angular2/routers/order-router.service';
+import { WarehouseOrdersRouter }                       from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
+import { ILocaleMember }                               from '@modules/server.common/interfaces/ILocale';
+import RegistrationSystem                              from '@modules/server.common/enums/RegistrationSystem';
+import { IProductImage }                               from '@modules/server.common/interfaces/IProduct';
+import { StorageService }                              from 'app/services/storage';
 
 @Component({
-	           selector: 'product',
-	           animations: [
+	           selector:    'product',
+	           animations:  [
 		           trigger('show', [
 			           state('shown', style({ opacity: 1 })),
 			           state('hidden', style({ opacity: 0 })),
 			           transition('shown <=> hidden', animate('.2s')),
 		           ]),
 	           ],
-	           styleUrls: ['./product.component.scss'],
+	           styleUrls:   ['./product.component.scss'],
 	           templateUrl: './product.component.html',
            })
 export class ProductComponent implements OnChanges
 {
 	@Output()
-	load: EventEmitter<void> = new EventEmitter<void>();
+	public load: EventEmitter<void> = new EventEmitter<void>();
 	
 	@Input()
-	info: ProductInfo;
+	public info: ProductInfo;
 	
-	showTitle: 'shown' | 'hidden' = 'hidden';
-	isGridView: boolean;
-	productImage: IProductImage;
+	public showTitle: 'shown' | 'hidden' = 'hidden';
+	public isGridView: boolean;
+	public productImage: IProductImage;
 	
 	@Input()
 	private layoutComplete: Observable<void>;
@@ -47,13 +53,13 @@ export class ProductComponent implements OnChanges
 			private readonly orderRouter: OrderRouter,
 			private readonly router: Router,
 			private readonly _productLocalesService: ProductLocalesService,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{
-		this.isGridView = this.store.productListViewType === 'grid';
+		this.isGridView = this.storage.productListViewType === 'grid';
 	}
 	
-	ngOnChanges(): void
+	public ngOnChanges(): void
 	{
 		if(this.info)
 		{
@@ -69,7 +75,7 @@ export class ProductComponent implements OnChanges
 		}
 	}
 	
-	onImageLoad(): void
+	public onImageLoad(): void
 	{
 		if(ElementQueries)
 		{
@@ -80,32 +86,32 @@ export class ProductComponent implements OnChanges
 		this.showTitle = 'shown';
 	}
 	
-	onLayoutComplete(): void
+	public onLayoutComplete(): void
 	{
 		return;
 	}
 	
-	async createOrder(): Promise<void>
+	public async createOrder(): Promise<void>
 	{
 		if(
-				!this.store.userId &&
-				this.store.registrationSystem === RegistrationSystem.Disabled
+				!this.storage.userId &&
+				this.storage.registrationSystem === RegistrationSystem.Disabled
 		)
 		{
-			this.store.registrationSystem = RegistrationSystem.Once;
-			this.store.buyProduct = this.info.warehouseProduct.id;
-			this.store.merchantId = this.info.warehouseId;
+			this.storage.registrationSystem = RegistrationSystem.Once;
+			this.storage.buyProductId = this.info.warehouseProduct.id;
+			this.storage.merchantId = this.info.warehouseId;
 			this.router.navigate(['/login']).catch(console.error);
 		}
 		else
 		{
-			const userId = this.store.userId;
+			const userId = this.storage.userId;
 			
 			const order = await this.warehouseOrdersRouter.createByProductType(
 					userId,
 					this.info.warehouseId,
 					this.info.warehouseProduct.product['id'],
-					this.store.deliveryType
+					this.storage.deliveryType
 			);
 			
 			await this.orderRouter.confirm(order.id);
@@ -114,7 +120,7 @@ export class ProductComponent implements OnChanges
 		}
 	}
 	
-	localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._productLocalesService.getTranslate(member);
 	}
