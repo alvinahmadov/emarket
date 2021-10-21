@@ -34,14 +34,14 @@ export abstract class InputComponent implements ControlValueAccessor
 		}
 	}
 	
-	writeValue(value: any)
+	public writeValue(value: any)
 	{
 		if(typeof value !== 'string')
 		{
 			throw new Error('Written value is not string!');
 		}
 		
-		if(value == null)
+		if(!value)
 		{
 			value = '';
 		}
@@ -49,23 +49,23 @@ export abstract class InputComponent implements ControlValueAccessor
 		this._value = value;
 	}
 	
-	registerOnChange(fn: (value: string) => void)
+	public registerOnChange(fn: (value: string) => void)
 	{
 		this.changes.subscribe(fn);
 	}
 	
-	registerOnTouched(fn: () => void)
+	public registerOnTouched(fn: () => void)
 	{
 		this.touches.subscribe(fn);
 	}
 	
 	// Allows Angular to disable the input.
-	setDisabledState(isDisabled: boolean): void
+	public setDisabledState(isDisabled: boolean): void
 	{
 		this.disabled = isDisabled;
 	}
 	
-	touch()
+	public touch()
 	{
 		this.touches.emit();
 	}
