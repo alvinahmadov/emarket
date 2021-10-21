@@ -1,32 +1,22 @@
-import {
-	Component,
-	OnDestroy,
-	Renderer2,
-	ElementRef,
-	AfterViewChecked,
-} from '@angular/core';
-
-import { Subject, forkJoin, Observable } from 'rxjs';
-import { LocalDataSource }               from 'ng2-smart-table';
-import InviteRequest                     from '@modules/server.common/entities/InviteRequest';
-import { InvitesRequestsService }        from '../../../../@core/data/invites-requests.service';
-import { getCountryName }                from '@modules/server.common/entities/GeoLocation';
-import { takeUntil, first }              from 'rxjs/operators';
-import { CountryRenderComponent }        from '../country-render/country-render.component';
-import { InvitesService }                from '../../../../@core/data/invites.service';
-import { IGeoLocationCreateObject }      from '@modules/server.common/interfaces/IGeoLocation';
-import { IInviteCreateObject }           from '@modules/server.common/interfaces/IInvite';
-import { TranslateService }              from '@ngx-translate/core';
-import { countries }                     from '@modules/server.common/data/abbreviation-to-country';
-import { StatusComponent }               from '../../../../@shared/render-component/invites-requests/status/status.component';
-import { InvitedDateComponent }          from '../../../../@shared/render-component/invites-requests/invited-date.component';
-import { NotifyService }                 from '@app/@core/services/notify/notify.service';
-import { NgbModal }                      from '@ng-bootstrap/ng-bootstrap';
-import { ConfimationModalComponent }     from '../../../../@shared/confirmation-modal/confirmation-modal.component';
-import { InviteViewModel }               from '../invites.component';
-
-// import { ToasterService } from 'angular2-toaster';
-// import fingerprint2 from 'fingerprintjs2';
+import { NgbModal }                                                       from '@ng-bootstrap/ng-bootstrap';
+import { TranslateService }                                               from '@ngx-translate/core';
+import { AfterViewChecked, Component, ElementRef, OnDestroy, Renderer2, } from '@angular/core';
+import { forkJoin, Observable, Subject, Subscription }                    from 'rxjs';
+import { first, takeUntil }                                               from 'rxjs/operators';
+import { LocalDataSource }                                                from 'ng2-smart-table';
+import { countries, getDefaultCountryName }                               from '@modules/server.common/data/countries';
+import { IGeoLocationCreateObject }                                       from '@modules/server.common/interfaces/IGeoLocation';
+import { IInviteCreateObject }                                            from '@modules/server.common/interfaces/IInvite';
+import InviteRequest                                                      from '@modules/server.common/entities/InviteRequest';
+import { NotifyService }                                                  from '@app/@core/services/notify/notify.service';
+import { InvitesRequestsService }                                         from '@app/@core/data/invites-requests.service';
+import { InvitesService }                                                 from '@app/@core/data/invites.service';
+import { StorageService }                                                 from '@app/@core/data/store.service';
+import { StatusComponent }                                                from '@app/@shared/render-component/invites-requests/status/status.component';
+import { InvitedDateComponent }                                           from '@app/@shared/render-component/invites-requests/invited-date.component';
+import { ConfimationModalComponent }                                      from '@app/@shared/confirmation-modal/confirmation-modal.component';
+import { CountryRenderComponent }                                         from '../country-render/country-render.component';
+import { InviteViewModel }                                                from '../invites.component';
 
 export interface InviteRequestViewModel
 {
@@ -41,29 +31,32 @@ export interface InviteRequestViewModel
 const perPage = 10;
 
 @Component({
-	           selector: 'ea-invites-requests',
-	           styleUrls: ['invites-requests.component.scss'],
+	           selector:    'ea-invites-requests',
+	           styleUrls:   ['invites-requests.component.scss'],
 	           templateUrl: 'invites-requests.component.html',
            })
 export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 {
-	loading: boolean;
+	public loading: boolean;
 	
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
+	public notInvitedOnly: boolean = true;
+	
+	private readonly locale: string;
 	
 	private ngDestroy$ = new Subject<void>();
 	private noInfoSign = '';
 	private selectedInvitesRequests: any[] = [];
 	private addClick: boolean;
-	private notInvitedOnly: boolean = true;
 	private dataCount: number;
-	private $invitesRequests: any;
+	private $invitesRequests: Subscription;
 	private currentPage: number = 1;
 	
 	constructor(
 			private readonly _invitesRequestsService: InvitesRequestsService,
 			private readonly _invitesService: InvitesService,
+			private readonly _storage: StorageService,
 			private readonly _elRef: ElementRef,
 			private readonly _renderer: Renderer2,
 			private readonly _translateService: TranslateService,
@@ -71,26 +64,19 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 			private readonly modalService: NgbModal
 	)
 	{
+		this.locale = this._storage.locale ?? 'en-US';
 		this._loadSettingsSmartTable();
 		this._loadDataSmartTable();
 		this.smartTableChange();
 	}
 	
-	get hasSelectedInvitesRequests(): boolean
+	public ngOnDestroy(): void
 	{
-		return this.selectedInvitesRequests.length > 0;
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
 	}
 	
-	get hasSelectedInvitesRequestsForInvite(): boolean
-	{
-		return (
-				this.selectedInvitesRequests.filter(
-						(i: InviteRequest) => !i.isInvited
-				).length > 0
-		);
-	}
-	
-	ngAfterViewChecked(): void
+	public ngAfterViewChecked(): void
 	{
 		this.loadSmartTableTranslates();
 		
@@ -123,36 +109,49 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		}
 	}
 	
-	selectInvitesRequestsTmp(ev: { selected: any })
+	public get hasSelectedInvitesRequests(): boolean
+	{
+		return this.selectedInvitesRequests.length > 0;
+	}
+	
+	public get hasSelectedInvitesRequestsForInvite(): boolean
+	{
+		return (
+				this.selectedInvitesRequests.filter(
+						(i: InviteRequest) => !i.isInvited
+				).length > 0
+		);
+	}
+	
+	public selectInvitesRequestsTmp(ev: { selected: any }): void
 	{
 		this.selectedInvitesRequests = ev.selected;
 	}
 	
-	notInvitedOnlyChanged()
+	public notInvitedOnlyChanged(): void
 	{
 		this.$invitesRequests.unsubscribe();
 		this.notInvitedOnly = !this.notInvitedOnly;
 		this._loadDataSmartTable(this.currentPage);
 	}
 	
-	loadSmartTableTranslates()
+	public loadSmartTableTranslates(): void
 	{
-		this._translateService.onLangChange.subscribe((d) =>
-		                                              {
-			                                              this._loadSettingsSmartTable();
-		                                              });
+		this._translateService.onLangChange.subscribe(() => this._loadSettingsSmartTable());
 	}
 	
-	async createConfirm(e): Promise<void>
+	public async createConfirm(e): Promise<void>
 	{
 		try
 		{
 			this.loading = true;
 			
-			const createDataObject = this.inviteRequestCreateObject(e.newData);
+			const createDataObject =
+					      InvitesRequestsComponent.inviteRequestCreateObject(e.newData);
 			
 			const createInput = await this._invitesRequestsService.getCreateInviteRequestObject(
-					createDataObject
+					createDataObject,
+					this.locale
 			);
 			
 			await this._invitesRequestsService
@@ -195,20 +194,20 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		// })
 	}
 	
-	async deleteConfirm(e): Promise<void>
+	public async deleteConfirm(e): Promise<void>
 	{
 		const activeModal = this.modalService.open(ConfimationModalComponent, {
-			size: 'sm',
+			size:      'sm',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 		
 		const modalComponent: ConfimationModalComponent =
-				activeModal.componentInstance;
+				      activeModal.componentInstance;
 		
 		await modalComponent.confirmEvent
 		                    .pipe(takeUntil(modalComponent.ngDestroy$))
-		                    .subscribe((dataEvent) =>
+		                    .subscribe(() =>
 		                               {
 			                               try
 			                               {
@@ -239,16 +238,17 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		                               });
 	}
 	
-	async editConfirm(e): Promise<void>
+	public async editConfirm(e): Promise<void>
 	{
 		try
 		{
 			this.loading = true;
-			const createDataObject: InviteViewModel = this.inviteRequestCreateObject(
+			const createDataObject: InviteViewModel = InvitesRequestsComponent.inviteRequestCreateObject(
 					e.newData
 			);
 			const updateInput = await this._invitesService.getCreateInviteObject(
-					createDataObject
+					createDataObject,
+					this.locale
 			);
 			
 			const res = await this._invitesRequestsService
@@ -268,7 +268,7 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		}
 	}
 	
-	async inviteSelectedRows(): Promise<void>
+	public async inviteSelectedRows(): Promise<void>
 	{
 		let succesInvite = 0;
 		const invitesRequests = this.selectedInvitesRequests.filter(
@@ -287,7 +287,7 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 				
 				await this._invitesRequestsService
 				          .updateInviteRequest(inviteRequest.id, {
-					          isInvited: true,
+					          isInvited:   true,
 					          invitedDate: new Date(),
 				          })
 				          .pipe(first())
@@ -315,7 +315,7 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		this.selectInvitesRequestsTmp({ selected: [] });
 	}
 	
-	async deleteSelectedRows(): Promise<void>
+	public async deleteSelectedRows(): Promise<void>
 	{
 		const idsForDelete: string[] = this.selectedInvitesRequests.map(
 				(c) => c.id
@@ -345,13 +345,7 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		}
 	}
 	
-	ngOnDestroy(): void
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
-	}
-	
-	private _loadSettingsSmartTable()
+	private _loadSettingsSmartTable(): void
 	{
 		const columnTitlePrefix = 'CUSTOMERS_VIEW.SMART_TABLE_COLUMNS.';
 		
@@ -383,54 +377,58 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 						{
 							this.settingsSmartTable = {
 								selectMode: 'multi',
-								add: {
-									addButtonContent: '<i class="ion-md-add"></i>',
+								add:        {
+									addButtonContent:    '<i class="ion-md-add"></i>',
 									createButtonContent:
-											'<i class="ion-md-checkmark"></i>',
+									                     '<i class="ion-md-checkmark"></i>',
 									cancelButtonContent: '<i class="ion-md-close"></i>',
-									confirmCreate: true,
+									confirmCreate:       true,
 								},
-								edit: {
-									editButtonContent: '<i class="ion-md-create"></i>',
+								edit:       {
+									editButtonContent:   '<i class="ion-md-create"></i>',
 									saveButtonContent:
-											'<i class="ion-md-checkmark"></i>',
+									                     '<i class="ion-md-checkmark"></i>',
 									cancelButtonContent: '<i class="ion-md-close"></i>',
-									confirmSave: true,
+									confirmSave:         true,
 								},
-								delete: {
+								delete:     {
 									deleteButtonContent: '<i class="ion-md-trash"></i>',
-									confirmDelete: true,
+									confirmDelete:       true,
 								},
-								columns: {
-									country: {
-										title: country,
+								columns:    {
+									country:     {
+										title:  country,
 										editor: {
-											type: 'custom',
-											component: CountryRenderComponent,
+											type:                    'custom',
+											component:               CountryRenderComponent,
+											onComponentInitFunction: (instance: CountryRenderComponent) =>
+											                         {
+												                         instance.locale = this.locale ?? 'en-US';
+											                         },
 										},
 									},
-									city: { title: city },
-									address: { title: streetAddress },
-									house: { title: house },
-									apartment: { title: apartment },
+									city:        { title: city },
+									address:     { title: streetAddress },
+									house:       { title: house },
+									apartment:   { title: apartment },
 									invitedDate: {
-										title: invitedDate,
-										editable: false,
-										addable: false,
-										type: 'custom',
+										title:           invitedDate,
+										editable:        false,
+										addable:         false,
+										type:            'custom',
 										renderComponent: InvitedDateComponent,
 									},
-									status: {
-										title: status,
-										class: 'text-center',
-										filter: false,
-										editable: false,
-										addable: false,
-										type: 'custom',
+									status:      {
+										title:           status,
+										class:           'text-center',
+										filter:          false,
+										editable:        false,
+										addable:         false,
+										type:            'custom',
 										renderComponent: StatusComponent,
 									},
 								},
-								pager: {
+								pager:      {
 									display: true,
 									perPage,
 								},
@@ -441,43 +439,43 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 	
 	private async _loadDataSmartTable(page = 1)
 	{
-		let invitesRequests: InviteRequest[] = [];
-		
 		if(this.$invitesRequests)
 		{
 			await this.$invitesRequests.unsubscribe();
 		}
 		
-		const loadData = async() =>
+		const loadData = async(invitesRequests: InviteRequest[]) =>
 		{
-			const invitesRequestsVM = invitesRequests.map((inviteRequest) =>
-			                                              {
-				                                              return {
-					                                              country:
-							                                              getCountryName(inviteRequest.geoLocation.countryId) ||
-							                                              this.noInfoSign,
-					                                              city: inviteRequest.geoLocation.city || this.noInfoSign,
-					                                              address:
-							                                              inviteRequest.geoLocation.streetAddress ||
-							                                              this.noInfoSign,
-					                                              house: inviteRequest.geoLocation.house || this.noInfoSign,
-					                                              apartment:
-							                                              inviteRequest.apartment.trim() || this.noInfoSign,
-					                                              id: inviteRequest.id,
-					                                              geoLocation: inviteRequest.geoLocation,
-					                                              invitedDate:
-							                                              inviteRequest.invitedDate &&
-							                                              new Date(
-									                                              inviteRequest.invitedDate
-							                                              ).toLocaleDateString() +
-							                                              '\n' +
-							                                              new Date(
-									                                              inviteRequest.invitedDate
-							                                              ).toLocaleTimeString(),
-					                                              isInvited: inviteRequest.isInvited,
-					                                              inviteRequest,
-				                                              };
-			                                              });
+			const invitesRequestsVM =
+					      invitesRequests
+							      .map((inviteRequest) =>
+							           {
+								           return {
+									           country:
+											           getDefaultCountryName(inviteRequest.geoLocation.countryId) ||
+											           this.noInfoSign,
+									           city:        inviteRequest.geoLocation.city || this.noInfoSign,
+									           address:
+											           inviteRequest.geoLocation.streetAddress ||
+											           this.noInfoSign,
+									           house:       inviteRequest.geoLocation.house || this.noInfoSign,
+									           apartment:
+											           inviteRequest.apartment.trim() || this.noInfoSign,
+									           id:          inviteRequest.id,
+									           geoLocation: inviteRequest.geoLocation,
+									           invitedDate:
+											           inviteRequest.invitedDate &&
+											           new Date(
+													           inviteRequest.invitedDate
+											           ).toLocaleDateString() +
+											           '\n' +
+											           new Date(
+													           inviteRequest.invitedDate
+											           ).toLocaleTimeString(),
+									           isInvited:   inviteRequest.isInvited,
+									           inviteRequest,
+								           };
+							           });
 			
 			await this.loadDataCount();
 			
@@ -499,7 +497,7 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		this.$invitesRequests = this._invitesRequestsService
 		                            .getInvitesRequests(
 				                            {
-					                            skip: perPage * (page - 1),
+					                            skip:  perPage * (page - 1),
 					                            limit: perPage,
 				                            },
 				                            !this.notInvitedOnly
@@ -507,25 +505,9 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		                            .pipe(takeUntil(this.ngDestroy$))
 		                            .subscribe(async(i: InviteRequest[]) =>
 		                                       {
-			                                       invitesRequests = i;
-			                                       await loadData();
+			                                       await loadData(i);
 			                                       this.loading = false;
 		                                       });
-	}
-	
-	private inviteRequestCreateObject(data)
-	{
-		this.inviteRequestValidation(data);
-		data.apartment = data.apartment || ' ';
-		return data;
-	}
-	
-	private inviteRequestValidation(data)
-	{
-		if(!data.address || !data.city || !data.country || !data.house)
-		{
-			throw new Error('Validation error');
-		}
 	}
 	
 	private getInviteCreateObject(data): IInviteCreateObject
@@ -534,22 +516,20 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 				data.apartment !== this.noInfoSign ? data.apartment : ' ';
 		
 		const geoLocation: IGeoLocationCreateObject = {
-			countryId: Object.values(countries).indexOf(data.country),
-			city: data.city,
+			countryId:     Object.values(countries).indexOf(data.country),
+			city:          data.city,
 			streetAddress: data.address,
-			house: data.house,
-			loc: {
+			house:         data.house,
+			loc:           {
 				coordinates: data.geoLocation.loc.coordinates,
-				type: 'Point',
+				type:        'Point',
 			},
 		};
 		
-		const invite: IInviteCreateObject = {
+		return {
 			apartment: data.apartment,
 			geoLocation,
 		};
-		
-		return invite;
 	}
 	
 	private async smartTableChange()
@@ -573,5 +553,20 @@ export class InvitesRequestsComponent implements OnDestroy, AfterViewChecked
 		this.dataCount = await this._invitesRequestsService.getCountOfInvitesRequests(
 				!this.notInvitedOnly
 		);
+	}
+	
+	private static inviteRequestCreateObject(data: any)
+	{
+		InvitesRequestsComponent.inviteRequestValidation(data);
+		data.apartment = data.apartment || ' ';
+		return data;
+	}
+	
+	private static inviteRequestValidation(data: any)
+	{
+		if(!data.address || !data.city || !data.country || !data.house)
+		{
+			throw new Error('Validation error');
+		}
 	}
 }
