@@ -149,7 +149,7 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter, ISe
 	@asyncListener()
 	async findAdmin(adminFindInput: IAdminFindInput): Promise<Admin | null>
 	{
-		return this.findOne(adminFindInput);
+		return this.findOne(adminFindInput ?? {});
 	}
 	
 	@asyncListener()
