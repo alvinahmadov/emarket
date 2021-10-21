@@ -1,15 +1,16 @@
 import { Component, OnDestroy, OnInit, Inject } from '@angular/core';
 import { TranslateService }                     from '@ngx-translate/core';
-import { environment }                          from 'environments/environment';
 import { DOCUMENT }                             from '@angular/common';
-import { Store }                                from '../services/store';
+import { getLanguage }                          from '@modules/server.common/data/languages';
+import { environment }                          from 'environments/environment';
+import { StorageService }                       from 'app/services/storage';
 
 @Component({
-	           selector: 'settings',
-	           styleUrls: ['./settings.component.scss'],
+	           selector:    'settings',
+	           styleUrls:   ['./settings.component.scss'],
 	           templateUrl: './settings.component.html',
            })
-export class SettingsComponent implements OnInit, OnDestroy
+export class SettingsComponent implements OnInit
 {
 	public selectedLang: string;
 	public defaultLanguage = '';
@@ -19,7 +20,7 @@ export class SettingsComponent implements OnInit, OnDestroy
 			public translateService: TranslateService,
 			@Inject(DOCUMENT)
 			public document: Document,
-			private store: Store
+			private storage: StorageService
 	)
 	{
 		this.defaultLanguage = environment.DEFAULT_LANGUAGE;
@@ -54,15 +55,15 @@ export class SettingsComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	ngOnInit() {}
+	public ngOnInit() {}
 	
-	switchLanguage(language: string)
+	public switchLanguage(language: string)
 	{
 		this.translateService.use(language);
 		
 		const langAbbreviation = language.substr(0, 2);
 		
-		if(language === 'he-IL')
+		if(language.startsWith('he') || language.startsWith('ar'))
 		{
 			this.dir = 'rtl';
 		}
@@ -74,5 +75,8 @@ export class SettingsComponent implements OnInit, OnDestroy
 		this.document.documentElement.lang = langAbbreviation;
 	}
 	
-	ngOnDestroy() {}
+	public translateLanguage(languageCode: string): string
+	{
+		return getLanguage(languageCode);
+	}
 }
