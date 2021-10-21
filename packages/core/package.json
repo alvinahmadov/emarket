@@ -11,6 +11,7 @@
 	"scripts": {
 		"coverage": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 nyc report --reporter=text-lcov | coveralls",
 		"precommit": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 lint-staged",
+		"schema:generate": "yarn ts-node src/tools/generate-typings.ts",
 		"start": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 rimraf dist build && yarn tsc -p tsconfig.build.json && node build/src/main.js",
 		"start:dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=2048 concurrently \"wait-on build/src/main.js && nodemon --watch src\" \"tsc -p tsconfig.build.json\" ",
 		"start:prod": "yarn run build:prod && yarn run prod",
