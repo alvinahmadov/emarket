@@ -1,42 +1,42 @@
 import { NgModule, APP_INITIALIZER }        from '@angular/core';
 import { HttpClient, HttpClientModule }     from '@angular/common/http';
-import { BrowserModule }                    from '@angular/platform-browser';
-import { InAppBrowser }                     from '@ionic-native/in-app-browser/ngx';
-import { SplashScreen }                     from '@ionic-native/splash-screen/ngx';
-import { StatusBar }                        from '@ionic-native/status-bar/ngx';
 import { RouteReuseStrategy }               from '@angular/router';
 import { BrowserAnimationsModule }          from '@angular/platform-browser/animations';
-import { IonicModule, IonicRouteStrategy }  from '@ionic/angular';
-import { IonicStorageModule }               from '@ionic/storage';
+import { ServiceWorkerModule }              from '@angular/service-worker';
+import { BrowserModule }                    from '@angular/platform-browser';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
-import { CommonModule }                     from '@modules/client.common.angular2/common.module';
-import { MenuModule }                       from '../components/menu/menu.module';
-import { AppRoutingModule }                 from './app-routing.module';
-import { AppComponent }                     from './app.component';
-import { environment }                      from 'environments/environment';
 import { HttpLinkModule }                   from 'apollo-angular-link-http';
 import { FileUploadModule }                 from 'ng2-file-upload';
+import { IonicModule, IonicRouteStrategy }  from '@ionic/angular';
+import { IonicStorageModule }               from '@ionic/storage';
+import { Device }                           from '@ionic-native/device/ngx';
+import { BarcodeScanner }                   from '@ionic-native/barcode-scanner/ngx';
 import { CallNumber }                       from '@ionic-native/call-number/ngx';
+import { Camera }                           from '@ionic-native/camera/ngx';
 import { EmailComposer }                    from '@ionic-native/email-composer/ngx';
 import { Globalization }                    from '@ionic-native/globalization/ngx';
 import { GoogleAnalytics }                  from '@ionic-native/google-analytics/ngx';
-import { Mixpanel }                         from '@ionic-native/mixpanel/ngx';
+import { InAppBrowser }                     from '@ionic-native/in-app-browser/ngx';
 import { Intercom }                         from '@ionic-native/intercom/ngx';
+import { Mixpanel }                         from '@ionic-native/mixpanel/ngx';
+import { Network }                          from '@ionic-native/network/ngx';
 import { ScreenOrientation }                from '@ionic-native/screen-orientation/ngx';
-import { GraphQLModule }                    from '../graphql/apollo.config';
-import { Camera }                           from '@ionic-native/camera/ngx';
-import { Storage }                          from 'services/storage.service';
-import { UserMutationModule }               from '../@shared/user/mutation/user-mutation.module';
+import { SplashScreen }                     from '@ionic-native/splash-screen/ngx';
+import { StatusBar }                        from '@ionic-native/status-bar/ngx';
+import { CommonModule }                     from '@modules/client.common.angular2/common.module';
 import { GoogleMapsLoader }                 from '@modules/client.common.angular2/services/googlemaps-loader';
 import { MaintenanceService }               from '@modules/client.common.angular2/services/maintenance.service';
 import { ServerConnectionService }          from '@modules/client.common.angular2/services/server-connection.service';
-import { BarcodeScanner }                   from '@ionic-native/barcode-scanner/ngx';
-import { PagesModuleGuard }                 from '../pages/pages.module.guard';
+import { environment }                      from 'environments/environment';
+import { StorageService }                   from 'services/storage.service';
+import { AppComponent }                     from './app.component';
+import { AppRoutingModule }                 from './app-routing.module';
 import { MaintenanceModuleGuard }           from './+maintenance-info/maintenance-info.module.guard';
-import { ServiceWorkerModule }              from '@angular/service-worker';
-import { Network }                          from '@ionic-native/network/ngx';
-import { Device }                           from '@ionic-native/device/ngx';
+import { UserMutationModule }               from '../@shared/user/mutation/user-mutation.module';
+import { MenuModule }                       from '../components/menu/menu.module';
+import { GraphQLModule }                    from '../graphql/apollo.config';
+import { PagesModuleGuard }                 from '../pages/pages.module.guard';
 
 @NgModule({
 	          declarations:    [AppComponent],
@@ -128,10 +128,10 @@ export function googleMapsLoaderFactory(provider: GoogleMapsLoader)
 
 export function serverConnectionFactory(
 		provider: ServerConnectionService,
-		store: Storage
+		storage: StorageService
 )
 {
-	return () => provider.load(environment.SERVICES_ENDPOINT, store);
+	return () => provider.load(environment.SERVICES_ENDPOINT, storage);
 }
 
 export function maintenanceFactory(provider: MaintenanceService)
