@@ -462,7 +462,7 @@ export class OrderResolver
 		return this._ordersService.getDashboardCompletedOrdersToday();
 	}
 	
-	@Query('getOrder')
+	@Query('order')
 	async getOrder(_context, { id }: { id: string }): Promise<Order>
 	{
 		return this._ordersService.get(id).pipe(first()).toPromise();
