@@ -25,7 +25,13 @@ export type Env = Readonly<{
 	DELIVERY_TIME_MIN: number;
 	DELIVERY_TIME_MAX: number;
 	
+	GOOGLE_APP_URL: string;
+	YANDEX_APP_URL: string;
+	FACEBOOK_APP_URL: string;
+	VKONTAKTE_APP_URL: string;
+	
 	GOOGLE_MAPS_API_KEY: string;
+	YANDEX_MAPS_API_KEY: string;
 	
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
@@ -42,36 +48,42 @@ export const env: Env = cleanEnv(
 		{
 			production: bool({ default: false }),
 			
-			HTTP_SERVICES_ENDPOINT: str({ default: 'http://localhost:5500' }),
-			HTTPS_SERVICES_ENDPOINT: str({ default: 'https://localhost:5501' }),
-			GQL_ENDPOINT: str({ default: 'http://localhost:5555/graphql' }),
+			HTTP_SERVICES_ENDPOINT:     str({ default: 'http://localhost:5500' }),
+			HTTPS_SERVICES_ENDPOINT:    str({ default: 'https://localhost:5501' }),
+			GQL_ENDPOINT:               str({ default: 'http://localhost:5555/graphql' }),
 			GQL_SUBSCRIPTIONS_ENDPOINT: str({
 				                                default: 'ws://localhost:5050/subscriptions',
 			                                }),
 			
 			DEFAULT_COORDINATES: bool({ default: false }),
-			DEFAULT_LATITUDE: num({ default: 37.6156 }),
-			DEFAULT_LONGITUDE: num({ default: 55.7522 }),
+			DEFAULT_LATITUDE:    num({ default: 37.6156 }),
+			DEFAULT_LONGITUDE:   num({ default: 55.7522 }),
 			
-			DEFAULT_LANGUAGE: str({ default: 'ru-RU' }),
+			DEFAULT_LANGUAGE:  str({ default: 'ru-RU' }),
 			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			
-			AUTH_LOGO: str({ default: 'assets/img/logo.svg' }),
+			AUTH_LOGO:        str({ default: 'assets/img/logo.svg' }),
 			NO_INTERNET_LOGO: str({ default: 'assets/img/logo.svg' }),
 			
 			DELIVERY_TIME_MIN: num({ default: 30 }),
 			DELIVERY_TIME_MAX: num({ default: 60 }),
 			
+			GOOGLE_APP_URL:    str({ default: '/auth/google' }),
+			YANDEX_APP_URL:    str({ default: '/auth/yandex' }),
+			FACEBOOK_APP_URL:  str({ default: '/auth/facebook' }),
+			VKONTAKTE_APP_URL: str({ default: '/auth/vkontakte' }),
+			
 			GOOGLE_MAPS_API_KEY: str({ default: '' }),
+			YANDEX_MAPS_API_KEY: str({ default: '' }),
 			
 			// For maintenance micro service.
-			SETTINGS_APP_TYPE: str({ default: 'shop-web' }),
+			SETTINGS_APP_TYPE:            str({ default: 'shop-web' }),
 			SETTINGS_MAINTENANCE_API_URL: str({
 				                                  default: '',
 			                                  }),
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
-			WEB_MEMORY: num({ default: 4096 }),
+			WEB_MEMORY:      num({ default: 4096 }),
 			
 			HOST: str({ default: 'localhost' }),
 			PORT: num({ default: 3000 })
