@@ -9,10 +9,10 @@ import { StorageService } from 'app/services/storage';
            })
 export class ViewTypeComponent
 {
-	listViewSpace: string;
-	listViewType: string;
-	viewType: string;
-	showTuneButton: boolean = true;
+	public listViewSpace: string;
+	public listViewType: string;
+	public viewType: string;
+	public showTuneButton: boolean = true;
 	
 	constructor(private storage: StorageService, private router: Router)
 	{
@@ -21,24 +21,24 @@ export class ViewTypeComponent
 		this.viewType = this.storage.productViewType || 'list';
 	}
 	
-	get isListView()
+	public get isListView()
 	{
 		return this.viewType === 'list';
 	}
 	
-	async listViewSpaceChange()
+	public async listViewSpaceChange()
 	{
 		this.storage.productListViewSpace = this.listViewSpace;
 		await this.reload();
 	}
 	
-	async listViewTypeChange()
+	public async listViewTypeChange()
 	{
 		this.storage.productListViewType = this.listViewType;
 		await this.reload();
 	}
 	
-	async viewTypeChange()
+	public async viewTypeChange()
 	{
 		this.storage.productViewType = this.viewType;
 		if(this.viewType === 'carousel')
