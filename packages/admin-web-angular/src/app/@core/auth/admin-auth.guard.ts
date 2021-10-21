@@ -6,7 +6,7 @@ import {
 	RouterStateSnapshot,
 }                     from '@angular/router';
 import { Apollo }     from 'apollo-angular';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
+import { GQLQuery }   from 'graphql/definitions';
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate
@@ -23,7 +23,7 @@ export class AdminAuthGuard implements CanActivate
 		                      .query<{
 			                      adminAuthenticated: boolean
 		                      }>({
-			                         query:       GQLQueries.AdminAuthentticated,
+			                         query:       GQLQuery.Admin.IsAuthenticated,
 			                         fetchPolicy: 'network-only',
 		                         })
 		                      .toPromise();
