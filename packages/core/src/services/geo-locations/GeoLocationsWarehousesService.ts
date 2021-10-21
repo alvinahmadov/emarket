@@ -163,39 +163,42 @@ export class GeoLocationsWarehousesService
 		                           : {}
 		);
 		
-		let warehouses: IWarehouse[] = await this.warehousesService
-		                                         .Model
-		                                         .find(_.assign(
-				                                         {
-					                                         'geoLocation.countryId': geoLocation.countryId
-				                                         },
-				                                         findObjOpts
-		                                         ))
-		                                         .populate(options.fullProducts ? 'products.product' : '')
-		                                         .lean()
-		                                         .exec();
+		let warehouses: IWarehouse[];
 		
-		if(!warehouses || !warehouses.length)
+		const searchWarehouses = async(findObject?: object): Promise<any> =>
 		{
-			warehouses = await this.warehousesService
-			                       .Model
-			                       .find(_.assign(
-					                       {
-						                       'geoLocation.loc': {
-							                       $near: {
-								                       $geometry:    {
-									                       type:        'Point',
-									                       coordinates: geoLocation.loc.coordinates
-								                       },
-								                       $maxDistance: maxDistance
-							                       }
-						                       }
-					                       },
-					                       findObjOpts
-			                       ))
-			                       .populate(options.fullProducts ? 'products.product' : '')
-			                       .lean()
-			                       .exec();
+			if(!findObject)
+				findObject = {};
+			
+			return this.warehousesService
+			           .Model
+			           .find(_.assign(findObject, findObjOpts))
+			           .populate(options.fullProducts ? 'products.product' : '')
+			           .lean()
+			           .exec();
+		}
+		
+		if(geoLocation.countryId)
+		{
+			warehouses = await searchWarehouses({ 'geoLocation.countryId': geoLocation.countryId });
+		}
+		else if(geoLocation.loc && geoLocation.loc.coordinates.length > 0)
+		{
+			warehouses = await searchWarehouses({
+				                                    'geoLocation.loc': {
+					                                    $near: {
+						                                    $geometry: {
+							                                    type:        'Point',
+							                                    coordinates: geoLocation.loc.coordinates
+						                                    },
+						                                    // $maxDistance: maxDistance
+					                                    }
+				                                    }
+			                                    });
+		}
+		else
+		{
+			warehouses = await searchWarehouses();
 		}
 		
 		return warehouses;
