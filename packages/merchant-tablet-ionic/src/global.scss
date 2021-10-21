@@ -115,12 +115,11 @@ ion-item.payments-gateways-select-container {
           background-color: #353748;
 
           .order-image-header {
-            margin: 0;
             font-size: 24px;
             background-color: $brand;
             color: white;
             text-align: center;
-            margin-bottom: 0;
+            margin: 0;
             display: block;
             padding-top: 5px;
             padding-left: 5px;
@@ -151,7 +150,6 @@ ion-item.payments-gateways-select-container {
             padding-top: 11px;
             padding-bottom: 11px;
             text-align: center;
-            margin-bottom: 0;
           }
 
           &.no-carrier {
@@ -213,10 +211,8 @@ ion-item.payments-gateways-select-container {
             .cancel-message {
               font-weight: 600;
               text-align: center;
-              margin-top: 15px;
               font-size: 16px;
-              margin: auto;
-              margin-bottom: 10px;
+              margin: auto auto 10px;
             }
           }
 
@@ -237,11 +233,9 @@ ion-item.payments-gateways-select-container {
           &.warehouse-issues {
             .issue {
               font-weight: 500;
-              margin-top: 15px;
               text-align: center;
               font-size: 16px;
-              margin: auto;
-              margin-bottom: 10px;
+              margin: auto auto 10px;
             }
           }
         }
@@ -713,16 +707,16 @@ ion-content.app-view {
 }
 
 .bar .title {
-  position: absolute;
   top: 0;
   right: 0;
   left: 0;
   z-index: 0;
   overflow: hidden;
-  margin: 0 10px;
   min-width: 30px;
   height: 43px;
   text-align: center;
+  margin: 10px auto 0;
+  position: relative;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 17px;
@@ -771,7 +765,7 @@ ion-content.app-view {
 .bar .buttons > .button {
   min-height: 31px;
   line-height: 32px;
-  padding: 10px;
+  padding: 0px;
 }
 
 .bar .buttons span {
@@ -808,10 +802,9 @@ ion-content.app-view {
 
 .custom-title-popup {
   text-align: center;
-  margin: 0 15px 3rem 15px;
   border-bottom: 1px solid black;
   padding: 15px;
-  margin-bottom: 15px;
+  margin: 0 15px 15px;
 }
 
 .text-center {
