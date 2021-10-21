@@ -4,64 +4,59 @@ import { map, share }                    from 'rxjs/operators';
 import { Observable }                    from 'rxjs';
 import ICustomer, { ICustomerFindInput } from '@modules/server.common/interfaces/ICustomer';
 import Customer                          from '@modules/server.common/entities/Customer';
-import { GQLQueries }                    from '@modules/server.common/utilities/graphql';
+import ApolloService                     from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }                      from '../graphql/definitions';
 
 @Injectable()
-export class CustomersService
+export class CustomersService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName: "Merchant::CustomersService"
+		      });
+	}
 	
 	public getCustomer(id: string): Observable<Customer>
 	{
-		return this._apollo
+		return this.apollo
 		           .query<{
 			           customer: ICustomer
 		           }>({
-			              query:     GQLQueries.CustomerById,
+			              query:     GQLQuery.Customer.GetById,
 			              variables: { id }
 		              })
-		           .pipe(
-				           map((res) => this._customerFactory(res.data.customer))
-		           );
+		           .pipe(map((result) => <Customer>
+				           this.factory(result, Customer)));
 	}
 	
 	public getCustomers(): Observable<Customer[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           customers: ICustomer[]
 		           }>({
-			              query:        GQLQueries.UserAll,
-			              pollInterval: 5000,
-		              })
-		           .valueChanges
+			              query:        GQLQuery.Customer.GetAll,
+			              pollInterval: this.pollInterval,
+		              }).valueChanges
 		           .pipe(
-				           map((res) => res.data.customers),
-				           map((customers) => customers.map(
-						           (customer) => this._customerFactory(customer))
-				           ),
+				           map((result) => <Customer[]>
+						           this.factory(result, Customer)),
 				           share()
 		           );
 	}
 	
 	public findCustomer(findInput: ICustomerFindInput): Observable<Customer>
 	{
-		return this._apollo
+		return this.apollo
 		           .query<{
 			           customer: ICustomer
 		           }>({
-			              query:     GQLQueries.CustomerFindByInput,
+			              query:     GQLQuery.Customer.Find,
 			              variables: { findInput }
 		              })
-		           .pipe(
-				           map((res) => this._customerFactory(res.data.customer))
-		           );
-	}
-	
-	protected _customerFactory(customer: ICustomer)
-	{
-		return customer != null
-		       ? new Customer(customer)
-		       : null;
+		           .pipe(map((result) => <Customer>
+				           this.factory(result, Customer)));
 	}
 }
