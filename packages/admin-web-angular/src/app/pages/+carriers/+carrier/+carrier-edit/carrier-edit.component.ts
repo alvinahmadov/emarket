@@ -1,44 +1,45 @@
 import { Component, OnInit, ViewChild, EventEmitter } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup }        from '@angular/forms';
-import { ActivatedRoute, Router }                     from '@angular/router';
-import { BasicInfoFormComponent }                     from '../../../../@shared/carrier/forms';
-import { LocationFormComponent }                      from '../../../../@shared/forms/location';
-import { CarrierRouter }                              from '@modules/client.common.angular2/routers/carrier-router.service';
-import Carrier                                        from '@modules/server.common/entities/Carrier';
-import IGeoLocation                                   from '@modules/server.common/interfaces/IGeoLocation';
-import { ToasterService }                             from 'angular2-toaster';
+import { ActivatedRoute }                             from '@angular/router';
 import { map, first }                                 from 'rxjs/operators';
+import { ToasterService }                             from 'angular2-toaster';
+import IGeoLocation                                   from '@modules/server.common/interfaces/IGeoLocation';
+import Carrier                                        from '@modules/server.common/entities/Carrier';
+import { CarrierRouter }                              from '@modules/client.common.angular2/routers/carrier-router.service';
+import { BasicInfoFormComponent }                     from '@app/@shared/carrier/forms';
+import { LocationFormComponent }                      from '@app/@shared/forms/location';
 
 @Component({
-	           selector: 'ea-carrier-edit',
+	           selector:    'ea-carrier-edit',
+	           styleUrls:   ['./carrier-edit.component.scss'],
 	           templateUrl: './carrier-edit.component.html',
-	           styleUrls: ['./carrier-edit.component.scss'],
            })
 export class CarrierEditComponent implements OnInit
 {
 	@ViewChild('basicInfoForm')
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('locationForm')
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
-	mapTypeEmitter = new EventEmitter<string>();
-	mapCoordEmitter = new EventEmitter<number[]>();
-	mapGeometryEmitter = new EventEmitter<any>();
+	public mapTypeEmitter = new EventEmitter<string>();
+	public mapCoordEmitter = new EventEmitter<number[]>();
+	public mapGeometryEmitter = new EventEmitter<any>();
 	
 	public loading: boolean;
 	
-	readonly form: FormGroup = this.formBuilder.group({
-		                                                  basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
-		                                                  location: LocationFormComponent.buildForm(this.formBuilder),
-		                                                  apartment: LocationFormComponent.buildApartmentForm(this.formBuilder),
-	                                                  });
+	public readonly form: FormGroup =
+			                this.formBuilder.group({
+				                                       basicInfo: BasicInfoFormComponent.buildForm(this.formBuilder),
+				                                       location:  LocationFormComponent.buildForm(this.formBuilder),
+				                                       apartment: LocationFormComponent.buildApartmentForm(this.formBuilder),
+			                                       });
 	
-	readonly basicInfo = this.form.get('basicInfo') as FormControl;
-	readonly location = this.form.get('location') as FormControl;
-	readonly apartment = this.form.get('apartment') as FormControl;
+	public readonly basicInfo = this.form.get('basicInfo') as FormControl;
+	public readonly location = this.form.get('location') as FormControl;
+	public readonly apartment = this.form.get('apartment') as FormControl;
 	
-	readonly carrierId$ = this.activatedRoute.params.pipe(map((p) => p['id']));
+	public readonly carrierId$ = this.activatedRoute.params.pipe(map((p) => p['id']));
 	
 	public currentCarrier: Carrier;
 	
@@ -46,17 +47,16 @@ export class CarrierEditComponent implements OnInit
 			private readonly toasterService: ToasterService,
 			private readonly activatedRoute: ActivatedRoute,
 			private readonly formBuilder: FormBuilder,
-			private readonly carrierRouter: CarrierRouter,
-			private readonly router: Router
+			private readonly carrierRouter: CarrierRouter
 	)
 	{}
 	
-	get isCarrierValid()
+	public get isCarrierValid()
 	{
 		return this.basicInfo.valid && this.location.valid;
 	}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		const id = this.activatedRoute.snapshot.params.id;
 		
@@ -86,22 +86,22 @@ export class CarrierEditComponent implements OnInit
 		               });
 	}
 	
-	onCoordinatesChanges(coords: number[])
+	public onCoordinatesChanges(coords: number[])
 	{
 		this.mapCoordEmitter.emit(coords);
 	}
 	
-	onGeometrySend(geometry: any)
+	public onGeometrySend(geometry: any)
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	emitMapType(mapType: string)
+	public emitMapType(mapType: string)
 	{
 		this.mapTypeEmitter.emit(mapType);
 	}
 	
-	async updateCarrier()
+	public async updateCarrier()
 	{
 		try
 		{
