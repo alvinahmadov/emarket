@@ -11,7 +11,7 @@
 					*ngFor="let lang of translateService.getLangs()"
 					[value]="lang"
 			>
-				{{ lang }}
+				{{ translateLanguage(lang) }}
 			</mat-option>
 		</mat-select>
 	</mat-form-field>
