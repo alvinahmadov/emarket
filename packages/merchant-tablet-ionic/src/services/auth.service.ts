@@ -1,22 +1,17 @@
 import { Injectable }                  from '@angular/core';
 import { Apollo }                      from 'apollo-angular';
-import bcrypt                          from 'bcryptjs';
 import { Observable }                  from 'rxjs';
 import { map, share }                  from 'rxjs/operators';
+import { IWarehouseCreateObject }      from '@modules/server.common/interfaces/IWarehouse';
 import Warehouse                       from '@modules/server.common/entities/Warehouse';
 import { IWarehouseRegistrationInput } from '@modules/server.common/routers/IWarehouseAuthRouter';
-import { GQLMutations }                from '@modules/server.common/utilities/graphql';
-import { environment }                 from '../environments/environment';
+import ApolloService                   from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation }                 from 'graphql/definitions';
 
 export interface WarehouseLoginInfo
 {
 	warehouse: Warehouse;
 	token: string;
-}
-
-export interface WarehouseRegisterInfo
-{
-	warehouse: Warehouse;
 }
 
 export interface WarehouseRegisterInput
@@ -26,33 +21,28 @@ export interface WarehouseRegisterInput
 }
 
 @Injectable()
-export class AuthService
+export class AuthService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName: "Merchant::AuthService"
+		      })
+	}
 	
 	public isAuthenticated(token: string): Observable<boolean>
 	{
-		try
-		{
-			return this.apollo
-			           .mutate(
-					           {
-						           mutation:  GQLMutations.WarehouseAuthenticated,
-						           variables: {
-							           token
-						           },
-					           })
-			           .pipe(
-					           map(result => result.data),
-					           share<boolean>()
-			           );
-		} catch(e)
-		{
-			if(!environment.production)
-			{
-				console.error(e)
-			}
-		}
+		return this.apollo
+		           .mutate(
+				           {
+					           mutation:  GQLMutation.Store.IsAuthenticated,
+					           variables: { token }
+				           })
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
 	public login(
@@ -64,36 +54,32 @@ export class AuthService
 		           .mutate<{
 			           warehouseLogin: WarehouseLoginInfo
 		           }>({
-			              mutation:  GQLMutations.WarehouseLogin,
+			              mutation:  GQLMutation.Store.Login,
 			              variables: {
 				              username,
 				              password,
 			              },
 		              })
 		           .pipe(
-				           map(result => result.data.warehouseLogin),
-				           share<WarehouseLoginInfo>()
+				           map(result => this.get(result)),
+				           share()
 		           );
 	}
 	
-	public register(input: IWarehouseRegistrationInput): Observable<WarehouseRegisterInfo>
+	public register(registerInput: IWarehouseRegistrationInput): Observable<Warehouse>
 	{
-		const salt = bcrypt.genSaltSync(environment.WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS);
-		input.warehouse.hash = bcrypt.hashSync(input.password, salt);
-		
 		return this.apollo
 		           .mutate<{
-			           warehouseRegister: WarehouseRegisterInput
+			           warehouse: IWarehouseCreateObject
 		           }>(
 				           {
-					           mutation:  GQLMutations.WarehouseRegister,
-					           variables: {
-						           input
-					           },
+					           mutation:  GQLMutation.Store.Register,
+					           variables: { registerInput },
 				           })
 		           .pipe(
-				           map(result => result.data.warehouseRegister),
-				           share<WarehouseRegisterInfo>()
+				           map((result) => <Warehouse>
+						           this.factory(result, Warehouse)),
+				           share()
 		           );
 	}
 }
