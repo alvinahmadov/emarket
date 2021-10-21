@@ -1,8 +1,8 @@
-import '../styles/styles.scss';
 import { APP_INITIALIZER, NgModule }            from '@angular/core';
-import { BrowserModule }                        from '@angular/platform-browser';
+import { HttpClient, HttpClientModule }         from '@angular/common/http';
 import { FormsModule }                          from '@angular/forms';
 import { PreloadAllModules, RouterModule }      from '@angular/router';
+import { BrowserModule }                        from '@angular/platform-browser';
 import { MatButtonModule }                      from '@angular/material/button';
 import { MatButtonToggleModule }                from '@angular/material/button-toggle';
 import { MatCardModule }                        from '@angular/material/card';
@@ -10,44 +10,46 @@ import { MatCheckboxModule }                    from '@angular/material/checkbox
 import { MatFormFieldModule }                   from '@angular/material/form-field';
 import { MatIconModule }                        from '@angular/material/icon';
 import { MatListModule }                        from '@angular/material/list';
+import { MatSelectModule }                      from '@angular/material/select';
 import { MatSidenavModule }                     from '@angular/material/sidenav';
 import { MatSlideToggleModule }                 from '@angular/material/slide-toggle';
 import { MatToolbarModule }                     from '@angular/material/toolbar';
+import { FlexLayoutModule }                     from '@angular/flex-layout';
+import { platformBrowserDynamic }               from '@angular/platform-browser-dynamic';
 import { BrowserAnimationsModule }              from '@angular/platform-browser/animations';
+import { Apollo }                               from 'apollo-angular';
+import { HttpLink, HttpLinkModule }             from 'apollo-angular-link-http';
+import { InMemoryCache }                        from 'apollo-cache-inmemory';
+import { setContext }                           from 'apollo-link-context';
+import { InfiniteScrollModule }                 from 'ngx-infinite-scroll';
+import { TranslateLoader, TranslateModule }     from '@ngx-translate/core';
+import { TranslateHttpLoader }                  from '@ngx-translate/http-loader';
 import { environment }                          from 'environments/environment';
-import { IconsModule }                          from '../modules/icons';
-import { MatBoldInputModule, MatSearchModule, } from '../modules/material-extensions';
+import { CommonModule }                         from '@modules/client.common.angular2/common.module';
+import { GoogleMapsLoader }                     from '@modules/client.common.angular2/services/googlemaps-loader';
+import { MaintenanceService }                   from '@modules/client.common.angular2/services/maintenance.service';
+import { ServerConnectionService }              from '@modules/client.common.angular2/services/server-connection.service';
 import { ROUTES }                               from './app.routes';
 import { AppComponent }                         from './app.component';
 import { APP_RESOLVER_PROVIDERS }               from './app.resolver';
 import { AppState }                             from './app.service';
+import { AppModuleGuard }                       from './app.module.guard';
 import { ToolbarComponent }                     from './toolbar/toolbar.component';
 import { NoContentComponent }                   from './no-content';
-import { CommonModule }                         from '@modules/client.common.angular2/common.module';
-// import { Logger } from 'angular2-logger/core';
 import { SidenavService }                       from './sidenav/sidenav.service';
 import { SidenavContentComponent }              from './sidenav/sidenav-content.component';
-import { HttpClient, HttpClientModule }         from '@angular/common/http';
-import { TranslateLoader, TranslateModule }     from '@ngx-translate/core';
-import { TranslateHttpLoader }                  from '@ngx-translate/http-loader';
-import { ServerSettings }                       from './services/server-settings';
-import { LoginModuleGuard }                     from './+login/login.module.guard';
-import { ProductsModuleGuard }                  from './+products/products.module.guard';
-import { MaintenanceService }                   from '@modules/client.common.angular2/services/maintenance.service';
-import { AppModuleGuard }                       from './app.module.guard';
-import { MaintenanceModuleGuard }               from './+maintenance-info/maintenance-info.module.guard';
-import { GoogleMapsLoader }                     from '@modules/client.common.angular2/services/googlemaps-loader';
-import { Apollo, ApolloModule }                 from 'apollo-angular';
-import { HttpLink, HttpLinkModule }             from 'apollo-angular-link-http';
-import { InMemoryCache }                        from 'apollo-cache-inmemory';
-import { setContext }                           from 'apollo-link-context';
-import { Store }                                from './services/store';
-import { InfiniteScrollModule }                 from 'ngx-infinite-scroll';
-import { platformBrowserDynamic }               from '@angular/platform-browser-dynamic';
 import { GeoLocationService }                   from './services/geo-location';
+import { ServerSettings }                       from './services/server-settings';
+import { StorageService }                       from './services/storage';
 import { LocationPopupModalModule }             from './shared/location-popup/location-popup.module';
 import { AuthGuard }                            from './authentication/auth.guard';
-import { ServerConnectionService }              from '@modules/client.common.angular2/services/server-connection.service';
+import { LoginModuleGuard }                     from './+login/login.module.guard';
+import { ProductsModuleGuard }                  from './+products/products.module.guard';
+import { WarehousesModuleGuard }                from './+warehouses/warehouses.module.guard';
+import { MaintenanceModuleGuard }               from './+maintenance-info/maintenance-info.module.guard';
+import { GraphQLModule }                        from '../graphql/apollo.config';
+import { IconsModule }                          from '../modules/icons';
+import { MatBoldInputModule, MatSearchModule, } from '../modules/material-extensions';
 
 export function HttpLoaderWebFactory(http: HttpClient)
 {
@@ -75,69 +77,69 @@ export function googleMapsLoaderFactory(provider: GoogleMapsLoader)
 
 export function serverConnectionFactory(
 		provider: ServerConnectionService,
-		store: Store
+		storage: StorageService
 )
 {
-	return () => provider.load(environment.HTTP_SERVICES_ENDPOINT, store);
+	return () => provider.load(environment.HTTP_SERVICES_ENDPOINT, storage);
 }
 
 const APP_PROVIDERS = [
 	ServerConnectionService,
 	{
-		provide: APP_INITIALIZER,
+		provide:    APP_INITIALIZER,
 		useFactory: serverConnectionFactory,
-		deps: [ServerConnectionService, Store],
-		multi: true,
+		deps:       [ServerConnectionService, StorageService],
+		multi:      true,
 	},
 	MaintenanceService,
 	{
-		provide: APP_INITIALIZER,
+		provide:    APP_INITIALIZER,
 		useFactory: maintenanceFactory,
-		deps: [MaintenanceService],
-		multi: true,
+		deps:       [MaintenanceService],
+		multi:      true,
 	},
 	GoogleMapsLoader,
 	{
-		provide: APP_INITIALIZER,
+		provide:    APP_INITIALIZER,
 		useFactory: googleMapsLoaderFactory,
-		deps: [GoogleMapsLoader],
-		multi: true,
+		deps:       [GoogleMapsLoader],
+		multi:      true,
 	},
 	...APP_RESOLVER_PROVIDERS,
 	AppState,
 	SidenavService,
-	// Logger,
 	ServerSettings,
 	InfiniteScrollModule,
 	{
-		provide: APP_INITIALIZER,
+		provide:    APP_INITIALIZER,
 		useFactory: serverSettingsFactory,
-		deps: [ServerSettings],
-		multi: true,
+		deps:       [ServerSettings],
+		multi:      true,
 	},
 ];
 
 @NgModule({
-	          bootstrap: [AppComponent],
+	          bootstrap:    [AppComponent],
 	          declarations: [
 		          AppComponent,
 		          ToolbarComponent,
 		          NoContentComponent,
 		          SidenavContentComponent,
 	          ],
-	          imports: [
+	          imports:      [
 		          BrowserModule,
 		          HttpClientModule,
-		          ApolloModule,
+		          GraphQLModule,
 		          TranslateModule.forRoot({
 			                                  loader: {
-				                                  provide: TranslateLoader,
+				                                  provide:    TranslateLoader,
 				                                  useFactory: HttpLoaderWebFactory,
-				                                  deps: [HttpClient],
+				                                  deps:       [HttpClient],
 			                                  },
 		                                  }),
 		          BrowserAnimationsModule,
 		          FormsModule,
+		          FlexLayoutModule,
 		          HttpLinkModule,
 		          RouterModule.forRoot(ROUTES, {
 			          useHash: Boolean(history.pushState) === false,
@@ -162,13 +164,16 @@ const APP_PROVIDERS = [
 			                               apiUrl: environment.HTTP_SERVICES_ENDPOINT,
 		                               }),
 		          LocationPopupModalModule,
+		          MatSelectModule,
 	          ],
-	          providers: [
+	          providers:    [
 		          environment.ENV_PROVIDERS,
 		          APP_PROVIDERS,
 		          LoginModuleGuard,
 		          ProductsModuleGuard,
+		          WarehousesModuleGuard,
 		          AppModuleGuard,
+		          SidenavService,
 		          MaintenanceModuleGuard,
 		          GeoLocationService,
 		          AuthGuard,
@@ -176,8 +181,13 @@ const APP_PROVIDERS = [
           })
 export class AppModule
 {
-	constructor(apollo: Apollo, httpLink: HttpLink, store: Store)
+	constructor(apollo: Apollo, httpLink: HttpLink, store: StorageService)
 	{
+	}
+	
+	private init(apollo: Apollo, httpLink: HttpLink, store: StorageService)
+	{
+		
 		const http = httpLink.create({
 			                             uri: environment.GQL_ENDPOINT,
 		                             });
@@ -196,21 +206,21 @@ export class AppModule
 		                            });
 		
 		apollo.create({
-			              link: http,
+			              link:           http,
 			              defaultOptions: {
 				              watchQuery: {
 					              fetchPolicy: 'network-only',
 					              errorPolicy: 'ignore',
 				              },
-				              query: {
+				              query:      {
 					              fetchPolicy: 'network-only',
 					              errorPolicy: 'all',
 				              },
-				              mutate: {
+				              mutate:     {
 					              errorPolicy: 'all',
 				              },
 			              },
-			              cache: new InMemoryCache(),
+			              cache:          new InMemoryCache(),
 		              });
 	}
 }
