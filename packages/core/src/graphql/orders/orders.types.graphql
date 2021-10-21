@@ -118,7 +118,7 @@ type GenerateOrdersResponse {
 
 type Query {
     # If order query doesn't work for you it may be that you use 'order' instead 'getOrder' query
-    getOrder(id: String!): Order
+    order(id: String!): Order
 
     orders(findInput: OrdersFindInput): [Order!]!
 
