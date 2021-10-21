@@ -1,8 +1,8 @@
+import { Entity, Column }                                from 'typeorm';
 import GeoLocation                                       from './GeoLocation';
 import { DBObject, Schema, ModelName, Types, getSchema } from '../@pyro/db';
 import IInvite                                           from '../interfaces/IInvite';
 import { IInviteCreateObject }                           from '../interfaces/IInvite';
-import { Entity, Column }                                from 'typeorm';
 
 /**
  * Invite for potential Customer
@@ -17,8 +17,10 @@ import { Entity, Column }                                from 'typeorm';
 class Invite extends DBObject<IInvite, IInviteCreateObject> implements IInvite
 {
 	/**
-	 * Invite code (usually just 4 digit number), which Customer can use to continue registration
-	 * Note: invite code works only within specific radius location around customer address!
+	 * Invite code (usually just 4 digit number), which
+	 * Customer can use to continue registration
+	 * Note: invite code works only within specific
+	 * radius location around customer address!
 	 *
 	 * @type {string}
 	 * @memberof Invite
@@ -26,6 +28,7 @@ class Invite extends DBObject<IInvite, IInviteCreateObject> implements IInvite
 	@Types.String()
 	@Column()
 	code: string;
+	
 	/**
 	 * Apartment (optional) for which invite will work
 	 *
@@ -35,6 +38,7 @@ class Invite extends DBObject<IInvite, IInviteCreateObject> implements IInvite
 	@Types.String()
 	@Column()
 	apartment: string;
+	
 	/**
 	 * Location (Address) of invited Customer
 	 *
@@ -43,6 +47,7 @@ class Invite extends DBObject<IInvite, IInviteCreateObject> implements IInvite
 	 */
 	@Schema(getSchema(GeoLocation))
 	geoLocation: GeoLocation;
+	
 	@Types.Boolean(false)
 	@Column()
 	isDeleted: boolean;
@@ -64,7 +69,7 @@ class Invite extends DBObject<IInvite, IInviteCreateObject> implements IInvite
 	{
 		return {
 			geoLocation: this.geoLocation,
-			apartment: this.apartment
+			apartment:   this.apartment
 		};
 	}
 }
