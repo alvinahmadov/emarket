@@ -19,8 +19,8 @@ export class CarrierService extends ApolloService
 	constructor(apollo: Apollo)
 	{
 		super(apollo, {
-			serviceName:  CarrierService.name,
-			pollInterval: 10000
+			serviceName:  "Merchant::CarrierService",
+			pollInterval: 4000
 		})
 		this.carriers$ = this.apollo
 		                     .watchQuery<{
