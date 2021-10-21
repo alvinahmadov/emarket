@@ -7,6 +7,7 @@
   "Pay now": "Pay Now",
   "Products": "Products",
   "Orders": "Orders",
+  "Warehouses": "Warehouses",
   "Buy for": "Buy for",
   "DELIVERY": "Delivery",
   "SELECT_YOUR_LOCATION": "Select your location",
@@ -62,15 +63,19 @@
     "BY_LOCATION_VIEW": {
       "WHAT_IS_YOUR_ADDRESS": "What is your address?",
       "WE_GUARANTEE_TO_SHOW_ONLY_RELEVANT_PRODUCTS": "We guarantee to show only relevant products based on the address entered",
-      "SEARCH": "search",
+      "SEARCH": "Search",
       "COUNTRY": "Country...",
       "APARTMENT": "Apartment",
       "CONTINUE": "Continue",
       "PLACEHOLDER": {
+        "USERNAME": "Username",
+        "EMAIL": "Mail address",
+        "PASSWORD": "Password",
         "SELECTED_CITY": "Selected City",
         "SELECTED_STREET": "Selected Street",
         "HOUSE": "house",
-        "APARTMENT_OPTIONAL": "Apartment (optional)"
+        "APARTMENT_OPTIONAL": "Apartment (optional)",
+        "COUNTRY_NOT_FOUND": "Not found"
       }
     }
   },
