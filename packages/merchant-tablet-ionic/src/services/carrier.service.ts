@@ -5,30 +5,34 @@ import { Apollo }     from 'apollo-angular';
 import ICarrier       from '@modules/server.common/interfaces/ICarrier';
 import Carrier        from '@modules/server.common/entities/Carrier';
 import Order          from '@modules/server.common/entities/Order';
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
 import {
-	GQLQueries,
-	GQLMutations
-}                     from '@modules/server.common/utilities/graphql';
+	GQLQuery,
+	GQLMutation
+}                     from 'graphql/definitions';
 
 @Injectable()
-export class CarrierService
+export class CarrierService extends ApolloService
 {
 	private readonly carriers$: Observable<Carrier[]>
-	private static readonly pollInterval = 10000;
 	
-	constructor(private readonly _apollo: Apollo)
+	constructor(apollo: Apollo)
 	{
-		this.carriers$ = this._apollo
+		super(apollo, {
+			serviceName:  CarrierService.name,
+			pollInterval: 10000
+		})
+		this.carriers$ = this.apollo
 		                     .watchQuery<{
 			                     getCarriers: ICarrier[]
 		                     }>({
-			                        query:        GQLQueries.CarrierAll,
-			                        pollInterval: CarrierService.pollInterval,
+			                        query:        GQLQuery.Carrier.GetAll,
+			                        pollInterval: this.pollInterval,
 		                        })
 		                     .valueChanges
 		                     .pipe(
-				                     map((res) => res.data.getCarriers),
-				                     map((carriers) => carriers.map((c) => this._carrierFactory(c))),
+				                     map((result) => <Carrier[]>
+						                     this.factory(result, Carrier)),
 				                     share()
 		                     );
 	}
@@ -40,36 +44,32 @@ export class CarrierService
 	
 	public updateCarrier(id: string, updateInput: any): Observable<Carrier>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate<{
 			           updateCarrier: Carrier
 		           }>({
-			              mutation:  GQLMutations.CarrierUpdate,
+			              mutation:  GQLMutation.Carrier.Update,
 			              variables: {
 				              id,
 				              updateInput,
 			              },
 		              })
 		           .pipe(
-				           map((result) => result.data.updateCarrier),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
 	async getCarrierCurrentOrder(carrierId: string): Promise<Order>
 	{
-		const res = await this._apollo
-		                      .query({
-			                             query:     GQLQueries.CarrierCurrentOrder,
-			                             variables: { carrierId },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCarrierCurrentOrder'];
-	}
-	
-	protected _carrierFactory(carrier: ICarrier)
-	{
-		return carrier == null ? null : new Carrier(carrier);
+		return this.apollo
+		           .query<{
+			           currentOrder: Order
+		           }>({
+			              query:     GQLQuery.Carrier.GetCurrentOrder,
+			              variables: { carrierId },
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 }
