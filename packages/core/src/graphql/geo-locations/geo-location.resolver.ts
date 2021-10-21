@@ -8,6 +8,7 @@ export interface IGetGeoLocationProductsOptions
 {
 	isDeliveryRequired?: boolean;
 	isTakeaway?: boolean;
+	trackingDistance?: number;
 	merchantIds?: string[];
 	imageOrientation?: number;
 	locale?: string;

@@ -87,6 +87,7 @@ type Query {
 input GetGeoLocationProductsOptions {
     isDeliveryRequired: Boolean
     isTakeaway: Boolean
+    trackingDistance: Int
     merchantIds: [String]
     imageOrientation: Int
     locale: String
