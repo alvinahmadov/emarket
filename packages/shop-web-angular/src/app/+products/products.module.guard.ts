@@ -5,15 +5,14 @@ import {
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
 }                         from '@angular/router';
-import { Store }          from 'app/services/store';
-import RegistrationSystem from '@modules/server.common/enums/RegistrationSystem';
+import { StorageService } from 'app/services/storage';
 
 @Injectable()
 export class ProductsModuleGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{}
 	
