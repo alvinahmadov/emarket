@@ -69,7 +69,7 @@ type Query {
 	isCustomerEmailExists(email: String!): Boolean!
 
     generateCustomers(
-        qty: Int
+        qty: Int!
         defaultLng: Float!
         defaultLat: Float!
     ): ResponseGenerateCustomers
