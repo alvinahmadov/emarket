@@ -5,9 +5,16 @@ namespace CommonUtils
 {
 	export const millisToSeconds = (milliseconds: number): number => milliseconds / 1000;
 	
+	export const millisToMinutes = (ms): string =>
+	{
+		const minutes = Math.floor(ms / 60000);
+		const seconds = ((ms % 60000) / 1000).toFixed(0);
+		return minutes + ':' + (+seconds < 10 ? '0' : '') + seconds;
+	}
+	
 	export const generateObjectIdString = (
 			m = Math, d = Date,
-			h           = 16, s = (x) => m.floor(x).toString(h)
+			h           = 16, s   = (x) => m.floor(x).toString(h)
 	) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
 	
 	export function toDate(date: string | Date)
