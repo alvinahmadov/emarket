@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
-import { Store }     from 'app/services/store';
-import { Router }    from '@angular/router';
+import { Component }      from '@angular/core';
+import { Router }         from '@angular/router';
+import { StorageService } from 'app/services/storage';
 
 @Component({
-	           selector: 'view-type',
-	           styleUrls: ['./view-type.component.scss'],
+	           selector:    'view-type',
+	           styleUrls:   ['./view-type.component.scss'],
 	           templateUrl: './view-type.component.html',
            })
 export class ViewTypeComponent
@@ -14,11 +14,11 @@ export class ViewTypeComponent
 	viewType: string;
 	showTuneButton: boolean = true;
 	
-	constructor(private store: Store, private router: Router)
+	constructor(private storage: StorageService, private router: Router)
 	{
-		this.listViewSpace = this.store.productListViewSpace || 'normal';
-		this.listViewType = this.store.productListViewType || 'masonry';
-		this.viewType = this.store.productViewType || 'list';
+		this.listViewSpace = this.storage.productListViewSpace || 'normal';
+		this.listViewType = this.storage.productListViewType || 'masonry';
+		this.viewType = this.storage.productViewType || 'list';
 	}
 	
 	get isListView()
@@ -28,23 +28,23 @@ export class ViewTypeComponent
 	
 	async listViewSpaceChange()
 	{
-		this.store.productListViewSpace = this.listViewSpace;
+		this.storage.productListViewSpace = this.listViewSpace;
 		await this.reload();
 	}
 	
 	async listViewTypeChange()
 	{
-		this.store.productListViewType = this.listViewType;
+		this.storage.productListViewType = this.listViewType;
 		await this.reload();
 	}
 	
 	async viewTypeChange()
 	{
-		this.store.productViewType = this.viewType;
+		this.storage.productViewType = this.viewType;
 		if(this.viewType === 'carousel')
 		{
-			this.store.productListViewType = 'grid';
-			this.store.productListViewSpace = 'wide';
+			this.storage.productListViewType = 'grid';
+			this.storage.productListViewSpace = 'wide';
 		}
 		await this.reload();
 	}
