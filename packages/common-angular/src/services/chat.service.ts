@@ -28,7 +28,7 @@ export class ChatService
 			private httpClient: HttpClient
 	)
 	{
-		this.appId = environment.TALKJS_APP_ID;
+		this.appId = environment['TALKJS_APP_ID'];
 		this.apiBaseUrl = 'https://api.talkjs.com';
 	}
 	
@@ -141,5 +141,4 @@ export class ChatService
 				(messages: Talk.UnreadConversation[]) => this._unreadCount = messages.length);
 		return session;
 	}
-	
 }
