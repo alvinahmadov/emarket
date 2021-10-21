@@ -1,7 +1,7 @@
 import { Component, NgZone }    from '@angular/core';
 import { CustomerOrdersRouter } from '@modules/client.common.angular2/routers/customer-orders-router.service';
 import Order                    from '@modules/server.common/entities/Order';
-import { Store }                from 'app/services/store';
+import { StorageService }       from 'app/services/storage';
 
 @Component({
 	           selector: 'orders-container',
@@ -22,12 +22,11 @@ export class OrdersContainerComponent
 	constructor(
 			private readonly userOrdersRouter: CustomerOrdersRouter,
 			private readonly ngZone: NgZone,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{
-		const userId = store.userId;
+		const userId = storage.userId;
 		
-		// During testing: this.userOrdersRouter.getOrderedProducts('23');
 		this.userOrdersRouter
 		    .get(userId)
 		    .subscribe((res: Order[]) =>
