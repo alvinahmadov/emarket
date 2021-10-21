@@ -1,69 +1,91 @@
-import { Injectable }               from '@angular/core';
-import { Apollo }                   from 'apollo-angular';
-import { IPromotionCreateObject }   from '@modules/server.common/interfaces/IPromotion';
-import { GQLMutations, GQLQueries } from '@modules/server.common/utilities/graphql';
-import { map, share }               from 'rxjs/operators';
-import { Observable }               from 'rxjs';
+import { Injectable }            from '@angular/core';
+import { Apollo }                from 'apollo-angular';
+import { Observable }            from 'rxjs';
+import { map, share }            from 'rxjs/operators';
+import {
+	IPromotionCreateObject,
+	IPromotionsFindInput
+}                                from '@modules/server.common/interfaces/IPromotion';
+import Promotion                 from '@modules/server.common/entities/Promotion';
+import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery, GQLMutation } from 'graphql/definitions';
+
+interface IRemovePromotionResponse
+{
+	n?: number
+	ok?: number
+}
 
 @Injectable()
-export class PromotionService
+export class PromotionService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      { serviceName: "Merchant::PromotionService" });
+	}
 	
-	getAll(findInput: { warehouse: string }): Observable<any>
+	public getPromotions(findInput: IPromotionsFindInput): Observable<Promotion[]>
 	{
 		return this.apollo
-		           .query<any>({
-			                       query: GQLQueries.PromotionAll,
-			                       variables: { findInput },
-		                       })
+		           .query<{
+			           promotions: Promotion[]
+		           }>({
+			              query:     GQLQuery.Promotion.GetAll,
+			              variables: { findInput },
+		              })
 		           .pipe(
-				           map((result) => result.data || []),
+				           map((result) => this.get(result) || []),
 				           share()
 		           );
 	}
 	
-	create(promotion: IPromotionCreateObject)
+	public create(promotion: IPromotionCreateObject): Observable<Promotion>
 	{
 		return this.apollo
 		           .mutate<{
 			           promotion: IPromotionCreateObject
 		           }>({
-			              mutation: GQLMutations.PromotionCreate,
+			              mutation:  GQLMutation.Promotion.Create,
 			              variables: {
 				              promotion,
 			              },
 		              })
 		           .pipe(
-				           map((result) => result.data),
+				           map((result) => <Promotion>
+						           this.factory(result, Promotion)),
 				           share()
 		           );
 	}
 	
-	update(id: String, promotion: IPromotionCreateObject)
+	public update(id: String, promotion: IPromotionCreateObject): Observable<Promotion>
 	{
 		return this.apollo
 		           .mutate<{
 			           promotion: IPromotionCreateObject
 		           }>({
-			              mutation: GQLMutations.PromotionUpdate,
+			              mutation:  GQLMutation.Promotion.Update,
 			              variables: {
 				              id,
 				              promotion,
 			              },
 		              })
 		           .pipe(
-				           map((result) => result.data),
+				           map((result) => <Promotion>
+						           this.factory(result, Promotion)),
 				           share()
 		           );
 	}
 	
-	removeByIds(ids: string[])
+	public removeByIds(ids: string[]): Observable<IRemovePromotionResponse>
 	{
 		return this.apollo
-		           .mutate({
-			                   mutation: GQLMutations.PromotionRemoveByIds,
-			                   variables: { ids },
-		                   });
+		           .mutate<{
+			           response: IRemovePromotionResponse
+		           }>({
+			              mutation:  GQLMutation.Promotion.RemoveByIds,
+			              variables: { ids },
+		              })
+		           .pipe(map((result) => this.get(result)));
 	}
 }
