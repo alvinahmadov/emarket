@@ -3,25 +3,34 @@ import { Apollo }       from 'apollo-angular';
 import { Observable }   from 'rxjs';
 import { map, share }   from 'rxjs/operators';
 import ProductsCategory from '@modules/server.common/entities/ProductsCategory';
-import { GQLQueries }   from '@modules/server.common/utilities/graphql';
+import ApolloService    from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }     from 'graphql/definitions';
 
 @Injectable()
-export class ProductsCategoryService
+export class ProductsCategoryService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName:  "Merchant::ProductsCategoryService",
+			      pollInterval: 2000
+		      })
+	}
 	
-	getCategories(): Observable<ProductsCategory[]>
+	public getCategories(): Observable<ProductsCategory[]>
 	{
 		return this.apollo
 		           .watchQuery<{
 			           productsCategories: ProductsCategory[]
 		           }>({
-			              query: GQLQueries.ProductCategoryAll,
-			              pollInterval: 1000,
+			              query:        GQLQuery.Category.GetAll,
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.productsCategories),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 }
