@@ -1,29 +1,42 @@
-import { Component, NgZone, ViewChild, AfterViewInit } from '@angular/core';
-import { SidenavService }                              from '../sidenav/sidenav.service';
-import { styleVariables }                              from '../../styles/variables';
-import { Store }                                       from 'app/services/store';
-import DeliveryType                                    from '@modules/server.common/enums/DeliveryType';
-import { Router }                                      from '@angular/router';
-import GeoLocation, {
-	Country,
-}                                                      from '@modules/server.common/entities/GeoLocation';
-import { UserRouter }                                  from '@modules/client.common.angular2/routers/user-router.service';
-import { first }                                       from 'rxjs/operators';
-import { GeoLocationService }                          from 'app/services/geo-location';
-import { MatSearchComponent }                          from '@modules/material-extensions/search/mat-search.component';
-import { MatDialog }                                   from '@angular/material/dialog';
-import { LocationPopupComponent }                      from 'app/shared/location-popup/location-popup.component';
-import { environment }                                 from 'environments/environment';
+import {
+	Component,
+	NgZone,
+	ViewChild,
+	AfterViewInit,
+	Inject
+}                                 from '@angular/core';
+import { DOCUMENT }               from '@angular/common';
+import { MatDialog }              from '@angular/material/dialog';
+import { Router }                 from '@angular/router';
+import { first }                  from 'rxjs/operators';
+import { getLanguage }            from '@modules/server.common/data/languages';
+import DeliveryType               from '@modules/server.common/enums/DeliveryType';
+import Country                    from '@modules/server.common/enums/Country';
+import GeoLocation                from '@modules/server.common/entities/GeoLocation';
+import { CustomerRouter }         from '@modules/client.common.angular2/routers/customer-router.service';
+import { MatSearchComponent }     from '@modules/material-extensions/search/mat-search.component';
+import { StorageService }         from 'app/services/storage';
+import { GeoLocationService }     from 'app/services/geo-location';
+import { LocationPopupComponent } from 'app/shared/location-popup/location-popup.component';
+import { environment }            from 'environments/environment';
+import { styleVariables }         from 'styles/variables';
+import { TranslateService }       from '@ngx-translate/core';
+import { SidenavService }         from 'app/sidenav/sidenav.service';
 
 @Component({
-	           selector: 'toolbar',
-	           styleUrls: ['./toolbar.component.scss'],
+	           selector:    'toolbar',
+	           styleUrls:   ['./toolbar.component.scss'],
 	           templateUrl: './toolbar.component.html',
            })
 export class ToolbarComponent implements AfterViewInit
 {
 	styleVariables: typeof styleVariables = styleVariables;
+	logo: string = environment.AUTH_LOGO;
 	isDeliveryRequired: boolean;
+	
+	public selectedLang: string;
+	public defaultLanguage = '';
+	public dir: 'ltr' | 'rtl';
 	
 	@ViewChild('matSearch')
 	matSearch: MatSearchComponent;
@@ -32,36 +45,25 @@ export class ToolbarComponent implements AfterViewInit
 	
 	constructor(
 			private readonly sidenavService: SidenavService,
-			private readonly ngZone: NgZone,
-			private readonly store: Store,
+			private readonly storage: StorageService,
 			private readonly router: Router,
-			private readonly userRouter: UserRouter,
+			private readonly ngZone: NgZone,
+			private readonly customerRouter: CustomerRouter,
 			private readonly geoLocationService: GeoLocationService,
+			public translateService: TranslateService,
+			@Inject(DOCUMENT)
+			public document: Document,
 			private dialog: MatDialog
 	)
 	{
 		this.isDeliveryRequired =
-				this.store.deliveryType === DeliveryType.Delivery;
+				this.storage.deliveryType === DeliveryType.Delivery;
+		if(this.storage.languageCode)
+		{
+			this.selectedLang = this.storage.languageCode;
+			this.translateService.use(this.selectedLang);
+		}
 		this.loadAddress();
-		/*let autocomplete = new google.maps.places.Autocomplete(this.searchElementRef.nativeElement, {
-		 types: ["address"]
-		 });
-		 autocomplete.addListener("place_changed", () => {
-		 this.ngZone.run(() => {
-		 //get the place result
-		 let place: google.maps.places.PlaceResult = autocomplete.getPlace();
-		 
-		 //verify result
-		 if (place.geometry === undefined || place.geometry === null) {
-		 return;
-		 }
-		 
-		 //set latitude, longitude and zoom
-		 this.latitude = place.geometry.location.lat();
-		 this.longitude = place.geometry.location.lng();
-		 this.zoom = 12;
-		 });
-		 });*/
 	}
 	
 	ngAfterViewInit(): void
@@ -73,14 +75,14 @@ export class ToolbarComponent implements AfterViewInit
 	{
 		this.isDeliveryRequired = !this.isDeliveryRequired;
 		
-		this.store.deliveryType = this.isDeliveryRequired
-		                          ? DeliveryType.Delivery
-		                          : DeliveryType.Takeaway;
+		this.storage.deliveryType = this.isDeliveryRequired
+		                            ? DeliveryType.Delivery
+		                            : DeliveryType.Takeaway;
 		
 		await this.reload();
 	}
 	
-	private tryFindNewAddress(address: string)
+	public tryFindNewAddress(address: string)
 	{
 		const geocoder = new google.maps.Geocoder();
 		
@@ -100,16 +102,16 @@ export class ToolbarComponent implements AfterViewInit
 		);
 	}
 	
-	private async loadAddress(findNew: boolean = false)
+	public async loadAddress(findNew: boolean = false)
 	{
 		let geoLocationForProducts: GeoLocation;
 		
 		const isProductionEnv = environment.production;
 		
-		if(this.store.userId && !findNew && isProductionEnv)
+		if(this.storage.userId && !findNew && isProductionEnv)
 		{
-			const user = await this.userRouter
-			                       .get(this.store.userId)
+			const user = await this.customerRouter
+			                       .get(this.storage.userId)
 			                       .pipe(first())
 			                       .toPromise();
 			
@@ -122,11 +124,35 @@ export class ToolbarComponent implements AfterViewInit
 				geoLocationForProducts = await this.geoLocationService.getCurrentGeoLocation();
 			} catch(error)
 			{
-				console.warn(error);
+				console.error(error);
 			}
 		}
 		
 		this.tryFindNewCoordinates(geoLocationForProducts, findNew);
+	}
+	
+	public switchLanguage(language: string)
+	{
+		this.translateService.use(language);
+		this.storage.languageCode = language;
+		
+		const langAbbreviation = language.substr(0, 2);
+		
+		if(language.startsWith('he') || language.startsWith('ar'))
+		{
+			this.dir = 'rtl';
+		}
+		else
+		{
+			this.dir = 'ltr';
+		}
+		this.document.documentElement.dir = this.dir;
+		this.document.documentElement.lang = langAbbreviation;
+	}
+	
+	public translateLanguage(languageCode: string): string
+	{
+		return getLanguage(languageCode);
 	}
 	
 	private tryFindNewCoordinates(
@@ -149,7 +175,7 @@ export class ToolbarComponent implements AfterViewInit
 						const formattedAddress = results[0].formatted_address;
 						const place: google.maps.GeocoderResult = results[0];
 						
-						const userId = this.store.userId;
+						const userId = this.storage.userId;
 						
 						if(findNew && userId)
 						{
@@ -177,8 +203,8 @@ export class ToolbarComponent implements AfterViewInit
 								city,
 								streetAddress,
 								house,
-								loc: {
-									type: 'Point',
+								loc:       {
+									type:        'Point',
 									coordinates: [lng, lat],
 								},
 							} as GeoLocation);
@@ -245,7 +271,7 @@ export class ToolbarComponent implements AfterViewInit
 			this.tryFindNewCoordinates(
 					{
 						loc: {
-							type: 'Point',
+							type:        'Point',
 							coordinates: [
 								place.geometry.location.lng(),
 								place.geometry.location.lat(),
@@ -262,7 +288,7 @@ export class ToolbarComponent implements AfterViewInit
 	{
 		const locationPopup = await this.dialog.open(LocationPopupComponent, {
 			width: '900px',
-			data: {
+			data:  {
 				place,
 			},
 		});
@@ -293,7 +319,10 @@ export class ToolbarComponent implements AfterViewInit
 	{
 		if(userId)
 		{
-			await this.userRouter.updateUser(userId, {
+			const customer = await this.customerRouter.get(userId).toPromise();
+			await this.customerRouter.updateCustomer(userId, {
+				username: customer.username,
+				email:    customer.email,
 				geoLocation,
 			});
 		}
