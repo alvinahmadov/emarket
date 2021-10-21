@@ -13,7 +13,12 @@ export interface Environment
 	AUTH_LOGO: string;
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
+	GOOGLE_APP_URL: string;
+	YANDEX_APP_URL: string;
+	FACEBOOK_APP_URL: string;
+	VKONTAKTE_APP_URL: string;
 	GOOGLE_MAPS_API_KEY: string;
+	YANDEX_MAPS_API_KEY: string;
 	DEFAULT_COORDINATES?: boolean;
 	DEFAULT_LATITUDE?: number;
 	DEFAULT_LONGITUDE?: number;
