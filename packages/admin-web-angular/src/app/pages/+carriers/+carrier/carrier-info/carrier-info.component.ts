@@ -1,7 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import Carrier                                    from '@modules/server.common/entities/Carrier';
+import { TranslateService }                       from '@ngx-translate/core';
 import CarrierStatus                              from '@modules/server.common/enums/CarrierStatus';
+import Carrier                                    from '@modules/server.common/entities/Carrier';
 import { CarrierRouter }                          from '@modules/client.common.angular2/routers/carrier-router.service';
+import { environment }                            from 'environments/environment';
 
 @Component({
 	           selector: 'ea-carrier-info',
@@ -11,17 +13,34 @@ import { CarrierRouter }                          from '@modules/client.common.a
 export class CarrierInfoComponent
 {
 	@Input()
-	carrier: Carrier;
+	public carrier: Carrier;
 	
 	@Output()
-	getChangeCarrier = new EventEmitter<Carrier>();
+	public getChangeCarrier = new EventEmitter<Carrier>();
 	
 	public showCode: boolean = false;
 	public loading: boolean;
+	public locale: string;
 	
-	constructor(private carrierRouter: CarrierRouter) {}
+	constructor(
+			private carrierRouter: CarrierRouter,
+			private _translateService: TranslateService
+	)
+	{
+		if(this._translateService.getLangs().length === 0)
+		{
+			this._translateService.addLangs(environment.AVAILABLE_LOCALES.split('|'));
+		}
+		
+		if (!this._translateService.currentLang)
+		{
+			this._translateService.use(environment.DEFAULT_LANGUAGE);
+		}
+		
+		this.locale = this._translateService.currentLang;
+	}
 	
-	async toogleStatus()
+	public async toogleStatus()
 	{
 		this.loading = true;
 		const isOnline = this.carrier.status === CarrierStatus.Online;
