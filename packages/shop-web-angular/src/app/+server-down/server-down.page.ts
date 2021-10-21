@@ -3,20 +3,20 @@ import { HttpClient }              from '@angular/common/http';
 import { Location }                from '@angular/common';
 import { TranslateService }        from '@ngx-translate/core';
 import { ServerConnectionService } from '@modules/client.common.angular2/services/server-connection.service';
-import { Store }                   from 'app/services/store';
+import { StorageService }          from 'app/services/storage';
 import { environment }             from 'environments/environment';
 
 @Component({
-	           styleUrls: ['./server-down.page.scss'],
+	           styleUrls:   ['./server-down.page.scss'],
 	           templateUrl: 'server-down.page.html',
            })
 export class ServerDownPage implements OnDestroy
 {
-	noInternetLogo: string;
-	interval;
+	public noInternetLogo: string;
+	public interval;
 	
 	constructor(
-			private store: Store,
+			private storage: StorageService,
 			private readonly http: HttpClient,
 			private location: Location,
 			private translate: TranslateService,
@@ -37,7 +37,7 @@ export class ServerDownPage implements OnDestroy
 		this.testConnection().then().catch();
 	}
 	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		clearInterval(this.interval);
 	}
@@ -48,10 +48,10 @@ export class ServerDownPage implements OnDestroy
 		                            {
 			                            await this.serverConnectionService.checkServerConnection(
 					                            environment.HTTP_SERVICES_ENDPOINT,
-					                            this.store
+					                            this.storage
 			                            );
 			
-			                            if(Number(this.store.serverConnection) !== 0)
+			                            if(Number(this.storage.serverConnection) !== 0)
 			                            {
 				                            clearInterval(this.interval);
 				                            this.location.back();
