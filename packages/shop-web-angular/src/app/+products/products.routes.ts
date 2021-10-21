@@ -4,11 +4,11 @@ import { ProductsComponent }       from './products.component';
 
 export const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: ProductsComponent,
 	},
 	{
-		path: 'details/:warehouseId/:productId',
+		path:      'details/:warehouseId/:productId',
 		component: ProductDetailsComponent,
-	},
+	}
 ];
