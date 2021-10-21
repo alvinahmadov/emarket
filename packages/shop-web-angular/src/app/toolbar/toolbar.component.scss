@@ -30,10 +30,7 @@
 	// }
 	
 	.logo {
-		margin-top: 20px;
-		margin-bottom: 10px;
-		margin-left: 20px;
-		margin-right: 20px;
+		margin: 20px 20px 10px;
 		outline: none;
 		// text-align: center;
 		
@@ -118,16 +115,4 @@
 
 .mat-toolbar-row {
 	height: 54px !important;
-}
-
-mat-sidenav-container {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
-
-.sidenav {
-	min-width: 200px;
 }
