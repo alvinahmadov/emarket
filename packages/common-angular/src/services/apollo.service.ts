@@ -18,18 +18,13 @@ class ApolloService
 	private readonly serviceName: string;
 	
 	constructor(
-			private readonly _apollo: Apollo,
+			protected readonly apollo: Apollo,
 			config?: IApolloServiceConfig
 	)
 	{
 		this.pollInterval = config.pollInterval ?? 5000;
 		this.debug = config.debug ?? false;
 		this.serviceName = config.serviceName ?? ApolloService.name;
-	}
-	
-	protected get apollo(): Apollo
-	{
-		return this._apollo;
 	}
 	
 	/**
