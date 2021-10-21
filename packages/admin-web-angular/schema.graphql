@@ -1,0 +1,1236 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+	query: Query
+	mutation: Mutation
+	subscription: Subscription
+}
+
+type Admin {
+	_id: String!
+	avatar: String!
+	email: String!
+	firstName: String
+	id: String!
+	lastName: String
+	role: String
+	username: String!
+}
+
+type AdminAppSettings {
+	adminPasswordReset: Int!
+	fakeDataGenerator: Int!
+}
+
+type AdminLoginInfo {
+	admin: Admin!
+	token: String!
+}
+
+type Carrier {
+	_id: String!
+	apartment: String
+	devices: [Device!]!
+	devicesIds: [String!]!
+	email: String
+	firstName: String!
+	geoLocation: GeoLocation!
+	id: String!
+	isActive: Boolean
+	isDeleted: Boolean!
+	isSharedCarrier: Boolean
+	lastName: String!
+	logo: String!
+	numberOfDeliveries: Int!
+	phone: String!
+	skippedOrderIds: [String!]
+	status: Int!
+	username: String!
+}
+
+type CarrierLoginInfo {
+	carrier: Carrier!
+	token: String!
+}
+
+type CarrierOrder {
+	_createdAt: Date
+	_id: String!
+	carrier: CarrierOrderCarrier!
+	carrierStatus: Int!
+	id: String!
+	isCancelled: Boolean!
+	isConfirmed: Boolean!
+	isPaid: Boolean!
+	orderNumber: Int!
+	products: [CarrierOrderProducts!]!
+	user: CarrierOrderUser!
+	warehouse: CarrierOrderWarehouse!
+	warehouseStatus: Int!
+}
+
+type CarrierOrderCarrier {
+	id: String!
+}
+
+type CarrierOrderProducts {
+	count: Int!
+	initialPrice: Float!
+	isCarrierRequired: Boolean!
+	isDeliveryRequired: Boolean!
+	isManufacturing: Boolean!
+	isTakeaway: Boolean
+	price: Float!
+	product: CarrierOrderProductsProduct!
+}
+
+type CarrierOrderProductsProduct {
+	_id: String!
+	categories: [String]
+	description: [TranslateType!]!
+	details: [TranslateType!]!
+	id: String!
+	images: [ImageType!]!
+	title: [TranslateType!]!
+}
+
+type CarrierOrderUser {
+	_id: String!
+	firstName: String
+	geoLocation: GeoLocation!
+	lastName: String
+}
+
+type CarrierOrderWarehouse {
+	geoLocation: GeoLocation!
+	logo: String!
+	name: String!
+}
+
+type Category {
+	id: String
+	name: [TranslateType!]!
+}
+
+type CompletedOrderInfo {
+	totalOrders: Int!
+	totalRevenue: Float!
+}
+
+type Conversation {
+	_id: String!
+	channelId: String!
+	id: String!
+	locale: String
+	participants: [String]
+	platform: String
+}
+
+type Currency {
+	_id: String!
+	code: String!
+	name: String
+	order: String
+	sign: String
+}
+
+type Customer {
+	_id: String!
+	apartment: String!
+	avatar: String
+	createdAt: Date
+	devices: [Device!]!
+	devicesIds: [String!]!
+	email: String!
+	firstName: String
+	fullAddress: String
+	fullName: String
+	geoLocation: GeoLocation!
+	id: String!
+	isBanned: Boolean!
+	lastName: String
+	phone: String
+	role: String
+	username: String!
+}
+
+type CustomerLoginInfo {
+	token: String!
+	user: Customer!
+}
+
+type CustomerMetrics {
+	canceledOrders: Int
+	completedOrdersTotalSum: Float
+	totalOrders: Int
+}
+
+type CustomersByStore {
+	customersCount: Int!
+	storeId: String!
+}
+
+type DashboardCompletedOrder {
+	totalPrice: Float!
+	warehouseId: String!
+}
+
+type Device {
+	_id: String!
+	channelId: String
+	id: String!
+	language: String
+	type: String!
+	uuid: String!
+}
+
+type ExistingCustomersByStores {
+	perStore: [CustomersByStore!]!
+	total: Int!
+}
+
+type GenerateOrdersResponse {
+	error: Boolean!
+	message: String
+}
+
+type GeoLocation {
+	_createdAt: Date
+	_id: String
+	_updatedAt: Date
+	city: String!
+	coordinates: GeoLocationCoordinates!
+	countryId: Int!
+	countryName: String
+	createdAt: Date
+	house: String!
+	id: String
+	loc: Loc!
+	notes: String
+	postcode: String
+	streetAddress: String!
+	updatedAt: Date
+}
+
+type GeoLocationCoordinates {
+	lat: Float!
+	lng: Float!
+}
+
+type ImageType {
+	height: Int!
+	locale: String!
+	orientation: Int!
+	url: String!
+	width: Int!
+}
+
+type Invite {
+	_id: String!
+	apartment: String!
+	code: String!
+	geoLocation: GeoLocation!
+	id: String!
+}
+
+type InviteRequest {
+	_id: String!
+	apartment: String!
+	geoLocation: GeoLocation!
+	id: String!
+	invitedDate: Date
+	isInvited: Boolean
+	isManual: Boolean
+}
+
+type Loc {
+	coordinates: [Float!]!
+	type: String!
+}
+
+type MerchantsOrders {
+	_id: String
+	ordersCount: Int
+}
+
+type Mutation {
+	addCustomerRegistrationInfo(id: String!, registrationInfo: AdditionalCustomerRegistrationInfo!): Void
+	addWarehouseProducts(products: [WarehouseProductInput!]!, storeId: String!): [WarehouseProduct!]
+	adminLogin(email: String!, password: String!): AdminLoginInfo
+	banCustomer(id: String!): Customer
+	carrierLogin(password: String!, username: String!): CarrierLoginInfo
+	createConversation(createInput: ConversationCreateInput!): Conversation!
+	createCurrency(createInput: CurrencyCreateInput!): MutationResponse
+	createDevice(createInput: DeviceCreateInput!): Device!
+	createInvite(createInput: InviteCreateInput!): Invite!
+	createInviteRequest(createInput: InviteRequestCreateInput!): InviteRequest!
+	createOrder(createInput: OrderCreateInput!): Order!
+	createProduct(product: ProductCreateInput!): Product!
+	createProductsCategory(createInput: ProductsCategoriesCreateInput): ProductsCategory!
+	createPromotion(createInput: PromotionInput): Promotion
+	customerLogin(email: String!, password: String!): CustomerLoginInfo
+	isAuthenticated(token: String!): Boolean
+	payOrderWithStripe(cardId: String!, orderId: String!): Order
+	registerAdmin(registerInput: AdminRegisterInput!): Admin!
+	registerCarrier(registerInput: CarrierRegisterInput!): Carrier!
+	registerCustomer(registerInput: CustomerRegisterInput!): Customer!
+	registerWarehouse(registerInput: WarehouseRegisterInput!): Warehouse!
+	removeCarrier(id: String!): Void
+	removeCarriersByIds(ids: [String!]!): String
+	removeConversation(channelId: String!): Void
+	removeCustomersByIds(ids: [String]!): String!
+	removeDevice(id: String!): Void
+	removeDeviceByIds(ids: [String!]!): Remove
+	removeInvite(id: String!): Void
+	removeInviteRequest(id: String!): Void
+	removeInvitesByIds(ids: [String!]!): Remove
+	removeInvitesRequestsByIds(ids: [String!]!): Remove
+	removeProductsByIds(ids: [String!]!): Remove
+	removeProductsCategoriesByIds(ids: [String!]!): Remove
+	removePromotion(id: String!): Void
+	removePromotionsByIds(ids: [String!]!): Remove
+	removeWarehouseProducts(productsIds: [String!]!, storeId: String!): Boolean
+	removeWarehousesByIds(ids: [String!]!): Void
+	saveProduct(product: ProductSaveInput!): Product!
+	unbanCustomer(id: String!): Customer
+	updateAdmin(id: String!, updateInput: AdminUpdateInput!): Admin!
+	updateAdminPassword(id: String!, password: AdminPasswordUpdateInput!): Void
+	updateCarrier(id: String!, updateInput: CarrierUpdateInput!): Carrier!
+	updateCarrierEmail(email: String!, id: String!): Carrier!
+	updateCarrierPassword(id: String!, password: CarrierPasswordUpdateInput!): Void
+	updateCarrierStatus(id: String!, status: CarrierStatus): Carrier
+	updateCustomer(id: String!, updateObject: CustomerUpdateObjectInput!): Customer!
+	updateCustomerEmail(email: String!, id: String!): Customer!
+	updateCustomerPassword(id: String!, password: CustomerPasswordUpdateInput!): Void
+	updateDevice(id: String!, updateInput: DeviceUpdateInput!): Device!
+	updateDeviceLanguage(deviceId: String!, language: Language!): Device!
+	updateInvite(id: String!, updateInput: InviteUpdateInput!): Invite!
+	updateInviteRequest(id: String!, updateInput: InviteRequestUpdateInput!): InviteRequest!
+	updateOrderCarrierStatus(orderId: String!, status: OrderCarrierStatus!): Order!
+	updateOrderWarehouseStatus(orderId: String!, status: OrderWarehouseStatus!): Order
+	updateProductsCategory(id: String!, updateInput: ProductsCategoriesCreateInput!): ProductsCategory!
+	updatePromotion(id: String, updateInput: PromotionInput): Promotion
+	updateStoreGeoLocation(geoLocation: GeoLocationCreateObject!, storeId: String!): Warehouse!
+	updateWarehousePassword(id: String!, password: WarehousePasswordUpdateInput!): Void
+	updateWarehouseProduct(productId: String!, storeId: String!, updateInput: WarehouseProductUpdateInput!): WarehouseProduct!
+	warehouseLogin(password: String!, username: String!): WarehouseLoginInfo
+}
+
+type MutationResponse {
+	data: Currency
+	message: String
+	success: Boolean!
+}
+
+type Order {
+	_createdAt: Date
+	_id: String!
+	_updatedAt: Date
+	carrier: Carrier
+	carrierId: String
+	carrierStatus: Int!
+	carrierStatusText: String!
+	createdAt: Date
+	customer: Customer!
+	deliveryTime: Date
+	deliveryTimeEstimate: Int
+	finishedProcessingTime: Date
+	id: String!
+	isCancelled: Boolean!
+	isCompleted: Boolean!
+	isConfirmed: Boolean!
+	isPaid: Boolean!
+	orderCurrency: Int
+	orderNotes: String
+	orderNumber: Int!
+	orderType: Int
+	products: [OrderProduct!]!
+	startDeliveryTime: Date
+	status: Int
+	totalPrice: Float!
+	updatedAt: Date
+	waitForCompletion: Boolean
+	warehouse: Warehouse!
+	warehouseId: String!
+	warehouseStatus: Int!
+	warehouseStatusText: String!
+}
+
+type OrderCancelation {
+	enabled: Boolean
+	onState: Int
+}
+
+type OrderChartPanel {
+	_createdAt: Date!
+	isCancelled: Boolean!
+	isCompleted: Boolean!
+	totalPrice: Float!
+}
+
+type OrderCountTnfo {
+	id: String
+	ordersCount: Int
+}
+
+type OrderProduct {
+	_id: String!
+	comment: String
+	count: Int!
+	initialPrice: Float!
+	isCarrierRequired: Boolean!
+	isDeliveryRequired: Boolean!
+	isManufacturing: Boolean!
+	isTakeaway: Boolean
+	price: Float!
+	product: Product!
+}
+
+type OrderedUserInfo {
+	customer: Customer!
+	ordersCount: Int!
+	totalPrice: Float!
+}
+
+type Product {
+	_createdAt: Date
+	_id: String!
+	_updatedAt: Date
+	categories: [String]
+	description: [TranslateType!]!
+	descriptionHTML: [TranslateType!]!
+	details: [TranslateType!]!
+	detailsHTML: [TranslateType!]!
+	id: String!
+	images: [ImageType!]!
+	title: [TranslateType!]!
+}
+
+type ProductComment {
+	comment: String!
+	dislikes: Int
+	isReply: Boolean
+	likes: Int
+	replyTo: String
+}
+
+type ProductInfo {
+	distance: Float!
+	warehouseId: String!
+	warehouseLogo: String!
+	warehouseProduct: WarehouseProduct!
+}
+
+type ProductObject {
+	_id: String!
+}
+
+type ProductsCategory {
+	_createdAt: Date
+	_id: String!
+	_updatedAt: Date
+	id: String!
+	image: String
+	name: [TranslateType!]!
+}
+
+type Promotion {
+	_id: String
+	active: Boolean
+	activeFrom: Date
+	activeTo: Date
+	description: [TranslateType]
+	image: String
+	product: ProductObject
+	productId: String
+	promoPrice: Float
+	purchasesCount: Int
+	title: [TranslateType]
+	warehouse: Warehouse
+	warehouseId: String
+}
+
+type Query {
+	addOrdersToTake: Void
+	addTakenOrders(carrierIds: [String!]!): Void
+	admin(id: String!): Admin
+	adminAppSettings: AdminAppSettings!
+	adminAuthenticated: Boolean!
+	adminByEmail(email: String!): Admin
+	adminSearch(findInput: AdminFindInput): Admin
+	clearAll: Boolean!
+	conversation(id: String): Conversation
+	conversations(findInput: ConversationFindInput): [Conversation!]!
+	countCustomers(storeId: String!): Int!
+	currencies: [Currency]
+	customer(id: String!): Customer
+	customers(pagingOptions: PagingOptionsInput): [Customer]!
+	device(id: String): Device
+	devices(findInput: DeviceFindInput): [Device!]!
+	findCustomers(findInput: CustomerFindInput, pagingOptions: PagingOptionsInput): [Customer]!
+	generate1000InviteRequests(defaultLat: Float!, defaultLng: Float!): Void
+	generate1000InvitesConnectedToInviteRequests(defaultLat: Float!, defaultLng: Float!): Void
+	generateActiveAndAvailableOrdersPerCarrier: Void
+	generateCustomers(defaultLat: Float!, defaultLng: Float!, qty: Int!): ResponseGenerateCustomers
+	generateOrdersByCustomerId(customerId: String!, numberOfOrders: Int!): Void
+	generatePastOrdersPerCarrier: Void
+	generateRandomOrdersCurrentStore(ordersLimit: Int!, storeCreatedAt: Date!, storeId: String!): GenerateOrdersResponse!
+	geoLocationProducts(geoLocation: GeoLocationFindInput!): [ProductInfo]
+	geoLocationProductsByPaging(geoLocation: GeoLocationFindInput!, options: GetGeoLocationProductsOptions, pagingOptions: PagingOptionsInput, searchText: String): [ProductInfo]!
+	getActiveCarriers: [Carrier]!
+	getAllActiveStores(fullProducts: Boolean!): [Warehouse!]!
+	getAllStores: [Warehouse!]!
+	getCarrier(id: String!): Carrier
+	getCarrierByUsername(username: String!): Carrier
+	getCarrierCurrentOrder(carrierId: String!): Order
+	getCarrierOrders(carrierId: String!, options: CarrierOrdersOptions): [CarrierOrder!]!
+	getCarrierOrdersHistory(carrierId: String!, options: GeoLocationOrdersOptions): [Order]!
+	getCarriers(carriersFindInput: CarriersFindInput, pagingOptions: PagingOptionsInput): [Carrier!]!
+	getCloseMerchants(geoLocation: GeoLocationFindInput!): [Warehouse]!
+	getCompletedOrdersInfo(storeId: String): CompletedOrderInfo!
+	getCountExistingCustomers: ExistingCustomersByStores!
+	getCountExistingCustomersToday: ExistingCustomersByStores!
+	getCountOfCarrierOrdersHistory(carrierId: String!): Int!
+	getCountOfCarriers(carriersFindInput: CarriersFindInput): Int!
+	getCountOfCustomers: Int!
+	getCountOfGeoLocationProducts(geoLocation: GeoLocationFindInput!, options: GetGeoLocationProductsOptions, searchText: String): Int!
+	getCountOfInvites: Int!
+	getCountOfInvitesRequests(invited: Boolean): Int!
+	getCountOfMerchants: Int!
+	getCountOfOrdersForWork(geoLocation: GeoLocationFindInput!, searchObj: SearchOrdersForWork, skippedOrderIds: [String!]!): Int!
+	getCountOfProducts(existedProductsIds: [String]): Int!
+	getCountOfStoreOrders(status: String!, storeId: String!): Int!
+	getCustomerMetrics(id: String!): CustomerMetrics
+	getDashboardCompletedOrders: [DashboardCompletedOrder!]!
+	getDashboardCompletedOrdersToday: [Order!]!
+	getDashboardOrdersChartOrders(storeId: String!): [Order!]!
+	getInviteByCode(info: InviteByCodeInput!): Invite
+	getInviteByLocation(info: InviteByLocationInput): Invite
+	getMerchantsByName(geoLocation: GeoLocationFindInput, searchName: String!): [Warehouse]!
+	getMerchantsOrders: [MerchantsOrders]
+	getMerchantsOrdersCountInfo(merchantsIds: [String!]): [OrderCountTnfo]
+	getNearMerchants(geoLocation: GeoLocationFindInput, options: GetGeoLocationWarehousesOptions): [Warehouse]!
+	getNextOrderNumber(storeId: String!): Int!
+	getOrderForWork(geoLocation: GeoLocationFindInput!, options: GeoLocationOrdersOptions, searchObj: SearchOrdersForWork, skippedOrderIds: [String!]!): Order
+	getOrderedUsersInfo(storeId: String!): [OrderedUserInfo!]!
+	getOrders(customerId: String!): [Order!]!
+	getOrdersChartTotalOrders: [OrderChartPanel!]!
+	getOrdersForWork(geoLocation: GeoLocationFindInput!, options: GeoLocationOrdersOptions, searchObj: SearchOrdersForWork, skippedOrderIds: [String!]!): [Order]!
+	getOrdersInDelivery(storeId: String!): [Order]!
+	getSocial(socialId: String!): Customer
+	getStoreAvailableProducts(storeId: String!): [WarehouseProduct!]!
+	getStoreCarriers(storeId: String!): [Carrier!]
+	getStoreCustomers(storeId: String!): [Customer!]!
+	getStoreOrders(storeId: String!): [Order!]!
+	getStoreOrdersTableData(pagingOptions: PagingOptionsInput, status: String, storeId: String!): StoreOrdersTableData!
+	getStoreProducts(fullProducts: Boolean!, storeId: String!): [WarehouseProduct!]!
+	getUsersOrdersCountInfo(usersIds: [String!]): [OrderCountTnfo]
+	getWarehouseProduct(productId: String!, storeId: String!): WarehouseProduct
+	getWarehouseProductInfo(storeId: String!): [ProductInfo!]
+	getWarehouseProductsCount(id: String!): Int
+	getWarehouseProductsWithPagination(pagingOptions: PagingOptionsInput, storeId: String!): [WarehouseProduct!]
+	hasExistingStores: Boolean!
+	invite(id: String!): Invite
+	inviteRequest(id: String!): InviteRequest
+	invites(findInput: InvitesFindInput, pagingOptions: PagingOptionsInput): [Invite!]!
+	invitesRequests(findInput: InvitesRequestsFindInput, invited: Boolean, pagingOptions: PagingOptionsInput): [InviteRequest!]
+	isCustomerEmailExists(email: String!): Boolean!
+	isCustomerExists(conditions: CustomerMemberInput!): Boolean!
+	nearbyStores(geoLocation: GeoLocationFindInput!): [Warehouse!]!
+	notifyAboutLaunch(devicesIds: [String!]!, invite: InviteInput): Void
+	order(id: String!): Order
+	orders(findInput: OrdersFindInput): [Order!]!
+	product(id: String!): Product
+	products(existedProductsIds: [String], findInput: ProductsFindInput, pagingOptions: PagingOptionsInput): [Product!]
+	productsCategories(findInput: ProductsCategoriesFindInput): [ProductsCategory!]!
+	productsCategory(id: String!): ProductsCategory
+	promotions(findInput: PromotionsFindInput): [Promotion]
+	removeCustomerOrders(customerId: String!, storeId: String!): RemovedUserOrdersObj
+	warehouse(id: String!): Warehouse
+	warehouses(findInput: WarehousesFindInput, pagingOptions: PagingOptionsInput): [Warehouse]!
+}
+
+type Remove {
+	n: Int
+	ok: Int
+}
+
+type RemovedUserOrdersObj {
+	modified: Int
+	num: Int
+}
+
+type ResponseGenerateCustomers {
+	message: String
+	success: Boolean!
+}
+
+type StoreOrdersTableData {
+	orders: [Order]!
+	page: Int!
+}
+
+type Subscription {
+	deviceCreated: Device!
+}
+
+type TranslateType {
+	locale: String!
+	value: String!
+}
+
+type Warehouse {
+	_createdAt: Date!
+	_id: String!
+	carrierCompetition: Boolean!
+	carriers: [Carrier!]
+	carriersIds: [String!]
+	contactEmail: String
+	contactPhone: String
+	customers: [Customer!]!
+	devices: [Device!]!
+	devicesIds: [String!]!
+	forwardOrdersUsing: [Int!]
+	geoLocation: GeoLocation!
+	hasRestrictedCarriers: Boolean
+	id: String!
+	inStoreMode: Boolean!
+	isActive: Boolean!
+	isCarrierRequired: Boolean
+	isManufacturing: Boolean
+	isPaymentEnabled: Boolean
+	logo: String!
+	name: String!
+	orderBarcodeType: Int
+	orderCancelation: OrderCancelation!
+	orders: [Order!]!
+	ordersEmail: String
+	ordersPhone: String
+	ordersShortProcess: Boolean
+	preferRestrictedCarriersForDelivery: Boolean
+	useOnlyRestrictedCarriersForDelivery: Boolean
+	usedCarriersIds: [String!]
+	username: String!
+}
+
+type WarehouseLoginInfo {
+	token: String!
+	warehouse: Warehouse!
+}
+
+type WarehouseProduct {
+	_id: String!
+	comments: [ProductComment]
+	count: Int
+	deliveryTimeMax: Int
+	deliveryTimeMin: Int
+	id: String!
+	initialPrice: Int!
+	isCarrierRequired: Boolean
+	isDeliveryRequired: Boolean
+	isManufacturing: Boolean
+	isProductAvailable: Boolean
+	isTakeaway: Boolean
+	likesCount: Int
+	price: Int!
+	product: Product!
+	soldCount: Int!
+	viewsCount: Int
+}
+
+enum CarrierStatus {
+	Blocked
+	Offline
+	Online
+}
+
+enum Language {
+	bg_BG
+	en_US
+	he_IL
+	ru_RU
+}
+
+enum OrderCarrierStatus {
+	CarrierArrivedToCustomer
+	CarrierPickedUpOrder
+	CarrierSelectedOrder
+	CarrierStartDelivery
+	ClientRefuseTakingOrder
+	DeliveryCompleted
+	IssuesDuringDelivery
+	NoCarrier
+}
+
+enum OrderWarehouseStatus {
+	AllocationFailed
+	AllocationFinished
+	AllocationStarted
+	GivenToCarrier
+	NoStatus
+	PackagingFailed
+	PackagingFinished
+	PackagingStarted
+	ReadyForProcessing
+	WarehouseStartedProcessing
+}
+
+input AdditionalCustomerRegistrationInfo {
+	email: String!
+	firstName: String
+	lastName: String
+	password: String!
+	phone: String
+}
+
+input AdminCreateInput {
+	avatar: String!
+	email: String!
+	firstName: String
+	lastName: String
+	username: String!
+}
+
+input AdminFindInput {
+	email: String
+	firstName: String
+	lastName: String
+	username: String
+}
+
+input AdminPasswordUpdateInput {
+	current: String!
+	new: String!
+}
+
+input AdminRegisterInput {
+	admin: AdminCreateInput!
+	password: String!
+}
+
+input AdminUpdateInput {
+	avatar: String
+	email: String
+	firstName: String
+	lastName: String
+	username: String
+}
+
+input CarrierCreateInput {
+	deliveriesCountToday: Int
+	devicesIds: [String!]
+	email: String
+	firstName: String!
+	geoLocation: GeoLocationCreateInput!
+	isDeleted: Boolean
+	isSharedCarrier: Boolean
+	lastName: String!
+	logo: String!
+	numberOfDeliveries: Int
+	password: String!
+	phone: String!
+	skippedOrderIds: [String!]
+	status: Int
+	totalDistanceToday: Float
+	username: String!
+}
+
+input CarrierOrdersOptions {
+	completion: String!
+	populateWarehouse: Boolean!
+}
+
+input CarrierPasswordUpdateInput {
+	current: String!
+	new: String!
+}
+
+input CarrierRegisterInput {
+	carrier: CarrierCreateInput!
+	password: String!
+}
+
+input CarrierUpdateInput {
+	deliveriesCountToday: Int
+	devicesIds: [String!]
+	email: String
+	firstName: String
+	geoLocation: GeoLocationUpdateInput
+	isActive: Boolean
+	isSharedCarrier: Boolean
+	lastName: String
+	logo: String
+	numberOfDeliveries: Int
+	phone: String
+	skippedOrderIds: [String!]
+	status: Int
+	totalDistanceToday: Float
+	username: String
+}
+
+input CarriersFindInput {
+	_id: Any
+	email: String
+	firstName: String
+	isDeleted: Boolean
+	isSharedCarrier: Boolean
+	lastName: String
+	phone: String
+	status: Int
+}
+
+input ConversationCreateInput {
+	channelId: String!
+	locale: String
+	participants: [String]
+	platform: String
+}
+
+input ConversationFindInput {
+	channelId: String
+	locale: String
+	participants: [String]
+	platform: String
+}
+
+input CurrencyCreateInput {
+	code: String!
+	name: String
+	order: String
+	sign: String
+}
+
+input CustomerCreateInput {
+	apartment: String!
+	avatar: String
+	email: String!
+	firstName: String
+	geoLocation: GeoLocationCreateInput!
+	lastName: String
+	phone: String
+	username: String!
+}
+
+input CustomerFindInput {
+	apartment: String
+	avatar: String
+	email: String
+	firstName: String
+	id: String
+	lastName: String
+	phone: String
+	username: String
+}
+
+input CustomerMemberInput {
+	exceptCustomerId: String
+	memberKey: String!
+	memberValue: String!
+}
+
+input CustomerPasswordUpdateInput {
+	current: String!
+	new: String!
+}
+
+input CustomerRegisterInput {
+	password: String
+	user: CustomerCreateInput!
+}
+
+input CustomerUpdateObjectInput {
+	apartment: String
+	devicesIds: [String!]
+	geoLocation: GeoLocationUpdateObjectInput!
+	stripeCustomerId: String
+}
+
+input DeviceCreateInput {
+	channelId: String!
+	language: String
+	type: String!
+	uuid: String!
+}
+
+input DeviceFindInput {
+	channelId: String
+	language: String
+	type: String
+	uuid: String
+}
+
+input DeviceUpdateInput {
+	channelId: String
+	language: String
+	type: String
+	uuid: String
+}
+
+input GeoLocationCreateInput {
+	city: String!
+	countryId: Int!
+	house: String!
+	loc: LocInput!
+	notes: String
+	postcode: String
+	streetAddress: String!
+}
+
+input GeoLocationCreateObject {
+	city: String!
+	countryId: Int!
+	house: String!
+	loc: Location!
+	postcode: String!
+	streetAddress: String!
+}
+
+input GeoLocationFindInput {
+	city: String
+	countryId: Int
+	house: String
+	loc: LocInput
+	notes: String
+	postcode: String
+	streetAddress: String
+}
+
+input GeoLocationInput {
+	city: String!
+	countryId: Int!
+	countryName: String
+	house: String!
+	loc: Location!
+	notes: String
+	postcode: String
+	streetAddress: String!
+}
+
+input GeoLocationOrdersOptions {
+	limit: Int
+	skip: Int
+	sort: String
+}
+
+input GeoLocationUpdateInput {
+	city: String
+	countryId: Int
+	house: String
+	loc: LocInput
+	notes: String
+	postcode: String
+	streetAddress: String
+}
+
+input GeoLocationUpdateObjectInput {
+	loc: Location!
+}
+
+input GetGeoLocationProductsOptions {
+	imageOrientation: Int
+	isDeliveryRequired: Boolean
+	isTakeaway: Boolean
+	locale: String
+	merchantIds: [String]
+	trackingDistance: Int
+	withoutCount: Boolean
+}
+
+input GetGeoLocationWarehousesOptions {
+	activeOnly: Boolean
+	fullProducts: Boolean
+	inStoreMode: Boolean
+	maxDistance: Int
+}
+
+input ImageInput {
+	height: Int!
+	locale: String!
+	orientation: Int!
+	url: String!
+	width: Int!
+}
+
+input InviteByCodeInput {
+	firstName: String
+	inviteCode: String!
+	lastName: String
+	location: Location!
+}
+
+input InviteByLocationInput {
+	apartment: String!
+	city: String!
+	countryId: Int!
+	house: String!
+	notes: String
+	postcode: String
+	streetAddress: String!
+}
+
+input InviteCreateInput {
+	apartment: String!
+	code: String
+	geoLocation: GeoLocationCreateInput!
+}
+
+input InviteInput {
+	apartment: String!
+	code: String!
+	geoLocation: GeoLocationInput!
+	isDeleted: Boolean!
+}
+
+input InviteRequestCreateInput {
+	apartment: String!
+	geoLocation: GeoLocationCreateInput!
+	invitedDate: Date
+	isInvited: Boolean
+	isManual: Boolean
+}
+
+input InviteRequestUpdateInput {
+	apartment: String
+	geoLocation: GeoLocationUpdateInput
+	invitedDate: Date
+	isInvited: Boolean
+	isManual: Boolean
+}
+
+input InviteUpdateInput {
+	apartment: String
+	code: String
+	geoLocation: GeoLocationUpdateInput
+}
+
+input InvitesFindInput {
+	apartment: String
+	code: String
+}
+
+input InvitesRequestsFindInput {
+	apartment: String
+	invitedDate: Date
+	isInvited: Boolean
+	isManual: Boolean
+}
+
+input LocInput {
+	coordinates: [Float!]!
+	type: String!
+}
+
+input Location {
+	coordinates: [Float!]!
+	type: String!
+}
+
+input OrderCreateInput {
+	customerId: String!
+	options: WarehouseOrdersRouterCreateOptions
+	orderType: Int
+	products: [OrderProductCreateInput!]!
+	warehouseId: String!
+}
+
+input OrderProductCreateInput {
+	comment: String
+	count: Int!
+	productId: String!
+}
+
+input OrdersFindInput {
+	carrier: String
+	carrierStatus: Int!
+	customer: String
+	isCancelled: Boolean
+	isConfirmed: Boolean
+	isPaid: Boolean
+	orderNumber: Int
+	warehouse: String
+	warehouseStatus: Int!
+}
+
+input PagingOptionsInput {
+	limit: Int
+	skip: Int
+	sort: PagingSortInput
+}
+
+input PagingSortInput {
+	field: String!
+	sortBy: String!
+}
+
+input ProductCreateInput {
+	categories: [ProductsCategoryInput!]
+	description: [TranslateInput!]!
+	descriptionHTML: [TranslateInput!]
+	details: [TranslateInput!]
+	detailsHTML: [TranslateInput!]
+	images: [ImageInput!]!
+	title: [TranslateInput!]!
+}
+
+input ProductSaveInput {
+	_id: String!
+	categories: [ProductsCategoryInput!]
+	description: [TranslateInput!]!
+	descriptionHTML: [TranslateInput!]
+	details: [TranslateInput!]
+	detailsHTML: [TranslateInput!]
+	id: String
+	images: [ImageInput!]!
+	title: [TranslateInput!]!
+}
+
+input ProductsCategoriesCreateInput {
+	image: String
+	name: [TranslateInput!]!
+}
+
+input ProductsCategoriesFindInput {
+	noop: Void
+}
+
+input ProductsCategoriesUpdatenput {
+	name: [TranslateInput!]
+}
+
+input ProductsCategoryInput {
+	_id: String!
+	name: [TranslateInput!]
+}
+
+input ProductsFindInput {
+	description: TranslateInput
+	details: TranslateInput
+	image: ImageInput
+	title: TranslateInput
+}
+
+input PromotionInput {
+	active: Boolean
+	activeFrom: Date
+	activeTo: Date
+	description: [TranslateInput]
+	image: String
+	product: String
+	promoPrice: Float
+	purchasesCount: Int
+	title: [TranslateInput]
+	warehouse: WarehouseInput
+}
+
+input PromotionsFindInput {
+	warehouse: String
+}
+
+input QuantityUpdateInput {
+	change: Int
+	to: Int
+}
+
+input SearchByRegex {
+	key: String!
+	value: String!
+}
+
+input SearchOrdersForWork {
+	byRegex: [SearchByRegex]
+	isCancelled: Boolean
+}
+
+input TranslateInput {
+	locale: String!
+	value: String!
+}
+
+input WarehouseCreateInput {
+	carrierCompetition: Boolean!
+	carriersIds: [String!]
+	contactEmail: String
+	contactPhone: String
+	forwardOrdersUsing: [Int!]
+	geoLocation: GeoLocationCreateInput!
+	hasRestrictedCarriers: Boolean
+	inStoreMode: Boolean!
+	isActive: Boolean
+	isCarrierRequired: Boolean
+	isManufacturing: Boolean
+	isPaymentEnabled: Boolean
+	logo: String!
+	name: String!
+	ordersEmail: String
+	ordersPhone: String
+	preferRestrictedCarriersForDelivery: Boolean
+	useOnlyRestrictedCarriersForDelivery: Boolean
+	usedCarriersIds: [String!]
+	username: String!
+}
+
+input WarehouseInput {
+	_id: String
+}
+
+input WarehouseOrdersRouterCreateOptions {
+	autoConfirm: Boolean!
+}
+
+input WarehousePasswordUpdateInput {
+	current: String!
+	new: String!
+}
+
+input WarehouseProductInput {
+	count: Int
+	deliveryTimeMax: Int
+	deliveryTimeMin: Int
+	initialPrice: Int!
+	isCarrierRequired: Boolean
+	isDeliveryRequired: Boolean
+	isManufacturing: Boolean
+	isProductAvailable: Boolean
+	isTakeaway: Boolean
+	price: Int!
+	product: String!
+}
+
+input WarehouseProductUpdateInput {
+	price: Int
+	quantity: QuantityUpdateInput
+}
+
+input WarehouseRegisterInput {
+	password: String!
+	warehouse: WarehouseCreateInput!
+}
+
+input WarehousesFindInput {
+	carrierCompetition: Boolean!
+	carriersIds: [String!]
+	contactEmail: String
+	contactPhone: String
+	forwardOrdersUsing: [Int]
+	hasRestrictedCarriers: Boolean
+	inStoreMode: Boolean!
+	isActive: Boolean
+	isCarrierRequired: Boolean
+	isManufacturing: Boolean
+	isPaymentEnabled: Boolean
+	logo: String
+	name: String
+	ordersEmail: String
+	ordersPhone: String
+	preferRestrictedCarriersForDelivery: Boolean
+	useOnlyRestrictedCarriersForDelivery: Boolean
+	usedCarriersIds: [String!]
+	username: String
+}
+
+
+scalar Date
+
+scalar Any
+
+scalar Void
