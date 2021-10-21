@@ -5,29 +5,30 @@ import {
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
 }                         from '@angular/router';
-import { Store }          from 'app/services/store';
 import RegistrationSystem from '@modules/server.common/enums/RegistrationSystem';
+import { StorageService } from 'app/services/storage';
 
 @Injectable()
 export class AuthGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{}
 	
-	async canActivate(
+	public async canActivate(
 			route: ActivatedRouteSnapshot,
 			state: RouterStateSnapshot
 	): Promise<boolean>
 	{
-		const isLogged = await this.store.isLogged();
-		const isRegistrationEnabled = this.store.registrationSystem === RegistrationSystem.Enabled;
+		const isLogged = await this.storage.isLogged();
+		const isRegistrationEnabled = this.storage.registrationSystem === RegistrationSystem.Enabled;
 		
 		if(!isLogged && isRegistrationEnabled)
 		{
-			await this.router.navigate(['auth']);
+			this.router.navigate(['login'])
+			    .catch(err => console.error(err));
 			return false;
 		}
 		
