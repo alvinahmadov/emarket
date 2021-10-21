@@ -1,41 +1,60 @@
 import { Injectable } from '@angular/core';
 import { Apollo }     from 'apollo-angular';
+import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import Order          from '@modules/server.common/entities/Order';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
-import { Observable } from 'rxjs';
+import Customer       from '@modules/server.common/entities/Customer';
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }   from 'graphql/definitions';
+
+interface IOrderedCustomerInfo
+{
+	customer: Customer
+	ordersCount: number
+	totalPrice: number
+}
 
 @Injectable()
-export class OrdersService
+export class OrdersService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
-	
-	getOrderedUsersInfo(storeId: string)
+	constructor(apollo: Apollo)
 	{
-		return this._apollo
-		           .watchQuery({
-			                       query: GQLQueries.OrderOrderedUsersInfo,
-			                       variables: { storeId },
-			                       pollInterval: 1000,
-		                       })
-		           .valueChanges.pipe(
-						map((res) => res.data['getOrderedUsersInfo']),
-						share()
-				);
+		super(apollo,
+		      {
+			      serviceName: "Merchant::OrdersService"
+		      })
 	}
 	
-	getOrders(): Observable<Order[]>
+	public getOrderedUsersInfo(storeId: string): Observable<IOrderedCustomerInfo[]>
 	{
-		return this._apollo
+		return this.apollo
+		           .watchQuery<{
+			           info: IOrderedCustomerInfo[]
+		           }>({
+			              query:        GQLQuery.Order.GetOrderedUsersInfo,
+			              variables:    { storeId },
+			              pollInterval: this.pollInterval,
+		              })
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
+	}
+	
+	public getOrders(): Observable<Order[]>
+	{
+		return this.apollo
 		           .watchQuery<{
 			           orders: Order[]
 		           }>({
-			              query: GQLQueries.OrderOrders,
-			              pollInterval: 4000,
+			              query:        GQLQuery.Order.GetAll,
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.orders),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 }
