@@ -94,6 +94,11 @@ export interface IPromotion extends IPromotionCreateObject, DBRawObject
 	_id: PyroObjectId;
 }
 
+export interface IPromotionsFindInput
+{
+	warehouse?: string
+}
+
 export interface IPromotionDescription extends ILocaleMember {}
 
 export interface IPromotionTitle extends ILocaleMember {}
