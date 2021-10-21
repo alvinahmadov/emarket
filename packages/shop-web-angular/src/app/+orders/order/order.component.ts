@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, NgZone, Inject } from '@angular/core';
-import Order                                        from '@modules/server.common/entities/Order';
+import { DOCUMENT }                                 from '@angular/common';
+import { MatDialog }                                from '@angular/material/dialog';
 import {
 	animate,
 	state,
@@ -7,29 +8,28 @@ import {
 	transition,
 	trigger,
 }                                                   from '@angular/animations';
+import { TranslateService }                         from '@ngx-translate/core';
+import { first }                                    from 'rxjs/operators';
 import { ILocaleMember }                            from '@modules/server.common/interfaces/ILocale';
+import Order                                        from '@modules/server.common/entities/Order';
+import Warehouse                                    from '@modules/server.common/entities/Warehouse';
 import { ProductLocalesService }                    from '@modules/client.common.angular2/locale/product-locales.service';
 import { WarehouseOrdersRouter }                    from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
 import { WarehouseRouter }                          from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { TranslateService }                         from '@ngx-translate/core';
-import { MatDialog }                                from '@angular/material/dialog';
-import { MessagePopUpComponent }                    from 'app/shared/message-pop-up/message-pop-up.component';
-import { first }                                    from 'rxjs/operators';
-import Warehouse                                    from '@modules/server.common/entities/Warehouse';
 import { CarrierRouter }                            from '@modules/client.common.angular2/routers/carrier-router.service';
+import { MessagePopUpComponent }                    from 'app/shared/message-pop-up/message-pop-up.component';
 import { CarrierLocationComponent }                 from '../location/carrier-location.component';
-import { DOCUMENT }                                 from '@angular/common';
 
 @Component({
-	           selector: 'order',
-	           animations: [
+	           selector:    'order',
+	           animations:  [
 		           trigger('show', [
 			           state('shown', style({ opacity: 1 })),
 			           state('hidden', style({ opacity: 0 })),
 			           transition('shown <=> hidden', animate('.2s')),
 		           ]),
 	           ],
-	           styleUrls: ['./order.component.scss'],
+	           styleUrls:   ['./order.component.scss'],
 	           templateUrl: './order.component.html',
            })
 export class OrderComponent implements OnInit
@@ -44,6 +44,8 @@ export class OrderComponent implements OnInit
 	public products;
 	public orderStatusText: string;
 	public orderNumber: number;
+	public orderCurrency: string;
+	public orderNotes: string;
 	public orderType: number;
 	public createdAt: Date;
 	public createdAtConverted: string;
@@ -72,7 +74,7 @@ export class OrderComponent implements OnInit
 	)
 	{}
 	
-	openDialog(): void
+	public openDialog(): void
 	{
 		//duble ckeck orderCancelation
 		if(this._isButtonDisabled)
@@ -82,11 +84,11 @@ export class OrderComponent implements OnInit
 		//---
 		const dialogRef = this.dialog.open(MessagePopUpComponent, {
 			width: '560px',
-			data: {
-				modalTitle: this.modalTitleText,
-				cancelButton: this.cancelPopUpButton,
+			data:  {
+				modalTitle:    this.modalTitleText,
+				cancelButton:  this.cancelPopUpButton,
 				confirmButton: this.confirmPopUpButton,
-				commonText: this.commonPopUpText,
+				commonText:    this.commonPopUpText,
 			},
 		});
 		
@@ -101,20 +103,20 @@ export class OrderComponent implements OnInit
 		                                  });
 	}
 	
-	openMap(): void
+	public openMap(): void
 	{
 		this.dialog.open(CarrierLocationComponent, {
-			width: '560px',
+			width:      '560px',
 			panelClass: 'app-dialog-container',
-			data: {
-				carrier: this.carrier,
-				merchant: this.warehouse,
-				userOrder: this.order.user,
+			data:       {
+				carrier:   this.carrier,
+				merchant:  this.warehouse,
+				userOrder: this.order.customer,
 			},
 		});
 	}
 	
-	getTranslate(key: string): string
+	public getTranslate(key: string): string
 	{
 		let translationResult = '';
 		
@@ -126,7 +128,7 @@ export class OrderComponent implements OnInit
 		return translationResult;
 	}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.warehouseRouter
 		    .get(this.order.warehouseId, false)
@@ -157,7 +159,7 @@ export class OrderComponent implements OnInit
 		this.loadData();
 	}
 	
-	protected localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._productLocalesService.getTranslate(member);
 	}
