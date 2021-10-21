@@ -1,14 +1,16 @@
 import { Injectable }                from '@angular/core';
 import { Apollo }                    from 'apollo-angular';
-import Warehouse                     from '@modules/server.common/entities/Warehouse';
-import { map, share }                from 'rxjs/operators';
+import { FetchResult }               from 'apollo-link';
 import { Observable }                from 'rxjs';
+import { map, share }                from 'rxjs/operators';
 import IPagingOptions                from '@modules/server.common/interfaces/IPagingOptions';
 import IWarehouse                    from '@modules/server.common/interfaces/IWarehouse';
 import IWarehouseProductCreateObject from '@modules/server.common/interfaces/IWarehouseProduct';
 import GeoLocation                   from '@modules/server.common/entities/GeoLocation';
+import Warehouse                     from '@modules/server.common/entities/Warehouse';
 import WarehouseProduct              from '@modules/server.common/entities/WarehouseProduct';
-import { GQLMutations, GQLQueries }  from '@modules/server.common/utilities/graphql';
+import ApolloService                 from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation, GQLQuery }     from 'graphql/definitions';
 
 export interface ICustomersByStore
 {
@@ -23,92 +25,98 @@ export interface IExistingCustomersByStores
 }
 
 @Injectable()
-export class WarehousesService
+export class WarehousesService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName: "Merchant::WarehousesService",
+		      });
+	}
 	
 	public hasExistingStores(): Observable<boolean>
 	{
-		return this._apollo
+		return this.apollo
 		           .query<{
 			           hasExistingStores: boolean
 		           }>({
-			              query: GQLQueries.WarehouseHasExistingStores
+			              query: GQLQuery.Store.HasExistingStores
 		              })
-		           .pipe(map((res) => res.data.hasExistingStores));
+		           .pipe(map((result) => this.get(result)));
 	}
 	
 	public getCountExistingCustomers(): Observable<IExistingCustomersByStores>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           getCountExistingCustomers: { total; perStore };
-		           }>({ query: GQLQueries.WarehouseExistingCustomersCount })
+		           }>({ query: GQLQuery.Store.GetCountExistingCustomers })
 		           .valueChanges.pipe(
 						map((res) => res.data.getCountExistingCustomers)
 				);
 	}
 	
-	// noinspection JSUnusedGlobalSymbols
 	public getCountExistingCustomersToday(): Observable<IExistingCustomersByStores>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
-			           getCountExistingCustomersToday: { total; perStore };
-		           }>({ query: GQLQueries.WarehouseExistingCustomersTodayCount })
-		           .valueChanges.pipe(
-						map((res) => res.data.getCountExistingCustomersToday)
-				);
+			           customersCount: IExistingCustomersByStores;
+		           }>({ query: GQLQuery.Store.GetCountExistingCustomersToday })
+		           .valueChanges
+		           .pipe(map((result) => this.get(result)));
 	}
 	
 	public getAllStores(): Observable<Warehouse[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .query<{
 			           getAllStores: Warehouse[]
-		           }>({ query: GQLQueries.WarehouseAllFull })
-		           .pipe(map((res) => res.data.getAllStores));
+		           }>({ query: GQLQuery.Store.GetAll })
+		           .pipe(map((result) => this.get(result)));
 	}
 	
 	public getStores(pagingOptions?: IPagingOptions): Observable<Warehouse[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           warehouses: IWarehouse[]
 		           }>({
-			              query:        GQLQueries.WarehousesAllWithPagination,
+			              query:        GQLQuery.Store.GetAllWithPagination,
 			              variables:    { pagingOptions },
-			              pollInterval: 5000,
+			              pollInterval: this.pollInterval,
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.warehouses),
-						map((ws) => ws.map((w) => this._warehouseFactory(w))),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((res) => <Warehouse[]>
+						           this.factory(res, Warehouse)),
+				           share()
+		           );
 	}
 	
 	public getNearbyStores(geoLocation: GeoLocation): Observable<Warehouse[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .watchQuery<{
 			           nearbyStores: IWarehouse[]
 		           }>({
-			              query:        GQLQueries.WarehousesNearby,
-			              pollInterval: 5000,
+			              query:        GQLQuery.Store.GetNearby,
+			              pollInterval: this.pollInterval,
 			              variables:    { geoLocation },
 		              })
-		           .valueChanges.pipe(
-						map((res) => res.data.nearbyStores),
-						map((ws) => ws.map((w) => this._warehouseFactory(w))),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((res) => <Warehouse[]>
+						           this.factory(res, Warehouse)),
+				           share()
+		           );
 	}
 	
-	public removeByIds(ids: string[]): Observable<any>
+	public removeByIds(ids: string[]): Observable<FetchResult<void>>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate({
-			                   mutation:  GQLMutations.WarehouseRemoveByIds,
+			                   mutation:  GQLMutation.Store.RemoveByIds,
 			                   variables: { ids },
 		                   });
 	}
@@ -118,73 +126,73 @@ export class WarehousesService
 			products: IWarehouseProductCreateObject[]
 	): Observable<WarehouseProduct[]>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate<{
-			           warehouseId: string;
 			           products: IWarehouseProductCreateObject[];
 		           }>({
-			              mutation:  GQLMutations.WarehouseAddProducts,
+			              mutation:  GQLMutation.Store.AddProducts,
 			              variables: {
 				              warehouseId,
 				              products,
 			              },
 		              })
 		           .pipe(
-				           map((result) => result.data['warehouseAddProducts']),
+				           map((result) => <WarehouseProduct[]>
+						           this.factory(result, WarehouseProduct)),
 				           share()
 		           );
 	}
 	
-	public removeProductsById(warehouseId: string, productsIds: string[]): Observable<any>
+	public removeProductsById(
+			warehouseId: string,
+			productsIds: string[]
+	): Observable<FetchResult<boolean>>
 	{
-		return this._apollo
+		return this.apollo
 		           .mutate({
-			                   mutation:  GQLMutations.WarehouseRemoveProducts,
+			                   mutation:  GQLMutation.Store.RemoveProducts,
 			                   variables: { warehouseId, productsIds },
 		                   });
 	}
 	
 	public getStoreById(id: string): Observable<Warehouse>
 	{
-		return this._apollo
+		return this.apollo
 		           .query({
-			                  query:     GQLQueries.Warehouse,
+			                  query:     GQLQuery.Store.GetById,
 			                  variables: { id },
 		                  })
 		           .pipe(
-				           map((res) => res.data['warehouse']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
 	public getWarehouseOrderProcess(id: string): Observable<Warehouse>
 	{
-		return this._apollo
+		return this.apollo
 		           .query({
-			                  query:     GQLQueries.WarehouseOrderProcess,
+			                  query:     GQLQuery.Store.Order.GetOrderProcess,
 			                  variables: { id },
 		                  })
 		           .pipe(
-				           map((res) => res.data['warehouse']),
+				           map((result) => this.get(result)),
 				           share()
 		           );
 	}
 	
 	public async getCountOfMerchants(): Promise<number>
 	{
-		return this._apollo
-		           .query({
-			                  query: GQLQueries.WarehouseMerchantsCount,
-		                  })
+		return this.apollo
+		           .query<{
+			           count: number
+		           }>({
+			              query: GQLQuery.Store.GetCount,
+		              })
 		           .pipe(
-				           map((res) => res.data['getCountOfMerchants']),
+				           map((result) => this.get(result)),
 				           share()
 		           )
 		           .toPromise();
-	}
-	
-	protected _warehouseFactory(warehouse: IWarehouse): Warehouse | null
-	{
-		return warehouse == null ? null : new Warehouse(warehouse);
 	}
 }
