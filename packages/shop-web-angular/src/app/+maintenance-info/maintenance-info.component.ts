@@ -2,17 +2,17 @@ import { Component }          from '@angular/core';
 import { MaintenanceService } from '@modules/client.common.angular2/services/maintenance.service';
 import { environment }        from 'environments/environment';
 import { ToolbarController }  from 'app/app.component';
-import { Store }              from 'app/services/store';
+import { StorageService }     from 'app/services/storage';
 import { Router }             from '@angular/router';
 
 @Component({
 	           template: `
-		<div
-			*ngIf="message"
-			class="maintenance-message-container"
-			[innerHTML]="message | safe: 'html'"
-		></div>
-	`,
+		           <div
+				           *ngIf="message"
+				           class="maintenance-message-container"
+				           [innerHTML]="message | safe: 'html'"
+		           ></div>
+	           `,
            })
 export class MaintenanceInfoComponent implements ToolbarController
 {
@@ -21,7 +21,7 @@ export class MaintenanceInfoComponent implements ToolbarController
 	
 	constructor(
 			private maintenanceService: MaintenanceService,
-			private store: Store,
+			private storageService: StorageService,
 			private router: Router
 	)
 	{
@@ -32,7 +32,7 @@ export class MaintenanceInfoComponent implements ToolbarController
 	async getMessage()
 	{
 		this.message = await this.maintenanceService.getMessage(
-				this.store.maintenanceMode,
+				this.storageService.maintenanceMode,
 				environment['SETTINGS_MAINTENANCE_API_URL']
 		);
 	}
@@ -46,13 +46,13 @@ export class MaintenanceInfoComponent implements ToolbarController
 					                             environment['SETTINGS_MAINTENANCE_API_URL']
 			                             );
 			                             console.warn(
-					                             `Maintenance on '${this.store.maintenanceMode}': ${status}`
+					                             `Maintenance on '${this.storageService.maintenanceMode}': ${status}`
 			                             );
 			
 			                             if(!status)
 			                             {
 				                             clearInterval(interval);
-				                             this.store.clearMaintenanceMode();
+				                             this.storageService.clearMaintenanceMode();
 				                             this.router.navigate(['']);
 			                             }
 		                             }, 5000);
