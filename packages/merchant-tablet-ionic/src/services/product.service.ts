@@ -2,46 +2,49 @@ import { Injectable }           from '@angular/core';
 import { Apollo }               from 'apollo-angular';
 import { Observable }           from 'rxjs';
 import { map, share }           from 'rxjs/operators';
+import { IProductCreateObject } from '@modules/server.common/interfaces/IProduct';
 import Product                  from '@modules/server.common/entities/Product';
-import { GQLMutations }         from '@modules/server.common/utilities/graphql'
-import { IProductCreateObject } from "@modules/server.common/interfaces/IProduct";
+import ApolloService            from '@modules/client.common.angular2/services/apollo.service';
+import { GQLMutation }          from '../graphql/definitions';
 
 @Injectable()
-export class ProductService
+export class ProductService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo,
+		      {
+			      serviceName: ProductService.name
+		      });
+	}
 	
-	save(product: Product)
+	public create(product: IProductCreateObject): Observable<Product>
 	{
 		return this.apollo
 		           .mutate<{
 			           product: Product
-		           }>(
-				           {
-					           mutation: GQLMutations.WarehouseSaveProduct,
-					           variables: {
-						           product,
-					           },
-				           }
-		           ).pipe(
-						map((result) => result.data.product),
-						share()
-				);
+		           }>({
+			              mutation:  GQLMutation.Store.CreateProduct,
+			              variables: { product },
+		              })
+		           .pipe(
+				           map((result) => this.get(result)),
+				           share()
+		           );
 	}
 	
-	create(product: IProductCreateObject): Observable<Product>
+	public save(product: Product): Observable<Product>
 	{
 		return this.apollo
 		           .mutate<{
-			           product: IProductCreateObject
+			           product: Product
 		           }>({
-			              mutation: GQLMutations.ProductCreate,
-			              variables: {
-				              product,
-			              },
+			              mutation:  GQLMutation.Store.SaveProduct,
+			              variables: { product },
 		              })
 		           .pipe(
-				           map((result: any) => result.data.createProduct),
+				           map((result) => <Product>
+						           this.factory(result, Product)),
 				           share()
 		           );
 	}
