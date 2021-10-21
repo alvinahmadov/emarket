@@ -1,3 +1,4 @@
+import '../styles/styles.scss';
 import { APP_INITIALIZER, NgModule }            from '@angular/core';
 import { HttpClient, HttpClientModule }         from '@angular/common/http';
 import { FormsModule }                          from '@angular/forms';
@@ -14,7 +15,7 @@ import { MatSelectModule }                      from '@angular/material/select';
 import { MatSidenavModule }                     from '@angular/material/sidenav';
 import { MatSlideToggleModule }                 from '@angular/material/slide-toggle';
 import { MatToolbarModule }                     from '@angular/material/toolbar';
-import { FlexLayoutModule }                     from '@angular/flex-layout';
+import { ExtendedModule, FlexLayoutModule }     from '@angular/flex-layout';
 import { platformBrowserDynamic }               from '@angular/platform-browser-dynamic';
 import { BrowserAnimationsModule }              from '@angular/platform-browser/animations';
 import { Apollo }                               from 'apollo-angular';
@@ -165,6 +166,7 @@ const APP_PROVIDERS = [
 		                               }),
 		          LocationPopupModalModule,
 		          MatSelectModule,
+		          ExtendedModule,
 	          ],
 	          providers:    [
 		          environment.ENV_PROVIDERS,
@@ -173,7 +175,6 @@ const APP_PROVIDERS = [
 		          ProductsModuleGuard,
 		          WarehousesModuleGuard,
 		          AppModuleGuard,
-		          SidenavService,
 		          MaintenanceModuleGuard,
 		          GeoLocationService,
 		          AuthGuard,
