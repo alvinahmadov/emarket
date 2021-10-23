@@ -1,0 +1,11 @@
+<toolbar *ngIf="!isToolbarDisabled"
+         class="navbar navbar-expand-lg">
+</toolbar>
+
+<div [ngClass]="{ 'toolbar-enabled': !isToolbarDisabled }"
+     class="app-content">
+	<router-outlet class="container-fluid"></router-outlet>
+</div>
+<div id="chatbox" #chatboxContainer>
+	Loading...
+</div>
