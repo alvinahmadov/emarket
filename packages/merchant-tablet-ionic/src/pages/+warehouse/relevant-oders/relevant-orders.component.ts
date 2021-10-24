@@ -1,56 +1,56 @@
 import {
 	Component,
 	Input,
-	ViewChild,
 	AfterViewInit,
 	OnDestroy,
 	OnChanges,
 	Output,
 	EventEmitter,
 }                                 from '@angular/core';
-import { WarehouseOrdersService } from '../../../services/warehouse-orders.service';
-import { Store }                  from '../../../services/store.service';
-import Order                      from '@modules/server.common/entities/Order';
-import { OrderState }             from '../warehouse';
 import { Subject }                from 'rxjs';
 import { takeUntil }              from 'rxjs/operators';
+import OrderWarehouseStatus       from '@modules/server.common/enums/OrderWarehouseStatus';
+import Order                      from '@modules/server.common/entities/Order';
+import { WarehouseOrdersService } from 'services/warehouse-orders.service';
+import { StorageService }         from 'services/storage.service';
+import { OrderState }             from '../warehouse';
 
 const showOrdersNumber: number = 10;
 
 @Component({
-	           selector: 'merchant-relevant-orders',
+	           selector:    'merchant-relevant-orders',
 	           templateUrl: 'relevant-orders.component.html',
-	           styleUrls: ['./relevant-orders.component.scss'],
+	           styleUrls:   ['./relevant-orders.component.scss'],
            })
 export class RelevantOrdersComponent
 		implements AfterViewInit, OnDestroy, OnChanges, OnDestroy
 {
 	@Input()
-	getWarehouseStatus: () => void;
+	public getWarehouseStatus: (os: OrderWarehouseStatus) => string;
 	
 	@Input()
-	onUpdateWarehouseStatus: any;
+	public onUpdateWarehouseStatus: any;
 	
 	@Input()
-	orderState: (Order) => void;
+	public orderState: (Order) => void;
 	
 	@Input()
-	focusedOrder: Order;
+	public focusedOrder: Order;
 	
 	@Input()
-	isOrderContainerLive: boolean;
+	public isOrderContainerLive: boolean;
 	
 	@Output()
-	toggleOrderContainer: EventEmitter<boolean> = new EventEmitter();
+	public toggleOrderContainer: EventEmitter<boolean> = new EventEmitter();
 	
 	@Input()
-	filter: string;
+	public filter: string;
 	
-	orders: Order[] = [];
-	ordersCount: number;
-	OrderState: any = OrderState;
-	page: number = 1;
-	ordersLoaded: boolean;
+	public orders: Order[] = [];
+	public ordersCount: number;
+	public OrderState: any = OrderState;
+	public page: number = 1;
+	public ordersLoaded: boolean;
 	
 	private readonly ngDestroy$ = new Subject<void>();
 	private loadedPages = [];
@@ -58,11 +58,11 @@ export class RelevantOrdersComponent
 	
 	constructor(
 			private warehouseOrdersService: WarehouseOrdersService,
-			private store: Store
+			private storageService: StorageService
 	)
 	{}
 	
-	ngOnChanges()
+	public ngOnChanges()
 	{
 		if(this.focusedOrder)
 		{
@@ -74,19 +74,25 @@ export class RelevantOrdersComponent
 		}
 	}
 	
-	ngAfterViewInit() {}
+	public ngAfterViewInit() {}
 	
-	async loadData(event = null, status = 'relevant')
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public async loadData(event = null, status = 'relevant')
 	{
 		const sub = this.warehouseOrdersService
 		                .getStoreOrdersTableData(
-				                this.store.warehouseId,
+				                this.storageService.warehouseId,
 				                {
-					                sort: {
-						                field: '_createdAt',
+					                sort:  {
+						                field:  '_createdAt',
 						                sortBy: 'desc',
 					                },
-					                skip: (this.page - 1) * showOrdersNumber,
+					                skip:  (this.page - 1) * showOrdersNumber,
 					                limit: showOrdersNumber,
 				                },
 				                status
@@ -145,14 +151,8 @@ export class RelevantOrdersComponent
 	private async loadOrdersCount(status = 'relevant')
 	{
 		this.ordersCount = await this.warehouseOrdersService.getCountOfStoreOrders(
-				this.store.warehouseId,
+				this.storageService.warehouseId,
 				status
 		);
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 }
