@@ -16,7 +16,7 @@ import ILanguage               from '@modules/server.common/interfaces/ILanguage
 import IPlatform               from '@modules/server.common/interfaces/IPlatform';
 import { IDeviceCreateObject } from '@modules/server.common/interfaces/IDevice';
 import { Router }              from '@angular/router';
-import { Storage }             from 'services/storage.service';
+import { StorageService }      from 'services/storage.service';
 import { environment }         from '../environments/environment';
 
 @Component({
@@ -29,7 +29,7 @@ export class AppComponent
 			public platform: Platform,
 			public statusBar: StatusBar,
 			public splashScreen: SplashScreen,
-			private readonly store: Storage,
+			private readonly storageService: StorageService,
 			private readonly router: Router,
 			private readonly location: Location,
 			private globalization: Globalization,
@@ -75,7 +75,7 @@ export class AppComponent
 				          );
 			          }
 			
-			          this.store.language = this.translate.currentLang;
+			          this.storageService.locale = this.translate.currentLang;
 			
 			          // Plugins only working on the mobile devices
 			          if(this.device.platform)
@@ -126,7 +126,7 @@ export class AppComponent
 	{
 		this.globalization
 		    .getPreferredLanguage()
-		    .then(res => this.store.language = res.value.substr(0, 2));
+		    .then(res => this.storageService.locale = res.value.substr(0, 2));
 	}
 	
 	public deviceCreateObject(): IDeviceCreateObject
@@ -167,7 +167,7 @@ export class AppComponent
 	
 	public get maintenanceMode(): string
 	{
-		return this.store.maintenanceMode;
+		return this.storageService.maintenanceMode;
 	}
 	
 	private _watchNetworkConnection()
@@ -202,8 +202,8 @@ export class AppComponent
 		
 		const device = await this.deviceRouter.create(deviceCreateObject);
 		
-		this.store.deviceId = device.id;
-		this.store.language = device.language;
-		this.store.platform = device.type;
+		this.storageService.deviceId = device.id;
+		this.storageService.locale = device.language;
+		this.storageService.platform = device.type;
 	}
 }
