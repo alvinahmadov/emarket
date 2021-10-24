@@ -1,26 +1,26 @@
 import { NgModule }                         from '@angular/core';
-import { WarehousePage }                    from './warehouse';
-import { ComponentsModule }                 from '../../components/components.module';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { HttpClient }                       from '@angular/common/http';
-import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
-import { OrderModule }                      from '../../components/order/order.module';
-import { NgxPaginationModule }              from 'ngx-pagination';
-import { AllOrdersComponent }               from './all-oders/all-orders.component';
-import { WarehouseOrdersService }           from '../../services/warehouse-orders.service';
-import { Store }                            from '../../services/store.service';
-import { RelevantOrdersComponent }          from './relevant-oders/relevant-orders.component';
-import { WarehouseCommonModule }            from './common/warehouse.common.module';
 import { CommonModule }                     from '@angular/common';
-import { AllProductsComponent }             from './all-products/all-products.component';
-import { TopProductsComponent }             from './top-products/top-products.component';
-import { WarehouseProductsService }         from '../../services/warehouse-products.service';
-import { NgxMasonryModule }                 from 'ngx-masonry';
+import { HttpClient }                       from '@angular/common/http';
 import { Routes, RouterModule }             from '@angular/router';
 import { IonicModule }                      from '@ionic/angular';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
+import { NgxPaginationModule }              from 'ngx-pagination';
+import { NgxMasonryModule }                 from 'ngx-masonry';
+import { StorageService }                   from 'services/storage.service';
+import { WarehouseOrdersService }           from 'services/warehouse-orders.service';
+import { WarehouseProductsService }         from 'services/warehouse-products.service';
+import { WarehousesService }                from 'services/warehouses.service';
+import { ComponentsModule }                 from 'components/components.module';
+import { OrderModule }                      from 'components/order/order.module';
+import { AllOrdersComponent }               from './all-oders/all-orders.component';
+import { AllProductsComponent }             from './all-products/all-products.component';
+import { WarehouseCommonModule }            from './common/warehouse.common.module';
+import { RelevantOrdersComponent }          from './relevant-oders/relevant-orders.component';
+import { TopProductsComponent }             from './top-products/top-products.component';
 import { CreateProductTypePopupPageModule } from './create-product-type-popup/create-product-type-popup.module';
 import { EditProductTypePopupPageModule }   from './edit-product-type-popup/edit-product-type-popup.module';
-import { WarehousesService }                from 'services/warehouses.service';
+import { WarehousePage }                    from './warehouse';
 import { OrderStatusFilterPipe }            from './warehouse.pipe';
 
 export function HttpLoaderFactory(http: HttpClient)
@@ -30,7 +30,7 @@ export function HttpLoaderFactory(http: HttpClient)
 
 const routes: Routes = [
 	{
-		path: '',
+		path:      '',
 		component: WarehousePage,
 	},
 ];
@@ -44,7 +44,7 @@ const routes: Routes = [
 		          TopProductsComponent,
 		          OrderStatusFilterPipe,
 	          ],
-	          imports: [
+	          imports:      [
 		          ComponentsModule,
 		          OrderModule,
 		          CommonModule,
@@ -52,9 +52,9 @@ const routes: Routes = [
 		          RouterModule.forChild(routes),
 		          TranslateModule.forChild({
 			                                   loader: {
-				                                   provide: TranslateLoader,
+				                                   provide:    TranslateLoader,
 				                                   useFactory: HttpLoaderFactory,
-				                                   deps: [HttpClient],
+				                                   deps:       [HttpClient],
 			                                   },
 		                                   }),
 		          NgxPaginationModule,
@@ -63,9 +63,9 @@ const routes: Routes = [
 		          CreateProductTypePopupPageModule,
 		          EditProductTypePopupPageModule,
 	          ],
-	          providers: [
+	          providers:    [
 		          WarehouseOrdersService,
-		          Store,
+		          StorageService,
 		          WarehouseProductsService,
 		          WarehousesService,
 	          ],
