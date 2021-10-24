@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription }                 from 'rxjs';
-import { Storage }                      from 'services/storage.service'
 import { CustomerRouter }               from '@modules/client.common.angular2/routers/customer-router.service';
+import { StorageService }               from 'services/storage.service';
 
 @Component({
 	           selector:    'page-terms-of-use',
@@ -11,19 +11,19 @@ export class TermsOfUsePage implements OnInit, OnDestroy
 {
 	public useTermsHtml: string = '<h1>Loading...</h1>';
 	public selectedLanguage: string;
-	private sub: Subscription;
 	public deviceId: string;
 	public userId: string;
+	private sub: Subscription;
 	
 	constructor(
 			private customerRouter: CustomerRouter,
-			private storage: Storage
+			private storageService: StorageService
 	)
 	{
 		
-		this.selectedLanguage = this.storage.language || 'en-US';
-		this.deviceId = this.storage.deviceId;
-		this.userId = this.storage.merchantId;
+		this.selectedLanguage = this.storageService.locale || 'en-US';
+		this.deviceId = this.storageService.deviceId;
+		this.userId = this.storageService.merchantId;
 	}
 	
 	public ngOnInit(): void
