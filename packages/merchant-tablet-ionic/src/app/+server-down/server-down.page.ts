@@ -1,5 +1,5 @@
 import { Component, OnDestroy }    from '@angular/core';
-import { Storage }                 from 'services/storage.service';
+import { StorageService }          from 'services/storage.service';
 import { Location }                from '@angular/common';
 import { ServerConnectionService } from '@modules/client.common.angular2/services/server-connection.service';
 import { environment }             from '../../environments/environment';
@@ -14,7 +14,7 @@ export class ServerDownPage implements OnDestroy
 	public interval: any;
 	
 	constructor(
-			private store: Storage,
+			private storage: StorageService,
 			private location: Location,
 			private serverConnectionService: ServerConnectionService
 	)
@@ -29,10 +29,10 @@ export class ServerDownPage implements OnDestroy
 		                            {
 			                            await this.serverConnectionService.checkServerConnection(
 					                            environment.SERVICES_ENDPOINT,
-					                            this.store
+					                            this.storage
 			                            );
 			
-			                            if(Number(this.store.serverConnection) !== 0)
+			                            if(Number(this.storage.serverConnection) !== 0)
 			                            {
 				                            clearInterval(this.interval);
 				                            this.location.back();
