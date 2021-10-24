@@ -1,45 +1,44 @@
-import { Component, ViewChild, OnInit, OnDestroy } from '@angular/core';
-
-import { AddChoiceComponent }       from './add-choice/add-choice';
-import { AddNewCarrierComponent }   from './add-new-carrier/add-new-carrier';
-import { CarrierRouter }            from '@modules/client.common.angular2/routers/carrier-router.service';
-import { WarehouseRouter }          from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { Store }                    from '../../../services/store.service';
-import Warehouse                    from '@modules/server.common/entities/Warehouse';
-import { CarriersCatalogComponent } from './carriers-catalog/carriers-catalog';
-import { TranslateService }         from '@ngx-translate/core';
-import { Subject }                  from 'rxjs';
-import { takeUntil, first }         from 'rxjs/operators';
-import { ModalController }          from '@ionic/angular';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { TranslateService }                        from '@ngx-translate/core';
+import { Subject }                                 from 'rxjs';
+import { first, takeUntil }                        from 'rxjs/operators';
+import { ModalController }                         from '@ionic/angular';
+import Warehouse                                   from '@modules/server.common/entities/Warehouse';
+import { CarrierRouter }                           from '@modules/client.common.angular2/routers/carrier-router.service';
+import { WarehouseRouter }                         from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { AddChoiceComponent }                      from './add-choice/add-choice';
+import { AddNewCarrierComponent }                  from './add-new-carrier/add-new-carrier';
+import { CarriersCatalogComponent }                from './carriers-catalog/carriers-catalog';
+import { StorageService }                          from 'services/storage.service';
 
 @Component({
-	           selector: 'page-add-carriers-popup',
+	           selector:    'page-add-carriers-popup',
+	           styleUrls:   ['./add-carriers-popup.scss'],
 	           templateUrl: 'add-carriers-popup.html',
-	           styleUrls: ['./add-carriers-popup.scss'],
            })
 export class AddCarriersPopupPage implements OnInit, OnDestroy
 {
 	@ViewChild('addNewCarrier', { static: false })
-	addNewCarrierComponent: AddNewCarrierComponent;
+	public addNewCarrierComponent: AddNewCarrierComponent;
 	
 	@ViewChild('carriersCatalog', { static: false })
-	carriersCatalog: CarriersCatalogComponent;
+	public carriersCatalog: CarriersCatalogComponent;
 	
 	@ViewChild('addChoice', { static: true })
-	addChoiceComponent: AddChoiceComponent;
+	public addChoiceComponent: AddChoiceComponent;
 	
 	@ViewChild('wizzardFrom', { static: true })
-	wizzardFrom: any;
+	public wizzardFrom: any;
 	
 	@ViewChild('wizzardFromStep1', { static: true })
-	wizzardFromStep1: any;
+	public wizzardFromStep1: any;
 	
 	@ViewChild('wizardFormStep2', { static: true })
-	wizardFormStep2: any;
+	public wizardFormStep2: any;
 	
-	choiced: string;
-	isDone: boolean;
-	choicedNew: boolean = false;
+	public choiced: string;
+	public isDone: boolean;
+	public choicedNew: boolean = false;
 	
 	private choice$: any;
 	private form$: any;
@@ -49,34 +48,50 @@ export class AddCarriersPopupPage implements OnInit, OnDestroy
 			public modalController: ModalController,
 			public carrierRouter: CarrierRouter,
 			public warehouseRouter: WarehouseRouter,
-			public store: Store,
+			public storageService: StorageService,
 			private readonly _translateService: TranslateService
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.wizzardFromStep1.showNext = false;
 		
-		this.choice$ = this.addChoiceComponent.choice.subscribe(async(res) =>
-		                                                        {
-			                                                        this.choiced = res;
-			                                                        this.wizzardFrom.next();
-		                                                        });
+		this.choice$ = this.addChoiceComponent.choice
+		                   .subscribe(
+				                   async(res) =>
+				                   {
+					                   this.choiced = res;
+					                   this.wizzardFrom.next();
+				                   });
 	}
 	
-	buttonClickEvent(data)
+	public ngOnDestroy()
 	{
-		const prevOrdNext: string = data;
+		if(this.choice$)
+		{
+			this.choice$.unsubscribe();
+		}
 		
-		if(prevOrdNext === 'previous')
+		if(this.form$)
+		{
+			this.form$.unsubscribe();
+		}
+		
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public buttonClickEvent(data: string)
+	{
+		if(data === 'previous')
 		{
 			this.wizzardFrom.previous();
 			this.choicedNew = false;
 		}
 	}
 	
-	completeCreateCarrier(data)
+	public completeCreateCarrier(data: string)
 	{
 		if(data === 'complete')
 		{
@@ -84,7 +99,7 @@ export class AddCarriersPopupPage implements OnInit, OnDestroy
 		}
 	}
 	
-	get wizardStepsTitle()
+	public get wizardStepsTitle()
 	{
 		let resultTitle = '';
 		
@@ -113,23 +128,7 @@ export class AddCarriersPopupPage implements OnInit, OnDestroy
 		};
 	}
 	
-	ngOnDestroy()
-	{
-		if(this.choice$)
-		{
-			this.choice$.unsubscribe();
-		}
-		
-		if(this.form$)
-		{
-			this.form$.unsubscribe();
-		}
-		
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-	}
-	
-	async onStep1Next(choiced)
+	public async onStep1Next(choiced)
 	{
 		if(choiced === 'new')
 		{
@@ -150,18 +149,18 @@ export class AddCarriersPopupPage implements OnInit, OnDestroy
 		}
 	}
 	
-	async add()
+	public async add()
 	{
 		this.cancelModal();
 		const warehouse: Warehouse = await this.warehouseRouter
-		                                       .get(this.store.warehouseId)
+		                                       .get(this.storageService.warehouseId)
 		                                       .pipe(first())
 		                                       .toPromise();
 		if(this.choiced === 'new')
 		{
 			const carrier = await this.carrierRouter.register({
-				                                                  carrier: this.addNewCarrierComponent.getCarrierCreateObject(),
-				                                                  password: this.addNewCarrierComponent.password.value,
+				                                                  carrier:  this.addNewCarrierComponent.getCarrierCreateObject(),
+				                                                  password: this.addNewCarrierComponent.password,
 			                                                  });
 			
 			warehouse.hasRestrictedCarriers = true;
@@ -178,7 +177,7 @@ export class AddCarriersPopupPage implements OnInit, OnDestroy
 		this.warehouseRouter.save(warehouse);
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.modalController.dismiss();
 	}
