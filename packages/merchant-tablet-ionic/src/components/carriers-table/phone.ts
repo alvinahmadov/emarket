@@ -1,34 +1,34 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ViewCell }                 from 'ng2-smart-table';
 import Carrier                      from '@modules/server.common/entities/Carrier';
-import { Store }                    from '../../services/store.service';
+import { StorageService }           from 'services/storage.service';
 import { CallNumber }               from '@ionic-native/call-number/ngx';
 
 @Component({
 	           selector: 'carrier-phone',
 	           template: `
-		<ion-icon
-			*ngIf="carrier?.phone"
-			name="call"
-			class="call-icon icon icon-md ion-md-call"
-			(click)="attemptCall(carrier?.phone)"
-			[ngClass]="canCall ? 'can-call' : 'can-not-call'"
-		>
-		</ion-icon>
-		<span>{{ carrier?.phone || '' }}</span>
-	`,
+		                     <ion-icon
+				                     *ngIf="carrier?.phone"
+				                     name="call"
+				                     class="call-icon icon icon-md ion-md-call"
+				                     (click)="attemptCall(carrier?.phone)"
+				                     [ngClass]="canCall ? 'can-call' : 'can-not-call'"
+		                     >
+		                     </ion-icon>
+		                     <span>{{ carrier?.phone || '' }}</span>
+	                     `,
            })
 export class PhoneComponent implements ViewCell, OnInit
 {
-	value: string | number;
-	rowData: any;
+	public value: string | number;
+	public rowData: any;
 	
 	@Input()
-	carrier: Carrier;
+	public carrier: Carrier;
 	
-	constructor(private store: Store, public callNumber: CallNumber) {}
+	constructor(private storageService: StorageService, public callNumber: CallNumber) {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		if(this.rowData)
 		{
@@ -36,19 +36,19 @@ export class PhoneComponent implements ViewCell, OnInit
 		}
 	}
 	
-	get canCall()
+	public get canCall()
 	{
-		if(this.store.platform)
+		if(this.storageService.platform)
 		{
 			return (
-					this.store.platform.toLocaleLowerCase() === 'android' ||
-					this.store.platform.toLocaleLowerCase() === 'ios'
+					this.storageService.platform.toLocaleLowerCase() === 'android' ||
+					this.storageService.platform.toLocaleLowerCase() === 'ios'
 			);
 		}
 		return false;
 	}
 	
-	attemptCall(phone)
+	public attemptCall(phone)
 	{
 		if(this.canCall)
 		{
