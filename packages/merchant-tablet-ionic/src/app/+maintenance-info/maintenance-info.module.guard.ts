@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable }     from '@angular/core';
 import {
 	Router,
 	CanActivate,
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
-}                     from '@angular/router';
-import { Storage }    from 'services/storage.service';
+}                         from '@angular/router';
+import { StorageService } from 'services/storage.service';
 
 @Injectable()
 export class MaintenanceModuleGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Storage
+			private readonly storageService: StorageService
 	)
 	{}
 	
@@ -21,7 +21,7 @@ export class MaintenanceModuleGuard implements CanActivate
 			state: RouterStateSnapshot
 	): boolean
 	{
-		const maintenanceMode = this.store.maintenanceMode;
+		const maintenanceMode = this.storageService.maintenanceMode;
 		if(!maintenanceMode)
 		{
 			this.router.navigate(['']);
