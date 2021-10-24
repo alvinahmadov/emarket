@@ -2,7 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { ViewCell }                 from 'ng2-smart-table';
 import { CallNumber }               from '@ionic-native/call-number/ngx';
 import Customer                     from '@modules/server.common/entities/Customer';
-import { Storage }                  from '../../services/storage.service';
+import { StorageService }           from 'services/storage.service';
 
 @Component({
 	           selector: 'user-phone',
@@ -27,7 +27,7 @@ export class UserPhoneComponent implements ViewCell, OnInit
 	@Input()
 	public customer: Customer;
 	
-	constructor(private store: Storage, public callNumber: CallNumber) {}
+	constructor(private storageService: StorageService, public callNumber: CallNumber) {}
 	
 	public ngOnInit(): void
 	{
@@ -39,11 +39,11 @@ export class UserPhoneComponent implements ViewCell, OnInit
 	
 	public get canCall(): boolean
 	{
-		if(this.store.platform)
+		if(this.storageService.platform)
 		{
 			return (
-					this.store.platform.toLocaleLowerCase() === 'android' ||
-					this.store.platform.toLocaleLowerCase() === 'ios'
+					this.storageService.platform.toLocaleLowerCase() === 'android' ||
+					this.storageService.platform.toLocaleLowerCase() === 'ios'
 			);
 		}
 		return false;
