@@ -84,7 +84,7 @@ import { PagesModuleGuard }                 from '../pages/pages.module.guard';
 		          {
 			          provide:    APP_INITIALIZER,
 			          useFactory: serverConnectionFactory,
-			          deps:       [ServerConnectionService, Storage],
+			          deps:       [ServerConnectionService, StorageService],
 			          multi:      true,
 		          },
 		          MaintenanceService,
@@ -98,7 +98,7 @@ import { PagesModuleGuard }                 from '../pages/pages.module.guard';
 		          { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		          PagesModuleGuard,
 		          MaintenanceModuleGuard,
-		          Storage,
+		          StorageService,
 		          CallNumber,
 		          EmailComposer,
 		          Globalization,
