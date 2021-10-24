@@ -1,7 +1,7 @@
 import { Component }          from '@angular/core';
 import { MaintenanceService } from '@modules/client.common.angular2/services/maintenance.service';
 import { Router }             from '@angular/router';
-import { Storage }            from 'services/storage.service';
+import { StorageService }     from 'services/storage.service';
 import { environment }        from 'environments/environment';
 
 @Component({
@@ -15,7 +15,7 @@ export class MaintenanceInfoPage
 	
 	constructor(
 			private maintenanceService: MaintenanceService,
-			private store: Storage,
+			private storage: StorageService,
 			private router: Router
 	)
 	{
@@ -25,7 +25,7 @@ export class MaintenanceInfoPage
 	
 	public get maintenanceMode(): string
 	{
-		return this.store.maintenanceMode;
+		return this.storage.maintenanceMode;
 	}
 	
 	public async getMessage()
@@ -45,13 +45,13 @@ export class MaintenanceInfoPage
 					                            environment['SETTINGS_MAINTENANCE_API_URL']
 			                            );
 			                            console.warn(
-					                            `Maintenance on '${this.store.maintenanceMode}': ${status}`
+					                            `Maintenance on '${this.storage.maintenanceMode}': ${status}`
 			                            );
 			
 			                            if(!status)
 			                            {
 				                            clearInterval(this.interval);
-				                            this.store.clearMaintenanceMode();
+				                            this.storage.clearMaintenanceMode();
 				                            this.router.navigateByUrl('');
 			                            }
 		                            }, 10000);
