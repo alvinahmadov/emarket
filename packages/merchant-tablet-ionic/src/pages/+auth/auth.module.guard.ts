@@ -1,15 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable }             from '@angular/core';
 import { CanLoad, Route, Router } from '@angular/router';
-import { Store } from '../../services/store.service';
+import { StorageService }         from 'services/storage.service';
 
 @Injectable()
-export class AuthModuleGuard implements CanLoad {
+export class AuthModuleGuard implements CanLoad
+{
 	constructor(
-		private readonly store: Store,
-		private readonly router: Router
-	) {}
-
-	async canLoad(route: Route) {
+			private readonly storage: StorageService,
+			private readonly router: Router
+	)
+	{}
+	
+	async canLoad(route: Route)
+	{
 		return true;
 	}
 }
