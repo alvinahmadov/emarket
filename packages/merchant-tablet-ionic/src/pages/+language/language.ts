@@ -1,65 +1,69 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { TranslateService }          from '@ngx-translate/core';
-import { DeviceRouter }              from '@modules/client.common.angular2/routers/device-router.service';
-import { Store }                     from '../../services/store.service';
-import ILanguage                     from '@modules/server.common/interfaces/ILanguage';
 import { DOCUMENT }                  from '@angular/common';
+import { TranslateService }          from '@ngx-translate/core';
+import ILanguage                     from '@modules/server.common/interfaces/ILanguage';
+import { DeviceRouter }              from '@modules/client.common.angular2/routers/device-router.service';
+import { environment as env }        from 'environments/environment';
+import { StorageService }            from 'services/storage.service';
 
 @Component({
-	           selector: 'page-language',
+	           selector:    'page-language',
 	           templateUrl: 'language.html',
-	           styleUrls: ['./language.scss'],
+	           styleUrls:   ['./language.scss'],
            })
 export class LanguagePage implements OnInit
 {
-	language: ILanguage;
-	dir: 'ltr' | 'rtl';
+	public language: ILanguage;
+	public dir: 'ltr' | 'rtl';
 	
-	OK: string = 'OK';
-	CANCEL: string = 'CANCEL';
-	PREFIX: string = 'LANGUAGE_VIEW.';
-	selected: string;
+	public OK: string = 'OK';
+	public CANCEL: string = 'CANCEL';
+	public PREFIX: string = 'LANGUAGE_VIEW.';
+	public selected: string;
 	
 	constructor(
 			public translate: TranslateService,
 			private _deviceRouter: DeviceRouter,
-			private store: Store,
+			private storageService: StorageService,
 			@Inject(DOCUMENT) private document: Document
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
-		this.selected = localStorage.getItem('_language');
-		this.language = localStorage.getItem('_language') as ILanguage;
-		// TODO: use settings service to get list of supported languages
-		this.translate.addLangs(['en-US', 'bg-BG', 'he-IL', 'ru-RU', 'es-ES']);
+		if(!this.translate.currentLang)
+			if(this.storageService.locale)
+				this.translate.currentLang = this.storageService.locale;
+		const availableLanguages = env.AVAILABLE_LOCALES.split('|');
+		this.selected = this.storageService.locale;
+		this.language = this.storageService.locale as ILanguage;
+		this.translate.addLangs(availableLanguages);
 	}
 	
-	get buttonOK()
+	public get buttonOK(): string
 	{
 		return this._translate(this.PREFIX + this.OK);
 	}
 	
-	get buttonCancel()
+	public get buttonCancel(): string
 	{
 		return this._translate(this.PREFIX + this.CANCEL);
 	}
 	
-	switchLanguage(language: string)
+	public switchLanguage(language: string)
 	{
 		this._deviceRouter.updateLanguage(
 				localStorage.getItem('_deviceId'),
 				this.language
 		);
-		this.store.language = language;
+		this.storageService.locale = language;
 		this.translate.use(language);
 		
 		const currentLang = localStorage.getItem('_language');
 		
 		const langAbbreviation = currentLang.substr(0, 2);
 		
-		if(currentLang === 'he-IL')
+		if(langAbbreviation === 'he' || langAbbreviation === 'ar')
 		{
 			this.dir = 'rtl';
 		}
@@ -74,12 +78,9 @@ export class LanguagePage implements OnInit
 	private _translate(key: string): string
 	{
 		let translationResult = '';
-		
-		this.translate.get(key).subscribe((res) =>
-		                                  {
-			                                  translationResult = res;
-		                                  });
-		
+		this.translate
+		    .get(key)
+		    .subscribe((res) => translationResult = res);
 		return translationResult;
 	}
 }
