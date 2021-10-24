@@ -1,21 +1,21 @@
 import { Component, OnDestroy }              from '@angular/core';
 import { TranslateService, LangChangeEvent } from '@ngx-translate/core';
 import { MenuController }                    from '@ionic/angular';
-import { takeUntil }                         from 'rxjs/operators';
 import { Subject }                           from 'rxjs';
-import { Storage }                           from 'services/storage.service';
+import { takeUntil }                         from 'rxjs/operators';
+import { StorageService }                    from 'services/storage.service';
 
 @Component({
-	           selector: 'e-cu-menu',
+	           selector:    'e-cu-menu',
 	           templateUrl: './menu.component.html',
-	           styleUrls: ['./menu.component.scss'],
+	           styleUrls:   ['./menu.component.scss'],
            })
 export class MenuComponent implements OnDestroy
 {
 	private ngDestroy$ = new Subject<void>();
 	
 	constructor(
-			private store: Storage,
+			private storageService: StorageService,
 			private menuCtrl: MenuController,
 			private translateService: TranslateService
 	)
@@ -45,7 +45,7 @@ export class MenuComponent implements OnDestroy
 	
 	public get maintenanceMode()
 	{
-		return this.store.maintenanceMode;
+		return this.storageService.maintenanceMode;
 	}
 	
 	public menuOpened() {}
