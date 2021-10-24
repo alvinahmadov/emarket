@@ -1,45 +1,45 @@
 import { Component }       from '@angular/core';
 import { WarehouseRouter } from '@modules/client.common.angular2/routers/warehouse-router.service';
 import Warehouse           from '@modules/server.common/entities/Warehouse';
-import { Store }           from '../../../src/services/store.service';
+import { StorageService }  from 'services/storage.service';
 
 @Component({
-	           selector: 'page-settings',
+	           selector:    'page-settings',
 	           templateUrl: 'settings.html',
-	           styleUrls: ['./settings.scss'],
+	           styleUrls:   ['./settings.scss'],
            })
 export class SettingsPage
 {
-	selectedSegment: any = 'account';
+	public selectedSegment: any = 'account';
 	
 	public _currWarehouse: Warehouse;
 	
 	constructor(
 			private warehouseRouter: WarehouseRouter,
-			private store: Store
+			private storageService: StorageService
 	)
 	{
 		this.getLocalWarehouse();
 	}
 	
-	get isLogged()
+	public get isLogged(): string
 	{
-		return localStorage.getItem('_warehouseId');
+		return this.storageService.warehouseId;
 	}
 	
-	get isBrowser()
+	public get isBrowser(): boolean
 	{
-		return localStorage.getItem('_platform') === 'browser';
+		return this.storageService.platform === 'browser';
 	}
 	
-	async ionViewCanEnter()
+	public async ionViewCanEnter(): Promise<boolean>
 	{
-		const isLogged = await this.store.isLogged();
+		const isLogged = await this.storageService.isLogged();
 		
-		return this.store.maintenanceMode === null && isLogged;
+		return this.storageService.maintenanceMode === null && isLogged;
 	}
 	
-	getLocalWarehouse()
+	public getLocalWarehouse()
 	{
 		this.warehouseRouter
 		    .get(localStorage.getItem('_warehouseId'))
