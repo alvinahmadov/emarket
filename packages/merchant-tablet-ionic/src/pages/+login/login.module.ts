@@ -1,13 +1,13 @@
 import { NgModule }             from '@angular/core';
-import { LoginPage }            from './login';
-import { TranslateModule }      from '@ngx-translate/core';
-import { AuthService }          from '../../services/auth.service';
-import { Storage }              from 'services/storage.service';
-import { Routes, RouterModule } from '@angular/router';
 import { CommonModule }         from '@angular/common';
 import { FormsModule }          from '@angular/forms';
+import { Routes, RouterModule } from '@angular/router';
 import { IonicModule }          from '@ionic/angular';
-import { TabModule }            from "@modules/client.common.angular2/components/tabs/tab.module";
+import { TranslateModule }      from '@ngx-translate/core';
+import { TabModule }            from '@modules/client.common.angular2/components/tabs/tab.module';
+import { AuthService }          from 'services/auth.service';
+import { StorageService }       from 'services/storage.service';
+import { LoginPage }            from './login';
 
 const routes: Routes = [
 	{
@@ -18,7 +18,7 @@ const routes: Routes = [
 
 @NgModule({
 	          declarations: [LoginPage],
-	          providers:    [AuthService, Storage],
+	          providers:    [AuthService, StorageService],
 	          imports:      [
 		          IonicModule,
 		          RouterModule.forChild(routes),
