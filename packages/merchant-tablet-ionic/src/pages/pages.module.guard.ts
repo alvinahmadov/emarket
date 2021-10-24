@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable }     from '@angular/core';
 import {
 	Router,
 	CanActivate,
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
-}                     from '@angular/router';
-import { Storage }    from 'services/storage.service';
+}                         from '@angular/router';
+import { StorageService } from 'services/storage.service';
 
 @Injectable()
 export class PagesModuleGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Storage
+			private readonly storageService: StorageService
 	)
 	{}
 	
@@ -21,13 +21,13 @@ export class PagesModuleGuard implements CanActivate
 			state: RouterStateSnapshot
 	): boolean
 	{
-		const maintenanceMode = this.store.maintenanceMode;
+		const maintenanceMode = this.storageService.maintenanceMode;
 		if(maintenanceMode)
 		{
 			this.router.navigate(['maintenance-info']);
 			return false;
 		}
-		const serverConnection = Number(this.store.serverConnection);
+		const serverConnection = Number(this.storageService.serverConnection);
 		
 		if(serverConnection === 0)
 		{
