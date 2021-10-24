@@ -1,13 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { OrderRouter }              from '@modules/client.common.angular2/routers/order-router.service';
-import DeliveryType                 from '@modules/server.common/enums/DeliveryType';
-import { Storage }                  from 'services/storage.service';
-import { WarehousesService }        from 'services/warehouses.service';
 import { map }                      from 'rxjs/operators';
+import DeliveryType                 from '@modules/server.common/enums/DeliveryType';
+import { OrderRouter }              from '@modules/client.common.angular2/routers/order-router.service';
+import { StorageService }           from 'services/storage.service';
+import { WarehousesService }        from 'services/warehouses.service';
 
 @Component({
-	           selector: 'order-control-buttons',
-	           styleUrls: ['./order-control-buttons.scss'],
+	           selector:    'order-control-buttons',
+	           styleUrls:   ['./order-control-buttons.scss'],
 	           templateUrl: 'order-control-buttons.html',
            })
 export class OrderControlButtonsComponent implements OnInit
@@ -35,7 +35,7 @@ export class OrderControlButtonsComponent implements OnInit
 	
 	constructor(
 			private orderRouter: OrderRouter,
-			private storage: Storage,
+			private storage: StorageService,
 			private warehousesService: WarehousesService
 	)
 	{}
