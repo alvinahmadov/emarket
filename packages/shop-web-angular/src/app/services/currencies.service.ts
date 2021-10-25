@@ -29,7 +29,6 @@ export class CurrenciesService extends ApolloService
 		super(apollo,
 		      {
 			      serviceName:  "Shop::CurrenciesService",
-			      pollInterval: 8000
 		      });
 		
 		this.currencies$ = this.apollo
