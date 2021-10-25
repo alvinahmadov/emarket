@@ -27,7 +27,7 @@
                 [order]="order"
                 [onUpdateWarehouseStatus]="onUpdateWarehouseStatus"
                 [getWarehouseStatus]="getWarehouseStatus"
-                *ngIf="orderState(order) === OrderState.WarehousePreparation"
+                *ngIf="checkOrderState(order, 0)"
         >
         </order-without-carrier>
 
@@ -35,34 +35,34 @@
                 [order]="order"
                 [onUpdateWarehouseStatus]="onUpdateWarehouseStatus"
                 [getWarehouseStatus]="getWarehouseStatus"
-                *ngIf="orderState(order) === OrderState.InDelivery"
+                *ngIf="checkOrderState(order, 2)"
         >
         </order-with-carrier>
 
         <order-delivered
                 [order]="order"
-                *ngIf="orderState(order) === OrderState.Delivered"
+                *ngIf="checkOrderState(order, 5)"
                 [getWarehouseStatus]="getWarehouseStatus"
         >
         </order-delivered>
 
         <order-canceled
                 [order]="order"
-                *ngIf="orderState(order) === OrderState.Canceled"
+                *ngIf="checkOrderState(order, 3)"
                 [getWarehouseStatus]="getWarehouseStatus"
         >
         </order-canceled>
 
         <order-delivery-problem
                 [order]="order"
-                *ngIf="orderState(order) === OrderState.DeliveryProblem"
+                *ngIf="checkOrderState(order, 4)"
                 [getWarehouseStatus]="getWarehouseStatus"
         >
         </order-delivery-problem>
 
         <order-warehouse-preparation-problem
                 [order]="order"
-                *ngIf="orderState(order) === OrderState.WarehousePreparationProblem"
+                *ngIf="checkOrderState(order, 1)"
                 [getWarehouseStatus]="getWarehouseStatus"
         >
         </order-warehouse-preparation-problem>
