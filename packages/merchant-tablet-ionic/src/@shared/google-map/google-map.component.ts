@@ -1,45 +1,55 @@
-import { ViewChild, Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { Subject, Observable }                            from 'rxjs';
-import { takeUntil }                                      from 'rxjs/operators';
+import {
+	ViewChild, Component, Input,
+	OnInit, OnDestroy
+}                              from '@angular/core';
+import { Subject, Observable } from 'rxjs';
+import { takeUntil }           from 'rxjs/operators';
 
 @Component({
 	           selector: 'google-map',
 	           styles: [
 		           `
-			.g-map {
-				height: 220px;
-				width: 100%;
-			}
-		`,
+                       .g-map {
+                           height: 220px;
+                           width: 100%;
+                       }
+		           `,
 	           ],
-	           template: ` <div #gmap class="g-map"></div> `,
+	           template: `
+		                     <div #gmap class="g-map"></div> `,
            })
 export class GoogleMapComponent implements OnInit, OnDestroy
 {
 	@ViewChild('gmap', { static: true })
-	mapElement: any;
+	public mapElement: any;
 	
 	@Input()
-	mapTypeEvent: Observable<string>;
+	public mapTypeEvent: Observable<string>;
 	
 	@Input()
-	mapCoordEvent: Observable<google.maps.LatLng>;
+	public mapCoordEvent: Observable<google.maps.LatLng | google.maps.LatLngLiteral>;
 	
 	@Input()
-	mapGeometryEvent: Observable<google.maps.GeocoderGeometry | google.maps.places.PlaceGeometry>;
+	public mapGeometryEvent: Observable<google.maps.GeocoderGeometry | google.maps.places.PlaceGeometry>;
 	
-	map: google.maps.Map;
+	public map: google.maps.Map;
 	
 	private _mapMarker: google.maps.Marker;
 	
 	private _ngDestroy$ = new Subject<void>();
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this._setupGoogleMap();
 		this._listenForMapType();
 		this._listenForMapCoordinates();
 		this._listenForMapGeometry();
+	}
+	
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
 	}
 	
 	private _navigateTo(location: google.maps.LatLng)
@@ -92,8 +102,8 @@ export class GoogleMapComponent implements OnInit, OnDestroy
 	private _setupGoogleMap()
 	{
 		const optionsMap = {
-			center: new google.maps.LatLng(0, 0),
-			zoom: 14,
+			center:    new google.maps.LatLng(0, 0),
+			zoom:      14,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		
@@ -108,7 +118,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy
 		this._clearMarker();
 		
 		this._mapMarker = new google.maps.Marker({
-			                                         map: this.map,
+			                                         map:      this.map,
 			                                         position: location,
 			                                         // TODO: we probably should pass Title as parameter here
 			                                         title: 'Store',
@@ -121,11 +131,5 @@ export class GoogleMapComponent implements OnInit, OnDestroy
 		{
 			this._mapMarker.setMap(null);
 		}
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
 	}
 }
