@@ -1,6 +1,6 @@
 <div id="header" class="bar bar-header bar-brand">
-    <h1 class="title">Track Carriers</h1>
-    <div class="buttons buttons-left header-item">
+	<h1 class="title">{{ 'CARRIERS_VIEW.TRACK_CARRIERS' | translate }}</h1>
+	<div class="buttons buttons-left header-item">
 		<span class="left-buttons">
 			<div class="waves-effect waves-classic">
 				<ion-menu-toggle class="button-icon">
@@ -8,49 +8,49 @@
 				</ion-menu-toggle>
 			</div>
 		</span>
-    </div>
+	</div>
 </div>
 <div id="contentWrapper" scroll="false">
-    <div #gmap id="mapDiv" class="map"></div>
-    <div class="sidebar">
-        <ion-item class="statistics">
-            Total Active Carriers: {{ totalActiveCarriers }}
-        </ion-item>
-        <ion-item class="statistics">
-            Total Carriers: {{ totalCarriers }}
-        </ion-item>
-        <ion-item class="statistics">
-            Total Deliveries: {{ totalDeliveries }}
-        </ion-item>
-        <ion-item *ngIf="showCheckboxFilters" (click)="refreshMap();">
-            <ion-label>Show active only</ion-label>
-            <ion-checkbox
-                    slot="end"
-                    [disabled]="loadingMap"
-                    [(ngModel)]="showActiveOnly"
-            ></ion-checkbox>
-        </ion-item>
-        <ion-item *ngIf="showCheckboxFilters" (click)="refreshMap();">
-            <ion-label>Show assigned only</ion-label>
-            <ion-checkbox
-                    slot="end"
-                    [disabled]="loadingMap"
-                    [(ngModel)]="showAssignedOnly"
-            ></ion-checkbox>
-        </ion-item>
-        <ion-item>
-            <ion-label>Search for Carrier</ion-label>
-            <ionic-selectable
-                #filterComponent
-                item-content
-                [(ngModel)]="selectedCarrier"
-                [items]="carrierListDropdown"
-                itemValueField="id"
-                itemTextField="fullName"
-                [canSearch]="true"
-                (onChange)="navigationHandler($event)"
-            >
-            </ionic-selectable>
-        </ion-item>
-    </div>
+	<div #gmap id="mapDiv" class="map"></div>
+	<div class="sidebar">
+		<ion-item class="statistics">
+			{{ 'CARRIERS_VIEW.TOTAL_ACTIVE' | translate }}: {{ totalActiveCarriers }}
+		</ion-item>
+		<ion-item class="statistics">
+			{{ 'CARRIERS_VIEW.CARRIERS' | translate }}: {{ totalCarriers }}
+		</ion-item>
+		<ion-item class="statistics">
+			{{'CARRIERS_VIEW.DELIVERIES_POP_UP.TOTAL_DELIVERIES' | translate }}: {{ totalDeliveries }}
+		</ion-item>
+		<ion-item *ngIf="showCheckboxFilters" (click)="refreshMap();">
+			<ion-label>{{ 'CARRIERS_VIEW.SHOW_ACTIVE_ONLY' | translate }}</ion-label>
+			<ion-checkbox
+					slot="end"
+					[disabled]="loadingMap"
+					[(ngModel)]="showActiveOnly"
+			></ion-checkbox>
+		</ion-item>
+		<ion-item *ngIf="showCheckboxFilters" (click)="refreshMap();">
+			<ion-label>{{ 'CARRIERS_VIEW.SHOW_ASSIGNED_ONLY' | translate }}</ion-label>
+			<ion-checkbox
+					slot="end"
+					[disabled]="loadingMap"
+					[(ngModel)]="showAssignedOnly"
+			></ion-checkbox>
+		</ion-item>
+		<ion-item>
+			<ion-label>{{ 'CARRIERS_VIEW.SEARCH_CARRIER' | translate }}</ion-label>
+			<ionic-selectable
+					#filterComponent
+					item-content
+					[(ngModel)]="selectedCarrier"
+					[items]="carrierListDropdown"
+					itemValueField="id"
+					itemTextField="fullName"
+					[canSearch]="true"
+					(onChange)="navigationHandler($event)"
+			>
+			</ionic-selectable>
+		</ion-item>
+	</div>
 </div>
