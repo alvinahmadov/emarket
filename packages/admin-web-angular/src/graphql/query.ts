@@ -41,6 +41,12 @@ export namespace GQLQuery
 				}
 			}
 		`;
+		
+		export const IsAuthenticated = gql`
+			query AdminAuth {
+				adminAuthenticated
+			}
+		`;
 	}
 	
 	export namespace Carrier
