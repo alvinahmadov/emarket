@@ -1,9 +1,9 @@
-import { Component }   from '@angular/core';
-import { Router }      from '@angular/router';
-import { first }       from 'rxjs/operators';
-import { Storage }     from 'services/storage.service';
-import { AuthService } from 'services/auth.service';
-import { environment } from 'environments/environment';
+import { Component }      from '@angular/core';
+import { Router }         from '@angular/router';
+import { first }          from 'rxjs/operators';
+import { StorageService } from 'services/storage.service';
+import { AuthService }    from 'services/auth.service';
+import { environment }    from 'environments/environment';
 
 @Component({
 	           selector:    'page-login',
@@ -19,7 +19,7 @@ export class LoginPage
 	
 	constructor(
 			private authService: AuthService,
-			private store: Storage,
+			private storageService: StorageService,
 			private router: Router
 	)
 	{
@@ -56,8 +56,8 @@ export class LoginPage
 			console.log(`Merchant logged in with id ${res.warehouse.id}`);
 		}
 		
-		this.store.warehouseId = res.warehouse.id;
-		this.store.token = res.token;
+		this.storageService.warehouseId = res.warehouse.id;
+		this.storageService.token = res.token;
 		
 		this.router.navigate(['warehouse'])
 		    .catch(console.error);
