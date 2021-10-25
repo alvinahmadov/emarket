@@ -1,0 +1,21 @@
+.page-chats {
+    background-color: white;
+    min-height: 100%;
+    overflow: hidden;
+    iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+}
+
+.chat {
+    height: calc(100% - 75px);
+    top: auto;
+    bottom: auto;
+}
+
+.Inbox:not(.chat-only) .center-stage {
+    max-width: 100%!important;
+}
