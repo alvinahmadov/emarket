@@ -1,8 +1,5 @@
 <div class="page-settings">
     <div id="header" class="bar bar-header bar-brand">
-        <h1 class="title">
-            {{ 'SIDE_MENU.GROUPS.SETTINGS.SETTINGS' | translate }}
-        </h1>
         <div class="buttons buttons-left header-item">
 			<span class="left-buttons">
 				<div class="waves-effect waves-classic">
@@ -12,6 +9,9 @@
 				</div>
 			</span>
         </div>
+	    <h1 class="title">
+		    {{ 'SIDE_MENU.GROUPS.SETTINGS.SETTINGS' | translate }}
+	    </h1>
     </div>
 
     <ion-segment [(ngModel)]="selectedSegment" id="segmentContainer">
@@ -35,7 +35,7 @@
     <div [ngSwitch]="selectedSegment">
         <div *ngSwitchCase="'options'" class="segmentDivs" id="optionsDiv">
             <merchant-settings
-                    [currWarehouse]="_currWarehouse"
+                    [currentWarehouse]="_currWarehouse"
             ></merchant-settings>
         </div>
 
