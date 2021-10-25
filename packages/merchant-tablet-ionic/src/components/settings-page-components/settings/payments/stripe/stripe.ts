@@ -13,25 +13,26 @@ import {
 	Validators,
 }                                      from '@angular/forms';
 import { Subject }                     from 'rxjs';
-import PaymentGateways                 from '@modules/server.common/enums/PaymentGateways';
-import { IPaymentGatewayCreateObject } from '@modules/server.common/interfaces/IPaymentGateway';
 import { takeUntil }                   from 'rxjs/operators';
+import { IPaymentGatewayCreateObject } from '@modules/server.common/interfaces/IPaymentGateway';
+import PaymentGateways                 from '@modules/server.common/enums/PaymentGateways';
+import Currency                        from '@modules/server.common/entities/Currency';
 
 @Component({
-	           selector: 'e-cu-stripe-gateway',
+	           selector:    'e-cu-stripe-gateway',
+	           styleUrls:   ['stripe.scss', '../mutation/mutation.scss'],
 	           templateUrl: './stripe.html',
-	           styleUrls: ['stripe.scss', '../mutation/mutation.scss'],
            })
 export class StripeGatewayComponent implements OnInit, OnDestroy
 {
 	@Input()
-	currenciesCodes: string[] = [];
+	public currencies: Currency[] = [];
 	@Input()
-	defaultCompanyBrandLogo: string;
+	public defaultCompanyBrandLogo: string;
 	@Input()
-	defaultCurrency: string;
+	public defaultCurrency: string;
 	@Input()
-	data: {
+	public data: {
 		payButtontext: string;
 		currency: string;
 		companyBrandLogo: string;
@@ -39,59 +40,68 @@ export class StripeGatewayComponent implements OnInit, OnDestroy
 		allowRememberMe: boolean;
 	};
 	@Input()
-	isValid: boolean;
+	public isValid: boolean;
 	
 	@Output()
-	isValidChange = new EventEmitter();
+	public isValidChange = new EventEmitter();
 	@Output()
-	configureObject = new Subject();
+	public configureObject = new Subject();
 	
-	form: FormGroup;
+	public form: FormGroup;
 	
-	payButtontext: AbstractControl;
-	currency: AbstractControl;
-	companyBrandLogo: AbstractControl;
-	publishableKey: AbstractControl;
-	allowRememberMe: AbstractControl;
-	invalidUrl: boolean;
+	public payButtontext: AbstractControl;
+	public currency: AbstractControl;
+	public companyBrandLogo: AbstractControl;
+	public publishableKey: AbstractControl;
+	public allowRememberMe: AbstractControl;
+	public invalidUrl: boolean;
 	
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(private formBuilder: FormBuilder) {}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.buildForm(this.formBuilder);
 		this.bindFormControls();
 		this.onFormChanges();
 	}
 	
-	deleteImg()
-	{
-		this.companyBrandLogo.setValue('');
-	}
-	
-	ngOnDestroy(): void
+	public ngOnDestroy(): void
 	{
 		this.configureObject.next(this.getConfigureObject());
 	}
 	
-	onUrlChanges(isInvalid: boolean)
+	public deleteImg()
+	{
+		this.companyBrandLogo.setValue('');
+	}
+	
+	public onUrlChanges(isInvalid: boolean)
 	{
 		this.invalidUrl = isInvalid;
 		this.isValid = this.form.valid && !isInvalid;
 		this.isValidChange.emit(this.isValid);
 	}
 	
+	public getCurrencySign(currency: Currency)
+	{
+		return currency?.sign ?? currency.code;
+	}
+	
 	private buildForm(formBuilder: FormBuilder)
 	{
 		this.form = formBuilder.group({
-			                              payButtontext: [
-				                              this.data ? this.data.payButtontext : '',
+			                              payButtontext:    [
+				                              this.data
+				                              ? this.data.payButtontext
+				                              : '',
 				                              [Validators.required],
 			                              ],
-			                              currency: [
-				                              this.data ? this.data.currency : this.defaultCurrency,
+			                              currency:         [
+				                              this.data
+				                              ? this.data.currency
+				                              : this.defaultCurrency,
 				                              [Validators.required],
 			                              ],
 			                              companyBrandLogo: [
@@ -100,11 +110,17 @@ export class StripeGatewayComponent implements OnInit, OnDestroy
 				                              : this.defaultCompanyBrandLogo,
 				                              [Validators.required],
 			                              ],
-			                              publishableKey: [
-				                              this.data ? this.data.publishableKey : '',
+			                              publishableKey:   [
+				                              this.data
+				                              ? this.data.publishableKey
+				                              : '',
 				                              Validators.required,
 			                              ],
-			                              allowRememberMe: [this.data ? this.data.allowRememberMe : ''],
+			                              allowRememberMe:  [
+				                              this.data
+				                              ? this.data.allowRememberMe
+				                              : ''
+			                              ],
 		                              });
 	}
 	
@@ -120,7 +136,7 @@ export class StripeGatewayComponent implements OnInit, OnDestroy
 	private getConfigureObject(): IPaymentGatewayCreateObject
 	{
 		return {
-			paymentGateway: PaymentGateways.Stripe,
+			paymentGateway:  PaymentGateways.Stripe,
 			configureObject: this.form.getRawValue(),
 		};
 	}
