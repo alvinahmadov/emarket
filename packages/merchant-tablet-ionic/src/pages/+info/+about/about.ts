@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
-import { UserRouter }           from '@modules/client.common.angular2/routers/user-router.service';
 import { Subscription }         from 'rxjs';
+import { CustomerRouter }       from '@modules/client.common.angular2/routers/customer-router.service';
 import { environment }          from 'environment';
 
 @Component({
@@ -16,7 +16,7 @@ export class AboutPage implements OnDestroy
 	public userId: string;
 	public appVersion: string;
 	
-	constructor(private userRouter: UserRouter)
+	constructor(private userRouter: CustomerRouter)
 	{
 		this.selectedLanguage = localStorage.getItem('_language') || 'en-US';
 		this.deviceId = localStorage.getItem('_deviceId');
