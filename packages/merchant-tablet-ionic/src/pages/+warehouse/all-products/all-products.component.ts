@@ -1,65 +1,65 @@
-import { Component, OnInit, OnDestroy, Input, ElementRef } from '@angular/core';
-import { WarehouseProductsService }                        from '../../../services/warehouse-products.service';
-import { Subscription }                                    from 'rxjs';
-import WarehouseProduct                                    from '@modules/server.common/entities/WarehouseProduct';
-import { ILocaleMember }                                   from "@modules/server.common/interfaces/ILocale";
-import { ProductLocalesService }                           from '@modules/client.common.angular2/locale/product-locales.service';
-import { WarehouseProductsRouter }                         from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import Product                                             from '@modules/server.common/entities/Product';
-import { NgxMasonryOptions }                               from 'ngx-masonry';
-import { ModalController }                                 from '@ionic/angular';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Subscription }                        from 'rxjs';
+import { NgxMasonryOptions }                   from 'ngx-masonry';
+import { ModalController }                     from '@ionic/angular';
+import Product                                 from '@modules/server.common/entities/Product';
+import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
+import { ILocaleMember }                       from '@modules/server.common/interfaces/ILocale';
+import { ProductLocalesService }               from '@modules/client.common.angular2/locale/product-locales.service';
+import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { WarehouseProductsService }            from 'services/warehouse-products.service';
 
 @Component({
-	           selector: 'merchant-all-products',
-	           templateUrl: 'all-products.component.html',
-	           styleUrls: ['all-products.component.scss'],
+	           selector:    'merchant-all-products',
+	           styleUrls:   ['./all-products.component.scss'],
+	           templateUrl: './all-products.component.html',
            })
 export class AllProductsComponent implements OnInit, OnDestroy
 {
 	@Input()
-	warehouseId: string;
+	public warehouseId: string;
 	
 	@Input()
-	presentCreateProductPopover: () => void;
+	public presentCreateProductPopover: () => void;
 	
 	@Input()
-	addProduct: (string) => void;
+	public addProduct: (string) => void;
 	
 	@Input()
-	removeProduct: (string) => void;
+	public removeProduct: (string) => void;
 	
 	@Input()
-	getWarehouseProductImageUrl: (p: Product) => string;
+	public getWarehouseProductImageUrl: (p: Product) => string;
 	
 	@Input()
-	openEditProductModal: (p: any) => Promise<void>;
+	public openEditProductModal: (p: any) => Promise<void>;
 	
 	@Input()
-	truncateTitle: (title: string) => string;
+	public truncateTitle: (title: string) => string;
 	
 	@Input()
-	localeTranslate: (locale: ILocaleMember[]) => string;
+	public localeTranslate: (locale: ILocaleMember[]) => string;
 	
 	private products$: Subscription;
 	
-	allProducts: WarehouseProduct[] = [];
+	public allProducts: WarehouseProduct[] = [];
 	
 	public masonryOptions: NgxMasonryOptions = {
-		itemSelector: '.masonry-item',
-		columnWidth: 234,
+		itemSelector:       '.masonry-item',
+		columnWidth:        234,
 		transitionDuration: '0.2s',
-		gutter: 10,
-		resize: true,
-		initLayout: true,
-		fitWidth: true,
+		gutter:             10,
+		resize:             true,
+		initLayout:         true,
+		fitWidth:           true,
 	};
 	
-	page: number = 1;
-	productsCount: number;
-	paginationCount: number = 10;
+	public page: number = 1;
+	public productsCount: number;
+	public paginationCount: number = 10;
 	
-	updateMasonryLayout: boolean = false;
-	showNoProductsIcon: boolean = false;
+	public updateMasonryLayout: boolean = false;
+	public showNoProductsIcon: boolean = false;
 	
 	constructor(
 			private warehouseProductsService: WarehouseProductsService,
@@ -69,7 +69,7 @@ export class AllProductsComponent implements OnInit, OnDestroy
 	)
 	{}
 	
-	async ngOnInit()
+	public ngOnInit()
 	{
 		this.warehouseProductsService
 		    .getProductsCount(this.warehouseId)
@@ -83,7 +83,15 @@ export class AllProductsComponent implements OnInit, OnDestroy
 		this.loadPage(this.page);
 	}
 	
-	loadPage(page: number)
+	public ngOnDestroy()
+	{
+		if(this.products$)
+		{
+			this.products$.unsubscribe();
+		}
+	}
+	
+	public loadPage(page: number)
 	{
 		if(this.products$)
 		{
@@ -92,7 +100,7 @@ export class AllProductsComponent implements OnInit, OnDestroy
 		
 		this.products$ = this.warehouseProductsService
 		                     .getProductsWithPagination(this.warehouseId, {
-			                     skip: (page - 1) * 10,
+			                     skip:  (page - 1) * 10,
 			                     limit: 10,
 		                     })
 		                     .subscribe((products) =>
@@ -102,29 +110,21 @@ export class AllProductsComponent implements OnInit, OnDestroy
 			                                this.allProducts = products.map(
 					                                (p) =>
 							                                new WarehouseProduct({
-								                                                     _id: p._id,
-								                                                     count: p.count,
-								                                                     product: p.product,
-								                                                     isManufacturing: p.isManufacturing,
-								                                                     isCarrierRequired: p.isCarrierRequired,
+								                                                     _id:                p._id,
+								                                                     count:              p.count,
+								                                                     product:            p.product,
+								                                                     isManufacturing:    p.isManufacturing,
+								                                                     isCarrierRequired:  p.isCarrierRequired,
 								                                                     isDeliveryRequired: p.isCarrierRequired,
-								                                                     isTakeaway: p.isTakeaway,
-								                                                     _createdAt: p._createdAt,
-								                                                     _updatedAt: p._updatedAt,
-								                                                     price: p.price,
-								                                                     initialPrice: p.initialPrice,
+								                                                     isTakeaway:         p.isTakeaway,
+								                                                     _createdAt:         p._createdAt,
+								                                                     _updatedAt:         p._updatedAt,
+								                                                     price:              p.price,
+								                                                     initialPrice:       p.initialPrice,
 							                                                     })
 			                                );
 			
 			                                this.page = page;
 		                                });
-	}
-	
-	ngOnDestroy()
-	{
-		if(this.products$)
-		{
-			this.products$.unsubscribe();
-		}
 	}
 }
