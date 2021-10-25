@@ -3,16 +3,16 @@ import { ActivatedRoute }    from '@angular/router';
 
 @Component({
 	           selector: 'about',
-	           styles: [``],
+	           styles:   [``],
 	           template: `
-		<h1>About</h1>
-		<div>
-			For hot module reloading run
-			<pre>npm run start:hmr</pre>
-		</div>
-		<div><h3>patrick@tipe.io</h3></div>
-		<pre>this.localState = {{ localState | json }}</pre>
-	`,
+		                     <h1>About</h1>
+		                     <div>
+			                     For hot module reloading run
+			                     <pre>npm run start:hmr</pre>
+		                     </div>
+		                     <div><h3>patrick@tipe.io</h3></div>
+		                     <pre>this.localState = {{ localState | json }}</pre>
+	                     `,
            })
 export class AboutComponent implements OnInit
 {
@@ -49,11 +49,12 @@ export class AboutComponent implements OnInit
 		 */
 		setTimeout(() =>
 		           {
-			           import('../../assets/mock-data/mock-data.json').then((json) =>
-			                                                                {
-				                                                                console.log('async mockData', json);
-				                                                                this.localState = json;
-			                                                                });
+			           import('../../assets/mock-data/mock-data.json')
+					           .then((json) =>
+					                 {
+						                 console.log('async mockData', json);
+						                 this.localState = json;
+					                 });
 		           });
 	}
 }
