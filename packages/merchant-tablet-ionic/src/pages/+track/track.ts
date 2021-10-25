@@ -4,22 +4,23 @@ import {
 	ElementRef,
 	OnDestroy,
 	OnInit,
-} from '@angular/core';
-
-import Carrier                      from '@modules/server.common/entities/Carrier';
-import { CarrierService }           from '../../../src/services/carrier.service';
+}                                   from '@angular/core';
+import { ActivatedRoute, Router }   from '@angular/router';
 import { Subject, Subscription }    from 'rxjs';
 import { IonicSelectableComponent } from 'ionic-selectable';
-import { ActivatedRoute, Router }   from '@angular/router';
+import Carrier                      from '@modules/server.common/entities/Carrier';
+import Order                        from '@modules/server.common/entities/Order';
+import { CarrierService }           from 'services/carrier.service';
 import { WarehousesService }        from 'services/warehouses.service';
-import { WarehouseOrdersService }   from '../../services/warehouse-orders.service';
+import { WarehouseOrdersService }   from 'services/warehouse-orders.service';
+import { StorageService } from 'services/storage.service';
 
 declare var google: any;
 
 @Component({
-	           selector: 'page-track',
+	           selector:    'page-track',
 	           templateUrl: 'track.html',
-	           styleUrls: ['./track.scss'],
+	           styleUrls:   ['./track.scss'],
            })
 export class TrackPage implements OnInit, OnDestroy
 {
@@ -31,48 +32,65 @@ export class TrackPage implements OnInit, OnDestroy
 	private orders$: Subscription;
 	private _ngDestroy$ = new Subject<void>();
 	
-	map: google.maps.Map;
-	selectedCarrier: Carrier;
-	carriers: Carrier[];
-	markers: google.maps.Marker[] = [];
-	totalDeliveries = 0;
-	totalCarriers = 0;
-	totalActiveCarriers = 0;
-	showAssignedOnly = true;
-	showActiveOnly = true;
-	showCheckboxFilters = true;
-	loadingMap = false;
-	listOfOrders: any;
-	storeIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon21.png';
-	sharedCarrierIcon = 'http://maps.google.com/mapfiles/kml/pal4/icon23.png';
-	userIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon48.png';
-	carrierIcon = 'http://maps.google.com/mapfiles/kml/pal4/icon54.png';
-	carrierListDropdown: Carrier[];
-	sharedCarrierListId: string[];
+	public map: google.maps.Map;
+	public selectedCarrier: Carrier;
+	public carriers: Carrier[];
+	public markers: google.maps.Marker[] = [];
+	public totalDeliveries = 0;
+	public totalCarriers = 0;
+	public totalActiveCarriers = 0;
+	public showAssignedOnly = true;
+	public showActiveOnly = true;
+	public showCheckboxFilters = true;
+	public loadingMap = false;
+	public listOfOrders: any;
+	public storeIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon21.png';
+	public sharedCarrierIcon = 'http://maps.google.com/mapfiles/kml/pal4/icon23.png';
+	public userIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon48.png';
+	public carrierIcon = 'http://maps.google.com/mapfiles/kml/pal4/icon54.png';
+	public carrierListDropdown: Carrier[];
+	public sharedCarrierListId: string[];
 	
 	@ViewChild('gmap', { static: true })
-	gmapElement: ElementRef;
+	public gmapElement: ElementRef;
 	
 	@ViewChild('filterComponent', { static: true })
-	filterComponent: IonicSelectableComponent;
+	public filterComponent: IonicSelectableComponent;
 	
 	constructor(
 			private carrierService: CarrierService,
 			private route: ActivatedRoute,
 			private router: Router,
 			private warehouseService: WarehousesService,
-			private warehouseOrderService: WarehouseOrdersService
+			private warehouseOrderService: WarehouseOrdersService,
+			private storageService: StorageService,
 	)
 	{
 		this.route.params.subscribe(() => this.loadData());
 	}
 	
-	openModal()
+	public ngOnInit(): void {}
+	
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+		if(this.carriers$)
+		{
+			this.carriers$.unsubscribe();
+		}
+		if(this.params$)
+		{
+			this.params$.unsubscribe();
+		}
+	}
+	
+	public openModal()
 	{
 		this.filterComponent.close();
 	}
 	
-	navigationHandler(event: {
+	public navigationHandler(event: {
 		component: IonicSelectableComponent;
 		value: any;
 	})
@@ -83,9 +101,7 @@ export class TrackPage implements OnInit, OnDestroy
 		this.router.navigate([`track/${event.value.id}`]);
 	}
 	
-	ngOnInit(): void {}
-	
-	loadData()
+	public loadData()
 	{
 		this.warehouse$ = this.warehouseService
 		                      .getAllStores()
@@ -171,114 +187,116 @@ export class TrackPage implements OnInit, OnDestroy
 		                                 });
 	}
 	
-	get warehouseId()
+	public get warehouseId(): string
 	{
-		return localStorage.getItem('_warehouseId');
+		return this.storageService.warehouseId;
 	}
 	
-	drawOrderRoutes()
+	public drawOrderRoutes()
 	{
 		this.warehouseOrderService
 		    .getOrdersInDelivery(this.warehouseId)
-		    .then((orderList) =>
+		    .then((orderList: Order[]) =>
 		          {
 			          this.listOfOrders = orderList;
-			          this.listOfOrders.forEach((order) =>
-			                                    {
-				                                    const carrier = this.carriersOnDisplay.find(
-						                                    (x) => x.id === order.carrier.id
-				                                    );
+			          this.listOfOrders
+			              .forEach((order: Order) =>
+			                       {
+				                       const carrier: Carrier = this.carriersOnDisplay.find(
+						                       (x) => (order?.carrierId)
+						                              ? x.id === order.carrierId
+						                              : typeof order.carrier === Carrier.name
+						                                ? x.id === (order.carrier as Carrier).id
+						                                : false
+				                       );
 				
-				                                    if(carrier && carrier.shared)
-				                                    {
-					                                    this.addMarker(
-							                                    {
-								                                    lat:
-										                                    order.carrier.geoLocation.loc
-												                                    .coordinates[1],
-								                                    lng:
-										                                    order.carrier.geoLocation.loc
-												                                    .coordinates[0],
-							                                    },
-							                                    this.map,
-							                                    this.sharedCarrierIcon
-					                                    );
-				                                    }
+				                       if(carrier && carrier.shared)
+				                       {
+					                       let _carrier = order.carrier as Carrier;
+					                       this.addMarker(
+							                       {
+								                       lat: _carrier.geoLocation
+										                            .loc
+										                            .coordinates[1],
+								                       lng: _carrier.geoLocation
+										                            .loc
+										                            .coordinates[0],
+							                       },
+							                       this.map,
+							                       this.sharedCarrierIcon
+					                       );
+				                       }
+				                       const carrierId = order?.carrierId
+				                                         ? order.carrierId
+				                                         : (order.carrier as Carrier).id;
 				
-				                                    const carriersWithOrders = orderList.map(
-						                                    (o) => o.carrier.id
-				                                    );
-				                                    this.carriers = this.carriers.filter((car) =>
-				                                                                         {
-					                                                                         if(
-							                                                                         !carriersWithOrders.includes(car.id) &&
-							                                                                         car.shared
-					                                                                         )
-					                                                                         {
-						                                                                         return false;
-					                                                                         }
-					                                                                         else
-					                                                                         {
-						                                                                         return true;
-					                                                                         }
-				                                                                         });
-				                                    this.carrierListDropdown = this.carriers;
+				                       const carriersWithOrders = orderList.map(
+						                       (o) => typeof o.carrier === 'string'
+						                              ? o.carrier
+						                              : o.carrier.id
+				                       );
+				                       this.carriers = this.carriers.filter(
+						                       (car) => !(!carriersWithOrders.includes(car.id) &&
+						                                  car.shared));
+				                       this.carrierListDropdown = this.carriers;
 				
-				                                    if(
-						                                    this.carriersOnDisplay
-						                                        .map((car) => car.id)
-						                                        .includes(order.carrier.id)
-				                                    )
-				                                    {
-					                                    this.addMarker(
-							                                    {
-								                                    lat: order.user.geoLocation.loc.coordinates[1],
-								                                    lng: order.user.geoLocation.loc.coordinates[0],
-							                                    },
-							                                    this.map,
-							                                    this.userIcon
-					                                    );
+				                       if(
+						                       this.carriersOnDisplay
+						                           .map((car) => car.id)
+						                           .includes(carrierId)
+				                       )
+				                       {
+					                       this.addMarker(
+							                       {
+								                       lat: order.customer.geoLocation.loc.coordinates[1],
+								                       lng: order.customer.geoLocation.loc.coordinates[0],
+							                       },
+							                       this.map,
+							                       this.userIcon
+					                       );
 					
-					                                    const request = {
-						                                    origin: new google.maps.LatLng(
-								                                    order.carrier.geoLocation.loc.coordinates[1],
-								                                    order.carrier.geoLocation.loc.coordinates[0]
-						                                    ),
-						                                    destination: new google.maps.LatLng(
-								                                    order.user.geoLocation.loc.coordinates[1],
-								                                    order.user.geoLocation.loc.coordinates[0]
-						                                    ),
-						                                    travelMode: 'DRIVING',
-					                                    };
-					                                    const directionsDisplay = new google.maps.DirectionsRenderer(
-							                                    {
-								                                    polylineOptions: {
-									                                    strokeColor: `hsl(${Math.floor(
-											                                    Math.random() * 320
-									                                    )},100%,50%)`,
-								                                    },
-							                                    }
-					                                    );
-					                                    const directionsService = new google.maps.DirectionsService();
-					                                    directionsService.route(request, function(res, stat)
-					                                    {
-						                                    if(stat === 'OK')
-						                                    {
-							                                    directionsDisplay.setDirections(res);
-						                                    }
-					                                    });
+					                       const request = {
+						                       origin:      new google.maps.LatLng(
+								                       (order.carrier as Carrier)
+										                       .geoLocation.loc.coordinates[1],
+								                       (order.carrier as Carrier)
+										                       .geoLocation.loc.coordinates[0]
+						                       ),
+						                       destination: new google.maps.LatLng(
+								                       order.customer.geoLocation.loc.coordinates[1],
+								                       order.customer.geoLocation.loc.coordinates[0]
+						                       ),
+						                       travelMode:  'DRIVING',
+					                       };
+					                       const directionsDisplay = new google.maps.DirectionsRenderer(
+							                       {
+								                       polylineOptions: {
+									                       strokeColor: `hsl(${Math.floor(
+											                       Math.random() * 320
+									                       )},100%,50%)`,
+								                       },
+							                       }
+					                       );
+					                       const directionsService = new google.maps.DirectionsService();
+					                       directionsService.route(request, function(res, stat)
+					                       {
+						                       if(stat === 'OK')
+						                       {
+							                       directionsDisplay.setDirections(res);
+						                       }
+					                       });
 					
-					                                    directionsDisplay.setOptions({
-						                                                                 suppressMarkers: true,
-					                                                                 });
+					                       directionsDisplay.setOptions({
+						                                                    suppressMarkers: true,
+					                                                    });
 					
-					                                    directionsDisplay.setMap(this.map);
-				                                    }
-			                                    });
+					                       directionsDisplay.setMap(this.map);
+				                       }
+			                       });
 		          });
 	}
 	
-	renderCarriers(carriers: Carrier[])
+	public renderCarriers(carriers: Carrier[])
 	{
 		if(this.markers.length > 0)
 		{
@@ -304,7 +322,7 @@ export class TrackPage implements OnInit, OnDestroy
 		this.drawOrderRoutes();
 	}
 	
-	filterDisplayedCarriers()
+	public filterDisplayedCarriers()
 	{
 		let filteredCarriers = this.carriers;
 		if(this.showActiveOnly && this.carriers.length > 1)
@@ -324,14 +342,14 @@ export class TrackPage implements OnInit, OnDestroy
 		this.carriersOnDisplay = filteredCarriers;
 	}
 	
-	loadGoogleMaps()
+	public loadGoogleMaps()
 	{
 		this.loadingMap = true;
 		const initialCoords = new google.maps.LatLng(42.7089136, 23.3702736);
 		
 		const mapProp = {
-			center: initialCoords,
-			zoom: 13,
+			center:    initialCoords,
+			zoom:      13,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		
@@ -339,7 +357,7 @@ export class TrackPage implements OnInit, OnDestroy
 		this.loadingMap = false;
 	}
 	
-	addMarker(
+	public addMarker(
 			position: { lat: number; lng: number },
 			map: google.maps.Map,
 			icon: string
@@ -353,23 +371,9 @@ export class TrackPage implements OnInit, OnDestroy
 		this.markers.push(marker);
 	}
 	
-	refreshMap()
+	public refreshMap()
 	{
 		this.filterDisplayedCarriers();
 		this.renderCarriers(this.carriersOnDisplay);
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-		if(this.carriers$)
-		{
-			this.carriers$.unsubscribe();
-		}
-		if(this.params$)
-		{
-			this.params$.unsubscribe();
-		}
 	}
 }
