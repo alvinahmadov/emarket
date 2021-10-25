@@ -7,57 +7,60 @@ import {
 	Output,
 	EventEmitter,
 }                                 from '@angular/core';
-import { WarehouseOrdersService } from '../../../services/warehouse-orders.service';
-import { Store }                  from '../../../services/store.service';
-import Order                      from '@modules/server.common/entities/Order';
-import { OrderState }             from '../warehouse';
 import { Subscription }           from 'rxjs';
+import Order                      from '@modules/server.common/entities/Order';
+import { StorageService }         from 'services/storage.service';
+import { WarehouseOrdersService } from 'services/warehouse-orders.service';
+import { OrderState }             from '../warehouse';
 
 @Component({
-	           selector: 'merchant-all-orders',
+	           selector:    'merchant-all-orders',
 	           templateUrl: 'all-orders.component.html',
-	           styleUrls: ['./all-orders.component.scss'],
+	           styleUrls:   ['./all-orders.component.scss'],
            })
 export class AllOrdersComponent implements OnInit, OnDestroy, OnChanges
 {
 	@Input()
-	getWarehouseStatus: () => void;
+	public getWarehouseStatus: () => void;
 	
 	@Input()
-	onUpdateWarehouseStatus: any;
+	public onUpdateWarehouseStatus: any;
 	
 	@Input()
-	orderState: (Order) => void;
+	public orderState: (order: Order) => OrderState;
 	
 	@Input()
-	focusedOrder: Order;
+	public focusedOrder: Order;
 	
 	@Input()
-	isOrderContainerLive: boolean;
+	public isOrderContainerLive: boolean;
 	
 	@Output()
-	toggleOrderContainer: EventEmitter<boolean> = new EventEmitter();
+	public toggleOrderContainer: EventEmitter<boolean> = new EventEmitter();
 	
-	orders: Order[] = [];
-	ordersCount: number;
-	OrderState: any = OrderState;
-	page: number = 1;
-	ordersLoaded: boolean;
+	public orders: Order[] = [];
+	public ordersCount: number;
+	public OrderState: OrderState;
+	public page: number = 1;
+	public ordersLoaded: boolean;
 	
 	private orders$: Subscription;
 	
 	constructor(
 			private warehouseOrdersService: WarehouseOrdersService,
-			private store: Store
+			private store: StorageService
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnDestroy()
 	{
-		this.loadAllOrders();
+		if(this.orders$)
+		{
+			this.orders$.unsubscribe();
+		}
 	}
 	
-	ngOnChanges()
+	public ngOnChanges()
 	{
 		if(this.focusedOrder)
 		{
@@ -71,7 +74,17 @@ export class AllOrdersComponent implements OnInit, OnDestroy, OnChanges
 		}
 	}
 	
-	async loadPage(page: number)
+	public checkOrderState(order: Order, state: OrderState): boolean
+	{
+		return this.orderState(order) === state;
+	}
+	
+	public ngOnInit()
+	{
+		this.loadAllOrders();
+	}
+	
+	public async loadPage(page: number)
 	{
 		if(this.orders$)
 		{
@@ -82,11 +95,11 @@ export class AllOrdersComponent implements OnInit, OnDestroy, OnChanges
 		                   .getStoreOrdersTableData(
 				                   this.store.warehouseId,
 				                   {
-					                   sort: {
-						                   field: '_createdAt',
+					                   sort:  {
+						                   field:  '_createdAt',
 						                   sortBy: 'desc',
 					                   },
-					                   skip: (page - 1) * 10,
+					                   skip:  (page - 1) * 10,
 					                   limit: 10,
 				                   },
 				                   'all'
@@ -103,14 +116,6 @@ export class AllOrdersComponent implements OnInit, OnDestroy, OnChanges
 			                              }
 			                              this.ordersLoaded = true;
 		                              });
-	}
-	
-	ngOnDestroy()
-	{
-		if(this.orders$)
-		{
-			this.orders$.unsubscribe();
-		}
 	}
 	
 	private async loadAllOrders()
