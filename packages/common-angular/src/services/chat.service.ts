@@ -9,6 +9,7 @@ export type ChatUser = Talk.User;
 export type ChatSession = Talk.Session;
 export type ChatInbox = Talk.Inbox;
 export type ChatBox = Talk.Chatbox;
+export type ChatPopup = Talk.Popup;
 export type ChatConversation = Talk.ConversationBuilder;
 
 @Injectable({
@@ -28,7 +29,7 @@ export class ChatService
 			private httpClient: HttpClient
 	)
 	{
-		this.appId = environment['TALKJS_APP_ID'];
+		this.appId = environment.TALKJS_APP_ID;
 		this.apiBaseUrl = 'https://api.talkjs.com';
 	}
 	
@@ -110,6 +111,26 @@ export class ChatService
 		         });
 		await inbox.mount(elementContainer.nativeElement);
 		return inbox;
+	}
+	
+	public async createChatbox(
+			session: Talk.Session,
+			elementContainer?: ElementRef
+	)
+	{
+		const chatbox = session.createChatbox(this.selectedConversation);
+		await chatbox.mount(elementContainer.nativeElement);
+		return chatbox;
+	}
+	
+	public async createPopup(
+			session: Talk.Session,
+			elementContainer?: ElementRef
+	)
+	{
+		const popup = session.createPopup(this.selectedConversation);
+		await popup.mount(elementContainer.nativeElement);
+		return popup;
 	}
 	
 	public get messages(): Observable<object | null>
