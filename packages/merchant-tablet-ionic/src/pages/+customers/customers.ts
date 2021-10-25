@@ -11,7 +11,7 @@ import { IOrderCreateInput }             from '@modules/server.common/routers/IW
 import { WarehouseOrdersRouter }         from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
 import { CustomerAddrPopupPage }         from './customer-addr-popup/customer-addr-popup';
 import { UserMutationComponent }         from '../../@shared/user/mutation/user-mutation.component';
-import { Storage }                       from '../../services/storage.service';
+import { StorageService }                from '../../services/storage.service';
 import { WarehouseOrdersService }        from '../../services/warehouse-orders.service';
 import { OrdersService }                 from '../../services/orders.service';
 import { AddressComponent }              from '../../components/users-table/address';
@@ -44,7 +44,7 @@ export class CustomersPage implements OnDestroy
 			private readonly _translateService: TranslateService,
 			private readonly ordersService: OrdersService,
 			private readonly warehouseOrdersService: WarehouseOrdersService,
-			private readonly store: Storage
+			private readonly storageService: StorageService
 	)
 	{
 		this.loadCustomers();
@@ -71,9 +71,9 @@ export class CustomersPage implements OnDestroy
 	
 	public async ionViewCanEnter(): Promise<boolean>
 	{
-		const isLogged = await this.store.isLogged();
+		const isLogged = await this.storageService.isLogged();
 		
-		return this.store.maintenanceMode === null && isLogged;
+		return this.storageService.maintenanceMode === null && isLogged;
 	}
 	
 	public ionViewWillLeave(): void
