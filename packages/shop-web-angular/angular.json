@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ever-shop-web": {
+    "shop-web-angular": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -70,18 +70,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ever-admin:build"
+            "browserTarget": "shop-web-angular:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ever-admin:build:production"
+              "browserTarget": "shop-web-angular:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ever-admin:build"
+            "browserTarget": "shop-web-angular:build"
           }
         },
         "test": {
@@ -124,7 +124,7 @@
         }
       }
     },
-    "ever-admin-e2e": {
+    "shop-web-angular-e2e": {
       "root": "",
       "sourceRoot": "",
       "projectType": "application",
@@ -133,7 +133,7 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "./protractor.conf.js",
-            "devServerTarget": "ever-admin:serve"
+            "devServerTarget": "shop-web-angular:serve"
           }
         },
         "lint": {
@@ -150,16 +150,16 @@
       }
     }
   },
-  "defaultProject": "ever-shop-web",
+  "defaultProject": "shop-web-angular",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "ea",
       "style": "scss",
-      "name": "ever-shop-web"
+      "name": "shop-web-angular"
     },
     "@schematics/angular:directive": {
       "prefix": "ea",
-      "name": "ever-shop-web"
+      "name": "shop-web-angular"
     }
   }
 }
