@@ -6,14 +6,15 @@ import {
 	ViewChild,
 	OnInit,
 }                                                      from '@angular/core';
-import { FileUploader, FileUploaderOptions, FileItem } from 'ng2-file-upload';
-import { environment }                                 from 'environments/environment';
+import { NgModel }                                     from '@angular/forms';
 import { ActionSheetController }                       from '@ionic/angular';
 import { Camera, CameraOptions }                       from '@ionic-native/camera/ngx';
+import { TranslateService }                            from '@ngx-translate/core';
+import { FileUploader, FileUploaderOptions, FileItem } from 'ng2-file-upload';
 import { IProductImage }                               from '@modules/server.common/interfaces/IProduct';
 import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
-import { LocaleService }                               from '@modules/client.common.angular2/locale/locale.service';
-import { NgModel }                                     from '@angular/forms';
+import { environment }                                 from 'environments/environment';
+import { StorageService }                              from 'services/storage.service';
 
 @Component({
 	           selector:    'e-cu-file-uploader',
@@ -23,71 +24,73 @@ import { NgModel }                                     from '@angular/forms';
 export class FileUploaderComponent implements OnInit
 {
 	@ViewChild('shownInput', { static: true })
-	shownInput: NgModel;
+	public shownInput: NgModel;
 	
 	@Input()
-	labelText: string;
+	public labelText: string;
+	
 	@Input()
-	name: string;
+	public name: string;
 	@Input()
-	buttonFullSpace: boolean;
+	public buttonFullSpace: boolean;
 	@Input()
-	fileUrl: string;
+	public fileUrl: string;
 	@Input()
-	itemMode: string;
+	public itemMode: string;
 	@Input()
-	inputCustomStyle: boolean;
+	public inputCustomStyle: boolean;
 	
 	@Output()
-	uploadedImgUrl: EventEmitter<string> = new EventEmitter<string>();
+	public uploadedImgUrl: EventEmitter<string> = new EventEmitter<string>();
 	@Output()
-	uploadedImgObj: EventEmitter<IProductImage> = new EventEmitter<IProductImage>();
+	public uploadedImgObj: EventEmitter<IProductImage> = new EventEmitter<IProductImage>();
 	
-	uploader: FileUploader;
+	public uploader: FileUploader;
 	
 	private PREFIX: string = 'FILE_UPLOADER.';
 	private DRAG_AND_DROP: string = 'DRAG_AND_DROP_FILE_HERE';
 	private PICTURE_URL: string = 'PICTURE_URL';
 	
 	constructor(
-			private localeService: LocaleService,
+			private storageService: StorageService,
+			private translateService: TranslateService,
 			private actionSheetCtrl: ActionSheetController,
 			private camera: Camera,
 			public readonly localeTranslateService: ProductLocalesService
 	)
 	{}
 	
-	get isBrowser()
+	public get isBrowser(): boolean
 	{
-		return localStorage.getItem('_platform') === 'browser';
+		return this.storageService.platform === 'browser';
 	}
 	
-	get warehouseId()
+	public get warehouseId(): string
 	{
-		return localStorage.getItem('_warehouseId');
+		return this.storageService.warehouseId;
 	}
 	
-	get dragAndDrob()
+	public get dragAndDrob(): string
 	{
-		return this.localeService.translate(this.PREFIX + this.DRAG_AND_DROP);
+		return this._translate(this.PREFIX + this.DRAG_AND_DROP);
 	}
 	
-	get pictureURL()
+	public get pictureURL(): string
 	{
-		return this.localeService.translate(this.PREFIX + this.PICTURE_URL);
+		return this._translate(this.PREFIX + this.PICTURE_URL);
 	}
 	
-	get currentLocale()
+	public get currentLocale(): string
 	{
 		return this.localeTranslateService.currentLocale;
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this._uploaderConfig();
 	}
 	
-	imageUrlChanged()
+	public imageUrlChanged()
 	{
 		if(this.uploader.queue.length > 0)
 		{
@@ -125,30 +128,32 @@ export class FileUploaderComponent implements OnInit
 		};
 	}
 	
-	async presentActionSheet()
+	public async presentActionSheet()
 	{
-		const actionSheet = await this.actionSheetCtrl.create({
-			                                                      header:  'Select Image Source',
-			                                                      buttons: [
-				                                                      {
-					                                                      text:    'Load from Library',
-					                                                      handler: () =>
-					                                                               {
-						                                                               this._takePicture(
-								                                                               this.camera.PictureSourceType.PHOTOLIBRARY
-						                                                               );
-					                                                               },
-				                                                      },
-				                                                      {
-					                                                      text:    'Use Camera',
-					                                                      handler: () =>
-					                                                               {
-						                                                               this._takePicture(this.camera.PictureSourceType.CAMERA);
-					                                                               },
-				                                                      },
-				                                                      { text: 'Cancel', role: 'cancel' },
-			                                                      ],
-		                                                      });
+		const actionSheet = await this.actionSheetCtrl.create(
+				{
+					header:  'Select Image Source',
+					buttons: [
+						{
+							text:    'Load from Library',
+							handler: () =>
+							         {
+								         this._takePicture(
+										         this.camera.PictureSourceType.PHOTOLIBRARY
+								         );
+							         },
+						},
+						{
+							text:    'Use Camera',
+							handler: () =>
+							         {
+								         this._takePicture(this.camera.PictureSourceType.CAMERA);
+							         },
+						},
+						{ text: 'Cancel', role: 'cancel' },
+					],
+				}
+		);
 		await actionSheet.present();
 	}
 	
@@ -190,6 +195,13 @@ export class FileUploaderComponent implements OnInit
 		};
 	}
 	
+	private _translate(key: string): string
+	{
+		let translationResult = '';
+		this.translateService.get(key).subscribe((res) => translationResult = res);
+		return translationResult;
+	}
+	
 	private _takePicture(sourceType: number)
 	{
 		const options: CameraOptions = {
@@ -214,11 +226,11 @@ export class FileUploaderComponent implements OnInit
 					this.uploader.queue.push(fileItem);
 					this.imageUrlChanged();
 				},
-				(err) => {}
+				() => {}
 		);
 	}
 	
-	private _urltoFile(url, filename, mimeType)
+	private _urltoFile(url, filename, mimeType): Promise<File>
 	{
 		return fetch(url)
 				.then(function(res)
@@ -231,7 +243,7 @@ export class FileUploaderComponent implements OnInit
 				      });
 	}
 	
-	private static _createFileName()
+	private static _createFileName(): string
 	{
 		return new Date().getTime() + '.jpg';
 	}
