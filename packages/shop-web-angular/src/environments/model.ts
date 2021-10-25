@@ -19,6 +19,7 @@ export interface Environment
 	VKONTAKTE_APP_URL: string;
 	GOOGLE_MAPS_API_KEY: string;
 	YANDEX_MAPS_API_KEY: string;
+	TALKJS_APP_ID: string;
 	DEFAULT_COORDINATES?: boolean;
 	DEFAULT_LATITUDE?: number;
 	DEFAULT_LONGITUDE?: number;
