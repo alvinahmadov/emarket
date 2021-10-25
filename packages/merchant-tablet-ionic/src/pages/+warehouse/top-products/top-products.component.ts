@@ -1,51 +1,47 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Subscription }                        from 'rxjs';
-import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { ILocaleMember }                       from '@modules/server.common/interfaces/ILocale';
+import Product                                 from '@modules/server.common/entities/Product';
 import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
-import { ProductLocalesService }               from '@modules/client.common.angular2/locale/product-locales.service';
-import { ModalController }                     from '@ionic/angular';
+import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
 
 @Component({
-	           selector: 'merchant-top-products',
+	           selector:    'merchant-top-products',
 	           templateUrl: 'top-products.component.html',
-	           styleUrls: ['../common/no-orders-info/no-orders-info.component.scss'],
+	           styleUrls:   ['../common/no-orders-info/no-orders-info.component.scss'],
            })
 export class TopProductsComponent implements OnInit, OnDestroy
 {
 	@Input()
-	warehouseId: string;
+	public warehouseId: string;
 	
 	@Input()
-	presentCreateProductPopover: () => void;
+	public presentCreateProductPopover: () => Promise<void>;
 	
 	@Input()
-	addProduct: () => void;
+	public addProduct: (productId: string) => Promise<WarehouseProduct>;
 	
 	@Input()
-	getWarehouseProductImageUrl: () => void;
+	public getWarehouseProductImageUrl: (product: Product) => string;
 	
 	@Input()
-	openEditProductModal: () => void;
+	public openEditProductModal: (product: any) => Promise<void>;
 	
 	@Input()
-	truncateTitle: () => void;
+	public truncateTitle: (title: string) => string;
 	
 	@Input()
-	localeTranslate: () => void;
+	public localeTranslate: (member: ILocaleMember[]) => string;
 	
-	topProducts$: Subscription;
-	topProducts: WarehouseProduct[] = [];
+	public topProducts$: Subscription;
+	public topProducts: WarehouseProduct[] = [];
 	
 	public showNoProductsIcon: boolean = false;
 	
-	constructor(
-			private warehouseProductsRouter: WarehouseProductsRouter,
-			private modalCtrl: ModalController,
-			private translateProductLocales: ProductLocalesService
-	)
+	constructor(private warehouseProductsRouter: WarehouseProductsRouter)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		if(this.topProducts$)
 		{
@@ -56,14 +52,12 @@ export class TopProductsComponent implements OnInit, OnDestroy
 		                        .getTopProducts(this.warehouseId, 20)
 		                        .subscribe((products) =>
 		                                   {
-			                                   products.length === 0
-			                                   ? (this.showNoProductsIcon = true)
-			                                   : (this.showNoProductsIcon = false);
+			                                   this.showNoProductsIcon = products.length === 0;
 			                                   this.topProducts = products;
 		                                   });
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		if(this.topProducts$)
 		{
