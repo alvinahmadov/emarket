@@ -3,17 +3,17 @@ import DeliveryType                                from '@modules/server.common/
 
 @Component({
 	           selector: 'order-type',
-	           templateUrl: './order-type.component.html',
 	           styleUrls: ['./order-type.component.scss'],
+	           templateUrl: './order-type.component.html',
            })
 export class OrderTypeComponent implements OnInit
 {
 	@Output()
-	orderTypeEmitter = new EventEmitter<DeliveryType>();
+	public orderTypeEmitter = new EventEmitter<DeliveryType>();
 	
-	ngOnInit() {}
+	public ngOnInit() {}
 	
-	chooseOption(type: DeliveryType)
+	public chooseOption(type: DeliveryType)
 	{
 		this.orderTypeEmitter.emit(type);
 	}
