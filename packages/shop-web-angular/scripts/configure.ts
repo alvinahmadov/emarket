@@ -68,6 +68,8 @@ export const environment: Environment = {
 
 	GOOGLE_MAPS_API_KEY:    '${env.GOOGLE_MAPS_API_KEY}',
 	YANDEX_MAPS_API_KEY:    '${env.YANDEX_MAPS_API_KEY}',
+	
+	TALKJS_APP_ID: '${env.TALKJS_APP_ID}',
 
 	SETTINGS_APP_TYPE:              '${env.SETTINGS_APP_TYPE}',
 	SETTINGS_MAINTENANCE_API_URL:   '${env.SETTINGS_MAINTENANCE_API_URL}',
@@ -136,6 +138,8 @@ export const environment: Environment = {
   
 	GOOGLE_MAPS_API_KEY: '${env.GOOGLE_MAPS_API_KEY}',
 	YANDEX_MAPS_API_KEY: '${env.YANDEX_MAPS_API_KEY}',
+	
+	TALKJS_APP_ID: '${env.TALKJS_APP_ID}',
 
 	SETTINGS_APP_TYPE:              '${env.SETTINGS_APP_TYPE}',
 	SETTINGS_MAINTENANCE_API_URL:   '${env.SETTINGS_MAINTENANCE_API_URL}',

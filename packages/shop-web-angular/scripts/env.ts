@@ -33,6 +33,8 @@ export type Env = Readonly<{
 	GOOGLE_MAPS_API_KEY: string;
 	YANDEX_MAPS_API_KEY: string;
 	
+	TALKJS_APP_ID: string;
+	
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
 	
@@ -75,6 +77,8 @@ export const env: Env = cleanEnv(
 			
 			GOOGLE_MAPS_API_KEY: str({ default: '' }),
 			YANDEX_MAPS_API_KEY: str({ default: '' }),
+			
+			TALKJS_APP_ID: str({ default: '' }),
 			
 			// For maintenance micro service.
 			SETTINGS_APP_TYPE:            str({ default: 'shop-web' }),
