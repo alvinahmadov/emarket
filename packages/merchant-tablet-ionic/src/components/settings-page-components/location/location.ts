@@ -3,10 +3,10 @@ import {
 	ElementRef,
 	EventEmitter,
 	Input,
+	ViewChild,
 	OnChanges,
 	OnDestroy,
-	OnInit,
-	ViewChild,
+	OnInit
 }                               from '@angular/core';
 import {
 	AbstractControl,
@@ -17,12 +17,16 @@ import {
 import { TranslateService }     from '@ngx-translate/core';
 import { AlertController }      from '@ionic/angular';
 import { isEmpty }              from 'lodash';
-import { TCountryData }         from '@modules/server.common/data/countries';
+import {
+	getDefaultCountryName,
+	countriesIdsToNamesArrayFn,
+	TCountryData
+}                               from '@modules/server.common/data/countries';
 import { CountryAbbreviations } from '@modules/server.common/data/abbreviation-to-country';
 import Country                  from '@modules/server.common/enums/Country';
 import Warehouse                from '@modules/server.common/entities/Warehouse';
 import { WarehouseRouter }      from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { LocaleService }        from '@modules/client.common.angular2/locale/locale.service';
+import { StorageService }       from 'services/storage.service';
 
 @Component({
 	           selector:    'merchant-location',
@@ -63,12 +67,18 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			private formBuilder: FormBuilder,
 			private warehouseRouter: WarehouseRouter,
 			public alertController: AlertController,
-			private localeService: LocaleService,
-			private translate: TranslateService
+			private translate: TranslateService,
+			private storageService: StorageService
 	)
 	{
 		this.buildForm();
 		this.bindFormControls();
+	}
+	
+	public ngOnInit(): void
+	{
+		this._initGoogleAutocompleteApi();
+		this._tryFindNewCoordinates();
 	}
 	
 	public ngOnChanges(): void
@@ -94,15 +104,11 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		}
 	}
 	
-	public ngOnInit(): void
-	{
-		this._initGoogleAutocompleteApi();
-		this._tryFindNewCoordinates();
-	}
+	public ngOnDestroy(): void {}
 	
 	public get countries(): TCountryData[]
 	{
-		return this.localeService.countries;
+		return countriesIdsToNamesArrayFn(this.storageService.locale ?? 'ru-RU');
 	}
 	
 	public get buttonOK(): string
@@ -138,10 +144,10 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		this.currWarehouse.geoLocation.apartment = this.apartment.value;
 		this.currWarehouse.geoLocation.loc = {
 			type:        'Point',
-			coordinates: {
-				lng: this.longitude.value,
-				lat: this.latitude.value
-			},
+			coordinates: [
+				this.longitude.value,
+				this.latitude.value
+			],
 		};
 	}
 	
@@ -402,7 +408,7 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 		const house = this.house.value;
 		const city = this.city.value;
 		const streetAddress = this.street.value;
-		const countryName = this.localeService.getCountryName(+this.country.value);
+		const countryName = getDefaultCountryName(+this.country.value);
 		
 		if(
 				isEmpty(streetAddress) ||
@@ -450,6 +456,4 @@ export class LocationComponent implements OnInit, OnChanges, OnDestroy
 			inputElement.value = address;
 		}
 	}
-	
-	ngOnDestroy(): void {}
 }
