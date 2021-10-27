@@ -1,20 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable }     from '@angular/core';
 import {
-	CanLoad,
-	Route,
 	Router,
 	CanActivate,
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
-}                     from '@angular/router';
-import { Store }      from 'app/services/store';
+}                         from '@angular/router';
+import { StorageService } from 'app/services/storage';
 
 @Injectable()
 export class SocieModuleGuard implements CanActivate
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{}
 	
@@ -26,8 +24,9 @@ export class SocieModuleGuard implements CanActivate
 		const id = route.params['id'];
 		if(id)
 		{
-			this.store.userId = id;
-			this.router.navigate(['products']);
+			this.storage.userId = id;
+			this.router.navigate(['products'])
+			    .catch(e => console.error(e));
 			return false;
 		}
 		return true;
