@@ -12,6 +12,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
 import { LazyLoadImageModule }              from 'ng-lazyload-image';
 import { DragScrollModule }                 from 'ngx-drag-scroll';
+import { CurrenciesService }                from 'app/services/currencies.service';
 import { GeoLocationService }               from 'app/services/geo-location';
 import { GeoLocationProductsService }       from 'app/services/geo-location-products';
 import { ProductsService }                  from 'app/services/products';
@@ -55,6 +56,7 @@ export function HttpLoaderFactory(http: HttpClient)
 		          MatButtonModule,
 	          ],
 	          providers:    [
+		          CurrenciesService,
 		          GeoLocationService,
 		          GeoLocationProductsService,
 		          ProductsService,
