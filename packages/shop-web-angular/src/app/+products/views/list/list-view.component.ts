@@ -9,33 +9,36 @@ import {
 	EventEmitter,
 	OnDestroy,
 }                           from '@angular/core';
+import { Subject }          from 'rxjs';
 import ProductInfo          from '@modules/server.common/entities/ProductInfo';
 import { MasonryComponent } from '@modules/masonry';
 import { ProductComponent } from 'app/+products/product';
-import { Subject }          from 'rxjs';
 
 @Component({
-	           selector: 'list-view',
-	           styleUrls: ['./list-view.component.scss'],
+	           selector:    'list-view',
+	           styleUrls:   ['./list-view.component.scss'],
 	           templateUrl: './list-view.component.html',
            })
 export class ListViewComponent implements OnDestroy
 {
 	@Input()
-	products: ProductInfo[];
+	public products: ProductInfo[];
 	@Input()
-	productsLoading: boolean;
+	public productsLoading: boolean;
 	@Input()
-	isWideView: boolean;
+	public isWideView: boolean;
 	
 	@ViewChild(MasonryComponent)
-	masonry: MasonryComponent;
+	public masonry: MasonryComponent;
 	
 	containerWidth: string = '100px';
-	productsCount: number = 10;
+	public productsCount: number = 10;
 	
 	@Output()
-	loadProducts = new EventEmitter<number>();
+	public loadProducts = new EventEmitter<number>();
+	
+	@Output()
+	public layoutComplete;
 	
 	@ViewChildren(ProductComponent)
 	private productsComponents: QueryList<ProductComponent>;
@@ -47,7 +50,7 @@ export class ListViewComponent implements OnDestroy
 		this.elRef.nativeElement.ownerDocument.body.style.overflow = 'hidden';
 	}
 	
-	onLayoutComplete(): void
+	public onLayoutComplete(ev: any[]): void
 	{
 		this.elRef.nativeElement.ownerDocument.body.style.overflow = 'inherit';
 		
@@ -56,12 +59,12 @@ export class ListViewComponent implements OnDestroy
 		);
 	}
 	
-	onResize(event)
+	public onResize(event)
 	{
 		this.containerWidth = `${0.6 * event.target.innerWidth} px`;
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.elRef.nativeElement.ownerDocument.body.style.overflow = 'inherit';
 		
