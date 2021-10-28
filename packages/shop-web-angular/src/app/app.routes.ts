@@ -3,6 +3,7 @@ import { environment }            from 'environments/environment'
 import { AppModuleGuard }         from './app.module.guard';
 import { NoContentComponent }     from './no-content';
 import { AuthGuard }              from './authentication/auth.guard';
+import { AuthModuleGuard }        from './+auth/auth.module.guard';
 import { MaintenanceModuleGuard } from './+maintenance-info/maintenance-info.module.guard';
 import { ProductsModuleGuard }    from './+products/products.module.guard';
 import { WarehousesModuleGuard }  from './+warehouses/warehouses.module.guard';
@@ -30,6 +31,7 @@ export const ROUTES: Routes = [
 						              import('./+auth')
 								              .then((m) => m.AuthModule)
 								              .catch(err => catchError(err)),
+				canActivate:  [AuthModuleGuard],
 			},
 			{
 				path:         'products',
