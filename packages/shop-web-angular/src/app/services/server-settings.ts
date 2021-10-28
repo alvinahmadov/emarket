@@ -1,8 +1,8 @@
 import { Injectable }         from '@angular/core';
+import RegistrationSystem     from '@modules/server.common/enums/RegistrationSystem';
 import { InviteRouter }       from '@modules/client.common.angular2/routers/invite-router.service';
 import { CustomerAuthRouter } from '@modules/client.common.angular2/routers/customer-auth-router.service';
-import RegistrationSystem     from '@modules/server.common/enums/RegistrationSystem';
-import { Store }              from './store';
+import { StorageService }     from './storage';
 
 @Injectable({
 	            providedIn: 'root',
@@ -11,27 +11,27 @@ export class ServerSettings
 {
 	constructor(
 			private readonly inviteRouter: InviteRouter,
-			private readonly userAuthRouter: CustomerAuthRouter,
-			private readonly store: Store
+			private readonly customerAuthRouter: CustomerAuthRouter,
+			private readonly storageService: StorageService
 	)
 	{}
 	
-	load(): Promise<boolean>
+	public load(): Promise<boolean>
 	{
-		return new Promise(async(resolve, reject) =>
+		return new Promise(async(resolve) =>
 		                   {
 			                   if(
-					                   !this.store.maintenanceMode &&
-					                   Number(this.store.serverConnection) !== 0
+					                   !this.storageService.maintenanceMode &&
+					                   Number(this.storageService.serverConnection) !== 0
 			                   )
 			                   {
 				                   const inviteSystem = await this.inviteRouter.getInvitesSettings();
-				                   const registrationSystem = await this.userAuthRouter.getRegistrationsSettings();
+				                   const registrationSystem = await this.customerAuthRouter.getRegistrationsSettings();
 				
-				                   this.store.inviteSystem = inviteSystem.isEnabled;
-				                   this.store.registrationSystem = registrationSystem.registrationRequiredOnStart
-				                                                   ? RegistrationSystem.Enabled
-				                                                   : RegistrationSystem.Disabled;
+				                   this.storageService.inviteSystem = inviteSystem.isEnabled;
+				                   this.storageService.registrationSystem = registrationSystem.registrationRequiredOnStart
+				                                                            ? RegistrationSystem.Enabled
+				                                                            : RegistrationSystem.Disabled;
 			                   }
 			
 			                   resolve(true);
