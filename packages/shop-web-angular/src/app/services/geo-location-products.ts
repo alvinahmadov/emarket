@@ -1,53 +1,66 @@
 import { Injectable } from '@angular/core';
 import { Apollo }     from 'apollo-angular';
-import IPagingOptions from '@modules/server.common/interfaces/IPagingOptions';
 import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
+import IPagingOptions from '@modules/server.common/interfaces/IPagingOptions';
 import ProductInfo    from '@modules/server.common/entities/ProductInfo';
-import { GQLQueries } from '@modules/server.common/utilities/graphql';
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }   from 'graphql/definitions';
+
+export interface IGeoLocationProductsOptions
+{
+	isDeliveryRequired?: boolean;
+	isTakeaway?: boolean,
+	trackingDistance?: number
+}
 
 @Injectable()
-export class GeoLocationProductsService
+export class GeoLocationProductsService extends ApolloService
 {
-	constructor(private readonly apollo: Apollo) {}
+	constructor(apollo: Apollo)
+	{
+		super(apollo, {
+			serviceName:  'Shop::GeoLocationProductsService',
+			pollInterval: 2000,
+		});
+	}
 	
-	geoLocationProductsByPaging(
+	public geoLocationProductsByPaging(
 			geoLocation,
 			pagingOptions: IPagingOptions,
-			options?: { isDeliveryRequired?: boolean; isTakeaway?: boolean },
+			options?: IGeoLocationProductsOptions,
 			searchText?: string
 	): Observable<ProductInfo[]>
 	{
 		return this.apollo
-		           .watchQuery<{ geoLocationProductsByPaging: ProductInfo[] }>(
+		           .watchQuery<{
+			           geoLocationProductsByPaging: ProductInfo[]
+		           }>(
 				           {
-					           query: GQLQueries.GeoLocationProductByPaging,
-					           variables: { geoLocation, options, pagingOptions, searchText },
-					           pollInterval: 2000,
+					           query:        GQLQuery.GeoLocation.Product.GetByPaging,
+					           variables:    { geoLocation, options, pagingOptions, searchText },
+					           pollInterval: this.pollInterval,
 				           })
-		           .valueChanges.pipe(
-						map((res) =>
-								    res.data.geoLocationProductsByPaging.filter(
-										    (p) => p.warehouseProduct.isProductAvailable === true
-								    )
-						),
-						share()
-				);
+		           .valueChanges
+		           .pipe(
+				           map((res) => this.get(res)
+				           ),
+				           share()
+		           );
 	}
 	
-	async getCountOfGeoLocationProducts(
+	public async getCountOfGeoLocationProducts(
 			geoLocation,
 			options?: { isDeliveryRequired?: boolean; isTakeaway?: boolean },
 			searchText?: string
 	)
 	{
-		const res = await this.apollo
-		                      .query({
-			                             query: GQLQueries.GeoLocationProductCount,
-			                             variables: { geoLocation, options, searchText },
-		                             })
-		                      .toPromise();
-		
-		return res.data['getCountOfGeoLocationProducts'];
+		return this.apollo
+		           .query({
+			                  query:     GQLQuery.GeoLocation.Product.Count,
+			                  variables: { geoLocation, options, searchText },
+		                  })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 }
