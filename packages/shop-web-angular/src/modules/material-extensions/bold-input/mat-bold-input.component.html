@@ -1,19 +1,21 @@
 <div
-        [matRippleColor]="focusedColor"
-        [matRippleDisabled]="this.isFocused"
-        matRipple
-        style="position: relative;"
+		[matRippleColor]="focusedColor"
+		[matRippleDisabled]="this.isFocused"
+		matRipple
+		style="position: relative;"
 >
-    <input
-        #input
-        (blur)="onBlur()"
-        (focus)="onFocus($event)"
-        [(ngModel)]="value"
-        [disabled]="disabled"
-        [placeholder]="placeholder"
-        [style.background-color]="isFocused ? focusedColor : 'transparent'"
-        [style.border]="'1px solid ' + color"
-        [type]="type"
-        matInput
-    />
+	<mat-label *ngIf="label.length > 0">
+		{{ label }}
+	</mat-label>
+	<input #input
+	       (blur)="onBlur()"
+	       (focus)="onFocus($event)"
+	       [(ngModel)]="value"
+	       [disabled]="disabled"
+	       [placeholder]="placeholder"
+	       [style.background-color]="isFocused ? focusedColor : 'white'"
+	       [style.border]="'1px solid ' + color"
+	       [type]="type"
+	       matInput
+	/>
 </div>
