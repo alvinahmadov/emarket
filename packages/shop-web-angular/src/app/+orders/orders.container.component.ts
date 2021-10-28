@@ -20,15 +20,15 @@ export class OrdersContainerComponent
 	public orders: Order[] = [];
 	
 	constructor(
-			private readonly userOrdersRouter: CustomerOrdersRouter,
+			private readonly customerOrdersRouter: CustomerOrdersRouter,
 			private readonly ngZone: NgZone,
 			private readonly storage: StorageService
 	)
 	{
-		const userId = storage.userId;
+		const customerId = storage.customerId;
 		
-		this.userOrdersRouter
-		    .get(userId)
+		this.customerOrdersRouter
+		    .get(customerId)
 		    .subscribe((res: Order[]) =>
 		               {
 			               this.ngZone
