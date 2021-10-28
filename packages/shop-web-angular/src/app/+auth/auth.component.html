@@ -5,27 +5,17 @@
 		/></div>
 	<form [formGroup]="formControl"
 	      class="signup-form">
-		<mat-form-field appearance="standard" class="signup-full-width">
-			<mat-label class="signup-label">
-				{{ 'LOG_IN_VIEW.ENTER_EMAIL_OR_USERNAME' | translate }}
-			</mat-label>
-			<input id="email"
-			       matInput
-			       formControlName="email"
-			       name="email"
-			       type="text"/>
-		</mat-form-field>
-		<mat-form-field appearance="standard"
-		                class="signin-full-width">
-			<mat-label class="signin-label">
-				{{ 'LOG_IN_VIEW.ENTER_PASSWORD' | translate }}
-			</mat-label>
-			<input matInput
-			       id="password"
-			       name="password"
-			       formControlName="password"
-			       type="password"/>
-		</mat-form-field>
+		<mat-bold-input formControlName="email"
+		                placeholder="{{ 'LOG_IN_VIEW.ENTER_EMAIL_OR_USERNAME' | translate }}"
+		                type="text"
+		                class="signin-input"
+		>
+		</mat-bold-input>
+		<mat-bold-input formControlName="password"
+		                placeholder="{{ 'LOG_IN_VIEW.ENTER_PASSWORD' | translate }}"
+		                type="password"
+		                class="signin-input">
+		</mat-bold-input>
 		<div
 				*ngIf="hasError"
 				class="err-wrapper"
