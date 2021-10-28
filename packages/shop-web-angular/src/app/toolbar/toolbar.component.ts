@@ -4,7 +4,8 @@ import {
 	ViewChild,
 	Inject,
 	OnInit,
-	AfterViewInit
+	AfterViewInit,
+    Input
 }                                 from '@angular/core';
 import { DOCUMENT }               from '@angular/common';
 import { MatDialog }              from '@angular/material/dialog';
@@ -35,16 +36,17 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 	public styleVariables: typeof styleVariables = styleVariables;
 	public logo: string = environment.AUTH_LOGO;
 	public isDeliveryRequired: boolean;
+	public isLocationBarVisible: boolean;
 	
 	public selectedLang: string;
 	public defaultLanguage = '';
 	public dir: 'ltr' | 'rtl';
 	
+	@Input('sidenav')
+	public sidenav: MatSidenav;
+	
 	@ViewChild('matSearch')
 	public matSearch: MatSearchComponent;
-	
-	@ViewChild('sidenav')
-	public sidenav: MatSidenav;
 	
 	private initializedAddress: string;
 	
@@ -95,6 +97,7 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 		}
 		
 		this.selectedLang = this.translateService.currentLang;
+		this.isLocationBarVisible = this.storage.isLocationSearchBarVisible;
 	}
 	
 	public ngAfterViewInit(): void
@@ -111,12 +114,6 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 		                            : DeliveryType.Takeaway;
 		
 		await this.reload();
-	}
-	
-	public closeSidenav(ev: MouseEvent)
-	{
-		if(ev.x > 400)
-			this.sidenav.close();
 	}
 	
 	public tryFindNewAddress(address: string)
@@ -257,7 +254,7 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 	
 	private applyFormattedAddress(address: string)
 	{
-		if(this.matSearch.input)
+		if(this.matSearch?.input)
 		{
 			this.initializedAddress = address;
 			this.matSearch.input.nativeElement.value = address;
@@ -266,7 +263,7 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 	
 	private initGoogleAutocompleteApi()
 	{
-		if(this.matSearch.input)
+		if(this.matSearch?.input)
 		{
 			new google.maps.places.Autocomplete(
 					this.matSearch.input.nativeElement
