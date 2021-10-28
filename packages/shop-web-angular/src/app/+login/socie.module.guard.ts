@@ -24,7 +24,7 @@ export class SocieModuleGuard implements CanActivate
 		const id = route.params['id'];
 		if(id)
 		{
-			this.storage.userId = id;
+			this.storage.customerId = id;
 			this.router.navigate(['products'])
 			    .catch(e => console.error(e));
 			return false;
