@@ -201,7 +201,7 @@ export class CodeConfirmationComponent implements OnInit
 	
 	private async register(invite: Invite)
 	{
-		const customerId = this.storageService.userId;
+		const customerId = this.storageService.customerId;
 		await this.customerRouter
 		          .updateCustomer(customerId, {
 			          apartment:               invite.apartment,
