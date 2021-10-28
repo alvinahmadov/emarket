@@ -1,0 +1,47 @@
+<div class="content auth">
+	<div class="logo">
+		<img src="{{ authLogo }}"
+		     alt="{{ authLogo }}"
+		/></div>
+	<div *ngIf="isInvited"
+	     class="another-option-wrapper"
+	     ng-show="inviteByCodeCtrl.isInvited"
+	>
+		<div>
+			<h3 style="color: #ccc;">
+				{{ 'LOG_IN_VIEW.THANKS_FOR_REGISTERING' | translate }}
+			</h3>
+			<h5 style="color: #888;">
+				{{ 'LOG_IN_VIEW.WE_WILL_SEND_YOU_A_MESSAGE' | translate }}
+			</h5>
+			<p style="color: #bbb; font-size: 120%;">{{ inviteAddress }}</p>
+		</div>
+		
+		<p class="another-option-or">
+			<span class="or">
+				{{ 'LOG_IN_VIEW.SIGN_UP_WITH_AN_APP_INVITATION' | translate }}
+			</span>
+		</p>
+	</div>
+	<form [formGroup]="formControl">
+		<mat-bold-input
+				#codeRef
+				class="invite-code-input"
+				color="#f1f1f1"
+				focusedColor="#f1f1f1"
+				formControlName="code"
+				placeholder="{{ 'LOG_IN_VIEW.INVITE_CODE' | translate }}"
+				type="number"
+		>
+		</mat-bold-input>
+		<div *ngIf="!isInvited" class="or">
+			{{ 'LOG_IN_VIEW.OR' | translate }}
+		</div>
+		<button (click)="loadByLocation()"
+		        *ngIf="!isInvited"
+		        class="login-button"
+		>
+			{{ 'LOG_IN_VIEW.REGISTER' | translate }}
+		</button>
+	</form>
+</div>

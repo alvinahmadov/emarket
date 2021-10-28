@@ -1,0 +1,142 @@
+<form [formGroup]="formControl" class="location-form">
+	<!-- Username -->
+	<mat-bold-input
+			class="invite-code-input blackInput"
+			formControlName="username"
+			type="username"
+			color="#f1f1f1"
+			focusedColor="#f1f1f1"
+			required
+			placeholder="{{'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.USERNAME' | translate }}"
+	>
+	</mat-bold-input>
+	<!-- Email -->
+	<mat-bold-input
+			class="invite-code-input blackInput"
+			formControlName="email"
+			type="email"
+			color="#f1f1f1"
+			focusedColor="#f1f1f1"
+			placeholder="{{'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.EMAIL' | translate }}"
+	>
+	</mat-bold-input>
+	<!-- Password -->
+	<mat-bold-input
+			class="invite-code-input blackInput"
+			type="password"
+			color="#f1f1f1"
+			focusedColor="#f1f1f1"
+			formControlName="password"
+			placeholder="{{'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.PASSWORD' | translate }}"
+	>
+	</mat-bold-input>
+	<!-- Search -->
+	<!--	<mat-form-field class="search-input">
+			<span matPrefix>
+				<i class="material-icons">search</i>
+			</span>
+			<input #autocomplete
+				   style="color: white"
+				   placeholder="{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.SEARCH' | translate }}"
+				   matInput/>
+		</mat-form-field>-->
+	<!-- Country Select -->
+	<mat-select
+			(change)="onAddressChanges()"
+			class="invite-code-input blackInput"
+			formControlName="countryId"
+			placeholder="{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.COUNTRY' | translate }}"
+	>
+		<mat-option [disabled]="true">
+			{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.COUNTRY' | translate }}
+			<ngx-mat-select-search
+					[formControl]="countryFilterCtrl"
+					placeholderLabel="{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.SEARCH' | translate }}"
+					noEntriesFoundLabel="{{'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.COUNTRY_NOT_FOUND' | translate}}"
+			>
+			</ngx-mat-select-search>
+		</mat-option>
+		<mat-option
+				*ngFor="let country of filteredCountries | async"
+				value="{{ country.id }}"
+		>
+			{{ country.name }}
+		</mat-option>
+	</mat-select>
+	<!-- Selected City -->
+	<mat-bold-input
+			(change)="onAddressChanges()"
+			class="invite-code-input blackInput"
+			formControlName="city"
+			color="#f1f1f1"
+			focusedColor="#f1f1f1"
+			placeholder="{{'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.SELECTED_CITY' | translate }}"
+	></mat-bold-input>
+	<!-- Selected Street -->
+	<mat-bold-input
+			(change)="onAddressChanges()"
+			class="invite-code-input blackInput"
+			formControlName="streetAddress"
+			color="#f1f1f1"
+			focusedColor="#f1f1f1"
+			placeholder="{{
+			'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.SELECTED_STREET'
+				| translate
+		}}"
+	></mat-bold-input>
+	<!-- House -->
+	<div class="row m-0">
+		<div class="col-6 p-0 pr-2">
+			<mat-bold-input
+					(change)="onAddressChanges()"
+					class="invite-code-input blackInput d-inline-block"
+					type="number"
+					formControlName="house"
+					color="#f1f1f1"
+					focusedColor="#f1f1f1"
+					placeholder="{{
+					'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.HOUSE' | translate
+				}}"
+			></mat-bold-input>
+		</div>
+		
+		<!-- Apartment (Optional) -->
+		<div class="col-6 p-0 pl-2">
+			<mat-bold-input
+					(change)="onAddressChanges()"
+					*ngIf="isApartmentControl?.value"
+					class="invite-code-input blackInput d-inline-block"
+					type="number"
+					formControlName="apartament"
+					color="#f1f1f1"
+					focusedColor="#f1f1f1"
+					placeholder="
+{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.PLACEHOLDER.APARTMENT_OPTIONAL' | translate }}
+"
+			></mat-bold-input>
+			<mat-checkbox
+					*ngIf="!apartament"
+					[labelPosition]="'before'"
+					class="invite-code-input"
+					formControlName="isApartment"
+			>
+				<span class="label">{{
+					'LOG_IN_VIEW.BY_LOCATION_VIEW.APARTMENT' | translate
+					}}</span>
+			</mat-checkbox>
+		</div>
+	</div>
+	
+	<button
+			(click)="continue.emit(true)"
+			[hidden]="!statusForm"
+			class="login-button m-0"
+			color="accent"
+			mat-button
+	>
+		{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.CONTINUE' | translate }}
+	</button>
+	<a style="margin-left: 40%; margin-right: 40%" [routerLink]="['/auth']">
+		{{ 'LOG_IN_VIEW.LOGIN' | translate }}
+	</a>
+</form>

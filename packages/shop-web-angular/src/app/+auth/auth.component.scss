@@ -1,0 +1,192 @@
+@import '../../styles/variables';
+@import '~@angular/material/theming';
+
+$ya-color-dark: #ff0000;
+$ya-color-darker: #943411FF;
+$ya-color-light: #dd5d39;
+$ya-color-lighter: #cf8a6c;
+
+$fb-color-dark: #1b4bd0;
+$fb-color-darker: #113494;
+$fb-color-light: #399bdd;
+$fb-color-lighter: #6cc0cf;
+
+:host {
+	width: 100%;
+	height: 100%;
+	
+	position: absolute;
+	top: 0;
+	left: 0;
+	
+	background-color: $brand-darken;
+	display: flex;
+	
+	justify-content: center;
+	align-items: center;
+}
+
+.content {
+	background-color: $brand;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 40px 70px;
+	border-radius: 3px;
+}
+
+.signin-label {
+	font-size: 12pt !important;
+}
+
+.signin-form {
+	//background-color: white;
+	min-width: 150px;
+	max-width: 500px;
+	width: 100%;
+}
+
+.signup-full-width {
+	width: 100%;
+}
+
+.matInput {
+	background-color: white !important;
+}
+
+.err-wrapper {
+	color: red;
+	border: 1px solid red;
+	padding: 0 19px;
+	text-align: left;
+	font-size: 14px;
+}
+
+.invite-code-input {
+	margin-top: 0;
+	margin-bottom: 20px;
+	width: 100%;
+}
+
+.or {
+	text-align: center;
+	font-size: 1.05em;
+	font-weight: bold;
+}
+
+.another-option-wrapper {
+	text-align: center;
+	margin-bottom: 50px;
+}
+
+.iconsContainer {
+	margin: 0 !important;
+}
+
+.auth {
+	.fbIcon,
+	.googleIcon,
+	.yaIcon {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		width: 50%;
+		
+		margin-bottom: 0;
+	}
+	
+	.fbIcon {
+		-moz-box-shadow: inset 0 1px 0 0 $fb-color-lighter;
+		-webkit-box-shadow: inset 0 1px 0 0 $fb-color-lighter;
+		box-shadow: inset 0 1px 0 0 $fb-color-lighter;
+		background: -webkit-gradient(
+						linear,
+						left top,
+						left bottom,
+						color-stop(0.05, $fb-color-dark),
+						color-stop(1, $fb-color-light)
+		);
+		background: -moz-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+		background: -webkit-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+		background: -o-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+		background: -ms-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+		background: linear-gradient(to bottom, $fb-color-dark 5%, $fb-color-light 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1b4bd0', endColorstr='#399bdd', GradientType=0);
+		background-color: $fb-color-dark;
+		border: 1px solid $fb-color-darker;
+		text-shadow: 0 1px 0 #298576;
+		
+		&:hover {
+			background: -webkit-gradient(
+							linear,
+							left top,
+							left bottom,
+							color-stop(0.05, $fb-color-dark),
+							color-stop(1, $fb-color-light)
+			);
+			background: -moz-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+			background: -webkit-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+			background: -o-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+			background: -ms-linear-gradient(top, $fb-color-dark 5%, $fb-color-light 100%);
+			background: linear-gradient(to bottom, $fb-color-dark 5%, $fb-color-light 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1b3cd0', endColorstr='#399bdd', GradientType=0);
+			background-color: $fb-color-dark;
+		}
+	}
+	
+	.yaIcon {
+		-moz-box-shadow: inset 0 1px 0 0 $ya-color-lighter;
+		-webkit-box-shadow: inset 0 1px 0 0 $ya-color-lighter;
+		box-shadow: inset 0 1px 0 0 $ya-color-lighter;
+		background: -webkit-gradient(
+						linear,
+						left top,
+						left bottom,
+						color-stop(0.05, $ya-color-dark),
+						color-stop(1, $ya-color-light)
+		);
+		background: -moz-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+		background: -webkit-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+		background: -o-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+		background: -ms-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+		background: linear-gradient(to bottom, $ya-color-dark 5%, $ya-color-light 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1b4bd0', endColorstr='#399bdd', GradientType=0);
+		background-color: $ya-color-dark;
+		border: 1px solid $ya-color-darker;
+		text-shadow: 0 1px 0 #298576;
+		
+		&:hover {
+			background: -webkit-gradient(
+							linear,
+							left top,
+							left bottom,
+							color-stop(0.05, $ya-color-dark),
+							color-stop(1, $ya-color-light)
+			);
+			background: -moz-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+			background: -webkit-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+			background: -o-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+			background: -ms-linear-gradient(top, $ya-color-dark 5%, $ya-color-light 100%);
+			background: linear-gradient(to bottom, $ya-color-dark 5%, $ya-color-light 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1b3cd0', endColorstr='#399bdd', GradientType=0);
+			background-color: $ya-color-dark;
+		}
+	}
+	
+	mat-tab-group {
+		padding: 0;
+		background: $brand-lighted;
+		margin: 0 auto;
+		max-width: 400px;
+		-webkit-box-shadow: 0 0 50px 5px rgba(156, 156, 156, 0.75);
+		-moz-box-shadow: 0 0 50px 5px rgba(156, 156, 156, 0.75);
+		box-shadow: 0 0 50px 5px rgba(156, 156, 156, 0.75);
+	}
+}
+
+.mat-tab-label-content {
+	color: white !important;
+}

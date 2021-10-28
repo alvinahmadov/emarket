@@ -1,0 +1,71 @@
+<div class="content auth">
+	<div class="logo">
+		<img src="{{ authLogo }}"
+		     alt="{{ authLogo }}"
+		/></div>
+	<form [formGroup]="formControl"
+	      class="signup-form">
+		<mat-form-field appearance="standard" class="signup-full-width">
+			<mat-label class="signup-label">
+				{{ 'LOG_IN_VIEW.ENTER_EMAIL_OR_USERNAME' | translate }}
+			</mat-label>
+			<input id="email"
+			       matInput
+			       formControlName="email"
+			       name="email"
+			       type="text"/>
+		</mat-form-field>
+		<mat-form-field appearance="standard"
+		                class="signin-full-width">
+			<mat-label class="signin-label">
+				{{ 'LOG_IN_VIEW.ENTER_PASSWORD' | translate }}
+			</mat-label>
+			<input matInput
+			       id="password"
+			       name="password"
+			       formControlName="password"
+			       type="password"/>
+		</mat-form-field>
+		<div
+				*ngIf="hasError"
+				class="err-wrapper"
+		>
+			{{ 'LOG_IN_VIEW.ERRORS.DATA_IS_INVALID' | translate }}
+		</div>
+		<button (click)="login()"
+		        class="login-button"
+		>
+			{{ 'LOG_IN_VIEW.LOGIN' | translate }}
+		</button>
+		
+		<div class="or">
+			{{ 'LOG_IN_VIEW.OR' | translate }}
+		</div>
+		
+		<div class="row iconsContainer">
+			<a class="login-button yaIcon"
+			   href="{{ endpoints.https + authUrl.yandex }}"
+			>
+				<fa-icon [icon]="['fab', 'yandex']"></fa-icon>
+			</a>
+			<a class="login-button googleIcon"
+			   href="{{ endpoints.https + authUrl.google }}"
+			>
+				<fa-icon [icon]="['fab', 'google']"></fa-icon>
+			</a>
+			<a class="login-button fbIcon"
+			   href="{{ endpoints.https + authUrl.facebook }}"
+			>
+				<fa-icon [icon]="['fab', 'facebook']"></fa-icon>
+			</a>
+			<a class="login-button fbIcon"
+			   href="{{ endpoints.https + authUrl.vkontakte }}"
+			>
+				<fa-icon [icon]="['fab', 'vk']"></fa-icon>
+			</a>
+		</div>
+		<a style="margin: 0 auto" [routerLink]="['by-location']">
+			{{ 'LOG_IN_VIEW.REGISTER' | translate }}
+		</a>
+	</form>
+</div>

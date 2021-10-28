@@ -1,0 +1,27 @@
+<div class="content auth">
+	<div class="formContent">
+		<div class="logo">
+			<img src="{{ authLogo }}" alt=""/></div>
+		<h2 class="title">
+			{{ 'LOG_IN_VIEW.BY_LOCATION_VIEW.WHAT_IS_YOUR_ADDRESS' | translate }}
+		</h2>
+		
+		<div class="row">
+			<div class="col offset-lg-3 col-lg-3 mr-4">
+				<es-location-form
+						#locationForm
+						(continue)="register()"
+						(mapCoordinatesEmitter)="onCoordinatesChanges($event)"
+						(mapGeometryEmitter)="onGeometrySend($event)"
+						[coordinates]="coordinates"
+				></es-location-form>
+			</div>
+			
+			<div class="col col-lg-3 ml-4">
+				<ngx-google-map [mapCoordEvent]="mapCoordEmitter"
+				                [mapGeometryEvent]="mapGeometryEmitter"
+				></ngx-google-map>
+			</div>
+		</div>
+	</div>
+</div>
