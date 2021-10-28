@@ -98,7 +98,7 @@ export class AppComponent implements OnInit
 		if(isLogged)
 		{
 			customer = await this.customersService
-			                     .getCustomerById(this.storageService.userId)
+			                     .getCustomerById(this.storageService.customerId)
 			                     .toPromise();
 		}
 		else
