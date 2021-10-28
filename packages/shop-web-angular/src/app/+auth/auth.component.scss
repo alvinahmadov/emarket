@@ -39,6 +39,11 @@ $fb-color-lighter: #6cc0cf;
 
 .signin-label {
 	font-size: 12pt !important;
+	color: white;
+}
+
+.signin-input {
+	margin-bottom: 30px;
 }
 
 .signin-form {
@@ -48,12 +53,8 @@ $fb-color-lighter: #6cc0cf;
 	width: 100%;
 }
 
-.signup-full-width {
+.signin-full-width {
 	width: 100%;
-}
-
-.matInput {
-	background-color: white !important;
 }
 
 .err-wrapper {
