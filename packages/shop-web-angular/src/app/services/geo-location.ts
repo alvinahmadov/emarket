@@ -1,8 +1,8 @@
 import { Injectable }              from '@angular/core';
-import { ILocation }               from '@modules/server.common/interfaces/IGeoLocation';
-import GeoLocation                 from '@modules/server.common/entities/GeoLocation';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subscribable }            from 'rxjs';
+import { ILocation }               from '@modules/server.common/interfaces/IGeoLocation';
+import GeoLocation                 from '@modules/server.common/entities/GeoLocation';
 import { environment }             from 'environments/environment';
 
 interface Coords
@@ -20,7 +20,7 @@ export class GeoLocationService
 	
 	constructor(private http: HttpClient) {}
 	
-	getCurrentGeoLocation(): Promise<GeoLocation>
+	public getCurrentGeoLocation(): Promise<GeoLocation>
 	{
 		return new Promise(async(resolve, reject) =>
 		                   {
@@ -28,19 +28,19 @@ export class GeoLocationService
 			                   {
 				                   const coords = await this.getCurrentCoords();
 				                   const location: ILocation = {
-					                   type: 'Point',
+					                   type:        'Point',
 					                   coordinates: [coords.longitude, coords.latitude],
 				                   };
 				
 				                   const currentGeolocation = new GeoLocation({
-					                                                              _id: '',
-					                                                              loc: location,
-					                                                              countryId: null,
-					                                                              city: null,
+					                                                              _id:           '',
+					                                                              loc:           location,
+					                                                              countryId:     null,
+					                                                              city:          null,
 					                                                              streetAddress: null,
-					                                                              house: null,
-					                                                              _createdAt: '',
-					                                                              _updatedAt: '',
+					                                                              house:         null,
+					                                                              _createdAt:    '',
+					                                                              _updatedAt:    '',
 				                                                              });
 				                   resolve(currentGeolocation);
 			                   } catch(error)
@@ -50,7 +50,7 @@ export class GeoLocationService
 		                   });
 	}
 	
-	getCurrentCoords(): Promise<Coords>
+	public getCurrentCoords(): Promise<Coords>
 	{
 		return new Promise(
 				(resolve, reject) =>
@@ -63,41 +63,39 @@ export class GeoLocationService
 					{
 						if(defaultLat && defaultLng)
 						{
-							resolve(
-									GeoLocationService.getCoordsObj({
-										                                latitude: defaultLat,
-										                                longitude: defaultLng,
-									                                })
-							);
-							
-							return;
+							resolve(GeoLocationService.getCoordsObj({
+								                                        latitude:  defaultLat,
+								                                        longitude: defaultLng,
+							                                        }));
 						}
 					}
-					
-					navigator.geolocation
-					         .getCurrentPosition(
-							         (res) =>
-							         {
-								         // If user is enable GPS on browser
-								         resolve(GeoLocationService.getCoordsObj(res.coords));
-							         },
-							         (err) =>
-							         {
-								         // If user is denied GPS on browser
-								         this.getLocationByIP()
-								             .subscribe((res) =>
-								                        {
-									                        if(res)
+					else
+					{
+						navigator.geolocation
+						         .getCurrentPosition(
+								         (res) =>
+								         {
+									         // If user is enable GPS on browser
+									         resolve(GeoLocationService.getCoordsObj(res.coords));
+								         },
+								         (err) =>
+								         {
+									         // If user is denied GPS on browser
+									         this.getLocationByIP()
+									             .subscribe((res: Coords) =>
 									                        {
-										                        resolve(GeoLocationService.getCoordsObj(res));
-									                        }
-									                        else
-									                        {
-										                        reject(err.message);
-									                        }
-								                        });
-							         }
-					         );
+										                        if(res)
+										                        {
+											                        resolve(GeoLocationService.getCoordsObj(res));
+										                        }
+										                        else
+										                        {
+											                        reject(err.message);
+										                        }
+									                        });
+								         }
+						         );
+					}
 				}
 		);
 	}
@@ -114,7 +112,7 @@ export class GeoLocationService
 	{
 		return {
 			longitude: coords.longitude,
-			latitude: coords.latitude,
+			latitude:  coords.latitude,
 		};
 	}
 }
