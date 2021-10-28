@@ -176,7 +176,7 @@ export class AuthComponent implements ToolbarController, OnInit, OnDestroy
 			setTimeout(() => this.hasError = false, 2500);
 			return;
 		}
-		this.storage.userId = response.user.id;
+		this.storage.customerId = response.user.id;
 		this.storage.token = response.token;
 		await this.router.navigate(['products']);
 	}
