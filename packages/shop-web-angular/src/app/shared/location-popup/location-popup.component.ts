@@ -5,17 +5,14 @@ import {
 	EventEmitter,
 	AfterViewInit,
 	ViewChild,
-}                                        from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Router }                        from '@angular/router';
-import { ILocation }                     from '@modules/server.common/interfaces/IGeoLocation';
-import { LocationFormComponent }         from 'app/+login/byLocation/location/location.component';
-import { environment }                   from 'environments/environment';
-import { Store }                         from 'app/services/store';
-import GeoLocation, {
-	getCountryName,
-}                                        from '@modules/server.common/entities/GeoLocation';
-import { UserRouter }                    from '@modules/client.common.angular2/routers/user-router.service';
+}                                              from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA }       from '@angular/material/dialog';
+import { Router }                              from '@angular/router';
+import { IGeoLocationCreateObject, ILocation } from '@modules/server.common/interfaces/IGeoLocation';
+import { CustomerRouter }                      from '@modules/client.common.angular2/routers/customer-router.service';
+import { LocationFormComponent }               from 'app/+login/byLocation/location/location.component';
+import { StorageService }                      from 'app/services/storage';
+import { environment }                         from 'environments/environment';
 
 @Component({
 	           styleUrls: ['./location-popup.component.scss'],
@@ -24,24 +21,24 @@ import { UserRouter }                    from '@modules/client.common.angular2/r
 export class LocationPopupComponent implements OnInit, AfterViewInit
 {
 	@ViewChild('locationForm')
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
-	place: google.maps.places.PlaceResult;
-	coordinates: ILocation;
+	public place: google.maps.places.PlaceResult;
+	public coordinates: ILocation;
 	
-	mapCoordEmitter = new EventEmitter<number[]>();
-	mapGeometryEmitter = new EventEmitter<any>();
+	public mapCoordEmitter = new EventEmitter<number[]>();
+	public mapGeometryEmitter = new EventEmitter<any>();
 	
 	constructor(
 			private dialogRef: MatDialogRef<LocationPopupComponent>,
 			@Inject(MAT_DIALOG_DATA) public data: any,
 			private router: Router,
-			private store: Store,
-			private userRouter: UserRouter
+			private storage: StorageService,
+			private userRouter: CustomerRouter
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.place = this.data.place;
 		
@@ -60,7 +57,7 @@ export class LocationPopupComponent implements OnInit, AfterViewInit
 		console.warn('LocationPopupComponent loaded');
 	}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
 		if(this.place)
 		{
@@ -69,24 +66,24 @@ export class LocationPopupComponent implements OnInit, AfterViewInit
 		}
 	}
 	
-	onCoordinatesChanges(coords)
+	public onCoordinatesChanges(coords)
 	{
 		this.mapCoordEmitter.emit(coords);
 	}
 	
-	onGeometrySend(geometry: any)
+	public onGeometrySend(geometry: any)
 	{
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	async updateLocation()
+	public async updateLocation()
 	{
 		if(this.locationForm)
 		{
 			const isValid = this.locationForm.statusForm;
 			if(isValid)
 			{
-				const userId = this.store.userId;
+				const userId = this.storage.userId;
 				await this.updateUser(
 						userId,
 						this.locationForm.getCreateUserInfo().geoLocation
@@ -100,7 +97,7 @@ export class LocationPopupComponent implements OnInit, AfterViewInit
 		console.warn('TODO update');
 	}
 	
-	async close(text = '')
+	public async close(text = '')
 	{
 		await this.dialogRef.close(text);
 		await this.reload();
@@ -114,13 +111,12 @@ export class LocationPopupComponent implements OnInit, AfterViewInit
 		await this.router.navigateByUrl('/products');
 	}
 	
-	private async updateUser(userId, geoLocation)
+	private async updateUser(userId: string, geoLocation: IGeoLocationCreateObject)
 	{
 		if(userId)
 		{
-			await this.userRouter.updateUser(userId, {
-				geoLocation,
-			});
+			await this.userRouter
+			          .updateCustomer(userId, { geoLocation });
 		}
 	}
 }
