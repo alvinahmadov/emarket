@@ -42,6 +42,8 @@ import { SidenavContentComponent }              from './sidenav/sidenav-content.
 import { GeoLocationService }                   from './services/geo-location';
 import { ServerSettings }                       from './services/server-settings';
 import { StorageService }                       from './services/storage';
+import { AdminsService }                        from './services/admins.service';
+import { CustomersService }                     from './services/customer.service';
 import { LocationPopupModalModule }             from './shared/location-popup/location-popup.module';
 import { AuthGuard }                            from './authentication/auth.guard';
 import { LoginModuleGuard }                     from './+login/login.module.guard';
@@ -109,6 +111,8 @@ const APP_PROVIDERS = [
 	...APP_RESOLVER_PROVIDERS,
 	AppState,
 	SidenavService,
+	AdminsService,
+	CustomersService,
 	ServerSettings,
 	InfiniteScrollModule,
 	{
@@ -183,8 +187,7 @@ const APP_PROVIDERS = [
 export class AppModule
 {
 	constructor(apollo: Apollo, httpLink: HttpLink, store: StorageService)
-	{
-	}
+	{}
 	
 	private init(apollo: Apollo, httpLink: HttpLink, store: StorageService)
 	{
@@ -228,4 +231,4 @@ export class AppModule
 
 platformBrowserDynamic()
 		.bootstrapModule(AppModule)
-		.catch(console.warn);
+		.catch(err => console.error(err));
