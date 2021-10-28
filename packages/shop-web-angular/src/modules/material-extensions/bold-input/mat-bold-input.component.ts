@@ -12,14 +12,14 @@ import { MatRipple }                               from '@angular/material/core'
 import { InputComponent } from './input-component';
 
 @Component({
-	           selector: 'mat-bold-input',
-	           styleUrls: ['./mat-bold-input.component.scss'],
+	           selector:    'mat-bold-input',
+	           styleUrls:   ['./mat-bold-input.component.scss'],
 	           templateUrl: 'mat-bold-input.component.html',
-	           providers: [
+	           providers:   [
 		           {
-			           provide: NG_VALUE_ACCESSOR,
+			           provide:     NG_VALUE_ACCESSOR,
 			           useExisting: MatBoldInputComponent,
-			           multi: true,
+			           multi:       true,
 		           },
 	           ],
            })
@@ -28,9 +28,9 @@ export class MatBoldInputComponent extends InputComponent
 {
 	@Input()
 	@HostBinding('style.background-color')
-	public color: string;
+	public color: string = "#FFF";
 	@Input()
-	public focusedColor: string;
+	public focusedColor: string = "transparent";
 	@Input()
 	public rippleSpeedFactor: number = 2;
 	@ViewChild(MatRipple)
@@ -39,6 +39,8 @@ export class MatBoldInputComponent extends InputComponent
 	public input: ElementRef;
 	@HostBinding('class.mat-focused')
 	public isFocused: boolean = false;
+	@Input()
+	public label: string = "";
 	public RIPPLE_FADE_IN_DURATION = 450;
 	private focusTimeout: number | null = null;
 	
@@ -61,7 +63,7 @@ export class MatBoldInputComponent extends InputComponent
 		}
 	}
 	
-	private onFocus()
+	public onFocus(event: FocusEvent)
 	{
 		if(this.focusTimeout != null)
 		{
@@ -74,7 +76,7 @@ export class MatBoldInputComponent extends InputComponent
 		                                      }, this.RIPPLE_FADE_IN_DURATION / this.rippleSpeedFactor);
 	}
 	
-	private onBlur()
+	public onBlur()
 	{
 		this.isFocused = false;
 		
