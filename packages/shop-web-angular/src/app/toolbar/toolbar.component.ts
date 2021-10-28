@@ -2,8 +2,9 @@ import {
 	Component,
 	NgZone,
 	ViewChild,
-	AfterViewInit,
-	Inject
+	Inject,
+	OnInit,
+	AfterViewInit
 }                                 from '@angular/core';
 import { DOCUMENT }               from '@angular/common';
 import { MatDialog }              from '@angular/material/dialog';
@@ -22,13 +23,14 @@ import { environment }            from 'environments/environment';
 import { styleVariables }         from 'styles/variables';
 import { TranslateService }       from '@ngx-translate/core';
 import { SidenavService }         from 'app/sidenav/sidenav.service';
+import { MatSidenav }             from '@angular/material/sidenav';
 
 @Component({
 	           selector:    'toolbar',
 	           styleUrls:   ['./toolbar.component.scss'],
 	           templateUrl: './toolbar.component.html',
            })
-export class ToolbarComponent implements AfterViewInit
+export class ToolbarComponent implements OnInit, AfterViewInit
 {
 	styleVariables: typeof styleVariables = styleVariables;
 	logo: string = environment.AUTH_LOGO;
@@ -40,6 +42,9 @@ export class ToolbarComponent implements AfterViewInit
 	
 	@ViewChild('matSearch')
 	matSearch: MatSearchComponent;
+	
+	@ViewChild('sidenav')
+	sidenav: MatSidenav;
 	
 	private initializedAddress: string;
 	
@@ -66,6 +71,32 @@ export class ToolbarComponent implements AfterViewInit
 		this.loadAddress();
 	}
 	
+	public ngOnInit(): void
+	{
+		const defaultLanguage = environment.DEFAULT_LANGUAGE ?? 'ru-RU';
+		const availableLanguages = environment.AVAILABLE_LOCALES;
+		
+		if(this.translateService.currentLang)
+		{
+			const current = this.translateService.currentLang;
+			this.translateService.setDefaultLang(current);
+		}
+		else
+		{
+			this.translateService.addLangs(availableLanguages.split('|'));
+			this.translateService.setDefaultLang(defaultLanguage);
+			
+			const browserLang = this.translateService.getBrowserLang();
+			this.translateService.use(
+					browserLang.match(availableLanguages)
+					? browserLang
+					: defaultLanguage
+			);
+		}
+		
+		this.selectedLang = this.translateService.currentLang;
+	}
+	
 	ngAfterViewInit(): void
 	{
 		this.initGoogleAutocompleteApi();
@@ -80,6 +111,12 @@ export class ToolbarComponent implements AfterViewInit
 		                            : DeliveryType.Takeaway;
 		
 		await this.reload();
+	}
+	
+	public closeSidenav(ev: MouseEvent)
+	{
+		if(ev.x > 400)
+			this.sidenav.close();
 	}
 	
 	public tryFindNewAddress(address: string)
@@ -108,14 +145,14 @@ export class ToolbarComponent implements AfterViewInit
 		
 		const isProductionEnv = environment.production;
 		
-		if(this.storage.userId && !findNew && isProductionEnv)
+		if(this.storage.customerId && !findNew && isProductionEnv)
 		{
-			const user = await this.customerRouter
-			                       .get(this.storage.userId)
-			                       .pipe(first())
-			                       .toPromise();
+			const customer = await this.customerRouter
+			                           .get(this.storage.customerId)
+			                           .pipe(first())
+			                           .toPromise();
 			
-			geoLocationForProducts = user.geoLocation;
+			geoLocationForProducts = customer.geoLocation;
 		}
 		else
 		{
@@ -175,9 +212,9 @@ export class ToolbarComponent implements AfterViewInit
 						const formattedAddress = results[0].formatted_address;
 						const place: google.maps.GeocoderResult = results[0];
 						
-						const userId = this.storage.userId;
+						const customerId = this.storage.customerId;
 						
-						if(findNew && userId)
+						if(findNew && customerId)
 						{
 							const addressComponents = place.address_components;
 							const city = addressComponents.find((a) =>
@@ -190,15 +227,15 @@ export class ToolbarComponent implements AfterViewInit
 											a.types.includes('intersection')
 							).long_name;
 							
-							const house = addressComponents.find((a) =>
-									                                     a.types.includes('street_number')
+							const house = addressComponents.find(
+									(a) => a.types.includes('street_number')
 							).long_name;
 							
-							const country = addressComponents.find((a) =>
-									                                       a.types.includes('country')
+							const country = addressComponents.find(
+									(a) => a.types.includes('country')
 							).short_name;
 							
-							await this.updateUser(userId, {
+							await this.updateUser(customerId, {
 								countryId: Country[country],
 								city,
 								streetAddress,
@@ -209,7 +246,7 @@ export class ToolbarComponent implements AfterViewInit
 								},
 							} as GeoLocation);
 							
-							this.reload();
+							await this.reload();
 						}
 						
 						this.applyFormattedAddress(formattedAddress);
