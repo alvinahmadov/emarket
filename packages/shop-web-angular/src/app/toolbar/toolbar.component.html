@@ -1,64 +1,123 @@
 <mat-toolbar class="toolbar" color="primary">
-    <div [routerLink]="['/']" class="logo" mat-button>
-        <img src="assets/img/ever-logo.svg"/>
-    </div>
-
-    <div class="menu-brand-separator"></div>
-
-    <span class="nav">
+	<div [fxShow]="false" [fxHide.gt-sm]="false">
+		<button mat-icon-button
+		        (click)="sidenav.toggle()">
+			<mat-icon>menu</mat-icon>
+		</button>
+	</div>
+	<div class="menu-brand-separator"></div>
+	
+	<span fxShow="true" fxHide.lt-md="false" class="nav">
 		<button
-                [routerLinkActive]="'active-option'"
-                [routerLink]="['/products']"
-                class="nav-option"
-                mat-button
-        >
+				[routerLinkActive]="'active-option'"
+				[routerLink]="['/products']"
+				class="nav-option"
+				mat-button
+		>
 			<ever-icon class="nav-icon" type="basket"></ever-icon>
-            {{ 'Products' | translate }}
+			{{ 'Products' | translate }}
 		</button>
 		<button
-                [routerLinkActive]="'active-option'"
-                [routerLink]="['/orders']"
-                class="nav-option"
-                mat-button
-        >
+				[routerLinkActive]="'active-option'"
+				[routerLink]="['/warehouses']"
+				class="nav-option"
+				mat-button
+		>
+			<mat-icon class="nav-icon">store</mat-icon>
+			{{ 'Warehouses' | translate }}
+		</button>
+		<button
+				[routerLinkActive]="'active-option'"
+				[routerLink]="['/orders']"
+				class="nav-option"
+				mat-button
+		>
 			<ever-icon class="nav-icon" type="history"></ever-icon>
-            {{ 'Orders' | translate }}
+			{{ 'Orders' | translate }}
 		</button>
 	</span>
-
-    <section class="right-elements">
+	
+	<section class="right-elements">
 		<span class="toggle-order-type">
 			<small
-                    (click)="toggleGetProductsType()"
-                    [ngClass]="{ 'no-select': isDeliveryRequired }"
-                    class="ml-3"
-            >{{ 'TAKEAWAY' | translate }}</small
-            >
+					(click)="toggleGetProductsType()"
+					[ngClass]="{ 'no-select': isDeliveryRequired }"
+					class="ml-3"
+			>{{ 'TAKEAWAY' | translate }}</small
+			>
 			<mat-slide-toggle
-                    (change)="toggleGetProductsType()"
-                    [checked]="isDeliveryRequired"
-                    class="example-margin mr-2 ml-2"
-            >
+					(change)="toggleGetProductsType()"
+					[checked]="isDeliveryRequired"
+					class="example-margin mr-2 ml-2"
+			>
 			</mat-slide-toggle>
 			<small
-                    (click)="toggleGetProductsType()"
-                    [ngClass]="{ 'no-select': !isDeliveryRequired }"
-                    class="mr-3"
-            >{{ 'DELIVERY' | translate }}</small
-            >
+					(click)="toggleGetProductsType()"
+					[ngClass]="{ 'no-select': !isDeliveryRequired }"
+					class="mr-3"
+			>{{ 'DELIVERY' | translate }}</small
+			>
 		</span>
-        <mat-search
-            #matSearch
-            (detectLocation)="loadAddress(true)"
-            (searchLocation)="tryFindNewAddress($event)"
-            [color]="styleVariables.brandLighted"
-            focusedColor="#f1f1f1"
-        ></mat-search>
-    </section>
-
-    <div class="nav">
-        <button [routerLink]="['/settings']" class="nav-option" mat-button>
-            <ever-icon class="nav-icon" type="settings"></ever-icon>
-        </button>
-    </div>
+		<mat-search #matSearch
+		            (detectLocation)="loadAddress(true)"
+		            (searchLocation)="tryFindNewAddress($event)"
+		            [color]="styleVariables.brandLighted"
+		            focusedColor="#f1f1f1">
+		</mat-search>
+		<mat-form-field class="language-bar" appearance="legacy">
+			<mat-icon>language</mat-icon>
+			<mat-select [(value)]="selectedLang">
+				<mat-option
+						(click)="switchLanguage(selectedLang)"
+						*ngFor="let lang of translateService.getLangs()"
+						[value]="lang"
+				>
+					{{ translateLanguage(lang) }}
+				</mat-option>
+			</mat-select>
+		</mat-form-field>
+	</section>
+	<span class="nav">
+	        <a [routerLink]="['/settings']" class="nav-option" mat-button>
+	            <ever-icon class="nav-icon" type="settings"></ever-icon>
+	        </a>
+		</span>
 </mat-toolbar>
+<mat-sidenav-container color="primary"
+                       [hasBackdrop]="true"
+                       (backdropClick)="sidenav.close()"
+                       (click)="closeSidenav($event)"
+>
+	<mat-sidenav #sidenav
+	             fixedInViewport
+	             class="sidenav"
+	             mode="over"
+	             position="start">
+		<mat-list dense class="nav-justified">
+			<mat-list-item class="nav-item">
+				<a [routerLinkActive]="'active-option'"
+				   [routerLink]="['/products']"
+				   class="nav-option nav-link"
+				>
+					{{ 'Products' | translate }}
+				</a>
+			</mat-list-item>
+			<mat-list-item class="sidenav-item">
+				<a [routerLinkActive]="'active-option'"
+				   [routerLink]="['/warehouses']"
+				   class="nav-option nav-link"
+				>
+					{{ 'Warehouses' | translate }}
+				</a>
+			</mat-list-item>
+			<mat-list-item class="sidenav-item">
+				<a [routerLinkActive]="'active-option'"
+				   [routerLink]="['/orders']"
+				   class="nav-option nav-link"
+				>
+					{{ 'Orders' | translate }}
+				</a>
+			</mat-list-item>
+		</mat-list>
+	</mat-sidenav>
+</mat-sidenav-container>
