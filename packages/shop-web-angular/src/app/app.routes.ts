@@ -3,7 +3,6 @@ import { environment }            from 'environments/environment'
 import { AppModuleGuard }         from './app.module.guard';
 import { NoContentComponent }     from './no-content';
 import { AuthGuard }              from './authentication/auth.guard';
-import { LoginModuleGuard }       from './+login/login.module.guard';
 import { MaintenanceModuleGuard } from './+maintenance-info/maintenance-info.module.guard';
 import { ProductsModuleGuard }    from './+products/products.module.guard';
 import { WarehousesModuleGuard }  from './+warehouses/warehouses.module.guard';
@@ -22,16 +21,15 @@ export const ROUTES: Routes = [
 		children:    [
 			{
 				path:       '',
-				redirectTo: '/login',
+				redirectTo: '/auth',
 				pathMatch:  'full',
 			},
 			{
-				path:         'login',
+				path:         'auth',
 				loadChildren: () =>
-						              import('./+login')
-								              .then((m) => m.LoginModule)
+						              import('./+auth')
+								              .then((m) => m.AuthModule)
 								              .catch(err => catchError(err)),
-				canActivate:  [LoginModuleGuard],
 			},
 			{
 				path:         'products',
