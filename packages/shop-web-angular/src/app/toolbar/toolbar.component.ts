@@ -32,19 +32,19 @@ import { MatSidenav }             from '@angular/material/sidenav';
            })
 export class ToolbarComponent implements OnInit, AfterViewInit
 {
-	styleVariables: typeof styleVariables = styleVariables;
-	logo: string = environment.AUTH_LOGO;
-	isDeliveryRequired: boolean;
+	public styleVariables: typeof styleVariables = styleVariables;
+	public logo: string = environment.AUTH_LOGO;
+	public isDeliveryRequired: boolean;
 	
 	public selectedLang: string;
 	public defaultLanguage = '';
 	public dir: 'ltr' | 'rtl';
 	
 	@ViewChild('matSearch')
-	matSearch: MatSearchComponent;
+	public matSearch: MatSearchComponent;
 	
 	@ViewChild('sidenav')
-	sidenav: MatSidenav;
+	public sidenav: MatSidenav;
 	
 	private initializedAddress: string;
 	
@@ -97,12 +97,12 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 		this.selectedLang = this.translateService.currentLang;
 	}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
 		this.initGoogleAutocompleteApi();
 	}
 	
-	async toggleGetProductsType()
+	public async toggleGetProductsType()
 	{
 		this.isDeliveryRequired = !this.isDeliveryRequired;
 		
