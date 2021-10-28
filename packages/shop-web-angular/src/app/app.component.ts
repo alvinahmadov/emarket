@@ -20,6 +20,7 @@ import { AdminsService }    from './services/admins.service';
 import { environment }      from 'environments/environment'
 import { CustomersService } from 'app/services/customer.service';
 import { StorageService }   from 'app/services/storage';
+import { MatSidenav }       from "@angular/material/sidenav";
 
 export interface ToolbarController
 {
@@ -45,6 +46,9 @@ export class AppComponent implements OnInit
 	
 	@ViewChild('chatpopupContainer')
 	public chatpopupContainer: ElementRef;
+	
+	@ViewChild('sidenav')
+	public sidenav: MatSidenav;
 	
 	private session: ChatSession;
 	
