@@ -208,7 +208,7 @@ export class CodeConfirmationComponent implements OnInit
 			          geoLocation:             invite.geoLocation,
 			          isRegistrationCompleted: true
 		          });
-		this.storageService.userId = customerId;
+		this.storageService.customerId = customerId;
 		this.storageService.inviteRequestId = null;
 		await this.router.navigate(['products']);
 	}
