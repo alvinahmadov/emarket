@@ -18,10 +18,7 @@ import { MatToolbarModule }                     from '@angular/material/toolbar'
 import { ExtendedModule, FlexLayoutModule }     from '@angular/flex-layout';
 import { platformBrowserDynamic }               from '@angular/platform-browser-dynamic';
 import { BrowserAnimationsModule }              from '@angular/platform-browser/animations';
-import { Apollo }                               from 'apollo-angular';
-import { HttpLink, HttpLinkModule }             from 'apollo-angular-link-http';
-import { InMemoryCache }                        from 'apollo-cache-inmemory';
-import { setContext }                           from 'apollo-link-context';
+import { HttpLinkModule }                       from 'apollo-angular-link-http';
 import { InfiniteScrollModule }                 from 'ngx-infinite-scroll';
 import { TranslateLoader, TranslateModule }     from '@ngx-translate/core';
 import { TranslateHttpLoader }                  from '@ngx-translate/http-loader';
@@ -147,8 +144,7 @@ const APP_PROVIDERS = [
 		          FlexLayoutModule,
 		          HttpLinkModule,
 		          RouterModule.forRoot(ROUTES, {
-			          useHash: Boolean(history.pushState) === false,
-			          // enableTracing: true,
+			          useHash:            Boolean(history.pushState) === false,
 			          preloadingStrategy: PreloadAllModules,
 		          }),
 		          MatIconModule,
@@ -184,50 +180,7 @@ const APP_PROVIDERS = [
 		          AuthGuard,
 	          ],
           })
-export class AppModule
-{
-	constructor(apollo: Apollo, httpLink: HttpLink, store: StorageService)
-	{}
-	
-	private init(apollo: Apollo, httpLink: HttpLink, store: StorageService)
-	{
-		
-		const http = httpLink.create({
-			                             uri: environment.GQL_ENDPOINT,
-		                             });
-		
-		const authLink = setContext((_, { headers }) =>
-		                            {
-			                            // get the authentication token from local storage if it exists
-			                            const token = store.token;
-			                            // return the headers to the context so httpLink can read them
-			                            return {
-				                            headers: {
-					                            ...headers,
-					                            authorization: token ? `Bearer ${token}` : '',
-				                            },
-			                            };
-		                            });
-		
-		apollo.create({
-			              link:           http,
-			              defaultOptions: {
-				              watchQuery: {
-					              fetchPolicy: 'network-only',
-					              errorPolicy: 'ignore',
-				              },
-				              query:      {
-					              fetchPolicy: 'network-only',
-					              errorPolicy: 'all',
-				              },
-				              mutate:     {
-					              errorPolicy: 'all',
-				              },
-			              },
-			              cache:          new InMemoryCache(),
-		              });
-	}
-}
+export class AppModule {}
 
 platformBrowserDynamic()
 		.bootstrapModule(AppModule)
