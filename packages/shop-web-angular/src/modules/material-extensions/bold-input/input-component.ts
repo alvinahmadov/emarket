@@ -1,6 +1,10 @@
 import { EventEmitter, Input, Directive } from '@angular/core';
 import { ControlValueAccessor }           from '@angular/forms';
 
+export type InputType = "text" | "password" | "email" | "color" |
+                        "date" | "tel" | "submit" | "search" | "number" |
+                        "file" | "hidden";
+
 @Directive()
 export abstract class InputComponent implements ControlValueAccessor
 {
@@ -8,7 +12,7 @@ export abstract class InputComponent implements ControlValueAccessor
 	public placeholder: string = '';
 	
 	@Input()
-	public type: string = 'text';
+	public type: InputType = 'text';
 	
 	@Input()
 	public disabled: boolean = false;
