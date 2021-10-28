@@ -43,7 +43,7 @@ import { AdminsService }                        from './services/admins.service'
 import { CustomersService }                     from './services/customer.service';
 import { LocationPopupModalModule }             from './shared/location-popup/location-popup.module';
 import { AuthGuard }                            from './authentication/auth.guard';
-import { LoginModuleGuard }                     from './+login/login.module.guard';
+import { AuthModuleGuard }                      from './+auth/auth.module.guard';
 import { ProductsModuleGuard }                  from './+products/products.module.guard';
 import { WarehousesModuleGuard }                from './+warehouses/warehouses.module.guard';
 import { MaintenanceModuleGuard }               from './+maintenance-info/maintenance-info.module.guard';
@@ -171,7 +171,7 @@ const APP_PROVIDERS = [
 	          providers:    [
 		          environment.ENV_PROVIDERS,
 		          APP_PROVIDERS,
-		          LoginModuleGuard,
+		          AuthModuleGuard,
 		          ProductsModuleGuard,
 		          WarehousesModuleGuard,
 		          AppModuleGuard,
