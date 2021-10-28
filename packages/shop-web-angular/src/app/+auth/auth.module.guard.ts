@@ -24,7 +24,7 @@ export class AuthModuleGuard implements CanActivate
 	{
 		const id = route.firstChild['params'].id;
 		if(
-				this.storage.userId != null ||
+				this.storage.customerId != null ||
 				(this.storage.registrationSystem === RegistrationSystem.Disabled &&
 				 !id)
 		)
