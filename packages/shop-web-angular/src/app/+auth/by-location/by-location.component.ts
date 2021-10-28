@@ -154,7 +154,7 @@ export class RegisterByLocationComponent implements OnInit
 					                          password: this.locationForm.password
 				                          });
 		
-		this.storage.userId = customer.id;
+		this.storage.customerId = customer.id;
 		await this.router.navigate(['auth/code']);
 	}
 	
