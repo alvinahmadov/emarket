@@ -1,8 +1,15 @@
 .products-view {
-  padding: 0;
-  min-height: 100%;
-
-  mat-form-field.mat-form-field {
-    width: 40%;
-  }
+	padding: 0;
+	min-height: 100%;
+	
+	mat-form-field.mat-form-field {
+		width: 40%;
+	}
+	
+	.search-bar {
+		border-bottom: 2px solid rgba(100, 100, 100, 0.1);
+		box-shadow: 0 2px 5px rgba(190, 190, 190, 0.2);
+		text-align: center !important;
+		margin-bottom: 20px !important;
+	}
 }
