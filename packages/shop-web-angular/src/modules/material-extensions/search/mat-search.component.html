@@ -7,7 +7,7 @@
     <input
         #input
         (blur)="onBlur()"
-        (focus)="onFocus($event)"
+        (focus)="onFocus()"
         (keyup.enter)="onInputEnter()"
         [style.background-color]="isFocused ? focusedColor : 'transparent'"
         [style.border]="'1px solid ' + color"
