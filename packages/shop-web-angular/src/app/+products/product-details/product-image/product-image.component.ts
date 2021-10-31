@@ -1,14 +1,13 @@
-import { Component, Input, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-import { IProductImage }                                      from '@modules/server.common/interfaces/IProduct';
-import Currency                                               from '@modules/server.common/entities/Currency';
-import { DragScrollComponent }                                from 'ngx-drag-scroll';
+import { Component, Input } from '@angular/core';
+import { IProductImage }    from '@modules/server.common/interfaces/IProduct';
+import Currency             from '@modules/server.common/entities/Currency';
 
 @Component({
 	           selector:    'es-product-image',
-	           templateUrl: './product-image.component.html',
-	           styleUrls:   ['./product-image.component.scss']
+	           styleUrls:   ['./product-image.component.scss'],
+	           templateUrl: './product-image.component.html'
            })
-export class ProductImageComponent implements OnInit
+export class ProductImageComponent
 {
 	@Input()
 	public productImages: IProductImage[];
@@ -16,20 +15,7 @@ export class ProductImageComponent implements OnInit
 	@Input()
 	public currency: Currency;
 	
-	@ViewChild('dragScroll')
-	public dragScroll: DragScrollComponent;
-	
 	public activeImageIndex: number;
-	
-	constructor() { }
-	
-	public ngOnInit(): void
-	{
-		if (this.dragScroll)
-		{
-			this.dragScroll.scrollbarHidden = true;
-		}
-	}
 	
 	public get hasImages(): boolean
 	{
