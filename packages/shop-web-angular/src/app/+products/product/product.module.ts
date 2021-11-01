@@ -5,12 +5,12 @@ import { FormsModule }          from '@angular/forms';
 import { MatButtonModule }      from '@angular/material/button';
 import { MatCardModule }        from '@angular/material/card';
 import { RouterModule }         from '@angular/router';
-import { ProductsCommonModule } from '../common/common.module';
 import { WarehouseLogoModule }  from 'app/warehouse-logo';
-import { ProductComponent }     from '.';
+import { ProductComponent }     from './product.component';
+import { ProductsCommonModule } from '../common/common.module';
 
 @NgModule({
-	          imports: [
+	          imports:      [
 		          CommonModule,
 		          TranslateModule.forChild(),
 		          FormsModule,
@@ -20,7 +20,7 @@ import { ProductComponent }     from '.';
 		          ProductsCommonModule,
 		          WarehouseLogoModule,
 	          ],
-	          exports: [ProductComponent],
+	          exports:      [ProductComponent],
 	          declarations: [ProductComponent],
           })
 export class ProductModule {}
