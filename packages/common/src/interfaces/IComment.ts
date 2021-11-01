@@ -19,16 +19,16 @@ export interface ICommentCreateObject extends DBCreateObject
 	 *Comment made by customer
 	 * */
 	content: string;
-}
-
-interface IComment extends ICommentCreateObject, DBRawObject
-{
-	_id: PyroObjectId;
 	
 	/**
 	 * User to whom the comment adressed
 	 * */
 	replyTo?: string;
+}
+
+interface IComment extends ICommentCreateObject, DBRawObject
+{
+	_id: PyroObjectId;
 	
 	/**
 	 * Number of likes of comment
