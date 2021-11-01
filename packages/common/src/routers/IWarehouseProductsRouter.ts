@@ -1,10 +1,7 @@
-import { Observable }   from 'rxjs';
-import WarehouseProduct from '../entities/WarehouseProduct';
-import IComment         from '../interfaces/IComment';
-import {
-	IWarehouseProductCreateObject,
-	default as IWarehouseProduct
-}                       from '../interfaces/IWarehouseProduct';
+import { Observable }             from 'rxjs';
+import WarehouseProduct           from '../entities/WarehouseProduct';
+import IWarehouseProduct,
+{ IWarehouseProductCreateObject } from '../interfaces/IWarehouseProduct';
 
 interface IWarehouseProductsRouter
 {
@@ -75,12 +72,6 @@ interface IWarehouseProductsRouter
 			productId: string,
 			count: number
 	): Promise<WarehouseProduct>;
-	
-	addComment(
-			warehouseId: string,
-			productId: string,
-			comment: IComment
-	): Promise<void>;
 	
 	getTopProducts(
 			warehouseId: string,
