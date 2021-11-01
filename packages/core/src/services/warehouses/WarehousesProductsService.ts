@@ -15,11 +15,9 @@ import IWarehouseProduct,
 import IProduct                   from '@modules/server.common/interfaces/IProduct';
 import IPagingOptions             from '@modules/server.common/interfaces/IPagingOptions';
 import IWarehouse                 from '@modules/server.common/interfaces/IWarehouse';
-import IComment                   from '@modules/server.common/interfaces/IComment';
 import IWarehouseProductsRouter   from '@modules/server.common/routers/IWarehouseProductsRouter';
 import DeliveryType               from '@modules/server.common/enums/DeliveryType';
 import WarehouseProduct           from '@modules/server.common/entities/WarehouseProduct';
-import Comment                    from '@modules/server.common/entities/Comment';
 import Warehouse                  from '@modules/server.common/entities/Warehouse';
 import { WarehousesService }      from './WarehousesService';
 import IService                   from '../IService';
@@ -269,10 +267,10 @@ export class WarehousesProductsService
 			this.warehousesService
 			    .existence
 			    .next({
-				          id: warehouse.id,
-				          value: warehouse,
+				          id:        warehouse.id,
+				          value:     warehouse,
 				          lastValue: lastValue,
-				          type: ExistenceEventType.Updated
+				          type:      ExistenceEventType.Updated
 			          });
 		}
 		
@@ -353,7 +351,7 @@ export class WarehousesProductsService
 		const updatedWarehouse = (
 				await this.warehousesService.updateMultiple(
 						{
-							_id: new Types.ObjectId(warehouseId),
+							_id:            new Types.ObjectId(warehouseId),
 							'products._id': updatedWarehouseProduct._id
 						},
 						{
@@ -529,73 +527,6 @@ export class WarehousesProductsService
 	): Promise<WarehouseProduct>
 	{
 		return this._changeCount(warehouseId, productId, -count, "likes");
-	}
-	
-	/**
-	 * Add comment from customer on the product's page
-	 *
-	 * @param {string} warehouseId
-	 * @param {string} productId
-	 * @param {IComment} comment
-	 *
-	 * @throws {Error} When warehouse with warehouseId or product with productId not found.
-	 *
-	 * @returns {Promise<WarehouseProduct>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	public async addComment(
-			warehouseId: string,
-			productId: string,
-			@serialization((c: IComment) => new Comment(c))
-					comment: Comment
-	): Promise<void>
-	{
-		const warehouse = await this._getWarehouse(warehouseId);
-		const warehouseProduct = this._getProduct(productId, warehouse);
-		
-		if(!warehouseProduct.comments)
-			warehouseProduct.comments = [];
-		
-		warehouseProduct.comments.push(comment);
-		
-		await this.update(warehouseId, warehouseProduct);
-	}
-	
-	/**
-	 * Remove comment from customer on the product's page
-	 *
-	 * @param {string} warehouseId
-	 * @param {string} productId to which product should be added
-	 * @param {string} commentId Id of comment
-	 *
-	 * @throws {Error} When warehouse with warehouseId or product with productId not found.
-	 *
-	 * @returns {Promise<void>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	public async removeComment(
-			warehouseId: string,
-			productId: string,
-			commentId: string
-	): Promise<void>
-	{
-		const warehouse = await this._getWarehouse(warehouseId);
-		const warehouseProduct = this._getProduct(productId, warehouse);
-		warehouseProduct.comments = _.filter(
-				warehouseProduct.comments,
-				comment => comment.id !== commentId
-		);
-		_.forEach(warehouseProduct.comments, (comment, index) =>
-		{
-			if(comment.id === commentId)
-			{
-				warehouseProduct.comments.splice(index, 1);
-			}
-		})
-		
-		await this.update(warehouseId, warehouseProduct);
 	}
 	
 	/**
