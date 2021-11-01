@@ -1,3 +1,4 @@
+<!-- TODO: Check Geolocation.countryName getter -->
 <nb-card>
     <nb-card-header>
         {{ carrier.firstName }} {{ carrier.firstName && carrier.lastName }}
@@ -49,7 +50,7 @@
             <div>
                 {{ carrier.geoLocation.city }}
                 {{ carrier.geoLocation.postcode }},
-                {{ carrier.geoLocation.countryName }}
+                {{ carrier.geoLocation.getCountryName(locale) }}
             </div>
         </div>
 
