@@ -1,72 +1,79 @@
-type Query {
-    getProductsWithPagination(
-        id: String!
-        pagingOptions: PagingOptionsInput
-    ): [WarehouseProduct!]
-
-    getProductsCount(id: String!): Int
-
-    getWarehouseProduct(
-        warehouseId: String!
-        warehouseProductId: String!
-    ): WarehouseProduct
-}
-
 type WarehouseProduct {
-    id: String!
-    _id: String!
-    price: Int!
-    initialPrice: Int!
-    count: Int
-    soldCount: Int!
-    product: Product!
-    isManufacturing: Boolean
-    isCarrierRequired: Boolean
-    isDeliveryRequired: Boolean
-    isProductAvailable: Boolean
-    isTakeaway: Boolean
-    deliveryTimeMin: Int
-    deliveryTimeMax: Int
+	id: String!
+	_id: String!
+	price: Int!
+	initialPrice: Int!
+	count: Int
+	soldCount: Int!
+	viewsCount: Int
+	likesCount: Int
+	product: Product!
+	comments: [Comment!]
+	isManufacturing: Boolean
+	isCarrierRequired: Boolean
+	isDeliveryRequired: Boolean
+	isProductAvailable: Boolean
+	isTakeaway: Boolean
+	deliveryTimeMin: Int
+	deliveryTimeMax: Int
 }
 
 input WarehouseProductInput {
-    price: Int!
-    initialPrice: Int!
-    count: Int
-    product: String!
-    isManufacturing: Boolean
-    isCarrierRequired: Boolean
-    isDeliveryRequired: Boolean
-    isProductAvailable: Boolean
-    isTakeaway: Boolean
-    deliveryTimeMin: Int
-    deliveryTimeMax: Int
+	price: Int!
+	initialPrice: Int!
+	count: Int
+	product: String!
+	isManufacturing: Boolean
+	isCarrierRequired: Boolean
+	isDeliveryRequired: Boolean
+	isProductAvailable: Boolean
+	isTakeaway: Boolean
+	deliveryTimeMin: Int
+	deliveryTimeMax: Int
 }
 
 input QuantityUpdateInput {
-    change: Int
-    to: Int
+	change: Int
+	to: Int
 }
 
 input WarehouseProductUpdateInput {
-    quantity: QuantityUpdateInput
-    price: Int
+	quantity: QuantityUpdateInput
+	price: Int
+}
+
+type Query {
+	getWarehouseProduct(
+		storeId: String!
+		productId: String!
+	): WarehouseProduct
+
+	getWarehouseProductInfo(
+		storeId: String!
+	): [ProductInfo!]
+
+	getWarehouseProductsWithPagination(
+		storeId: String!
+		pagingOptions: PagingOptionsInput
+	): [WarehouseProduct!]
+
+	getWarehouseProductsCount(id: String!): Int
 }
 
 type Mutation {
-    removeWarehouseProducts(
-        warehouseId: String!
-        productsIds: [String!]!
-    ): Boolean
+	removeWarehouseProducts(
+		warehouseId: String!
+		productsIds: [String!]!
+	): Boolean
 
-    addWarehouseProducts(
-        warehouseId: String!
-        products: [WarehouseProductInput!]!
-    ): [WarehouseProduct!]
+	addWarehouseProducts(
+		warehouseId: String!
+		products: [WarehouseProductInput!]!
+	): [WarehouseProduct!]
 
-    updateWarehouseProduct(
-        warehouseId: String!
-        productId: String!
-        updateInput: WarehouseProductUpdateInput!
-    ): WarehouseProduct!
+	updateWarehouseProduct(
+		warehouseId: String!
+		productId: String!
+		updateInput: WarehouseProductUpdateInput!
+	): WarehouseProduct!
 }
