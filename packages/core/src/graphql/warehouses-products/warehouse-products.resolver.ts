@@ -1,9 +1,40 @@
 import { Mutation, Resolver, Query }     from '@nestjs/graphql';
+import { Observable }                    from 'rxjs';
+import { first, map, share }             from 'rxjs/operators';
 import { IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
-import { WarehousesProductsService }     from '../../services/warehouses';
-import { Exception }                     from 'handlebars';
 import WarehouseProduct                  from '@modules/server.common/entities/WarehouseProduct';
-import { first }                         from 'rxjs/operators';
+import ProductInfo                       from '@modules/server.common/entities/ProductInfo';
+import { WarehousesProductsService }     from '../../services/warehouses';
+
+export type TWarehouseProductInput = {
+	warehouseId: string;
+	warehouseProductId: string;
+}
+
+export type TWarehouseProductsInput = {
+	warehouseId: string;
+	products: IWarehouseProductCreateObject[];
+}
+
+export type TWarehouseProductIdsInput = {
+	warehouseId: string;
+	productsIds: string[];
+}
+
+export type TQuantityUpdateInput = {
+	increase: number;
+	decrease: number;
+	to: number;
+}
+
+export type TWarehouseProductUpdateInput = {
+	warehouseId: string;
+	productId: string;
+	updateInput: {
+		quantity: TQuantityUpdateInput;
+		price: number;
+	};
+}
 
 @Resolver('Warehouse-products')
 export class WarehouseProductsResolver
@@ -14,10 +45,10 @@ export class WarehouseProductsResolver
 	{}
 	
 	@Query()
-	async getProductsWithPagination(_, { id, pagingOptions = {} })
+	async getWarehouseProductsWithPagination(_, { storeId, pagingOptions = {} }): Promise<WarehouseProduct[]>
 	{
 		const warehouseProducts = await this._warehousesProductsService.getProductsWithPagination(
-				id,
+				storeId,
 				pagingOptions
 		);
 		
@@ -25,7 +56,7 @@ export class WarehouseProductsResolver
 	}
 	
 	@Query()
-	async getProductsCount(_, { id }: { id: string })
+	async getWarehouseProductsCount(_, { id }: { id: string }): Promise<number>
 	{
 		return this._warehousesProductsService.getProductsCount(id);
 	}
@@ -36,13 +67,40 @@ export class WarehouseProductsResolver
 			{
 				warehouseId,
 				warehouseProductId
-			}: { warehouseId: string; warehouseProductId: string }
-	)
+			}: TWarehouseProductInput
+	): Promise<WarehouseProduct>
 	{
 		return await this._warehousesProductsService
 		                 .getProduct(warehouseId, warehouseProductId)
 		                 .pipe(first())
 		                 .toPromise();
+	}
+	
+	@Query()
+	getWarehouseProductInfo(
+			_,
+			{
+				warehouseId
+			}: { warehouseId: string }
+	): Observable<ProductInfo>
+	{
+		return this._warehousesProductsService
+		           .getAvailable(warehouseId)
+		           .pipe(
+				           map(warehouseProducts =>
+				               {
+					               return _.map(warehouseProducts, (warehouseProduct: WarehouseProduct) =>
+					               {
+						               return new ProductInfo({
+							                                      warehouseId:   warehouseId,
+							                                      warehouseLogo: '',
+							                                      warehouseProduct,
+							                                      distance:      100000
+						                                      });
+					               })
+				               }),
+				           share()
+		           )
 	}
 	
 	@Mutation()
@@ -51,8 +109,8 @@ export class WarehouseProductsResolver
 			{
 				warehouseId,
 				products
-			}: { warehouseId: string; products: IWarehouseProductCreateObject[] }
-	)
+			}: TWarehouseProductsInput
+	): Promise<WarehouseProduct[]>
 	{
 		return this._warehousesProductsService.add(warehouseId, products);
 	}
@@ -63,8 +121,8 @@ export class WarehouseProductsResolver
 			{
 				warehouseId,
 				productsIds
-			}: { warehouseId: string; productsIds: string[] }
-	)
+			}: TWarehouseProductIdsInput
+	): Promise<WarehouseProduct[]>
 	{
 		return this._warehousesProductsService.remove(warehouseId, productsIds);
 	}
@@ -76,30 +134,25 @@ export class WarehouseProductsResolver
 				warehouseId,
 				productId,
 				updateInput
-			}: {
-				warehouseId: string;
-				productId: string;
-				updateInput: {
-					quantity: {
-						increase: number;
-						decrease: number;
-						to: number;
-					};
-					price: number;
-				};
-			}
-	)
+			}: TWarehouseProductUpdateInput
+	): Promise<void>
 	{
-		throw new Exception('not implemented');
-		/*
-		 if (updateInput.quantity) {
-		 if (Object.keys(updateInput.quantity).length !== 1) {
-		 throw new Error("Can't");
-		 }
-		 
-		 this._warehousesProductsService.
-		 }
-		 return await this._warehousesProductsService.();
-		 */
+		if(updateInput.quantity)
+		{
+			if(Object.keys(updateInput.quantity).length !== 1)
+			{
+				throw new Error();
+			}
+			
+			await this._warehousesProductsService
+			          .increaseCount(
+					          warehouseId,
+					          productId,
+					          updateInput.quantity.increase
+			          );
+		}
+		
+		await this._warehousesProductsService
+		          .changePrice(warehouseId, productId, updateInput.price);
 	}
 }
