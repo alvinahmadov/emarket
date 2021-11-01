@@ -1,5 +1,4 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
-import ICustomer                                     from './ICustomer';
 
 export interface ICommentCreateObject extends DBCreateObject
 {
@@ -10,6 +9,11 @@ export interface ICommentCreateObject extends DBCreateObject
 	 * @memberof Comment
 	 */
 	userId: string;
+	
+	/**
+	 * Id of product under which is comment
+	 * */
+	productId: string;
 	
 	/**
 	 *Comment made by customer
