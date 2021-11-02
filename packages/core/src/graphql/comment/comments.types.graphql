@@ -1,0 +1,68 @@
+type Comment
+{
+	_id: String!
+	id: String!
+	userId: String!
+	productId: String!
+	message: String!
+	likes: Int
+	dislikes: Int
+	replyTo: String
+	_createdAt: Date
+	_updatedAt: Date
+}
+
+type Query {
+	comment(
+		storeId: String!,
+		storeProductId: String!,
+		commentId: String!
+	): Comment
+
+	comments(
+		storeId: String!,
+		storeProductId: String!,
+		pagingOptions: PagingOptionsInput
+	): [Comment!]!
+
+	getCountOfComments(storeId: String!, storeProductId: String!): Int!
+}
+
+input CommentCreateInput {
+	productId: String!
+	userId: String!
+	message: String!
+	replyTo: String
+}
+
+input CommentSaveInput
+{
+	userId: String
+	productId: String
+	message: String
+	likes: Int
+	dislikes: Int
+	replyTo: String
+	_updatedAt: Date
+}
+
+type Mutation {
+	addComment(
+		storeId: String!,
+		storeProductId: String!,
+		comment: CommentCreateInput!
+	): [Comment]
+
+	updateComment(
+		storeId: String!,
+		storeProductId: String!,
+		commentId: String!,
+		comment: CommentSaveInput!
+	): Comment!
+
+	deleteCommentsByIds(
+		storeId: String!,
+		storeProductId: String!,
+		commentIds: [String!]!
+	): [Comment]
+}
