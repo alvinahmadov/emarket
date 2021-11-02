@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, NgZone, Inject } from '@angular/core';
 import { DOCUMENT }                                 from '@angular/common';
+import { Router }                                   from '@angular/router';
 import { MatDialog }                                from '@angular/material/dialog';
 import {
 	animate,
@@ -63,7 +64,9 @@ export class OrderComponent implements OnInit
 	public modalTitleText: string = 'CONFIRMATION';
 	
 	constructor(
-			@Inject(DOCUMENT) public document: Document,
+			@Inject(DOCUMENT)
+			public document: Document,
+			public router: Router,
 			private warehouseOrdersRouter: WarehouseOrdersRouter,
 			private readonly warehouseRouter: WarehouseRouter,
 			private readonly carrierRouter: CarrierRouter,
@@ -73,6 +76,37 @@ export class OrderComponent implements OnInit
 			private readonly ngZone: NgZone
 	)
 	{}
+	
+	public ngOnInit()
+	{
+		this.warehouseRouter
+		    .get(this.order.warehouseId, false)
+		    .pipe(first())
+		    .subscribe((store) =>
+		               {
+			               this.ngZone.run(() =>
+			                               {
+				                               this.warehouse = store;
+				
+				                               this.orderCancelationCheck(
+						                               this.warehouse.orderCancelation,
+						                               this.order
+				                               );
+			                               });
+		               });
+		
+		if(this.order.carrierId)
+		{
+			this.carrierRouter
+			    .get(this.order.carrierId)
+			    .pipe(first())
+			    .subscribe((carrier) =>
+			               {
+				               this.carrier = carrier;
+			               });
+		}
+		this.loadData();
+	}
 	
 	public openDialog(): void
 	{
@@ -126,37 +160,6 @@ export class OrderComponent implements OnInit
 		                                         });
 		
 		return translationResult;
-	}
-	
-	public ngOnInit()
-	{
-		this.warehouseRouter
-		    .get(this.order.warehouseId, false)
-		    .pipe(first())
-		    .subscribe((store) =>
-		               {
-			               this.ngZone.run(() =>
-			                               {
-				                               this.warehouse = store;
-				
-				                               this.orderCancelationCheck(
-						                               this.warehouse.orderCancelation,
-						                               this.order
-				                               );
-			                               });
-		               });
-		
-		if(this.order.carrierId)
-		{
-			this.carrierRouter
-			    .get(this.order.carrierId)
-			    .pipe(first())
-			    .subscribe((carrier) =>
-			               {
-				               this.carrier = carrier;
-			               });
-		}
-		this.loadData();
 	}
 	
 	public localeTranslate(member: ILocaleMember[]): string
