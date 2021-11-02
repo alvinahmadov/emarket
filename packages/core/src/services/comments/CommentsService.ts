@@ -209,12 +209,15 @@ export class CommentsService
 		const updated = warehouseProduct.comments.filter(
 				(c) =>
 				{
-					if(c['_id'] == null || c['_id'] == undefined)
+					if(c._id == null)
 					{
 						return false;
 					}
-					let comment = this._factory(c);
-					return !commentIds.includes(comment.id);
+					
+					return _.findIndex(
+							commentIds,
+							commentId => c._id.toString() === commentId
+					) == -1;
 				}
 		);
 		warehouseProduct.comments = this._commentsFactory(updated);
@@ -223,7 +226,7 @@ export class CommentsService
 				warehouseProduct
 		);
 		
-		return updated;
+		return this._commentsFactory(warehouseProduct.comments);
 	}
 	
 	protected _getWarehouseProduct(
