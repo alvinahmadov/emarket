@@ -1,6 +1,8 @@
 import { NgModule, NO_ERRORS_SCHEMA, APP_INITIALIZER } from '@angular/core';
+import { RouteReuseStrategy }                          from '@angular/router';
 import { BrowserModule }                               from '@angular/platform-browser';
 import { HttpClient, HttpClientModule }                from '@angular/common/http';
+import { IonicModule, IonicRouteStrategy }             from '@ionic/angular';
 import { StatusBar }                                   from '@ionic-native/status-bar/ngx';
 import { SplashScreen }                                from '@ionic-native/splash-screen/ngx';
 import { GoogleMaps }                                  from '@ionic-native/google-maps';
@@ -9,24 +11,22 @@ import { Mixpanel }                                    from '@ionic-native/mixpa
 import { Network }                                     from '@ionic-native/network/ngx';
 import { Globalization }                               from '@ionic-native/globalization/ngx';
 import { Device }                                      from '@ionic-native/device/ngx';
-import { CommonModule }                                from '@modules/client.common.angular2/common.module';
 import { TranslateLoader, TranslateModule }            from '@ngx-translate/core';
 import { TranslateHttpLoader }                         from '@ngx-translate/http-loader';
-import { GraphQLModule }                               from '../graphql/apollo.config';
-import { environment }                                 from '../environments/environment';
-import { GoogleMapsLoader }                            from '@modules/client.common.angular2/services/googleMapsLoader';
-import { CarriersOrdersService }                       from '../services/carriers-orders.service';
-import { MaintenanceService }                          from '@modules/client.common.angular2/services/maintenance.service';
 import { Vibration }                                   from '@ionic-native/vibration/ngx';
 import { LocalNotifications }                          from '@ionic-native/local-notifications/ngx';
+import { CommonModule }                                from '@modules/client.common.angular2/common.module';
+import { GoogleMapsLoader }                            from '@modules/client.common.angular2/services/googlemaps-loader';
+import { MaintenanceService }                          from '@modules/client.common.angular2/services/maintenance.service';
 import { PipesModule }                                 from '@modules/client.common.angular2/pipes/pipes.module';
-import { Store }                                       from '../services/store.service';
 import { ServerConnectionService }                     from '@modules/client.common.angular2/services/server-connection.service';
-import { IonicModule, IonicRouteStrategy }             from '@ionic/angular';
-import { AppRoutingModule }                            from './app-routing.module';
-import { RouteReuseStrategy }                          from '@angular/router';
-import { AppComponent }                                from './app.component';
 import { MenuModule }                                  from 'components/menu/menu.module';
+import { GraphQLModule }                               from '../graphql/apollo.config';
+import { CarriersOrdersService }                       from '../services/carriers-orders.service';
+import { StorageService }                              from '../services/storage.service';
+import { environment }                                 from '../environments/environment';
+import { AppRoutingModule }                            from './app-routing.module';
+import { AppComponent }                                from './app.component';
 
 @NgModule({
 	          schemas:         [NO_ERRORS_SCHEMA],
@@ -57,7 +57,7 @@ import { MenuModule }                                  from 'components/menu/men
 		          {
 			          provide:    APP_INITIALIZER,
 			          useFactory: serverConnectionFactory,
-			          deps:       [ServerConnectionService, Store],
+			          deps:       [ServerConnectionService, StorageService],
 			          multi:      true,
 		          },
 		          GoogleMapsLoader,
@@ -87,7 +87,7 @@ import { MenuModule }                                  from 'components/menu/men
 		          CarriersOrdersService,
 		          Vibration,
 		          LocalNotifications,
-		          Store,
+		          StorageService,
 	          ],
           })
 export class AppModule
@@ -117,8 +117,8 @@ export function maintenanceFactory(provider: MaintenanceService)
 
 export function serverConnectionFactory(
 		provider: ServerConnectionService,
-		store: Store
+		storage: StorageService
 )
 {
-	return () => provider.load(environment.SERVICES_ENDPOINT, store);
+	return () => provider.load(environment.SERVICES_ENDPOINT, storage);
 }
