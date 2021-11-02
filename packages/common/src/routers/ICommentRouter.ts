@@ -16,7 +16,7 @@ interface ICommentsRouter
 			storeId: string,
 			storeProductId: string,
 			pagingOptions: IPagingOptions
-	): Observable<Comment[]>;
+	): Promise<Comment[]>;
 	
 	add(
 			storeId: string,
