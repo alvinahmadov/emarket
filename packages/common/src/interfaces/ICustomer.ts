@@ -16,7 +16,6 @@ export interface ICustomerInitializeObject extends DBCreateObject, IUser
 
 export interface ICustomerCreateObject extends ICustomerInitializeObject
 {
-	// TODO: Make not required
 	geoLocation: IGeoLocationCreateObject;
 	devicesIds?: string[];
 	apartment?: string;
