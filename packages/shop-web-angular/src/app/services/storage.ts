@@ -2,6 +2,12 @@ import { Injectable }     from '@angular/core';
 import { first }          from 'rxjs/operators';
 import { CustomerRouter } from '@modules/client.common.angular2/routers/customer-router.service';
 
+export interface Stats
+{
+	rating: number;
+	hasSeen: boolean;
+}
+
 @Injectable({
 	            providedIn: 'root',
             })
@@ -23,6 +29,24 @@ export class StorageService
 		else
 		{
 			localStorage.setItem('_cstmrId', id);
+		}
+	}
+	
+	public get stats(): Stats | null
+	{
+		const stt = localStorage.getItem('_stats');
+		
+		if(stt)
+			return <Stats>JSON.parse(stt);
+		else
+			return null
+	}
+	
+	public set stats(value: Stats)
+	{
+		if(value)
+		{
+			localStorage.setItem('_stats', JSON.stringify(value));
 		}
 	}
 	
@@ -53,7 +77,8 @@ export class StorageService
 		if(!currency)
 		{
 			localStorage.removeItem('_currency');
-		} else
+		}
+		else
 		{
 			localStorage.setItem('_currency', currency);
 		}
@@ -189,6 +214,23 @@ export class StorageService
 	public set serverConnection(val: string)
 	{
 		localStorage.setItem('serverConnection', val);
+	}
+	
+	public set isLocationSearchBarVisible(value: boolean | null)
+	{
+		if(value === null || value == false)
+		{
+			localStorage.setItem('locbar', '0');
+		}
+		else
+		{
+			localStorage.setItem('locbar', '1');
+		}
+	}
+	
+	public get isLocationSearchBarVisible(): boolean
+	{
+		return localStorage.getItem('locbar') === '1';
 	}
 	
 	public isLogged()
