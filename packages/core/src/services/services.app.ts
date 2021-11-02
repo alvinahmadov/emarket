@@ -522,19 +522,24 @@ export class ServicesApp
 			origins = [''];
 		}
 		
+		// const corsOptions = {
+		// 	origin:        (origin, cb) =>
+		// 	               {
+		// 		               if(origins.indexOf(origin) !== -1)
+		// 		               {
+		// 			               cb(null, true)
+		// 		               }
+		// 		               else
+		// 		               {
+		// 			               cb(new Error('Not allowed by CORS'))
+		// 		               }
+		// 	               },
+		// 	allowedHeader: ['Access-Control-Allow-Origin'],
+		// 	credentials:   true
+		// };
+		
 		const corsOptions = {
-			origin:      (origin, cb) =>
-			             {
-				             if(origins.indexOf(origin) !== -1)
-				             {
-					             cb(null, true)
-				             }
-				             else
-				             {
-					             cb(new Error('Not allowed by CORS'))
-				             }
-			             },
-			allowedHeader: ['Access-Control-Allow-Origin'],
+			origin: true,
 			credentials: true
 		};
 		
