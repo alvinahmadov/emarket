@@ -3,7 +3,6 @@ import { map }                   from 'rxjs/operators';
 import { Router, RouterFactory } from '../lib/router';
 import _                         from 'lodash';
 import { Injectable }            from '@angular/core';
-import IComment                  from '@modules/server.common/interfaces/IComment';
 import IWarehouseProduct, {
 	IWarehouseProductCreateObject
 }                                from '@modules/server.common/interfaces/IWarehouseProduct';
@@ -255,20 +254,6 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 				count
 		);
 		return this._factory(warehouseProduct);
-	}
-	
-	public async addComment(
-			warehouseId: string,
-			productId: string,
-			comment: IComment
-	): Promise<void>
-	{
-		return await this.router.run<void>(
-				'addComment',
-				warehouseId,
-				productId,
-				comment
-		);
 	}
 	
 	getTopProducts(
