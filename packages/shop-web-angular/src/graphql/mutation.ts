@@ -134,12 +134,12 @@ export namespace GQLMutation
 		{
 			export const AddProducts = gql`
 				mutation AddProducts(
-					$storeId: String!
+					$warehouseId: String!
 					$products: [WarehouseProductInput!]!
 				)
 				{
 					addWarehouseProducts(
-						storeId: $storeId
+						warehouseId: $warehouseId
 						products: $products
 					)
 					{
@@ -156,18 +156,88 @@ export namespace GQLMutation
 				}
 			`;
 			
-			export const RemoveProducts = gql`
-				mutation RemoveProductsByIds(
-					$storeId: String!
-					$productsIds: [String!]!
-				)
-				{
-					removeWarehouseProducts(
-						storeId: $storeId
-						productsIds: $productsIds
-					)
-				}
-			`;
+			export namespace Comment
+			{
+				export const Add = gql`
+					mutation AddComment(
+						$storeId: String!
+						$storeProductId: String!
+						$comment: CommentCreateInput!
+					) {
+						addComment(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							comment: $comment
+						)
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+				
+				export const Save = gql`
+					mutation SaveComment(
+						$storeId: String!
+						$storeProductId: String!
+						$commentId: String!
+						$comment: CommentSaveInput!
+					) {
+						updateComment(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							commentId: $commentId,
+							comment: $comment
+						)
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+				
+				export const Delete = gql`
+					mutation DeleteCommentsByIds(
+						$storeId: String!
+						$storeProductId: String!
+						$commentIds: [String!]!
+					) {
+						deleteCommentsByIds(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							commentIds: $commentIds
+						)
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+			}
 		}
 		
 		export namespace Orders

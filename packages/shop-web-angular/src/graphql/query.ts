@@ -55,6 +55,44 @@ export namespace GQLQuery
 				}
 			}
 		`;
+		
+		export const GetAllWithImage = gql`
+			query allCategories
+			{
+				productsCategories
+				{
+					id
+					name
+					{
+						locale
+						value
+					}
+					image
+				}
+			}
+		`;
+		
+		export const GetById = gql`
+			query GetCategory($id: String!)
+			{
+				productsCategory(id: $id)
+				{
+					name
+					{
+						value
+						locale
+					}
+					image
+					_createdAt
+					_updatedAt
+				}
+			}
+		`;
+	}
+	
+	export namespace Comment
+	{
+	
 	}
 	
 	export namespace Customer
@@ -493,21 +531,6 @@ export namespace GQLQuery
 			}
 		`;
 		
-		export const GetCountExistingCustomersToday = gql`
-			query GetCountExistingCustomersToday
-			{
-				getCountExistingCustomersToday
-				{
-					total
-					perStore
-					{
-						storeId
-						customersCount
-					}
-				}
-			}
-		`;
-		
 		export const GetAll = gql`
 			query GetAllStores
 			{
@@ -612,16 +635,6 @@ export namespace GQLQuery
 		
 		export namespace Orders
 		{
-			export const GetOrderProcess = gql`
-				query GetStoreOrderProcess($id: String!)
-				{
-					warehouse(id: $id)
-					{
-						ordersShortProcess
-					}
-				}
-			`;
-			
 			export const GetTableData = gql`
 				query GetStoreOrdersTableData(
 					$storeId: String!
@@ -827,10 +840,18 @@ export namespace GQLQuery
 						soldCount
 						viewsCount
 						likesCount
-						comments {
-							comment
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
 							likes
 							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
 						}
 						product
 						{
@@ -918,12 +939,18 @@ export namespace GQLQuery
 							_createdAt
 							_updatedAt
 						}
-						comments {
-							comment
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
 							likes
 							dislikes
-							isReply
 							replyTo
+							_createdAt
+							_updatedAt
 						}
 						viewsCount
 						likesCount
@@ -943,6 +970,74 @@ export namespace GQLQuery
 					getWarehouseProductsCount(id: $storeId)
 				}
 			`;
+			
+			export namespace Comment
+			{
+				export const GetComment = gql`
+					query GetComment(
+						$storeId: String!
+						$storeProductId: String!
+						$commentId: String!
+					)
+					{
+						comment(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							commentId: $commentId
+						)
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+				
+				export const GetComments = gql`
+					query GetComments(
+						$storeId: String!
+						$storeProductId: String!
+						$pagingOptions: PagingOptionsInput
+					)
+					{
+						comments(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							pagingOptions: $pagingOptions
+						)
+						{
+							id
+							_id
+							userId
+							message
+							likes
+							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+				
+				export const Count = gql`
+					query GetCountOfComments(
+						$storeId: String!
+						$storeProductId: String!
+					) {
+						getCountOfComments(
+							storeId: $storeId,
+							storeProductId: $storeProductId
+						)
+					}
+				`
+			}
 		}
 		
 	}
