@@ -41,7 +41,7 @@ class Comment extends DBObject<IComment, ICommentCreateObject>
 	 */
 	@Types.String()
 	@Column()
-	content: string;
+	message: string;
 	
 	/**
 	 * Number of likes of comment
