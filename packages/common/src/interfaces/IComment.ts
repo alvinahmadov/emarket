@@ -18,7 +18,7 @@ export interface ICommentCreateObject extends DBCreateObject
 	/**
 	 *Comment made by customer
 	 * */
-	content: string;
+	message: string;
 	
 	/**
 	 * User to whom the comment adressed
