@@ -59,7 +59,8 @@
 	},
 	"RETURN_PRODUCT_VIEW": {
 		"RETURN_PRODUCT": "Return Product",
-		"CANCEL": "Cancel"
+		"CANCEL": "Cancel",
+		"CANCEL_ORDER": "The customer cancel order"
 	},
 	"LOGIN_VIEW": {
 		"LOGIN": "Login"

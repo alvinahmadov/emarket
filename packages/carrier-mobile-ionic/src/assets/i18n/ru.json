@@ -59,7 +59,8 @@
 	},
 	"RETURN_PRODUCT_VIEW": {
 		"RETURN_PRODUCT": "Вернуться",
-		"CANCEL": "Отмена"
+		"CANCEL": "Отмена",
+		"CANCEL_ORDER": "Клиент отменил заказ"
 	},
 	"LOGIN_VIEW": {
 		"LOGIN": "Авторизоваться"
@@ -73,10 +74,7 @@
 	"LANGUAGE_VIEW": {
 		"TITLE": "Выберите язык",
 		"ENGLISH": "Английский",
-		"BULGARIAN": "Болгарский",
-		"HEBREW": "Иврит",
-		"RUSSIAN": "Русский",
-		"SPANISH": "Испанский"
+		"RUSSIAN": "Русский"
 	},
 	"LIST_VIEW": {
 		"YOU_NAVIGATED_HERE_FROM": "Вы перешли сюда из"
