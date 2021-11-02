@@ -10,6 +10,7 @@ import {
 	CarriersAuthService,
 	CarriersService
 }                                                                 from './carriers';
+import { CommentsService }                                        from './comments';
 import {
 	SocialRegisterService,
 	SocialStrategiesService,
@@ -77,6 +78,7 @@ const bindings = new ContainerModule((bind: interfaces.Bind) =>
 				                                     CarriersOrdersService,
 				                                     CarriersAuthService,
 				                                     CarriersService,
+				                                     CommentsService,
 				                                     DevicesService,
 				                                     GeoLocationsProductsService,
 				                                     GeoLocationsWarehousesService,
