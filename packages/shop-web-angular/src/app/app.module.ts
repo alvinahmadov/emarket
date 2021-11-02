@@ -2,6 +2,7 @@ import '../styles/styles.scss';
 import { APP_INITIALIZER, NgModule }            from '@angular/core';
 import { HttpClient, HttpClientModule }         from '@angular/common/http';
 import { FormsModule }                          from '@angular/forms';
+import { ExtendedModule, FlexLayoutModule }     from '@angular/flex-layout';
 import { PreloadAllModules, RouterModule }      from '@angular/router';
 import { BrowserModule }                        from '@angular/platform-browser';
 import { MatButtonModule }                      from '@angular/material/button';
@@ -10,12 +11,12 @@ import { MatCardModule }                        from '@angular/material/card';
 import { MatCheckboxModule }                    from '@angular/material/checkbox';
 import { MatFormFieldModule }                   from '@angular/material/form-field';
 import { MatIconModule }                        from '@angular/material/icon';
+import { MatInputModule }                       from '@angular/material/input';
 import { MatListModule }                        from '@angular/material/list';
 import { MatSelectModule }                      from '@angular/material/select';
 import { MatSidenavModule }                     from '@angular/material/sidenav';
 import { MatSlideToggleModule }                 from '@angular/material/slide-toggle';
 import { MatToolbarModule }                     from '@angular/material/toolbar';
-import { ExtendedModule, FlexLayoutModule }     from '@angular/flex-layout';
 import { platformBrowserDynamic }               from '@angular/platform-browser-dynamic';
 import { BrowserAnimationsModule }              from '@angular/platform-browser/animations';
 import { HttpLinkModule }                       from 'apollo-angular-link-http';
@@ -141,7 +142,6 @@ const APP_PROVIDERS = [
 		                                  }),
 		          BrowserAnimationsModule,
 		          FormsModule,
-		          FlexLayoutModule,
 		          HttpLinkModule,
 		          RouterModule.forRoot(ROUTES, {
 			          useHash:            Boolean(history.pushState) === false,
@@ -166,7 +166,9 @@ const APP_PROVIDERS = [
 		                               }),
 		          LocationPopupModalModule,
 		          MatSelectModule,
+		          MatInputModule,
 		          ExtendedModule,
+		          FlexLayoutModule,
 	          ],
 	          providers:    [
 		          environment.ENV_PROVIDERS,
@@ -178,7 +180,7 @@ const APP_PROVIDERS = [
 		          MaintenanceModuleGuard,
 		          GeoLocationService,
 		          AuthGuard,
-	          ],
+	          ]
           })
 export class AppModule {}
 
