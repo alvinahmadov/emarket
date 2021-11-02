@@ -1,12 +1,11 @@
-import { NgModule } from '@angular/core';
-
-import { WarehouseLogoComponent } from './warehouse-logo.component';
+import { NgModule }               from '@angular/core';
 import { CommonModule }           from '@angular/common';
+import { WarehouseLogoComponent } from './warehouse-logo.component';
 
 @NgModule({
-	          imports: [CommonModule],
-	          exports: [WarehouseLogoComponent],
+	          imports:      [CommonModule],
+	          exports:      [WarehouseLogoComponent],
 	          declarations: [WarehouseLogoComponent],
-	          providers: [],
+	          providers:    [],
           })
 export class WarehouseLogoModule {}
