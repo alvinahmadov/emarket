@@ -51,6 +51,8 @@
   "LOG_IN_VIEW": {
     "OR": "Or",
     "ENTER_BY_ADDRESS": "Enter by Address",
+    "REGISTER": "Sign Up",
+    "LOGIN": "Sign In",
     "SIGN_UP_WITH_AN_APP_INVITATION": "Sign up with an app invitation",
     "WE_WILL_SEND_YOU_A_MESSAGE": "We'll send you a message as soon as we start running at your address:",
     "THANKS_FOR_REGISTERING": "Thanks for registering!",

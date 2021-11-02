@@ -39,12 +39,25 @@
 		"NO_PRODUCTS": "Нет товаров",
 		"FASTFOOD": "быстрое питание",
 		"SEARCH": "поиск",
+		"PRICE": "Цена",
 		"LOADING_MORE_DATA": "Загрузка дополнительных данных ...",
 		"PRODUCT_DETAILS_VIEW": {
 			"BUY_FOR": "Заказать",
 			"DETAILS": "Детали",
+			"TOTAL_RATING": "Обшая оценка",
+			"TOTAL_VIEWS": "Обшие просмотры",
+			"CATEGORIES": "Категории",
 			"DELIVERY_FROM": "Доставка из",
-			"TAKEOUT_FROM": "Вынос из"
+			"TAKEOUT_FROM": "Вынос из",
+			"PRICE": "Цена",
+			"DISCOUNT": "Скидка",
+			"RATING": {
+				"BAD": "Плохо",
+				"NORMAL": "Нормально",
+				"GOOD": "Хорошо",
+				"BEST": "Отлично",
+				"PRETTY": "Прекрасно"
+			}
 		}
 	},
 	"WAREHOUSES_VIEW": {
@@ -71,8 +84,12 @@
 	"LOG_IN_VIEW": {
 		"OR": "Или",
 		"ENTER_BY_ADDRESS": "Введите адрес",
+		"ENTER_PASSWORD": "Введите пароль",
+		"ENTER_EMAIL_OR_USERNAME": "Введите имя/почту",
+		"REGISTER": "Регистрация",
+		"LOGIN": "Войти",
 		"SIGN_UP_WITH_AN_APP_INVITATION": "Зарегистрируйтесь с приглашением на приложение",
-		"WE_WILL_SEND_YOU_A_MESSAGE": "Мы отправим вам сообщение, как только начнем работать по вашему адресу:",
+		"WE_WILL_SEND_YOU_A_MESSAGE": "Мы отправим вам сообщение:",
 		"THANKS_FOR_REGISTERING": "Спасибо, что зарегистрировались!",
 		"WHAT_YOU_SEE_IS_WHAT_YOU_GET": "Что вы видите, это то, что вы получаете",
 		"INVITE_CODE": "Код приглашения",
@@ -97,6 +114,10 @@
 				"APARTMENT_OPTIONAL": "Апартаменты (по желанию)",
 				"COUNTRY_NOT_FOUND": "Страна не найдена"
 			}
+		},
+		"ERRORS": {
+			"EMAIL_OR_USERNAME_IS_INVALID": "Имя потльзователя/почта неверная!",
+			"DATA_IS_INVALID": "Имя потльзователя/почта или пароль неверные!"
 		}
 	},
 	"ORDER_VIEW": {
