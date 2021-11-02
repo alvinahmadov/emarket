@@ -18,14 +18,14 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 		this.router = routerFactory.create('customer-auth');
 	}
 	
-	async login(
-			username: string,
+	public async login(
+			emailOrUsername: string,
 			password: string
 	): Promise<ICustomerLoginResponse | null>
 	{
 		const res = await this.router.run<ICustomerLoginResponse>(
 				'login',
-				username,
+				emailOrUsername,
 				password
 		);
 		
@@ -50,13 +50,13 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 	 * @returns {Promise<User>}
 	 * @memberof UserAuthRouter
 	 */
-	async register(input: ICustomerRegistrationInput): Promise<Customer>
+	public async register(input: ICustomerRegistrationInput): Promise<Customer>
 	{
 		const u = await this.router.run<ICustomer>('register', input);
 		return this._userFactory(u);
 	}
 	
-	async addRegistrationInfo(
+	public async addRegistrationInfo(
 			id: Customer['id'],
 			info: AddableRegistrationInfo
 	): Promise<void>
@@ -64,7 +64,7 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 		await this.router.run('addRegistrationInfo', id, info);
 	}
 	
-	async updatePassword(
+	public async updatePassword(
 			id: string,
 			password: { current: string; new: string }
 	): Promise<void>
@@ -77,7 +77,7 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 		return user == null ? null : new Customer(user);
 	}
 	
-	getRegistrationsSettings(): Promise<{
+	public getRegistrationsSettings(): Promise<{
 		registrationRequiredOnStart: boolean;
 	}>
 	{
