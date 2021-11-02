@@ -8,7 +8,7 @@ import { Globalization }       from '@ionic-native/globalization/ngx';
 import { Device }              from '@ionic-native/device/ngx';
 import { TranslateService }    from '@ngx-translate/core';
 import { environment }         from '../environments/environment';
-import { Store }               from '../services/store.service';
+import { StorageService }      from '../services/storage.service';
 import ILanguage               from '@modules/server.common/interfaces/ILanguage';
 import { Platform }            from '@ionic/angular';
 import { DeviceRouter }        from '@modules/client.common.angular2/routers/device-router.service';
@@ -22,7 +22,7 @@ import { Router }              from '@angular/router';
            })
 export class AppComponent implements OnInit
 {
-	defaultLanguage = '';
+	public defaultLanguage = '';
 	
 	constructor(
 			public platform: Platform,
@@ -34,48 +34,49 @@ export class AppComponent implements OnInit
 			private globalization: Globalization,
 			private device: Device,
 			private _langTranslator: TranslateService,
-			private store: Store,
+			private storageService: StorageService,
 			private router: Router,
 			private deviceRouter: DeviceRouter
 	)
 	{}
 	
-	get showInformationPage()
+	public get showInformationPage()
 	{
-		return this.store.showInformationPage;
+		return this.storageService.showInformationPage;
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.initializeApp();
 	}
 	
-	initializeApp()
+	public initializeApp()
 	{
-		this.platform.ready().then(() =>
-		                           {
-			                           if(!this.store.deviceId)
-			                           {
-				                           this._registerDevice();
-			                           }
+		this.platform.ready()
+		    .then(() =>
+		          {
+			          if(!this.storageService.deviceId)
+			          {
+				          this._registerDevice();
+			          }
 			
-			                           this.networkWatch();
-			                           this._setupLangTranslator();
+			          this.networkWatch();
+			          this._setupLangTranslator();
 			
-			                           if(this.device.platform)
-			                           {
-				                           this.startGoogleAnalytics();
-				                           this.preferredLanguage();
-				                           this.startMixpanel();
-			                           }
-			                           // Okay, so the platform is ready and our plugins are available.
-			                           // Here you can do any higher level native things you might need.
-			                           this.statusBar.styleBlackOpaque();
-			                           this.splashScreen.hide();
-		                           });
+			          if(this.device.platform)
+			          {
+				          this.startGoogleAnalytics();
+				          this.preferredLanguage();
+				          this.startMixpanel();
+			          }
+			          // Okay, so the platform is ready and our plugins are available.
+			          // Here you can do any higher level native things you might need.
+			          this.statusBar.styleBlackOpaque();
+			          this.splashScreen.hide();
+		          });
 	}
 	
-	startGoogleAnalytics()
+	public startGoogleAnalytics()
 	{
 		setTimeout(() =>
 		           {
@@ -92,23 +93,22 @@ export class AppComponent implements OnInit
 		           }, 3000);
 	}
 	
-	networkWatch()
+	public networkWatch()
 	{
 		const disconnectSubscription = this.network
 		                                   .onDisconnect()
 		                                   .subscribe(() =>
 		                                              {
-			                                              this.store.noInternet = 'noInternet';
+			                                              this.storageService.noInternet = 'noInternet';
 			                                              this.router.navigateByUrl('info/no-internet', {
 				                                              skipLocationChange: false,
 			                                              });
-			                                              console.log('network was disconnected :-(');
+			                                              console.warn('network was disconnected :-(');
 		                                              });
 	}
 	
-	preferredLanguage()
+	public preferredLanguage()
 	{
-		console.log('Preferred Language');
 		this.globalization
 		    .getPreferredLanguage()
 		    .then((res) =>
@@ -118,31 +118,26 @@ export class AppComponent implements OnInit
 		    .catch((e) => console.log(e));
 	}
 	
-	startMixpanel()
+	public startMixpanel()
 	{
-		this.mixpanel.init(environment.MIXPANEL_API_KEY).then(() =>
-		                                                      {
-			                                                      console.log('Mixpanel is ready now!');
-			                                                      this.mixpanel.track('App Booted');
-		                                                      });
+		this.mixpanel.init(environment.MIXPANEL_API_KEY)
+		    .then(() =>
+		          {
+			          console.log('Mixpanel is ready now!');
+			          this.mixpanel.track('App Booted');
+		          });
 	}
 	
 	private async _setupLangTranslator()
 	{
 		this.defaultLanguage = environment['DEFAULT_LANGUAGE'];
 		
-		console.log('this.defaultLanguage');
-		console.log(this.defaultLanguage);
-		
 		const lang = (localStorage.getItem('_language') as ILanguage) || null;
-		const langs = { he: 'he', ru: 'ru', bg: 'bg', en: 'en', es: 'es' };
+		const langs = { ru: 'ru', en: 'en' };
 		// This 4 lines is here because of bug => without this lines, lang translation doesn't work.
 		// (The bug is unknown)
-		this._langTranslator.use(langs.he);
 		this._langTranslator.use(langs.ru);
-		this._langTranslator.use(langs.bg);
 		this._langTranslator.use(langs.en);
-		this._langTranslator.use(langs.es);
 		
 		this._langTranslator.resetLang(langs.en);
 		
@@ -179,9 +174,9 @@ export class AppComponent implements OnInit
 		
 		const device = await this.deviceRouter.create(deviceCreateObject);
 		
-		this.store.deviceId = device.id;
-		this.store.language = device.language;
-		this.store.platform = device.type;
+		this.storageService.deviceId = device.id;
+		this.storageService.language = device.language;
+		this.storageService.platform = device.type;
 	}
 	
 	private deviceCreateObject(): IDeviceCreateObject
