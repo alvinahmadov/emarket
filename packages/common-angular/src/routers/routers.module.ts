@@ -1,6 +1,7 @@
 import { NgModule }                    from '@angular/core';
 import { CarrierRouter }               from './carrier-router.service';
 import { CarrierOrdersRouter }         from './carrier-orders-router.service';
+import { CommentsRouter }              from './comments-router.service';
 import { CustomerRouter }              from './customer-router.service';
 import { CustomerAuthRouter }          from './customer-auth-router.service';
 import { CustomerOrdersRouter }        from './customer-orders-router.service';
@@ -22,12 +23,11 @@ import { WarehouseOrdersRouter }       from './warehouse-orders-router.service';
 import { CommonLibModule }             from '../lib';
 
 @NgModule({
-	          imports:      [CommonLibModule],
-	          exports:      [],
-	          declarations: [],
-	          providers:    [
+	          imports:   [CommonLibModule],
+	          providers: [
 		          CarrierOrdersRouter,
 		          CarrierRouter,
+		          CommentsRouter,
 		          CustomerAuthRouter,
 		          CustomerOrdersRouter,
 		          CustomerProductsRouter,
