@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import { Component, HostBinding, Input} from '@angular/core';
 
 @Component({
 	           selector: 'warehouse-logo',
@@ -41,7 +41,7 @@ import { Component, HostBinding, Input, OnInit } from '@angular/core';
 		                          [ngClass]="{ bordered: border, lighted: light }"/>
 	                     `,
            })
-export class WarehouseLogoComponent implements OnInit
+export class WarehouseLogoComponent
 {
 	@Input()
 	public logo: string;
@@ -52,14 +52,4 @@ export class WarehouseLogoComponent implements OnInit
 	
 	@Input()
 	public light: boolean = false;
-	
-	constructor()
-	{
-		return;
-	}
-	
-	public ngOnInit()
-	{
-		return;
-	}
 }
