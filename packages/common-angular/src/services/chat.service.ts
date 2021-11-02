@@ -78,16 +78,20 @@ export class ChatService
 	private static async createUser(user: IUser): Promise<ChatUser>
 	{
 		await Talk.ready;
+		const firstName = user.firstName ?? "";
+		const lastName = user.lastName ?? "";
+		const fullName = user.fullName ?? `${firstName} ${lastName}`;
+		
 		return new Talk.User({
 			                     id:       user._id.toString(),
 			                     email:    user.email,
 			                     name:     user.username ?? user.email,
 			                     photoUrl: user.avatar,
-			                     role:     user.role ?? "customer",
+			                     role:     user.role,
 			                     custom:   {
-				                     firstName: user.firstName ?? user.username,
-				                     lastName:  user.lastName ?? '',
-				                     fullName:  user.fullName ?? user.username
+				                     firstName: firstName,
+				                     lastName:  lastName,
+				                     fullName:  fullName
 			                     }
 		                     });
 	}
