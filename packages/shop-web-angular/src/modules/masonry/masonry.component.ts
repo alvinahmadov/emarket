@@ -40,7 +40,7 @@ export class MasonryComponent implements OnInit, OnDestroy
 	
 	constructor(private readonly _element: ElementRef) {}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		/// TODO: How to load imagesloaded only if this.useImagesLoaded===true?
 		// if (this.useImagesLoaded) {
@@ -75,7 +75,7 @@ export class MasonryComponent implements OnInit, OnDestroy
 		});
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		if(this._msnry)
 		{
@@ -89,11 +89,8 @@ export class MasonryComponent implements OnInit, OnDestroy
 		           {
 			           this._msnry.layout();
 		           });
-		
-		// console.log('AngularMasonry:', 'Layout');
 	}
 	
-	// public add(element: HTMLElement, prepend: boolean = false) {
 	add(element: HTMLElement)
 	{
 		let isFirstItem = false;
@@ -133,8 +130,6 @@ export class MasonryComponent implements OnInit, OnDestroy
 				this.layout();
 			}
 		}
-		
-		// console.log('AngularMasonry:', 'Brick added');
 	}
 	
 	remove(element: HTMLElement)
@@ -144,7 +139,5 @@ export class MasonryComponent implements OnInit, OnDestroy
 		
 		// Layout items
 		this.layout();
-		
-		// console.log('AngularMasonry:', 'Brick removed');
 	}
 }
