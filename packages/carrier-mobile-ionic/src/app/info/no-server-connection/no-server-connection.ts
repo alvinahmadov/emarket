@@ -1,6 +1,6 @@
 import { Component }               from '@angular/core';
 import { environment }             from '../../../environments/environment';
-import { Store }                   from '../../../services/store.service';
+import { StorageService }          from '../../../services/storage.service';
 import { ServerConnectionService } from '@modules/client.common.angular2/services/server-connection.service';
 import { Router }                  from '@angular/router';
 
@@ -15,7 +15,7 @@ export class NoServerConnectionComponent
 	interval;
 	
 	constructor(
-			private store: Store,
+			private storageService: StorageService,
 			private router: Router,
 			private serverConnectionService: ServerConnectionService
 	)
@@ -35,13 +35,13 @@ export class NoServerConnectionComponent
 		                            {
 			                            await this.serverConnectionService.checkServerConnection(
 					                            environment.SERVICES_ENDPOINT,
-					                            this.store
+					                            this.storageService
 			                            );
 			
-			                            if(!this.store.showInformationPage)
+			                            if(!this.storageService.showInformationPage)
 			                            {
 				                            clearInterval(this.interval);
-				                            this.store.clearMaintenanceMode();
+				                            this.storageService.clearMaintenanceMode();
 				                            this.router.navigateByUrl('');
 			                            }
 		                            }, 5000);
