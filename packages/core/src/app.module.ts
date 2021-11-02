@@ -19,29 +19,30 @@ import { CommonUtils as Common }              from '@modules/server.common/utili
 import { ConfigModule }                       from './config/config.module';
 import { TestController }                     from './controllers/test.controller';
 import { ProductModule }                      from './controllers/product/product.module';
+import { SCALARS }                            from './graphql/scalars';
 import { SubscriptionsModule }                from './graphql/subscriptions/subscriptions.module';
 import { SubscriptionsService }               from './graphql/subscriptions/subscriptions.service';
-import { InvitesModule }                      from './graphql/invites/invites.module';
-import { DevicesModule }                      from './graphql/devices/devices.module';
-import { CustomersModule }                    from './graphql/customers/customers.module';
-import { WarehousesModule }                   from './graphql/warehouses/warehouses.module';
-import { OrdersModule }                       from './graphql/orders/orders.module';
+import { AdminsModule }                       from './graphql/admin/admins.module';
+import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
 import { CarriersModule }                     from './graphql/carriers/carriers.module';
-import { ProductsModule }                     from './graphql/products/products.module';
+import { CarriersOrdersModule }               from './graphql/carriers-orders/carriers-orders.module';
+import { CommentsModule }                     from './graphql/comment/comments.module';
+import { CurrencyModule }                     from './graphql/currency/currency.module';
+import { CustomersModule }                    from './graphql/customers/customers.module';
+import { DevicesModule }                      from './graphql/devices/devices.module';
+import { InvitesModule }                      from './graphql/invites/invites.module';
 import { GeoLocationsModule }                 from './graphql/geo-locations/geo-locations.module';
-import { SCALARS }                            from './graphql/scalars';
-import { WarehousesProductsModule }           from './graphql/warehouses-products/warehouses-products.modules';
+import { GeoLocationMerchantsModule }         from './graphql/geo-locations/merchants/geo-location-merchants.module';
+import { GeoLocationOrdersModule }            from './graphql/geo-locations/orders/geo-location-orders.module';
+import { InvitesRequestsModule }              from './graphql/invites-requests/invites-requests.module';
+import { DataModule }                         from './graphql/data/data.module';
+import { OrdersModule }                       from './graphql/orders/orders.module';
+import { ProductsModule }                     from './graphql/products/products.module';
+import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
+import { WarehousesModule }                   from './graphql/warehouses/warehouses.module';
 import { WarehousesCarriersModule }           from './graphql/warehouses-carriers/warehouses-carriers.module';
 import { WarehousesOrdersModule }             from './graphql/warehouses-orders/warehouses-orders.module';
-import { InvitesRequestsModule }              from './graphql/invites-requests/invites-requests.module';
-import { AdminsModule }                       from './graphql/admin/admins.module';
-import { DataModule }                         from './graphql/data/data.module';
-import { CarriersOrdersModule }               from './graphql/carriers-orders/carriers-orders.module';
-import { GeoLocationOrdersModule }            from './graphql/geo-locations/orders/geo-location-orders.module';
-import { GeoLocationMerchantsModule }         from './graphql/geo-locations/merchants/geo-location-merchants.module';
-import { CurrencyModule }                     from './graphql/currency/currency.module';
-import { PromotionModule }                    from './graphql/products/promotions/promotion.module';
-import { AppsSettingsModule }                 from './graphql/apps-settings/apps-settings.module';
+import { WarehousesProductsModule }           from './graphql/warehouses-products/warehouses-products.modules';
 import { AuthModule }                         from './auth/auth.module';
 import { createLogger }                       from './helpers/Log';
 import { GetAboutUsHandler }                  from './services/customers';
@@ -159,6 +160,7 @@ const gqlSubscriptionsEndpoint = env.GQL_SUBSCRIPTIONS_ENDPOINT
 		        CarriersModule,
 		        CarriersOrdersModule,
 		        ProductsModule,
+		        CommentsModule,
 		        WarehousesProductsModule,
 		        WarehousesOrdersModule,
 		        WarehousesCarriersModule,
@@ -200,23 +202,6 @@ export class ApplicationModule implements NestModule, OnModuleInit
 		{
 			return this.toString();
 		};
-		
-		/* Next is code which could be used to manually create GraphQL Server instead of using GraphQLModule.forRoot(...)
-		 
-		 const schema: GraphQLSchema = this.createSchema();
-		 const server: ApolloServer = this.createServer(schema);
-		 
-		 // this creates manually GraphQL subscriptions server (over ws connection)
-		 this.subscriptionsService.createSubscriptionServer(server);
-		 
-		 const app: any = this.httpServerRef;
-		 
-		 const graphqlPath = '/graphql';
-		 
-		 server.applyMiddleware({app, path: graphqlPath});
-		 
-		 */
-		
 		log.info(
 				`GraphQL playground available at ${gqlEndpoint}`
 		);
