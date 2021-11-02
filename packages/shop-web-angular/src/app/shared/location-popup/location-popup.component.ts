@@ -1,10 +1,10 @@
 import {
 	Component,
-	OnInit,
 	Inject,
 	EventEmitter,
-	AfterViewInit,
 	ViewChild,
+	OnInit,
+	AfterViewInit
 }                                              from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA }       from '@angular/material/dialog';
 import { Router }                              from '@angular/router';
@@ -83,15 +83,15 @@ export class LocationPopupComponent implements OnInit, AfterViewInit
 			const isValid = this.locationForm.statusForm;
 			if(isValid)
 			{
-				const userId = this.storage.userId;
+				const customerId = this.storage.customerId;
 				await this.updateUser(
-						userId,
+						customerId,
 						this.locationForm.getCreateUserInfo().geoLocation
 				);
 				const address = this.locationForm.searchElement.nativeElement
 						.value;
 				
-				this.close(address);
+				await this.close(address);
 			}
 		}
 		console.warn('TODO update');
