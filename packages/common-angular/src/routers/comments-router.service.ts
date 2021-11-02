@@ -38,7 +38,7 @@ export class CommentsRouter implements ICommentsRouter
 			storeId: string,
 			storeProductId: string,
 			pagingOptions: IPagingOptions
-	): Promise<IComment[]>
+	): Promise<Comment[]>
 	{
 		const comments = await this.router
 		                           .run<IComment[]>(
