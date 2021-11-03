@@ -1,0 +1,22 @@
+<ngb-rating [rate]="rate"
+            [max]="max"
+            [readonly]="readonly"
+            (rateChange)="OnRateChange($event)"
+>
+	<ng-template let-fill="fill"
+	             let-index="index"
+	>
+		<span class="star"
+		      placement="top"
+		      [ngbTooltip]="tooltip(index + 1)"
+		      [class.filled]="fill === 100"
+		>
+			<span *ngIf="!fillStar; else filled">
+				&#9734;
+			</span>
+			<ng-template #filled>
+				&#9733;
+			</ng-template>
+		</span>
+	</ng-template>
+</ngb-rating>
