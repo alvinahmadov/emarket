@@ -1,0 +1,19 @@
+:host {
+	height: 100%;
+	width: 100%;
+	background-color: white;
+}
+
+.price-initial {
+	font-size: 15px;
+	text-decoration: line-through;
+	color: grey;
+}
+
+.discount {
+	border-radius: 5px;
+	color: white;
+	background-color: green;
+	opacity: 0.5;
+	padding: 2px;
+}
