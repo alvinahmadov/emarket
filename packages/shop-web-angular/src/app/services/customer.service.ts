@@ -4,6 +4,7 @@ import { Observable }            from 'rxjs';
 import { map, share }            from 'rxjs/operators';
 import ICustomer,
 { ICustomerUpdateObject }        from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
 import Customer                  from '@modules/server.common/entities/Customer';
 import {
 	ICustomerLoginResponse,
@@ -26,7 +27,8 @@ export class CustomersService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName: CustomersService.name
+			      serviceName:  "Shop::CustomersService",
+			      pollInterval: 10000
 		      })
 	}
 	
@@ -44,6 +46,22 @@ export class CustomersService extends ApolloService
 						           this.factory(res, Customer)),
 				           share()
 		           );
+	}
+	
+	public getCustomers(
+			pagingOptions: IPagingOptions = {}
+	): Observable<Customer[]>
+	{
+		return this.apollo
+		           .watchQuery<{
+			           customers: Customer[]
+		           }>({
+			              query:     GQLQuery.Customer.GetAll,
+			              variables: { pagingOptions }
+		              })
+		           .valueChanges
+		           .pipe(map((result) => <Customer[]>
+				           this.factory(result, Customer)))
 	}
 	
 	public login(
