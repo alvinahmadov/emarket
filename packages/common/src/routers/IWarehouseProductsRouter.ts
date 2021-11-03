@@ -43,12 +43,6 @@ interface IWarehouseProductsRouter
 			count: number
 	): Promise<WarehouseProduct>;
 	
-	increaseLikesCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>;
-	
 	decreaseCount(
 			warehouseId: string,
 			productId: string,
@@ -67,9 +61,10 @@ interface IWarehouseProductsRouter
 			count: number
 	): Promise<WarehouseProduct>;
 	
-	decreaseLikesCount(
+	changeRate(
 			warehouseId: string,
 			productId: string,
+			customerId: string,
 			count: number
 	): Promise<WarehouseProduct>;
 	
