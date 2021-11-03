@@ -226,16 +226,18 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 		return this._factory(warehouseProduct);
 	}
 	
-	public async increaseLikesCount(
+	public async changeRate(
 			warehouseId: string,
 			productId: string,
+			customerId: string,
 			count: number
 	): Promise<WarehouseProduct>
 	{
 		const warehouseProduct = await this.router.run<IWarehouseProduct>(
-				'increaseLikesCount',
+				'changeRate',
 				warehouseId,
 				productId,
+				customerId,
 				count
 		);
 		return this._factory(warehouseProduct);
