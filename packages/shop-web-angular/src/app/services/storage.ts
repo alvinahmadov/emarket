@@ -2,10 +2,82 @@ import { Injectable }     from '@angular/core';
 import { first }          from 'rxjs/operators';
 import { CustomerRouter } from '@modules/client.common.angular2/routers/customer-router.service';
 
-export interface Stats
+export interface Statistics
 {
-	rating: number;
-	hasSeen: boolean;
+	__rtg: number;
+	__hsn: boolean;
+}
+
+export const storageKeys = {
+	customerId:           {
+		name:  "_cstmrId",
+		value: ""
+	},
+	stats:                {
+		name:  "_stcs",
+		value: { __hsn: 0, __rtg: 0 }
+	},
+	locale:               {
+		name:  "_locale",
+		value: "ru-RU"
+	},
+	currency:             {
+		name:  "_currency",
+		value: "RUB"
+	},
+	inviteSystem:         {
+		name:  "_inviteSystem",
+		value: ""
+	},
+	inviteRequestId:      {
+		name:  "_inviteRequestId",
+		value: ""
+	},
+	registrationSystem:   {
+		name:  "_registrationSystem",
+		value: ""
+	},
+	buyProductId:         {
+		name:  "_buyProductId",
+		value: ""
+	},
+	merchantId:           {
+		name:  "_merchantId",
+		value: ""
+	},
+	maintenanceMode:      {
+		name:  "maintenanceMode",
+		value: false
+	},
+	token:                {
+		name:  "token",
+		value: ""
+	},
+	deliveryType:         {
+		name:  "deliveryType",
+		value: ""
+	},
+	productListViewSpace: {
+		name:  "productListViewSpace",
+		value: ""
+	},
+	productListViewType:  {
+		name:  "productListViewType",
+		value: ""
+	},
+	productViewType:      {
+		name:  "productViewType",
+		value: ""
+	},
+	serverConnection:     {
+		name:  "serverConnection",
+		value: ""
+	},
+	locbar:               {
+		name:  "locbar",
+		value: ""
+	}
+	
 }
 
 @Injectable({
@@ -17,220 +89,226 @@ export class StorageService
 	
 	public get customerId(): string | null
 	{
-		return localStorage.getItem('_cstmrId') || null;
+		return localStorage.getItem(storageKeys.customerId.name) || null;
 	}
 	
 	public set customerId(id: string | null)
 	{
 		if(id == null)
 		{
-			localStorage.removeItem('_cstmrId');
+			localStorage.removeItem(storageKeys.customerId.name);
 		}
 		else
 		{
-			localStorage.setItem('_cstmrId', id);
+			localStorage.setItem(storageKeys.customerId.name, id);
 		}
 	}
 	
-	public get stats(): Stats | null
+	public get hasSeen(): boolean
 	{
-		const stt = localStorage.getItem('_stats');
-		
-		if(stt)
-			return <Stats>JSON.parse(stt);
-		else
-			return null
+		if(this.stats)
+		{
+			return this.stats.__hsn;
+		}
+		return false;
 	}
 	
-	public set stats(value: Stats)
+	public set hasSeen(value: boolean)
 	{
-		if(value)
+		if(this.stats)
 		{
-			localStorage.setItem('_stats', JSON.stringify(value));
+			let stats = this.stats;
+			stats.__hsn = value;
+			this.stats = stats;
+		}
+		else
+		{
+			this.stats = { __hsn: false, __rtg: 0 };
 		}
 	}
 	
 	public get languageCode(): string
 	{
-		return localStorage.getItem('_languageCode') || null;
+		return localStorage.getItem(storageKeys.locale.name) || null;
 	}
 	
 	public set languageCode(code: string)
 	{
 		if(code == null)
 		{
-			localStorage.removeItem('_locale');
+			localStorage.removeItem(storageKeys.locale.name);
 		}
 		else
 		{
-			localStorage.setItem('_locale', code);
+			localStorage.setItem(storageKeys.locale.name, code);
 		}
 	}
 	
 	public get defaultCurrency(): string
 	{
-		return localStorage.getItem('_currency') ?? 'RUB';
+		return localStorage.getItem(storageKeys.currency.name)
+		       ?? storageKeys.currency.value;
 	}
 	
 	public set defaultCurrency(currency: string)
 	{
 		if(!currency)
 		{
-			localStorage.removeItem('_currency');
+			localStorage.removeItem(storageKeys.currency.name);
 		}
 		else
 		{
-			localStorage.setItem('_currency', currency);
+			localStorage.setItem(storageKeys.currency.name, currency);
 		}
 	}
 	
 	public get inviteSystem(): boolean
 	{
-		return localStorage.getItem('_inviteSystem') === 'enabled';
+		return localStorage.getItem(storageKeys.inviteSystem.name) === 'enabled';
 	}
 	
 	public set inviteSystem(isEndabled: boolean)
 	{
-		localStorage.setItem('_inviteSystem', isEndabled ? 'enabled' : 'disabled');
+		localStorage.setItem(storageKeys.inviteSystem.name, isEndabled ? 'enabled' : 'disabled');
 	}
 	
 	public get inviteRequestId(): string | null
 	{
-		return localStorage.getItem('_inviteRequestId') || null;
+		return localStorage.getItem(storageKeys.inviteRequestId.name) || null;
 	}
 	
 	public set inviteRequestId(id: string | null)
 	{
 		if(id == null)
 		{
-			localStorage.removeItem('_inviteRequestId');
+			localStorage.removeItem(storageKeys.inviteRequestId.name);
 		}
 		else
 		{
-			localStorage.setItem('_inviteRequestId', id);
+			localStorage.setItem(storageKeys.inviteRequestId.name, id);
 		}
 	}
 	
 	public get registrationSystem(): string
 	{
-		return localStorage.getItem('_registrationSystem');
+		return localStorage.getItem(storageKeys.registrationSystem.name);
 	}
 	
 	public set registrationSystem(registrationRequiredOnStart: string)
 	{
 		localStorage.setItem(
-				'_registrationSystem',
+				storageKeys.registrationSystem.name,
 				registrationRequiredOnStart
 		);
 	}
 	
 	public get buyProductId(): string
 	{
-		return localStorage.getItem('_buyProductId');
+		return localStorage.getItem(storageKeys.buyProductId.name);
 	}
 	
 	public set buyProductId(warehouseProductId: string)
 	{
-		localStorage.setItem('_buyProductId', warehouseProductId);
+		localStorage.setItem(storageKeys.buyProductId.name, warehouseProductId);
 	}
 	
 	public get merchantId(): string
 	{
-		return localStorage.getItem('_merchantId');
+		return localStorage.getItem(storageKeys.merchantId.name);
 	}
 	
 	public set merchantId(merchantId: string)
 	{
-		localStorage.setItem('_merchantId', merchantId);
+		localStorage.setItem(storageKeys.merchantId.name, merchantId);
 	}
 	
 	public get maintenanceMode(): string | null
 	{
-		return localStorage.getItem('maintenanceMode') || null;
+		return localStorage.getItem(storageKeys.maintenanceMode.name) || null;
 	}
 	
 	public get token(): string | null
 	{
-		return localStorage.getItem('token') || null;
+		return localStorage.getItem(storageKeys.token.name) || null;
 	}
 	
 	public set token(token: string)
 	{
 		if(token == null)
 		{
-			localStorage.removeItem('token');
+			localStorage.removeItem(storageKeys.token.name);
 		}
 		else
 		{
-			localStorage.setItem('token', token);
+			localStorage.setItem(storageKeys.token.name, token);
 		}
 	}
 	
 	public get deliveryType(): number
 	{
-		return Number(localStorage.getItem('deliveryType'));
+		return Number(localStorage.getItem(storageKeys.deliveryType.name));
 	}
 	
 	public set deliveryType(deliveryType: number)
 	{
-		localStorage.setItem('deliveryType', deliveryType.toString());
+		localStorage.setItem(storageKeys.deliveryType.name, deliveryType.toString());
 	}
 	
 	public get productListViewSpace(): string
 	{
-		return localStorage.getItem('productListViewSpace');
+		return localStorage.getItem(storageKeys.productListViewSpace.name);
 	}
 	
 	public set productListViewSpace(productListViewSpace: string)
 	{
-		localStorage.setItem('productListViewSpace', productListViewSpace);
+		localStorage.setItem(storageKeys.productListViewSpace.name, productListViewSpace);
 	}
 	
 	public get productListViewType(): string
 	{
-		return localStorage.getItem('productListViewType');
+		return localStorage.getItem(storageKeys.productListViewType.name);
 	}
 	
 	public set productListViewType(productListViewType: string)
 	{
-		localStorage.setItem('productListViewType', productListViewType);
+		localStorage.setItem(storageKeys.productListViewType.name, productListViewType);
 	}
 	
 	public get productViewType(): string
 	{
-		return localStorage.getItem('productViewType');
+		return localStorage.getItem(storageKeys.productViewType.name);
 	}
 	
 	public set productViewType(productViewType: string)
 	{
-		localStorage.setItem('productViewType', productViewType);
+		localStorage.setItem(storageKeys.productViewType.name, productViewType);
 	}
 	
 	public get serverConnection()
 	{
-		return localStorage.getItem('serverConnection');
+		return localStorage.getItem(storageKeys.serverConnection.name);
 	}
 	
 	public set serverConnection(val: string)
 	{
-		localStorage.setItem('serverConnection', val);
+		localStorage.setItem(storageKeys.serverConnection.name, val);
 	}
 	
 	public set isLocationSearchBarVisible(value: boolean | null)
 	{
 		if(value === null || value == false)
 		{
-			localStorage.setItem('locbar', '0');
+			localStorage.setItem(storageKeys.locbar.name, '0');
 		}
 		else
 		{
-			localStorage.setItem('locbar', '1');
+			localStorage.setItem(storageKeys.locbar.name, '1');
 		}
 	}
 	
 	public get isLocationSearchBarVisible(): boolean
 	{
-		return localStorage.getItem('locbar') === '1';
+		return localStorage.getItem(storageKeys.locbar.name) === '1';
 	}
 	
 	public isLogged()
@@ -258,11 +336,33 @@ export class StorageService
 	
 	public clearMaintenanceMode()
 	{
-		localStorage.removeItem('maintenanceMode');
+		localStorage.removeItem(storageKeys.maintenanceMode.name);
 	}
 	
 	public clear()
 	{
 		localStorage.clear();
+	}
+	
+	protected get stats(): Statistics
+	{
+		const stats = localStorage.getItem(storageKeys.stats.name);
+		
+		if(stats)
+			return <Statistics>JSON.parse(stats);
+		
+		return null;
+	}
+	
+	protected set stats(value: Statistics)
+	{
+		if(value)
+		{
+			localStorage.setItem(storageKeys.stats.name, JSON.stringify(value));
+		}
+		else
+		{
+			localStorage.setItem(storageKeys.stats.name, JSON.stringify({ __hsn: 0, __rtg: 0 }));
+		}
 	}
 }
