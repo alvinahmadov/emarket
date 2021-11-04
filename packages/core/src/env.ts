@@ -85,6 +85,10 @@ export type Env = Readonly<{
 	DEFAULT_ADMIN_MAIL: string;
 	DEFAULT_ADMIN_PASSWORD: string;
 	
+	DEFAULT_COORDINATES: boolean;
+	DEFAULT_LATITUDE: number;
+	DEFAULT_LONGITUDE: number;
+	
 	FAKE_INVITE_CODE: number;
 	
 	FAKE_MERCHANT_NAME: string;
@@ -215,6 +219,10 @@ export const env: Env = cleanEnv(
 			
 			DEFAULT_ADMIN_MAIL:     str({ default: 'admin@mail.com' }),
 			DEFAULT_ADMIN_PASSWORD: str({ default: 'admin' }),
+			
+			DEFAULT_COORDINATES: bool({ default: false }),
+			DEFAULT_LATITUDE:    num({ default: 37.6156 }),
+			DEFAULT_LONGITUDE:   num({ default: 55.7522 }),
 			
 			FAKE_MERCHANT_NAME:     str({ default: 'merchant' }),
 			FAKE_MERCHANT_PASSWORD: str({ default: '12345' }),
