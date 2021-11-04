@@ -428,12 +428,12 @@ export namespace GQLMutation
 			export const AddProducts = gql`
 				mutation AddProducts(
 					$storeId: String!
-					$products: [WarehouseProductInput!]!
+					$storeProducts: [WarehouseProductInput!]!
 				)
 				{
 					addWarehouseProducts(
 						storeId: $storeId
-						products: $products
+						storeProducts: $storeProducts
 					)
 					{
 						product
@@ -452,12 +452,12 @@ export namespace GQLMutation
 			export const RemoveProducts = gql`
 				mutation RemoveProductsByIds(
 					$storeId: String!
-					$productsIds: [String!]!
+					$storeProductIds: [String!]!
 				)
 				{
 					removeWarehouseProducts(
 						storeId: $storeId
-						productsIds: $productsIds
+						storeProductIds: $storeProductIds
 					)
 				}
 			`;
