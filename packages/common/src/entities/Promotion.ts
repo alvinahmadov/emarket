@@ -8,7 +8,6 @@ import {
 	IPromotionDescription
 }                                             from '../interfaces/IPromotion';
 import Warehouse                              from './Warehouse';
-import IWarehouse                             from '../interfaces/IWarehouse';
 
 /**
  *
