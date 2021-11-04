@@ -72,8 +72,7 @@ export class FileUploaderComponent
 		
 		this.uploader.onSuccessItem = (
 				item: any,
-				response: string,
-				status: number
+				response: string
 		) =>
 		{
 			const data = JSON.parse(response);
@@ -101,7 +100,7 @@ export class FileUploaderComponent
 	private _uploaderConfig()
 	{
 		const uploaderOptions: FileUploaderOptions = {
-			url: environment.API_FILE_UPLOAD_URL,
+			url: environment.CLOUDINARY_UPLOAD_URL,
 			
 			isHTML5:           true,
 			removeAfterUpload: true,
@@ -119,14 +118,14 @@ export class FileUploaderComponent
 				form: FormData
 		): any =>
 		{
-			form.append('upload_preset', 'everbie-products-images');
+			form.append('upload_preset', environment.CLOUDINARY_UNSIGNED_UPLOAD_PRESET);
 			
-			let tags = 'myphotoalbum';
+			let tags = 'product';
 			
 			if(this.name)
 			{
 				form.append('context', `photo=${this.name}`);
-				tags = `myphotoalbum,${this.name}`;
+				tags += `,${this.name}`;
 			}
 			
 			form.append('folder', 'angular_sample');
@@ -168,7 +167,7 @@ export class FileUploaderComponent
 		                   {
 			                   const img = new Image();
 			                   img.onload = () => resolve(img);
-			                   img.onerror = (err) => reject(false);
+			                   img.onerror = () => reject(false);
 			                   img.src = url;
 		                   });
 	}
