@@ -29,6 +29,9 @@ export type Env = Readonly<{
 	MAP_CARRIER_ICON_LINK: string;
 	
 	API_FILE_UPLOAD_URL: string;
+	CLOUDINARY_SIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UNSIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UPLOAD_URL: string;
 	
 	COMPANY_NAME: string;
 	COMPANY_SITE_LINK: string;
@@ -92,6 +95,10 @@ export const env: Env = cleanEnv(
 			API_FILE_UPLOAD_URL: str({
 				                         default: '',
 			                         }),
+			
+			CLOUDINARY_UPLOAD_URL:             str({ default: '' }),
+			CLOUDINARY_SIGNED_UPLOAD_PRESET:   str({ default: '' }),
+			CLOUDINARY_UNSIGNED_UPLOAD_PRESET: str({ default: '' }),
 			
 			COMPANY_NAME:          str({ default: 'Company' }),
 			COMPANY_SITE_LINK:     str({ default: 'https://localhost:4200/' }),
