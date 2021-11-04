@@ -308,9 +308,13 @@ export class ServicesApp
 		{
 			let warehouse;
 			const userInput: TUserGenerationInput = {
-				username: env.FAKE_MERCHANT_NAME,
-				email:    env.FAKE_MERCHANT_EMAIL,
-				role:     "merchant"
+				username:    env.FAKE_MERCHANT_NAME,
+				email:       env.FAKE_MERCHANT_EMAIL,
+				role:        "merchant",
+				coordinates: [
+					env.DEFAULT_LONGITUDE,
+					env.DEFAULT_LATITUDE
+				]
 			};
 			
 			const password = env.FAKE_MERCHANT_PASSWORD;
@@ -539,7 +543,7 @@ export class ServicesApp
 		// };
 		
 		const corsOptions = {
-			origin: true,
+			origin:      true,
 			credentials: true
 		};
 		
