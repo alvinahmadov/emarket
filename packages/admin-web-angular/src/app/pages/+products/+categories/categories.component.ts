@@ -1,23 +1,23 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { NgbModal }                        from '@ng-bootstrap/ng-bootstrap';
+import { Subject }                         from 'rxjs';
 import { takeUntil }                       from 'rxjs/operators';
 import { LocalDataSource }                 from 'ng2-smart-table';
-import { ProductsCategoryService }         from '../../../@core/data/productsCategory.service';
 import ProductsCategory                    from '@modules/server.common/entities/ProductsCategory';
-import { CategoryCreateComponent }         from '../../../@shared/product/categories/category-create/category-create.component';
-import { Subject }                         from 'rxjs';
-import { NgbModal }                        from '@ng-bootstrap/ng-bootstrap';
-import { CategoriesTableComponent }        from '../../../@shared/product/categories/categories-table/categories-table.component';
+import { ProductsCategoryService }         from '@app/@core/data/productsCategory.service';
 import { NotifyService }                   from '@app/@core/services/notify/notify.service';
+import { CategoryCreateComponent }         from '@app/@shared/product/categories/category-create/category-create.component';
+import { CategoriesTableComponent }        from '@app/@shared/product/categories/categories-table/categories-table.component';
 
 @Component({
-	           selector: 'ea-categories',
+	           selector:    'ea-categories',
 	           templateUrl: './categories.component.html',
-	           styleUrls: ['/categories.component.scss'],
+	           styleUrls:   ['/categories.component.scss'],
            })
 export class CategoriesComponent implements OnDestroy
 {
 	@ViewChild('categoriesTable', { static: true })
-	categoriesTable: CategoriesTableComponent;
+	public categoriesTable: CategoriesTableComponent;
 	public loading: boolean;
 	protected settingsSmartTable: object;
 	protected sourceSmartTable = new LocalDataSource();
@@ -32,21 +32,21 @@ export class CategoriesComponent implements OnDestroy
 		this._loadDataSmartTable();
 	}
 	
-	protected get hasSelectedCategories(): boolean
+	public get hasSelectedCategories(): boolean
 	{
 		return this.categoriesTable.hasSelectedCategories;
 	}
 	
-	openWizardNewCategory()
+	public openWizardNewCategory()
 	{
 		this._modalService.open(CategoryCreateComponent, {
-			size: 'lg',
+			size:      'lg',
 			container: 'nb-layout',
-			backdrop: 'static',
+			backdrop:  'static',
 		});
 	}
 	
-	async deleteSelectedRows()
+	public async deleteSelectedRows()
 	{
 		const categories = this.categoriesTable.selectedCategories;
 		const idsArray: any = [];
@@ -73,7 +73,7 @@ export class CategoriesComponent implements OnDestroy
 		}
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.ngDestroy$.next();
 		this.ngDestroy$.complete();
