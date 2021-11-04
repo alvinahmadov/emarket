@@ -23,7 +23,9 @@ export interface Environment
 	
 	MAP_CARRIER_ICON_LINK: string;
 	
-	API_FILE_UPLOAD_URL: string;
+	CLOUDINARY_SIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UNSIGNED_UPLOAD_PRESET: string;
+	CLOUDINARY_UPLOAD_URL: string;
 	
 	COMPANY_NAME: string;
 	COMPANY_SITE_LINK: string;
