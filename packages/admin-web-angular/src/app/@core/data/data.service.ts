@@ -1,20 +1,28 @@
 import { Injectable } from '@angular/core';
 import { Apollo }     from 'apollo-angular';
 import { map }        from 'rxjs/operators';
-import { GQLQueries } from "@modules/server.common/utilities/graphql";
+import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }   from 'graphql/definitions';
 
 @Injectable()
-export class DataService
+export class DataService extends ApolloService
 {
-	constructor(private readonly _apollo: Apollo) {}
-	
-	async clearAll(): Promise<any>
+	constructor(apollo: Apollo)
 	{
-		// return this._apollo
-		//            .query({
-		// 	                  query: GQLQueries.DataClearAll,
-		//                   })
-		//            .pipe(map((res) => res.data['clearAll']))
-		//            .toPromise();
+		super(apollo, {
+			serviceName: "Admin::DataService"
+		})
+	}
+	
+	public async clearAll(): Promise<boolean>
+	{
+		return this.apollo
+		           .query<{
+			           res: boolean
+		           }>({
+			              query: GQLQuery.Data.ClearAll,
+		              })
+		           .pipe(map((result) => this.get(result)))
+		           .toPromise();
 	}
 }
