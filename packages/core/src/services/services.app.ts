@@ -520,11 +520,7 @@ export class ServicesApp
 		// (but needs to be careful because we serve some HTML pages for all clients too, e.g. About Us)
 		
 		// const methods: string[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-		let origins = env.ALLOWED_ORIGINS.split(',');
-		if(!origins || origins.length === 0)
-		{
-			origins = [''];
-		}
+		// let origins = env.ALLOWED_ORIGINS.split(',');
 		
 		// const corsOptions = {
 		// 	origin:        (origin, cb) =>
