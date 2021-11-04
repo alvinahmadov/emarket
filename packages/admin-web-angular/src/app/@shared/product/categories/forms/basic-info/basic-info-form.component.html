@@ -1,70 +1,65 @@
 <form [formGroup]="form" class="form-horizontal pt-4 pb-0">
-    <div class="form-group row">
-        <label class="col-sm-2 control-label">{{
-            'CATEGORY_VIEW.CREATE.CATEGORY_NAME' | translate
-            }}</label>
-        <div class="col-sm-9">
-            <input
-                    class="form-control"
-                    formControlName="name"
-                    placeholder="{{
-					'CATEGORY_VIEW.CREATE.CATEGORY_NAME' | translate
-				}}"
-                    type="text"
-            />
-
-            <div
-                    *ngIf="name.invalid && (name.dirty || name.touched)"
-                    class="alert alert-danger"
-            >
-                {{
-                'CATEGORY_VIEW.CREATE.ENTER_THE_CATEGORY_NAME' | translate
-                }}!
-            </div>
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label class="col-sm-2 control-label">{{
-            'CATEGORY_VIEW.CREATE.PHOTO' | translate
-            }}</label>
-
-        <div class="col-sm-9">
-            <e-cu-file-uploader
-                    (uploadedImgUrl)="image.setValue($event)"
-                    [fileUrl]="image?.value"
-                    [name]="name?.value"
-                    [placeholder]="uploaderPlaceholder"
-            ></e-cu-file-uploader>
-
-            <div *ngIf="image.invalid" class="alert alert-danger">
-                {{ 'CATEGORY_VIEW.CREATE.INVALID_URL' | translate }}!
-            </div>
-        </div>
-    </div>
-
-    <div [hidden]="image.invalid" class="form-group row">
-        <label class="col-sm-2 control-label"></label>
-        <div class="col-sm-9">
-            <div [hidden]="!showImageMeta" class="row preview-img">
-                <div>
-                    <img
-                        #imagePreview
-                        alt="Invalid image"
-                        class="img-rounded"
-                        src="{{ image.value }}"
-                    />
-                </div>
-                <div (click)="deleteImg()" class="remove-icon text-danger">
-                    <div
-                            class="ion-md-remove-circle"
-                            placeholder="Remove image"
-                            title="{{
-							'CATEGORY_VIEW.CREATE.REMOVE_IMAGE' | translate
-						}}"
-                    ></div>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="form-group row">
+		<label class="col-sm-2 control-label">
+			{{ 'CATEGORY_VIEW.CREATE.CATEGORY_NAME' | translate }}
+		</label>
+		<div class="col-sm-9">
+			<input
+					class="form-control"
+					formControlName="name"
+					placeholder="{{ 'CATEGORY_VIEW.CREATE.CATEGORY_NAME' | translate }}"
+					type="text"
+			/>
+			
+			<div *ngIf="name.invalid && (name.dirty || name.touched)"
+			     class="alert alert-danger"
+			>
+				{{ 'CATEGORY_VIEW.CREATE.ENTER_THE_CATEGORY_NAME' | translate }}!
+			</div>
+		</div>
+	</div>
+	
+	<div class="form-group row">
+		<label class="col-sm-2 control-label">
+			{{ 'CATEGORY_VIEW.CREATE.PHOTO' | translate }}
+		</label>
+		
+		<div class="col-sm-9">
+			<e-cu-file-uploader
+					(uploadedImgUrl)="image.setValue($event)"
+					[fileUrl]="image?.value"
+					[name]="name?.value"
+					[placeholder]="uploaderPlaceholder"
+			></e-cu-file-uploader>
+			
+			<div *ngIf="image.invalid" class="alert alert-danger">
+				{{ 'CATEGORY_VIEW.CREATE.INVALID_URL' | translate }}!
+			</div>
+		</div>
+	</div>
+	
+	<div [hidden]="image.invalid" class="form-group row">
+		<label class="col-sm-2 control-label"></label>
+		<div class="col-sm-9">
+			<div [hidden]="!showImageMeta"
+			     class="row preview-img"
+			>
+				<div>
+					<img #imagePreview
+					     alt="Invalid image"
+					     class="img-rounded"
+					     src="{{ image.value }}"
+					/>
+				</div>
+				<div (click)="deleteImg()"
+				     class="remove-icon text-danger"
+				>
+					<div class="ion-md-remove-circle"
+					     placeholder="Remove image"
+					     title="{{ 'CATEGORY_VIEW.CREATE.REMOVE_IMAGE' | translate }}"
+					></div>
+				</div>
+			</div>
+		</div>
+	</div>
 </form>
