@@ -509,6 +509,16 @@ export namespace GQLQuery
 		`;
 	}
 	
+	export namespace Data
+	{
+		export const ClearAll = gql`
+			query ClearAll
+			{
+				clearAll
+			}
+		`;
+	}
+	
 	export namespace Device
 	{
 		export const GetAll = gql`
@@ -1490,6 +1500,7 @@ export namespace GQLQuery
 						soldCount
 						product
 						{
+							categories
 							description
 							{
 								value
@@ -1520,14 +1531,23 @@ export namespace GQLQuery
 							_updatedAt
 						}
 						comments {
-							comment
+							id
+							_id
+							message
 							likes
 							dislikes
-							isReply
+							likesBy
+							dislikesBy
 							replyTo
+							_createdAt
+							_updatedAt
+						}
+						rating
+						{
+							rate
+							ratedBy
 						}
 						viewsCount
-						likesCount
 						deliveryTimeMin
 						deliveryTimeMax
 						isCarrierRequired
@@ -1549,15 +1569,24 @@ export namespace GQLQuery
 						initialPrice
 						count
 						viewsCount
-						likesCount
 						soldCount
-						comments {
-							comment
-							dislikes
+						comments
+						{
+							id
+							_id
 							likes
-							isReply
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
 						}
-						product {
+						rating
+						{
+							rate
+							ratedBy
+						}
+						product
+						{
 							id
 							title {
 								value
@@ -1586,7 +1615,7 @@ export namespace GQLQuery
 			export const GetCount = gql`
 				query GetProductsCount($storeId: String!)
 				{
-					getWarehouseProductsCount(id: $storeId)
+					getWarehouseProductsCount(storeId: $storeId)
 				}
 			`;
 		}
