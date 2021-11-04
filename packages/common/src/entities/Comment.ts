@@ -1,6 +1,6 @@
-import { Column }                         from 'typeorm';
-import { DBObject, ModelName, Types }     from '@pyro/db';
-import IComment, { ICommentCreateObject } from '../interfaces/IComment';
+import { Column }                             from 'typeorm';
+import { DBObject, ModelName, Schema, Types } from '@pyro/db';
+import IComment, { ICommentCreateObject }     from '../interfaces/IComment';
 
 /**
  * Comment for product
@@ -62,6 +62,12 @@ class Comment extends DBObject<IComment, ICommentCreateObject>
 	@Types.Number(0)
 	@Column()
 	dislikes?: number;
+	
+	@Schema({ type: Array })
+	likesBy?: string[];
+	
+	@Schema({ type: Array })
+	dislikesBy?: string[];
 	
 	/**
 	 * User to whom the comment as a reply adressed
