@@ -2,9 +2,9 @@ import {
 	Component,
 	ViewChild,
 	ElementRef,
-	OnInit,
-	AfterViewInit,
 	Input,
+	OnInit,
+	AfterViewInit
 }                                        from '@angular/core';
 import {
 	FormGroup,
@@ -12,46 +12,46 @@ import {
 	AbstractControl,
 	FormBuilder,
 }                                        from '@angular/forms';
+import { TranslateService }              from '@ngx-translate/core';
 import isUrl                             from 'is-url';
 import _                                 from 'lodash';
-import { TranslateService }              from '@ngx-translate/core';
 import { first }                         from 'rxjs/operators';
 import { IProductsCategoryCreateObject } from '@modules/server.common/interfaces/IProductsCategory';
 
 @Component({
-	           selector: 'ea-product-category-basic-info-form',
+	           selector:    'ea-product-category-basic-info-form',
 	           templateUrl: 'basic-info-form.component.html',
-	           styleUrls: ['basic-info-form.component.scss'],
+	           styleUrls:   ['basic-info-form.component.scss'],
            })
 export class BasicInfoFormComponent implements OnInit, AfterViewInit
 {
 	@ViewChild('imagePreview', { static: true })
-	imagePreviewElement: ElementRef;
+	public imagePreviewElement: ElementRef;
 	
 	@Input()
-	category: { title: string; image: string };
+	public category: { title: string; image: string };
 	
-	uploaderPlaceholder: string;
+	public uploaderPlaceholder: string;
 	
-	readonly form: FormGroup = this.fb.group({
-		                                         name: ['', Validators.required],
-		                                         image: [
-			                                         '',
-			                                         [
-				                                         (control: AbstractControl) =>
-				                                         {
-					                                         const imageUrl = control.value;
+	public readonly form: FormGroup = this.fb.group({
+		                                                name:  ['', Validators.required],
+		                                                image: [
+			                                                '',
+			                                                [
+				                                                (control: AbstractControl) =>
+				                                                {
+					                                                const imageUrl = control.value;
 					
-					                                         if(!isUrl(imageUrl) && !_.isEmpty(imageUrl))
-					                                         {
-						                                         return { invalidUrl: true };
-					                                         }
+					                                                if(!isUrl(imageUrl) && !_.isEmpty(imageUrl))
+					                                                {
+						                                                return { invalidUrl: true };
+					                                                }
 					
-					                                         return null;
-				                                         },
-			                                         ],
-		                                         ],
-	                                         });
+					                                                return null;
+				                                                },
+			                                                ],
+		                                                ],
+	                                                });
 	
 	constructor(
 			private readonly fb: FormBuilder,
@@ -59,27 +59,27 @@ export class BasicInfoFormComponent implements OnInit, AfterViewInit
 	)
 	{}
 	
-	get image()
+	public get image()
 	{
 		return this.form.get('image');
 	}
 	
-	get name()
+	public get name()
 	{
 		return this.form.get('name');
 	}
 	
-	get isFormModelValid(): boolean
+	public get isFormModelValid(): boolean
 	{
 		return this.form.valid;
 	}
 	
-	get showImageMeta()
+	public get showImageMeta()
 	{
 		return this.image && this.image.value !== '';
 	}
 	
-	get usedLanguage()
+	public get usedLanguage()
 	{
 		const usedLanguage = this._langTranslateService.currentLang;
 		switch(usedLanguage)
@@ -87,24 +87,15 @@ export class BasicInfoFormComponent implements OnInit, AfterViewInit
 			case 'en-US':
 				return 'en-US';
 			
-			case 'bg-BG':
-				return 'bg-BG';
-			
-			case 'he-IL':
-				return 'he-IL';
-			
 			case 'ru-RU':
 				return 'ru-RU';
 			
-			case 'es-ES':
-				return 'es-ES';
-			
 			default:
-				return 'en-US';
+				return 'ru-RU';
 		}
 	}
 	
-	get createObject()
+	public get createObject()
 	{
 		const usedLanguage = this.usedLanguage;
 		
@@ -119,7 +110,7 @@ export class BasicInfoFormComponent implements OnInit, AfterViewInit
 		return categoryObject;
 	}
 	
-	getEditObject(currentCategory)
+	public getEditObject(currentCategory)
 	{
 		const usedLanguage = this.usedLanguage;
 		const newCategoryNames = currentCategory._nameLocaleValues.map(
@@ -128,7 +119,7 @@ export class BasicInfoFormComponent implements OnInit, AfterViewInit
 					return locale === usedLanguage
 					       ? {
 								locale: usedLanguage,
-								value: this.name.value,
+								value:  this.name.value,
 							}
 					       : { locale, value };
 				}
@@ -137,19 +128,19 @@ export class BasicInfoFormComponent implements OnInit, AfterViewInit
 		{
 			newCategoryNames.push({
 				                      locale: usedLanguage,
-				                      value: this.name.value,
+				                      value:  this.name.value,
 			                      });
 		}
 		
 		const categoryRaw: IProductsCategoryCreateObject = {
-			name: newCategoryNames,
+			name:  newCategoryNames,
 			image: this.image.value,
 		};
 		
 		return categoryRaw;
 	}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		if(this.category)
 		{
@@ -160,12 +151,12 @@ export class BasicInfoFormComponent implements OnInit, AfterViewInit
 		this.getUploaderPlaceholderText();
 	}
 	
-	deleteImg()
+	public deleteImg()
 	{
 		this.image.setValue('');
 	}
 	
-	ngAfterViewInit()
+	public ngAfterViewInit()
 	{
 		this._setupLogoUrlValidation();
 	}
