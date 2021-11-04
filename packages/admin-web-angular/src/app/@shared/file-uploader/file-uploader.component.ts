@@ -12,32 +12,32 @@ import { IProductImage }                     from '@modules/server.common/interf
 import { NgModel }                           from '@angular/forms';
 
 @Component({
-	           selector: 'e-cu-file-uploader',
+	           selector:    'e-cu-file-uploader',
+	           styleUrls:   ['./file-uploader.component.scss'],
 	           templateUrl: './file-uploader.component.html',
-	           styleUrls: ['./file-uploader.component.scss'],
            })
 export class FileUploaderComponent
 {
 	@ViewChild('shownInput', { static: true })
-	shownInput: NgModel;
+	public shownInput: NgModel;
 	
 	@Input()
-	placeholder: string;
+	public placeholder: string;
 	@Input()
-	name: string;
+	public name: string;
 	@Input()
-	fileUrl: string;
+	public fileUrl: string;
 	@Input()
-	customClass: string;
+	public customClass: string;
 	@Input()
-	locale: string;
+	public locale: string;
 	
 	@Output()
-	uploadedImgUrl: EventEmitter<string> = new EventEmitter<string>();
+	public uploadedImgUrl: EventEmitter<string> = new EventEmitter<string>();
 	@Output()
-	uploadedImgObj: EventEmitter<IProductImage> = new EventEmitter<IProductImage>();
+	public uploadedImgObj: EventEmitter<IProductImage> = new EventEmitter<IProductImage>();
 	
-	uploader: FileUploader;
+	public uploader: FileUploader;
 	
 	private oldValue: string;
 	
@@ -46,16 +46,16 @@ export class FileUploaderComponent
 	)
 	{}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this._uploaderConfig();
 	}
 	
-	async imageUrlChanged()
+	public async imageUrlChanged()
 	{
 		const newValue =
-				this.fileUrl &&
-				this.fileUrl.replace(this.oldValue || '', '').trim();
+				      this.fileUrl &&
+				      this.fileUrl.replace(this.oldValue || '', '').trim();
 		
 		if(this.uploader.queue.length > 0)
 		{
@@ -103,11 +103,11 @@ export class FileUploaderComponent
 		const uploaderOptions: FileUploaderOptions = {
 			url: environment.API_FILE_UPLOAD_URL,
 			
-			isHTML5: true,
+			isHTML5:           true,
 			removeAfterUpload: true,
-			headers: [
+			headers:           [
 				{
-					name: 'X-Requested-With',
+					name:  'X-Requested-With',
 					value: 'XMLHttpRequest',
 				},
 			],
