@@ -58,8 +58,7 @@ export class ProductsCategoryService extends ApolloService
 			              variables: { productsCategory },
 		              })
 		           .pipe(
-				           map((result) => <ProductsCategory>
-						           this.factory(result, ProductsCategory)),
+				           map((result) => <ProductsCategory>this.get(result)),
 				           share()
 		           );
 	}
