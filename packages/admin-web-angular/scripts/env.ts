@@ -28,7 +28,6 @@ export type Env = Readonly<{
 	
 	MAP_CARRIER_ICON_LINK: string;
 	
-	API_FILE_UPLOAD_URL: string;
 	CLOUDINARY_SIGNED_UPLOAD_PRESET: string;
 	CLOUDINARY_UNSIGNED_UPLOAD_PRESET: string;
 	CLOUDINARY_UPLOAD_URL: string;
@@ -91,10 +90,6 @@ export const env: Env = cleanEnv(
 			MAP_CARRIER_ICON_LINK: str({
 				                           default: 'https://maps.google.com/mapfiles/kml/pal4/icon54.png',
 			                           }),
-			
-			API_FILE_UPLOAD_URL: str({
-				                         default: '',
-			                         }),
 			
 			CLOUDINARY_UPLOAD_URL:             str({ default: '' }),
 			CLOUDINARY_SIGNED_UPLOAD_PRESET:   str({ default: '' }),
