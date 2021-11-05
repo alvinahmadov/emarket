@@ -187,6 +187,8 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 		if(customer && customer.geoLocation)
 		{
 			this.geoLocation = new GeoLocation(customer.geoLocation);
+			if(customer.apartment == undefined)
+				customer.apartment = "";
 		}
 	}
 	
