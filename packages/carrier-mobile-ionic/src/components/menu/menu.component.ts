@@ -1,10 +1,10 @@
 import { Component, OnDestroy }              from '@angular/core';
-import { Store }                             from 'services/store.service';
 import { Platform, MenuController }          from '@ionic/angular';
 import { TranslateService, LangChangeEvent } from '@ngx-translate/core';
-import { environment }                       from 'environments/environment';
-import { takeUntil }                         from 'rxjs/operators';
 import { Subject }                           from 'rxjs';
+import { takeUntil }                         from 'rxjs/operators';
+import { StorageService }                    from 'services/storage.service';
+import { environment }                       from 'environments/environment';
 
 @Component({
 	           selector:    'e-cu-menu',
@@ -13,12 +13,12 @@ import { Subject }                           from 'rxjs';
            })
 export class MenuComponent implements OnDestroy
 {
-	companyName: string;
+	public companyName: string;
 	
 	private ngDestroy$ = new Subject<void>();
 	
 	constructor(
-			private store: Store,
+			private storageService: StorageService,
 			public platform: Platform,
 			private translateService: TranslateService,
 			private menuCtrl: MenuController
@@ -42,14 +42,14 @@ export class MenuComponent implements OnDestroy
 		               });
 	}
 	
-	get showInformationPage()
+	public get showInformationPage()
 	{
-		return this.store.showInformationPage;
+		return this.storageService.showInformationPage;
 	}
 	
-	menuOpened() {}
+	public menuOpened() {}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
 		this.ngDestroy$.next();
 		this.ngDestroy$.complete();
