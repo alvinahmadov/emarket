@@ -2,7 +2,11 @@ import { Column }                             from 'typeorm';
 import { DBObject, ModelName, Schema, Types } from '@pyro/db';
 import IProduct                               from '../interfaces/IProduct';
 import IWarehouseProduct,
-{ IWarehouseProductCreateObject }             from '../interfaces/IWarehouseProduct';
+{
+	IProductRating,
+	IProductPromotion,
+	IWarehouseProductCreateObject
+}                                             from '../interfaces/IWarehouseProduct';
 import Comment                                from './Comment';
 import Product                                from './Product';
 
@@ -78,14 +82,16 @@ class WarehouseProduct
 	viewsCount: number;
 	
 	/**
-	 * How many views product have
+	 * Rate of product from customer
 	 *
 	 * @type {number}
 	 * @memberof WarehouseProduct
 	 */
-	@Types.Number(0)
+	@Schema({ type: Array })
+	rating: IProductRating[];
+	
 	@Column()
-	likesCount: number;
+	promotion: IProductPromotion;
 	
 	/**
 	 * Ref to Product
@@ -173,6 +179,14 @@ class WarehouseProduct
 		if(typeof warehouseProduct.product !== 'string')
 		{
 			this.product = new Product(warehouseProduct.product as IProduct);
+			
+			if(!warehouseProduct.promotion)
+			{
+				this.promotion = {
+					active:    false,
+					requested: false
+				}
+			}
 		}
 	}
 	
