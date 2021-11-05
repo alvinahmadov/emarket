@@ -3,8 +3,7 @@ import { injectable }            from 'inversify';
 import faker                     from 'faker';
 import { ICustomerCreateObject } from '@modules/server.common/interfaces/ICustomer';
 import {
-	IGeoLocationCreateObject,
-	IGeolocationUpdateObject
+	IGeoLocationCreateObject
 }                                from '@modules/server.common/interfaces/IGeoLocation';
 import Role                      from '@modules/server.common/enums/Role';
 import Country                   from '@modules/server.common/enums/Country';
@@ -178,10 +177,10 @@ export class FakeUsersService
 		const lastName = input.lastName ?? faker.name.lastName(1);
 		
 		const phone = faker.phone.phoneNumber("+7##########");
-		const geoLocation: IGeolocationUpdateObject = {
+		const geoLocation: IGeoLocationCreateObject = {
 			countryId:     Country.RU,
 			city:          faker.address.city(),
-			house:         `0`,
+			house:         "0",
 			loc:           {
 				type:        'Point',
 				coordinates: coordinates
