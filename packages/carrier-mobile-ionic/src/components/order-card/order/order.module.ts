@@ -1,11 +1,11 @@
 import { NgModule }            from '@angular/core';
 import { CommonModule }        from '@angular/common';
+import { IonicModule }         from '@ionic/angular';
 import { TranslateModule }     from '@ngx-translate/core';
-import { WarehouseLogoModule } from '../../warehouse-logo/warehouse-logo.module';
+import { StorageService }      from 'services/storage.service';
 import { OrderComponent }      from './order.component';
 import { ProductModule }       from './product/product.module';
-import { Store }               from '../../../services/store.service';
-import { IonicModule }         from '@ionic/angular';
+import { WarehouseLogoModule } from '../../warehouse-logo/warehouse-logo.module';
 
 @NgModule({
 	          imports:      [
@@ -15,7 +15,7 @@ import { IonicModule }         from '@ionic/angular';
 		          ProductModule,
 		          TranslateModule.forChild(),
 	          ],
-	          providers:    [Store],
+	          providers:    [StorageService],
 	          exports:      [OrderComponent],
 	          declarations: [OrderComponent],
           })
