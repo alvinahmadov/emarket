@@ -243,22 +243,7 @@ export class WarehouseProductsRouter implements IWarehouseProductsRouter
 		return this._factory(warehouseProduct);
 	}
 	
-	public async decreaseLikesCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>
-	{
-		const warehouseProduct = await this.router.run<IWarehouseProduct>(
-				'decreaseLikesCount',
-				warehouseId,
-				productId,
-				count
-		);
-		return this._factory(warehouseProduct);
-	}
-	
-	getTopProducts(
+	public getTopProducts(
 			warehouseId: string,
 			quantity: number
 	): Observable<WarehouseProduct[]>
