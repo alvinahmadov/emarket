@@ -7,9 +7,8 @@ export interface IPaymentGatewayCreateObject extends DBCreateObject
 	configureObject: any;
 }
 
-export interface IPaymentGateway
-		extends DBRawObject,
-		        IPaymentGatewayCreateObject
+export interface IPaymentGateway extends DBRawObject,
+                                         IPaymentGatewayCreateObject
 {
 	_id: PyroObjectId;
 	_createdAt: Date | string;
