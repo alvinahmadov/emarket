@@ -11,8 +11,8 @@ export interface ILocation
 {
 	type: 'Point';
 	coordinates: [
-		number /*longitude*/,
-		number /*latitude */
+		number, // longitude
+		number  // latitude
 	];
 }
 
