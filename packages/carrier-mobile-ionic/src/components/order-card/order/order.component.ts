@@ -4,107 +4,121 @@ import {
 	Input,
 	OnInit,
 }                         from '@angular/core';
+import { Platform }       from '@ionic/angular';
+import _                  from 'lodash';
+import { getCountryName } from '@modules/server.common/data/countries';
 import OrderStatus        from '@modules/server.common/enums/OrderStatus';
 import Order              from '@modules/server.common/entities/Order';
 import Warehouse          from '@modules/server.common/entities/Warehouse';
-import _                  from 'lodash';
-import { Store }          from '../../../services/store.service';
-import { environment }    from '../../../environments/environment';
 import Carrier            from '@modules/server.common/entities/Carrier';
 import OrderProduct       from '@modules/server.common/entities/OrderProduct';
-import { getCountryName } from '@modules/server.common/entities/GeoLocation';
-import { Platform }       from '@ionic/angular';
+import { CommonUtils }    from '@modules/server.common/utilities';
+import { StorageService } from '../../../services/storage.service';
+import { environment }    from '../../../environments/environment';
 
 @Component({
 	           selector:        'e-cu-order',
-	           templateUrl:     'order.component.html',
 	           styleUrls:       ['./order.component.scss'],
+	           templateUrl:     'order.component.html',
 	           changeDetection: ChangeDetectionStrategy.OnPush,
            })
 export class OrderComponent implements OnInit
 {
-	carrierAddress: string;
-	createOrderdAt: any;
-	deliveryOrderTime: any;
+	public carrierAddress: string;
+	public createOrderdAt: number;
+	public deliveryOrderTime: any;
 	
-	customerDefaultLogo: string = environment.DEFAULT_CUSTOMER_LOGO;
-	orderProductsToShow: OrderProduct[] = [];
-	
-	@Input()
-	productsMaxAmountToShow: number;
-	carrier: Carrier;
+	public customerDefaultLogo: string = environment.DEFAULT_CUSTOMER_LOGO;
+	public orderProductsToShow: OrderProduct[] = [];
 	
 	@Input()
-	order: Order;
+	public productsMaxAmountToShow: number;
+	public carrier: Carrier;
 	
 	@Input()
-	showDetailsButton: boolean = false;
+	public order: Order;
 	
-	constructor(private readonly store: Store, public platform: Platform) {}
+	@Input()
+	public showDetailsButton: boolean = false;
 	
-	get carrierId(): string
+	constructor(
+			private readonly storageService: StorageService,
+			public platform: Platform
+	)
+	{}
+	
+	public ngOnInit()
 	{
-		return this.store.carrierId;
+		this._sliceOrderProducts();
 	}
 	
-	get customerLogo()
+	public get carrierId(): string
 	{
-		return this.order.user['image'] || this.customerDefaultLogo;
+		return this.storageService.carrierId;
 	}
 	
-	get id()
+	public get customerLogo()
+	{
+		return this.order.customer.avatar || this.customerDefaultLogo;
+	}
+	
+	public get id()
 	{
 		return this.order.id;
 	}
 	
-	get warehouseLogo()
+	public get warehouseLogo()
 	{
 		return (this.order.warehouse as Warehouse).logo;
 	}
 	
-	get warehouseName()
+	public get warehouseName()
 	{
 		return (this.order.warehouse as Warehouse).name;
 	}
 	
-	get customerBasicInfo()
+	public get customerBasicInfo()
 	{
-		const firstName = this.order.user.firstName;
-		const lastName = this.order.user.lastName;
+		const firstName = this.order.customer.firstName;
+		const lastName = this.order.customer.lastName;
 		
 		return _.isEmpty(firstName) || _.isEmpty(lastName)
-		       ? this.order.user._id
+		       ? this.order.customer._id
 		       : `${firstName} ${lastName}`;
 	}
 	
-	get customerAddress()
+	public get customerAddress()
 	{
 		const countryName = getCountryName(
-				this.order.user.geoLocation.countryId
+				this.storageService.language,
+				this.order.customer.geoLocation.countryId
 		);
 		
-		return `${countryName} ${this.order.user.geoLocation.postcode}, ${this.order.user.geoLocation.city}`;
+		return `${countryName} ${this.order.customer.geoLocation.postcode}, ${this.order.customer.geoLocation.city}`;
 	}
 	
-	get customerNotes()
+	public get customerNotes()
 	{
 		const customerNotes =
-				      this.order.user.geoLocation.notes === null
+				      this.order.customer.geoLocation.notes === null
 				      ? ''
-				      : this.order.user.geoLocation.notes;
+				      : this.order.customer.geoLocation.notes;
 		
 		return `Notes: ${customerNotes}`;
 	}
 	
-	get warehouseAddress()
+	public get warehouseAddress()
 	{
 		const warehouse = this.order.warehouse as Warehouse;
-		const countryName = getCountryName(warehouse.geoLocation.countryId);
+		const countryName = getCountryName(
+				this.storageService.language,
+				warehouse.geoLocation.countryId
+		);
 		
 		return `${countryName} ${warehouse.geoLocation.postcode}, ${warehouse.geoLocation.city}`;
 	}
 	
-	get totalPrice()
+	public get totalPrice()
 	{
 		return _.chain(this.order.products)
 		        .map((p) => p.count * p.price)
@@ -112,12 +126,12 @@ export class OrderComponent implements OnInit
 		        .value();
 	}
 	
-	get createdAt()
+	public get createdAt(): string | Date
 	{
 		return this.order._createdAt;
 	}
 	
-	get deliveryTime()
+	public get deliveryTime()
 	{
 		const createOrderAtDate = this.order._createdAt;
 		this.createOrderdAt = new Date(createOrderAtDate.toString()).getTime();
@@ -128,16 +142,16 @@ export class OrderComponent implements OnInit
 		this.deliveryOrderTime = new Date(deliveryOrderDate).getTime();
 		const time = this.deliveryOrderTime - this.createOrderdAt;
 		return this.order.deliveryTime !== undefined
-		       ? this._millisToMinutes(time) + ' min'
+		       ? CommonUtils.millisToMinutes(time) + ' min'
 		       : 'In Delivery';
 	}
 	
-	get statusText()
+	public get statusText(): string
 	{
-		return this.order.getStatusText(this.store.language);
+		return this.order.getStatusText(this.storageService.language);
 	}
 	
-	get badgeClass()
+	public get badgeClass(): string
 	{
 		switch(this.order.status)
 		{
@@ -152,17 +166,12 @@ export class OrderComponent implements OnInit
 		}
 	}
 	
-	get showMoreIcon()
+	public get showMoreIcon(): boolean
 	{
 		return this.productsMaxAmountToShow < this.order.products.length;
 	}
 	
-	ngOnInit()
-	{
-		this._sliceOrderProducts();
-	}
-	
-	toggleOrderProducts()
+	public toggleOrderProducts()
 	{
 		if(this.orderProductsToShow.length > this.productsMaxAmountToShow)
 		{
@@ -180,12 +189,5 @@ export class OrderComponent implements OnInit
 				0,
 				this.productsMaxAmountToShow
 		);
-	}
-	
-	private _millisToMinutes(ms)
-	{
-		const minutes = Math.floor(ms / 60000);
-		const seconds = ((ms % 60000) / 1000).toFixed(0);
-		return minutes + ':' + (+seconds < 10 ? '0' : '') + seconds;
 	}
 }
