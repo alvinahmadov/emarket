@@ -1,7 +1,10 @@
-import Logger                                       from 'bunyan';
-import _                                            from 'lodash';
-import { inject, injectable, LazyServiceIdentifer } from 'inversify';
-import { Observable }                               from 'rxjs';
+import Logger                from 'bunyan';
+import _                     from 'lodash';
+import {
+	inject, injectable,
+	LazyServiceIdentifer
+}                            from 'inversify';
+import { Observable, of }    from 'rxjs';
 import {
 	distinctUntilChanged,
 	exhaustMap,
@@ -11,8 +14,7 @@ import {
 	switchMap,
 	tap,
 	map
-}                                                   from 'rxjs/operators';
-import { of }                                       from 'rxjs/observable/of';
+}                            from 'rxjs/operators';
 import { _throw }            from 'rxjs/observable/throw';
 import Stripe                from 'stripe';
 import { v1 as uuid }        from 'uuid';
@@ -27,10 +29,12 @@ import ILanguage             from '@modules/server.common/interfaces/ILanguage';
 import {
 	ICustomerCreateObject,
 	ICustomerUpdateObject,
-	ICustomerInitializeObject
+	ICustomerInitializeObject,
+	ICustomerFindInput
 }                            from '@modules/server.common/interfaces/ICustomer';
 import IPagingOptions        from '@modules/server.common/interfaces/IPagingOptions';
 import IGeoLocation          from '@modules/server.common/interfaces/IGeoLocation';
+import Role                  from '@modules/server.common/enums/Role';
 import Customer              from '@modules/server.common/entities/Customer';
 import GeoLocation           from '@modules/server.common/entities/GeoLocation';
 import ICustomerRouter       from '@modules/server.common/routers/ICustomerRouter';
@@ -56,7 +60,7 @@ interface IWatchedFiles
  * @export
  * @class CustomersService
  * @extends {DBService<User>}
- * @implements {IUserRouter}
+ * @implements {ICustomerRouter}
  * @implements {IService}
  */
 @injectable()
@@ -64,10 +68,10 @@ interface IWatchedFiles
 export class CustomersService extends DBService<Customer>
 		implements ICustomerRouter, IService
 {
-	public readonly DBObject: any = Customer;
 	public watchedFiles: IWatchedFiles;
+	public readonly DBObject: any = Customer;
 	protected readonly log: Logger = createLogger({
-		                                              name: 'usersService'
+		                                              name: 'customersService'
 	                                              });
 	// TODO: this and other Stripe related things should be inside separate Payments Service
 	private stripe = new Stripe(env.STRIPE_SECRET_KEY);
@@ -113,7 +117,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns {Promise<boolean>}
 	 * @memberof UsersService
 	 */
-	async isUserEmailExists(email: string): Promise<boolean>
+	public async isUserEmailExists(email: string): Promise<boolean>
 	{
 		return (await this.count({ email })) > 0;
 	}
@@ -125,7 +129,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
-	async getSocial(socialId: string): Promise<Customer>
+	public async getSocial(socialId: string): Promise<Customer>
 	{
 		return super.findOne({
 			                     socialIds: { $in: [socialId] },
@@ -140,7 +144,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
-	async initCustomer(customerInitializeObject: ICustomerInitializeObject): Promise<Customer>
+	public async initCustomer(customerInitializeObject: ICustomerInitializeObject): Promise<Customer>
 	{
 		return super.create(customerInitializeObject as any);
 	}
@@ -153,7 +157,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns
 	 * @memberof UsersService
 	 */
-	async getCustomers(findInput: any, pagingOptions: IPagingOptions)
+	public async getCustomers(findInput: ICustomerFindInput, pagingOptions: IPagingOptions = {})
 	{
 		const sortObj = {};
 		if(pagingOptions.sort)
@@ -182,7 +186,7 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async updateCustomer(
+	public async updateCustomer(
 			id: string,
 			userCreateObject: ICustomerUpdateObject
 	): Promise<Customer>
@@ -199,16 +203,12 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof UsersService
 	 */
 	@observableListener()
-	get(customerId: string): Observable<Customer>
+	public get(customerId: string): Observable<Customer>
 	{
 		return super.get(customerId)
 		            .pipe(
-				            map(async(user) =>
-				                {
-					                await this.throwIfNotExists(customerId);
-					                return user;
-				                }),
-				            switchMap((user) => user)
+				            map(async() => this.getOrThrow(customerId).toPromise()),
+				            switchMap(customer => customer)
 		            );
 	}
 	
@@ -221,23 +221,19 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async getCards(customerId: string): Promise<Stripe.cards.ICard[]>
+	public async getCards(customerId: string): Promise<Stripe.cards.ICard[]>
 	{
-		await this.throwIfNotExists(customerId);
+		const customer = await this.getOrThrow(customerId).toPromise();
 		
-		const user = await this.get(customerId)
-		                       .pipe(first())
-		                       .toPromise();
-		
-		if(user != null)
+		if(customer != null)
 		{
-			if(user.stripeCustomerId != null)
+			if(customer.stripeCustomerId != null)
 			{
 				return (
 						await this.stripe
 						          .customers
 						          .listSources(
-								          user.stripeCustomerId,
+								          customer.stripeCustomerId,
 								          {
 									          object: 'card'
 								          }
@@ -268,49 +264,46 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async addPaymentMethod(customerId: string, tokenId: string): Promise<string>
+	public async addPaymentMethod(customerId: string, tokenId: string): Promise<string>
 	{
-		await this.throwIfNotExists(customerId);
-		
 		const callId = uuid();
 		
 		this.log.info(
 				{ callId, userId: customerId, tokenId },
 				'.addPaymentMethod(userId, tokenId) called'
 		);
-		
+		let customer = await this.getOrThrow(customerId).toPromise();
 		let card: Stripe.cards.ICard;
 		
 		try
 		{
-			let user = await this.get(customerId)
-			                     .pipe(first())
-			                     .toPromise();
-			
-			if(user != null)
+			if(customer != null)
 			{
-				if(user.stripeCustomerId == null)
+				if(customer.stripeCustomerId == null)
 				{
-					const customer = await this.stripe
-					                           .customers
-					                           .create({
-						                                   email:       user.email,
-						                                   description: 'Customer id: ' + user.id,
-						                                   metadata:    {
-							                                   userId: user.id
-						                                   }
-					                                   });
+					const stripeCustomer = await this.stripe
+					                                 .customers
+					                                 .create({
+						                                         email:       customer.email,
+						                                         description: 'Customer id: ' + customer.id,
+						                                         metadata:    {
+							                                         userId: customer.id
+						                                         }
+					                                         });
 					
-					user = await this.update(customerId, {
-						stripeCustomerId: customer.id
-					});
+					customer = await this.update(
+							customerId,
+							{
+								stripeCustomerId: stripeCustomer.id
+							}
+					);
 				}
 				
 				card = (
 						await this.stripe
 						          .customers
 						          .createSource(
-								          user.stripeCustomerId as string,
+								          customer.stripeCustomerId as string,
 								          {
 									          source: tokenId
 								          }
@@ -324,16 +317,19 @@ export class CustomersService extends DBService<Customer>
 		} catch(err)
 		{
 			this.log.error(
-					{ callId, userId: customerId, tokenId, err },
-					'.addPaymentMethod(userId, tokenId) thrown error!'
+					{ callId, customerId: customerId, tokenId, err },
+					'.addPaymentMethod(customerId, tokenId) thrown error!'
 			);
 			throw err;
 		}
 		
 		this.log.info(
-				{ callId, userId: customerId, tokenId, card },
-				'.addPaymentMethod(userId, tokenId) added payment method'
+				{ callId, customerId: customerId, tokenId, card },
+				'.addPaymentMethod(customerId, tokenId) added payment method'
 		);
+		
+		if(!card)
+			return null;
 		
 		return card.id;
 	}
@@ -347,7 +343,7 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async updateEmail(customerId: string, email: string): Promise<Customer>
+	public async updateEmail(customerId: string, email: string): Promise<Customer>
 	{
 		await this.throwIfNotExists(customerId);
 		return this.update(customerId, { email });
@@ -357,12 +353,12 @@ export class CustomersService extends DBService<Customer>
 	 * Update role for given Customer (by customer Id)
 	 *
 	 * @param {string} customerId
-	 * @param {UserRole} role
+	 * @param {Role | string} role
 	 * @returns {Promise<Customer>}
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async updateRole(customerId: string, role: string): Promise<Customer>
+	public async updateRole(customerId: string, role: Role | string): Promise<Customer>
 	{
 		await this.throwIfNotExists(customerId);
 		return this.update(customerId, { role });
@@ -377,7 +373,7 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof UsersService
 	 */
 	@asyncListener()
-	async updateGeoLocation(
+	public async updateGeoLocation(
 			customerId: string,
 			@serialization((g: IGeoLocation) => new GeoLocation(g))
 					geoLocation: GeoLocation
@@ -397,7 +393,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns HTML representation of About Us
 	 */
 	@observableListener()
-	getAboutUs(
+	public getAboutUs(
 			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
@@ -423,7 +419,7 @@ export class CustomersService extends DBService<Customer>
 						           (oldDevice, newDevice) =>
 								           oldDevice.language !== newDevice.language
 				           ),
-				           switchMap((device) => this.watchedFiles.aboutUs[selectedLanguage as ILanguage])
+				           switchMap(() => this.watchedFiles.aboutUs[selectedLanguage as ILanguage])
 		           );
 	}
 	
@@ -436,7 +432,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns HTML representation of Terms Of Use
 	 */
 	@observableListener()
-	getTermsOfUse(
+	public getTermsOfUse(
 			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
@@ -464,7 +460,7 @@ export class CustomersService extends DBService<Customer>
 						           (oldDevice, newDevice) =>
 								           oldDevice.language !== newDevice.language
 				           ),
-				           switchMap((device) => this.watchedFiles.termsOfUse[selectedLanguage as ILanguage])
+				           switchMap(() => this.watchedFiles.termsOfUse[selectedLanguage as ILanguage])
 		           );
 	}
 	
@@ -477,7 +473,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns HTML representation of privacy policy
 	 */
 	@observableListener()
-	getPrivacy(
+	public getPrivacy(
 			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
@@ -503,7 +499,7 @@ export class CustomersService extends DBService<Customer>
 						           (oldDevice, newDevice) =>
 								           oldDevice.language !== newDevice.language
 				           ),
-				           switchMap((device) => this.watchedFiles.privacy[selectedLanguage as ILanguage])
+				           switchMap(() => this.watchedFiles.privacy[selectedLanguage as ILanguage])
 		           );
 	}
 	
@@ -516,7 +512,7 @@ export class CustomersService extends DBService<Customer>
 	 * @returns HTML representation of privacy policy
 	 */
 	@observableListener()
-	getHelp(
+	public getHelp(
 			customerId: string,
 			deviceId: string,
 			selectedLanguage: string
@@ -542,37 +538,53 @@ export class CustomersService extends DBService<Customer>
 						           (oldDevice, newDevice) =>
 								           oldDevice.language !== newDevice.language
 				           ),
-				           switchMap((device) => this.watchedFiles.help[selectedLanguage as ILanguage])
+				           switchMap(() => this.watchedFiles.help[selectedLanguage as ILanguage])
 		           );
 	}
 	
-	async banUser(id: string): Promise<Customer>
+	public async banUser(id: string): Promise<Customer>
 	{
 		await this.throwIfNotExists(id);
 		return this.update(id, { isBanned: true });
 	}
 	
-	async unbanUser(id: string): Promise<Customer>
+	public async unbanUser(id: string): Promise<Customer>
 	{
 		await this.throwIfNotExists(id);
 		return this.update(id, { isBanned: false });
 	}
 	
 	/**
-	 * Check if not deleted customer with given Id exists in DB and throw exception if it's not exists or deleted
+	 * Check if not deleted customer with given Id
+	 * exists in DB and throw exception if it's
+	 * not exists or deleted
 	 *
 	 * @param {string} customerId
 	 * @memberof UsersService
 	 */
-	async throwIfNotExists(customerId: string)
+	public async throwIfNotExists(customerId: string)
 	{
-		const user = await super.get(customerId)
-		                        .pipe(first())
-		                        .toPromise();
+		const customer = await super.get(customerId)
+		                            .pipe(first())
+		                            .toPromise();
 		
-		if(!user || user.isDeleted)
+		if(!customer || customer.isDeleted)
 		{
 			throw Error(`Customer with id '${customerId}' does not exists!`);
 		}
+	}
+	
+	private getOrThrow(id: string): Observable<Customer>
+	{
+		return super.get(id)
+		            .pipe(
+				            first(),
+				            map((customer) =>
+				                {
+					                if(!customer || customer.isDeleted)
+						                throw Error(`Customer with id '${id}' does not exists!`);
+					                return customer;
+				                }),
+		            );
 	}
 }
