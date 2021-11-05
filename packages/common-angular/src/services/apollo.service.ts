@@ -102,19 +102,25 @@ class ApolloService
 			const _factory = (value: R): C => value === null ? null : new Class(value);
 			const item = this.get<T, R>(result, key);
 			
-			if(Array.isArray(item))
+			if(item)
 			{
-				return item?.map(i => _factory(i));
-			}
-			else
+				if(Array.isArray(item))
+				{
+					return item.map(i => _factory(i));
+				}
+				else
+				{
+					return _factory(item);
+				}
+			} else
 			{
-				return _factory(item);
+				console.warn("Unable to create data")
 			}
 		} catch(e)
 		{
 			console.error(e);
-			return null;
 		}
+		return null;
 	}
 }
 
