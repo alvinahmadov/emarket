@@ -1,3 +1,16 @@
+type WarehouseProductRating {
+	rate: Float!
+	ratedBy: String!
+}
+
+type WarehouseProductPromotion
+{
+	active: Boolean!
+	requested: Boolean!
+	activeFrom: Date
+	activeTo: Date
+}
+
 type WarehouseProduct {
 	id: String!
 	_id: String!
@@ -6,7 +19,8 @@ type WarehouseProduct {
 	count: Int
 	soldCount: Int!
 	viewsCount: Int
-	likesCount: Int
+	rating: [WarehouseProductRating]
+	promotion: WarehouseProductPromotion
 	product: Product!
 	comments: [Comment!]
 	isManufacturing: Boolean
@@ -57,23 +71,95 @@ type Query {
 		pagingOptions: PagingOptionsInput
 	): [WarehouseProduct!]
 
-	getWarehouseProductsCount(id: String!): Int
+	getWarehouseProductsCount(storeId: String!): Int
+
+	getWarehouseProductsAvailable(storeId: String!): [WarehouseProduct!]
+
+	getWarehouseProductsTop(storeId: String!, quantity: Int!): [WarehouseProduct!]
 }
 
 type Mutation {
-	removeWarehouseProducts(
-		warehouseId: String!
-		productsIds: [String!]!
-	): Boolean
-
 	addWarehouseProducts(
-		warehouseId: String!
-		products: [WarehouseProductInput!]!
+		storeId: String!
+		storeProducts: [WarehouseProductInput!]!
+		triggerChange: Boolean
 	): [WarehouseProduct!]
 
+	removeWarehouseProducts(
+		storeId: String!
+		storeProductIds: [String!]!
+	): Boolean
+
 	updateWarehouseProduct(
-		warehouseId: String!
-		productId: String!
+		storeId: String!
+		storeProductId: String!
 		updateInput: WarehouseProductUpdateInput!
+	): WarehouseProduct!
+
+	changeWarehouseProductAvailability(
+		storeId: String!
+		storeProductId: String!
+		isAvailable: Boolean!
+	): WarehouseProduct!
+
+	changeWarehouseProductTakeaway(
+		storeId: String!
+		storeProductId: String!
+		isTakeaway: Boolean!
+	): WarehouseProduct!
+
+	changeWarehouseProductDelivery(
+		storeId: String!
+		storeProductId: String!
+		isDelivery: Boolean!
+	): WarehouseProduct!
+
+	changeWarehouseProductRating(
+		storeId: String!
+		storeProductId: String!
+		customerId: String!
+		count: Int!
+	): WarehouseProduct!
+
+	changeWarehouseProductPrice(
+		storeId: String!
+		storeProductId: String!
+		price: Int!
+	): WarehouseProduct!
+
+	increaseWarehouseProductCount(
+		storeId: String!
+		storeProductId: String!
+		count: Int!
+	): WarehouseProduct!
+
+	increaseWarehouseProductSoldCount(
+		storeId: String!
+		storeProductId: String!
+		count: Int!
+	): WarehouseProduct!
+
+	increaseWarehouseProductViewsCount(
+		storeId: String!
+		storeProductId: String!
+		count: Int!
+	): WarehouseProduct!
+
+	decreaseWarehouseProductCount(
+		storeId: String!
+		storeProductId: String!
+		count: Int!
+	): WarehouseProduct!
+
+	decreaseWarehouseProductSoldCount(
+		storeId: String!
+		storeProductId: String!
+		count: Int!
+	): WarehouseProduct!
+
+	decreaseWarehouseProductViewsCount(
+		storeId: String!
+		storeProductId: String!
+		count: Int!
 	): WarehouseProduct!
 }
