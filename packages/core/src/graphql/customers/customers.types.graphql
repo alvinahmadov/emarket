@@ -46,6 +46,7 @@ input CustomerFindInput {
 	email: String
 	phone: String
 	apartment: String
+	role: String
 
 	# URL of the image
 	avatar: String
