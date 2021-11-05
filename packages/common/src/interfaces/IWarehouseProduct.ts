@@ -1,5 +1,41 @@
 import IProduct                                      from './IProduct';
 import { DBCreateObject, DBRawObject, PyroObjectId } from '../@pyro/db';
+import IComment                                      from '../interfaces/IComment';
+
+export interface IProductRating
+{
+	rate: number;
+	ratedBy: string;
+}
+
+export interface IProductPromotion
+{
+	/**
+	 * Is promotion for product is active
+	 *
+	 * @default false
+	 * @type {boolean}
+	 * */
+	active: boolean;
+	
+	/**
+	 * Has merchant requested a promotion for product
+	 *
+	 * @default false
+	 * @type {boolean}
+	 * */
+	requested: boolean;
+	
+	/**
+	 * Promotion start date
+	 * */
+	activeFrom?: Date;
+	
+	/**
+	 * Promotion end date
+	 * */
+	activeTo?: Date;
+}
 
 /**
  * Represent Warehouse/Merchant inventory item (some product) for sale
@@ -43,6 +79,20 @@ export interface IWarehouseProductCreateObject extends DBCreateObject
 	 * @memberof IWarehouseProductCreateObject
 	 */
 	soldCount?: number;
+	
+	/**
+	 * How many users seen product
+	 *
+	 * @type {number}
+	 * @memberof IWarehouseProductCreateObject
+	 */
+	viewsCount?: number;
+	
+	rating?: IProductRating[];
+	
+	promotion?: IProductPromotion;
+	
+	comments?: IComment[];
 	
 	product: IProduct | string;
 	
