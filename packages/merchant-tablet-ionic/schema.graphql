@@ -112,18 +112,24 @@ type Category {
 	name: [TranslateType!]!
 }
 
+type Comment {
+	_createdAt: Date
+	_id: String!
+	_updatedAt: Date
+	dislikes: Int
+	dislikesBy: [String]
+	id: String!
+	likes: Int
+	likesBy: [String]
+	message: String!
+	productId: String!
+	replyTo: String
+	userId: String!
+}
+
 type CompletedOrderInfo {
 	totalOrders: Int!
 	totalRevenue: Float!
-}
-
-type Conversation {
-	_id: String!
-	channelId: String!
-	id: String!
-	locale: String
-	participants: [String]
-	platform: String
 }
 
 type Currency {
@@ -254,12 +260,17 @@ type MerchantsOrders {
 }
 
 type Mutation {
+	addComment(comment: CommentCreateInput!, storeId: String!, storeProductId: String!): [Comment]
 	addCustomerRegistrationInfo(id: String!, registrationInfo: AdditionalCustomerRegistrationInfo!): Void
-	addWarehouseProducts(products: [WarehouseProductInput!]!, storeId: String!): [WarehouseProduct!]
+	addWarehouseProducts(storeId: String!, storeProducts: [WarehouseProductInput!]!, triggerChange: Boolean): [WarehouseProduct!]
 	adminLogin(email: String!, password: String!): AdminLoginInfo
 	banCustomer(id: String!): Customer
 	carrierLogin(password: String!, username: String!): CarrierLoginInfo
-	createConversation(createInput: ConversationCreateInput!): Conversation!
+	changeWarehouseProductAvailability(isAvailable: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	changeWarehouseProductDelivery(isDelivery: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	changeWarehouseProductPrice(price: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	changeWarehouseProductRating(count: Int!, customerId: String!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	changeWarehouseProductTakeaway(isTakeaway: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	createCurrency(createInput: CurrencyCreateInput!): MutationResponse
 	createDevice(createInput: DeviceCreateInput!): Device!
 	createInvite(createInput: InviteCreateInput!): Invite!
@@ -269,6 +280,15 @@ type Mutation {
 	createProductsCategory(createInput: ProductsCategoriesCreateInput): ProductsCategory!
 	createPromotion(createInput: PromotionInput): Promotion
 	customerLogin(email: String!, password: String!): CustomerLoginInfo
+	decreaseWarehouseProductCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	decreaseWarehouseProductSoldCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	decreaseWarehouseProductViewsCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	deleteCommentsByIds(commentIds: [String!]!, storeId: String!, storeProductId: String!): [Comment]
+	increaseCommentDislikes(commentId: String!, storeId: String!, storeProductId: String!, userId: String!): Comment
+	increaseCommentLikes(commentId: String!, storeId: String!, storeProductId: String!, userId: String!): Comment
+	increaseWarehouseProductCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	increaseWarehouseProductSoldCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	increaseWarehouseProductViewsCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	isAuthenticated(token: String!): Boolean
 	payOrderWithStripe(cardId: String!, orderId: String!): Order
 	registerAdmin(registerInput: AdminRegisterInput!): Admin!
@@ -277,7 +297,6 @@ type Mutation {
 	registerWarehouse(registerInput: WarehouseRegisterInput!): Warehouse!
 	removeCarrier(id: String!): Void
 	removeCarriersByIds(ids: [String!]!): String
-	removeConversation(channelId: String!): Void
 	removeCustomersByIds(ids: [String]!): String!
 	removeDevice(id: String!): Void
 	removeDeviceByIds(ids: [String!]!): Remove
@@ -289,7 +308,7 @@ type Mutation {
 	removeProductsCategoriesByIds(ids: [String!]!): Remove
 	removePromotion(id: String!): Void
 	removePromotionsByIds(ids: [String!]!): Remove
-	removeWarehouseProducts(productsIds: [String!]!, storeId: String!): Boolean
+	removeWarehouseProducts(storeId: String!, storeProductIds: [String!]!): Boolean
 	removeWarehousesByIds(ids: [String!]!): Void
 	saveProduct(product: ProductSaveInput!): Product!
 	unbanCustomer(id: String!): Customer
@@ -299,6 +318,7 @@ type Mutation {
 	updateCarrierEmail(email: String!, id: String!): Carrier!
 	updateCarrierPassword(id: String!, password: CarrierPasswordUpdateInput!): Void
 	updateCarrierStatus(id: String!, status: CarrierStatus): Carrier
+	updateComment(comment: CommentSaveInput!, commentId: String!, storeId: String!, storeProductId: String!): Comment!
 	updateCustomer(id: String!, updateObject: CustomerUpdateObjectInput!): Customer!
 	updateCustomerEmail(email: String!, id: String!): Customer!
 	updateCustomerPassword(id: String!, password: CustomerPasswordUpdateInput!): Void
@@ -312,7 +332,7 @@ type Mutation {
 	updatePromotion(id: String, updateInput: PromotionInput): Promotion
 	updateStoreGeoLocation(geoLocation: GeoLocationCreateObject!, storeId: String!): Warehouse!
 	updateWarehousePassword(id: String!, password: WarehousePasswordUpdateInput!): Void
-	updateWarehouseProduct(productId: String!, storeId: String!, updateInput: WarehouseProductUpdateInput!): WarehouseProduct!
+	updateWarehouseProduct(storeId: String!, storeProductId: String!, updateInput: WarehouseProductUpdateInput!): WarehouseProduct!
 	warehouseLogin(password: String!, username: String!): WarehouseLoginInfo
 }
 
@@ -406,14 +426,6 @@ type Product {
 	title: [TranslateType!]!
 }
 
-type ProductComment {
-	comment: String!
-	dislikes: Int
-	isReply: Boolean
-	likes: Int
-	replyTo: String
-}
-
 type ProductInfo {
 	distance: Float!
 	warehouseId: String!
@@ -459,8 +471,8 @@ type Query {
 	adminByEmail(email: String!): Admin
 	adminSearch(findInput: AdminFindInput): Admin
 	clearAll: Boolean!
-	conversation(id: String): Conversation
-	conversations(findInput: ConversationFindInput): [Conversation!]!
+	comment(commentId: String!, storeId: String!, storeProductId: String!): Comment
+	comments(pagingOptions: PagingOptionsInput, storeId: String!, storeProductId: String!): [Comment!]!
 	countCustomers(storeId: String!): Int!
 	currencies: [Currency]
 	customer(id: String!): Customer
@@ -492,6 +504,7 @@ type Query {
 	getCountExistingCustomersToday: ExistingCustomersByStores!
 	getCountOfCarrierOrdersHistory(carrierId: String!): Int!
 	getCountOfCarriers(carriersFindInput: CarriersFindInput): Int!
+	getCountOfComments(storeId: String!, storeProductId: String!): Int!
 	getCountOfCustomers: Int!
 	getCountOfGeoLocationProducts(geoLocation: GeoLocationFindInput!, options: GetGeoLocationProductsOptions, searchText: String): Int!
 	getCountOfInvites: Int!
@@ -527,7 +540,9 @@ type Query {
 	getUsersOrdersCountInfo(usersIds: [String!]): [OrderCountTnfo]
 	getWarehouseProduct(productId: String!, storeId: String!): WarehouseProduct
 	getWarehouseProductInfo(storeId: String!): [ProductInfo!]
-	getWarehouseProductsCount(id: String!): Int
+	getWarehouseProductsAvailable(storeId: String!): [WarehouseProduct!]
+	getWarehouseProductsCount(storeId: String!): Int
+	getWarehouseProductsTop(quantity: Int!, storeId: String!): [WarehouseProduct!]
 	getWarehouseProductsWithPagination(pagingOptions: PagingOptionsInput, storeId: String!): [WarehouseProduct!]
 	hasExistingStores: Boolean!
 	invite(id: String!): Invite
@@ -620,7 +635,7 @@ type WarehouseLoginInfo {
 
 type WarehouseProduct {
 	_id: String!
-	comments: [ProductComment]
+	comments: [Comment!]
 	count: Int
 	deliveryTimeMax: Int
 	deliveryTimeMin: Int
@@ -631,11 +646,24 @@ type WarehouseProduct {
 	isManufacturing: Boolean
 	isProductAvailable: Boolean
 	isTakeaway: Boolean
-	likesCount: Int
 	price: Int!
 	product: Product!
+	promotion: WarehouseProductPromotion
+	rating: [WarehouseProductRating]
 	soldCount: Int!
 	viewsCount: Int
+}
+
+type WarehouseProductPromotion {
+	end: Date
+	isPromoted: Boolean
+	price: Float
+	start: Date
+}
+
+type WarehouseProductRating {
+	rate: Float!
+	ratedBy: String!
 }
 
 enum CarrierStatus {
@@ -779,18 +807,26 @@ input CarriersFindInput {
 	status: Int
 }
 
-input ConversationCreateInput {
-	channelId: String!
-	locale: String
-	participants: [String]
-	platform: String
+input CommentCreateInput {
+	message: String!
+	productId: String!
+	replyTo: String
+	userId: String!
 }
 
-input ConversationFindInput {
-	channelId: String
-	locale: String
-	participants: [String]
-	platform: String
+input CommentSaveInput {
+	_createdAt: Date
+	_id: String
+	_updatedAt: Date
+	dislikes: Int
+	dislikesBy: [String]
+	id: String
+	likes: Int
+	likesBy: [String]
+	message: String
+	productId: String
+	replyTo: String
+	userId: String
 }
 
 input CurrencyCreateInput {
@@ -812,6 +848,7 @@ input CustomerCreateInput {
 }
 
 input CustomerFindInput {
+	role: String
 	apartment: String
 	avatar: String
 	email: String
