@@ -85,6 +85,11 @@ export class CustomersAuthService extends EntityService<Customer>
 			delete input.user.lastName;
 		}
 		
+		if(input.user.email === '')
+		{
+			delete input.user.email;
+		}
+		
 		return await this.customersService.create({
 			                                          ...input.user,
 			                                          ...(input.password
@@ -197,7 +202,7 @@ export class CustomersAuthService extends EntityService<Customer>
 	}>
 	{
 		return new Promise<{ registrationRequiredOnStart: boolean }>(
-				(resolve, reject) =>
+				(resolve) =>
 				{
 					resolve({
 						        registrationRequiredOnStart:
