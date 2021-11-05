@@ -13,6 +13,7 @@ import { TranslateService }                         from '@ngx-translate/core';
 import { first }                                    from 'rxjs/operators';
 import { ILocaleMember }                            from '@modules/server.common/interfaces/ILocale';
 import Order                                        from '@modules/server.common/entities/Order';
+import OrderProduct                                 from '@modules/server.common/entities/OrderProduct';
 import Warehouse                                    from '@modules/server.common/entities/Warehouse';
 import { ProductLocalesService }                    from '@modules/client.common.angular2/locale/product-locales.service';
 import { WarehouseOrdersRouter }                    from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
@@ -42,7 +43,7 @@ export class OrderComponent implements OnInit
 	public price: number;
 	public description: string;
 	public img: string;
-	public products;
+	public products: OrderProduct[];
 	public orderStatusText: string;
 	public orderNumber: number;
 	public orderCurrency: string;
@@ -51,7 +52,7 @@ export class OrderComponent implements OnInit
 	public createdAt: Date;
 	public createdAtConverted: string;
 	public warehouse: Warehouse;
-	public totalPrice;
+	public totalPrice: number;
 	public carrier;
 	public _isButtonDisabled: boolean = true;
 	
@@ -100,10 +101,7 @@ export class OrderComponent implements OnInit
 			this.carrierRouter
 			    .get(this.order.carrierId)
 			    .pipe(first())
-			    .subscribe((carrier) =>
-			               {
-				               this.carrier = carrier;
-			               });
+			    .subscribe((carrier) => this.carrier = carrier);
 		}
 		this.loadData();
 	}
@@ -153,12 +151,7 @@ export class OrderComponent implements OnInit
 	public getTranslate(key: string): string
 	{
 		let translationResult = '';
-		
-		this.translateService.get(key).subscribe((res) =>
-		                                         {
-			                                         translationResult = res;
-		                                         });
-		
+		this.translateService.get(key).subscribe((res) => translationResult = res);
 		return translationResult;
 	}
 	
@@ -193,6 +186,8 @@ export class OrderComponent implements OnInit
 					this.order.products[0].product.title
 			);
 			this.price = this.order.totalPrice;
+			this.orderCurrency = this.order?.orderCurrency;
+			this.orderNotes = this.order.orderNotes;
 			this.description = this.localeTranslate(
 					this.order.products[0].product.description
 			);
