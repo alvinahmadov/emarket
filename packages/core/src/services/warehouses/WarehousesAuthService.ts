@@ -95,7 +95,7 @@ export class WarehousesAuthService extends DBService<Warehouse>
 			}
 		} catch(e)
 		{
-			this.log.debug(e);
+			this.log.error(e);
 		}
 	}
 	
