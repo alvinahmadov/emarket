@@ -73,7 +73,9 @@ class ApolloService
 			return result.data[key];
 		} catch(e)
 		{
-			console.error(e);
+			const err: Error = e;
+			console.error(`Caught ${err.name} error on ApolloService::get: ${err.stack}`);
+			console.error(`${err.name} message was: ${err.message}`);
 			return null;
 		}
 	}
@@ -118,7 +120,9 @@ class ApolloService
 			}
 		} catch(e)
 		{
-			console.error(e);
+			const err: Error = e;
+			console.error(`Caught error on ApolloService::factory: ${err.stack}`)
+			console.error(err.message);
 		}
 		return null;
 	}
