@@ -9,7 +9,7 @@
 		<i class="fa fa-close"></i>
 	</button>
 	
-	<ion-row>
+	<ion-row class="bg-white">
 		<div class="col popup-half">
 			<div class="popup-input-container">
 				<label>
@@ -22,14 +22,33 @@
 			
 			<div class="popup-input-container">
 				<label>
-					<span class="popup-input-description"
-					>{{ 'EDIT_PRODUCT_POP_UP.DESCRIPTION' | translate
-						}}</span
-					>
+					<span class="popup-input-description">
+						{{ 'EDIT_PRODUCT_POP_UP.DESCRIPTION' | translate }}
+					</span>
 					<textarea
 							class="popup-input"
 							rows="4"
 							[(ngModel)]="productDescription"
+							#productDesc="ngModel"
+					></textarea>
+				</label>
+				<div *ngIf="productDesc.control.value?.length > descrMaxLength"
+				     style="width: 100%; border: 1px solid red;">
+					<span style="color: red; font-size: 8px">
+						{{ 'EDIT_PRODUCT_POP_UP.ERRORS.MAX_CHAR' | translate }} (255)
+					</span>
+				</div>
+			</div>
+			
+			<div class="popup-input-container">
+				<label>
+					<span class="popup-input-description">
+						{{ 'EDIT_PRODUCT_POP_UP.DETAILS' | translate }}
+					</span>
+					<textarea
+							class="popup-input"
+							rows="6"
+							[(ngModel)]="productDetails"
 					></textarea>
 				</label>
 			</div>
@@ -47,12 +66,10 @@
 								[okText]="buttonOK"
 								[cancelText]="buttonCancel"
 						>
-							<ion-select-option
-									[value]="category.id"
-									*ngFor="let category of productsCategories"
+							<ion-select-option *ngFor="let category of productsCategories"
+							                   [value]="category.id"
 							>
-								{{ localeTranslateService.getTranslate(
-									category.name) }}
+								{{ localeTranslateService.getTranslate(category.name) }}
 							</ion-select-option>
 						</ion-select>
 					</ion-item>
@@ -63,10 +80,9 @@
 				<div class="col no-padding-left pl-0 pr-0">
 					<div class="popup-input-container">
 						<label>
-							<span class="popup-input-description"
-							>{{ 'EDIT_PRODUCT_POP_UP.PRICE' | translate
-								}}</span
-							>
+							<span class="popup-input-description">
+								{{ 'EDIT_PRODUCT_POP_UP.PRICE' | translate }}
+							</span>
 							<input
 									class="popup-input"
 									type="number"
@@ -80,10 +96,9 @@
 				<div class="col no-padding-right">
 					<div class="popup-input-container">
 						<label>
-							<span class="popup-input-description"
-							>{{ 'EDIT_PRODUCT_POP_UP.COUNT' | translate
-								}}</span
-							>
+							<span class="popup-input-description">
+								{{ 'EDIT_PRODUCT_POP_UP.COUNT' | translate }}
+							</span>
 							<input
 									class="popup-input"
 									type="number"
@@ -97,34 +112,19 @@
 				<div class="col no-padding-right pr-0">
 					<div class="popup-input-container">
 						<label>
-							<span class="popup-input-description"
-							>{{ 'EDIT_PRODUCT_POP_UP.LANGUAGE' | translate
-								}}</span
-							>
+							<span class="popup-input-description">
+								{{ 'EDIT_PRODUCT_POP_UP.LANGUAGE' | translate }}
+							</span>
 							<select
 									class="popup-input select"
 									[(ngModel)]="currentLocale"
 							>
-								<option value="en-US"
-								>{{ 'EDIT_PRODUCT_POP_UP.ENGLISH' |
-										translate }}</option
-								>
-								<option value="he-IL"
-								>{{ 'EDIT_PRODUCT_POP_UP.HEBREW' | translate
-									}}</option
-								>
-								<option value="ru-RU"
-								>{{ 'EDIT_PRODUCT_POP_UP.RUSSIAN' |
-										translate }}</option
-								>
-								<option value="bg-BG"
-								>{{ 'EDIT_PRODUCT_POP_UP.BULGARIAN' |
-										translate }}</option
-								>
-								<option value="es-ES"
-								>{{ 'EDIT_PRODUCT_POP_UP.SPANISH' |
-										translate }}</option
-								>
+								<option value="en-US">
+									{{ 'EDIT_PRODUCT_POP_UP.ENGLISH' | translate }}
+								</option>
+								<option value="ru-RU">
+									{{ 'EDIT_PRODUCT_POP_UP.RUSSIAN' | translate }}
+								</option>
 							</select>
 						</label>
 					</div>
@@ -138,7 +138,7 @@
 							(ionChange)="clickHandler()"
 					>
 					</ion-checkbox>
-					<ion-label>
+					<ion-label style="font-size: 12px">
 						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.PRODUCT_AVAILABILITY' | translate }}
 					</ion-label>
 				</ion-col>
@@ -172,19 +172,17 @@
 			</ion-row>
 		</div>
 		
-		<div
-				ng2FileDrop
-				[uploader]="uploader"
-				class="col popup-half"
-				style="margin: auto;"
+		<div [uploader]="uploader"
+		     ng2FileDrop
+		     class="col popup-half"
+		     style="margin: auto;"
 		>
-			<div
-					ngf-select="imageSelected($file)"
-					ngf-pattern="'image/*'"
-					class="upload-button"
-					#imageHolder
-					id="image-holder"
-					(click)="hasImage && showPicturesPopup()"
+			<div (click)="hasImage && showPicturesPopup()"
+			     #imageHolder
+			     ngf-select="imageSelected($file)"
+			     ngf-pattern="'image/*'"
+			     class="upload-button"
+			     id="image-holder"
 			>
 				<h6 *ngIf="isBrowser && !hasImage" class="dragDrop">
 					{{ 'EDIT_PRODUCT_POP_UP.DRAG&DROP_FILE_HERE' | translate }}
