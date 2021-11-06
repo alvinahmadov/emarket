@@ -3,10 +3,7 @@
         <i class="fa fa-book"></i>
         <div>
             <h2>
-                {{
-                'WAREHOUSE_VIEW.ORDER_WAREHOUSE_STATUSES.NO_PRODUCTS'
-                    | translate
-                }}
+                {{ 'WAREHOUSE_VIEW.ORDER_WAREHOUSE_STATUSES.NO_PRODUCTS' | translate }}
             </h2>
             <h3 (click)="presentCreateProductPopover()">
                 {{ 'WAREHOUSE_VIEW.MISC_TEXT.ADD_NEW_PRODUCT' | translate }}
@@ -18,39 +15,32 @@
         <ion-item
                 class="product-card-container"
                 type="card"
-                *ngFor="let warehouseProduct of topProducts"
+                *ngFor="let storeProduct of topProducts"
         >
             <div class="card product-card">
                 <div class="product-image-container">
                     <img
                             class="product-image"
-                            (click)="addProduct(warehouseProduct.productId)"
-                            src="{{
-							getWarehouseProductImageUrl(
-								warehouseProduct.product
-							)
-						}}"
+                            (click)="addProduct(storeProduct.productId)"
+                            src="{{ getWarehouseProductImageUrl(storeProduct.product)}}"
+                            alt="{{storeProduct.product.title}}"
                     />
                 </div>
 
                 <div class="product-mini-bar">
                     <a
                             class="edit-button button"
-                            (click)="openEditProductModal(warehouseProduct)"
+                            (click)="openEditProductModal(storeProduct)"
                     >
                         <ion-icon
                                 ios="ios-settings"
                                 md="md-settings"
                         ></ion-icon>
                     </a>
-                    <span class="name"
-                    >{{
-                        truncateTitle(
-                            localeTranslate(warehouseProduct.product.title)
-                        )
-                        }}
+                    <span class="name">
+	                    {{ truncateTitle(localeTranslate(storeProduct.product.title)) }}
 					</span>
-                    <span class="count">{{ warehouseProduct?.count }}</span>
+                    <span class="count">{{ storeProduct?.count }}</span>
                 </div>
             </div>
         </ion-item>
