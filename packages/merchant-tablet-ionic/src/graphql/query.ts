@@ -158,6 +158,7 @@ export namespace GQLQuery
 				customer(id: $id)
 				{
 					_id
+					username
 					firstName
 					lastName
 					avatar
@@ -223,12 +224,14 @@ export namespace GQLQuery
 			{
 				customers {
 					_id
+					username
 					firstName
 					lastName
 					email
 					role
 					apartment
 					phone
+					avatar
 					geoLocation {
 						countryId
 						city
@@ -738,19 +741,22 @@ export namespace GQLQuery
 							_updatedAt
 						}
 						comments {
-							comment
+							id
+							_id
+							message
 							likes
 							dislikes
-							isReply
+							likesBy
+							dislikesBy
 							replyTo
 						}
 						viewsCount
-						likesCount
 						deliveryTimeMin
 						deliveryTimeMax
 						isCarrierRequired
 						isDeliveryRequired
 						isManufacturing
+						isProductAvailable
 						isTakeaway
 					}
 				}
@@ -759,7 +765,7 @@ export namespace GQLQuery
 			export const Count = gql`
 				query GetProductsCount($storeId: String!)
 				{
-					getWarehouseProductsCount(id: $storeId)
+					getWarehouseProductsCount(storeId: $storeId)
 				}
 			`;
 		}
