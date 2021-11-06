@@ -5,52 +5,63 @@ import {
 	Input,
 	OnInit,
 	ViewChild
-}                                                             from '@angular/core';
-import { FileItem, FileUploader, FileUploaderOptions }        from 'ng2-file-upload';
-import { Camera, CameraOptions }                              from '@ionic-native/camera/ngx';
-import WarehouseProduct                                       from '@modules/server.common/entities/WarehouseProduct';
-import { IProductDescription, IProductImage, IProductTitle, } from '@modules/server.common/interfaces/IProduct';
-import { ProductRouter }                                      from '@modules/client.common.angular2/routers/product-router.service';
-import Product                                                from '@modules/server.common/entities/Product';
-import { WarehouseProductsRouter }                            from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { ProductLocalesService }                              from '@modules/client.common.angular2/locale/product-locales.service';
-import { TranslateService }                                   from '@ngx-translate/core';
-import { ILocaleMember }                                      from '@modules/server.common/interfaces/ILocale';
-import { environment }                                        from '../../../environments/environment';
-import ProductsCategory                                       from '@modules/server.common/entities/ProductsCategory';
-import { first }                                              from 'rxjs/operators';
-import { ProductsCategoryService }                            from '../../../services/products-category.service';
-import DeliveryType                                           from '@modules/server.common/enums/DeliveryType';
-import { ActionSheetController, ModalController }             from '@ionic/angular';
-import { ProductImagesPopup }                                 from '../product-pictures-popup/product-images-popup.component';
-import ProductTypePopup                                       from '../../../@shared/common/product-type-popup';
+}                                                      from '@angular/core';
+import { ActionSheetController, ModalController }      from '@ionic/angular';
+import { Camera, CameraOptions }                       from '@ionic-native/camera/ngx';
+import { TranslateService }                            from '@ngx-translate/core';
+import { FileItem, FileUploader, FileUploaderOptions } from 'ng2-file-upload';
+import { first }                                       from 'rxjs/operators';
+import {
+	IProductDescription,
+	IProductImage,
+	IProductTitle
+}                                                      from '@modules/server.common/interfaces/IProduct';
+import { ILocaleMember }                               from '@modules/server.common/interfaces/ILocale';
+import DeliveryType                                    from '@modules/server.common/enums/DeliveryType';
+import Currency                                        from '@modules/server.common/entities/Currency';
+import WarehouseProduct                                from '@modules/server.common/entities/WarehouseProduct';
+import Product                                         from '@modules/server.common/entities/Product';
+import ProductsCategory                                from '@modules/server.common/entities/ProductsCategory';
+import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
+import { ProductRouter }                               from '@modules/client.common.angular2/routers/product-router.service';
+import { WarehouseProductsRouter }                     from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { WarehouseRouter }                             from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { ProductsCategoryService }                     from 'services/products-category.service';
+import { StorageService }                              from 'services/storage.service';
+import { environment }                                 from 'environments/environment';
+import { ProductImagesPopup }                          from '../product-pictures-popup/product-images-popup.component';
+import ProductTypePopup                                from '../../../@shared/common/product-type-popup';
 
 @Component({
-	           selector: 'page-edit-product-type-popup',
-	           templateUrl: 'edit-product-type-popup.html',
-	           styleUrls: ['./edit-product-type-popup.scss'],
+	           selector:    'page-edit-product-type-popup',
+	           styleUrls:   ['./edit-product-type-popup.scss'],
+	           templateUrl: './edit-product-type-popup.html',
            })
 export class EditProductTypePopupPage extends ProductTypePopup
 		implements OnInit, AfterViewInit
 {
-	OK: string = 'OK';
-	CANCEL: string = 'CANCEL';
-	SELECT_CATEGORIES: string = 'SELECT_CATEGORIES';
-	PREFIX: string = 'WAREHOUSE_VIEW.SELECT_POP_UP.';
-	selectOptionsObj: object;
-	takaProductDelivery: boolean = true;
-	takaProductTakeaway: boolean;
-	isAvailable: boolean;
+	public OK: string = 'OK';
+	public CANCEL: string = 'CANCEL';
+	public SELECT_CATEGORIES: string = 'SELECT_CATEGORIES';
+	public PREFIX: string = 'WAREHOUSE_VIEW.SELECT_POP_UP.';
+	public selectOptionsObj: object;
+	public takaProductDelivery: boolean = true;
+	public takaProductTakeaway: boolean;
+	public isAvailable: boolean = false;
+	
+	@ViewChild('imageHolder', { static: true })
+	private _imageHolder: ElementRef;
 	
 	@Input()
-	warehouseProduct: WarehouseProduct;
-	product: Product;
-	readyToUpdate: boolean = false;
-	uploader: FileUploader;
-	translLang: string;
-	productsCategories: ProductsCategory[];
-	selectedProductCategories: string[] = [];
-	hasImage: boolean = true;
+	public warehouseProduct: WarehouseProduct;
+	public product: Product;
+	public currency: Currency;
+	public readyToUpdate: boolean = false;
+	public uploader: FileUploader;
+	public translLang: string;
+	public productsCategories: ProductsCategory[];
+	public selectedProductCategories: string[] = [];
+	public hasImage: boolean = true;
 	
 	private static cssClass = "mutation-product-images-modal";
 	
@@ -58,16 +69,19 @@ export class EditProductTypePopupPage extends ProductTypePopup
 	private lastProductDescription: IProductDescription[];
 	private lastProductPrice: number;
 	private lastProductCount: number;
+	public readonly locales: string[] = environment.AVAILABLE_LOCALES.split('|');
+	public readonly descrMaxLength = 255;
 	private imagesData: IProductImage[];
 	
 	@ViewChild('fileInput', { static: true })
 	private fileInput: ElementRef;
 	
 	constructor(
-			// public navParams: NavParams,
 			private productRouter: ProductRouter,
+			private warehouseRouter: WarehouseRouter,
 			private warehouseProductsRouter: WarehouseProductsRouter,
 			private readonly _productsCategorySrvice: ProductsCategoryService,
+			private readonly storage: StorageService,
 			public modalController: ModalController,
 			private camera: Camera,
 			public actionSheetCtrl: ActionSheetController,
@@ -75,59 +89,45 @@ export class EditProductTypePopupPage extends ProductTypePopup
 			private translate: TranslateService
 	)
 	{
-		super(modalController);
-		const uploaderOptions: FileUploaderOptions = {
-			url: environment.API_FILE_UPLOAD_URL,
-			
-			// Use xhrTransport in favor of iframeTransport
-			isHTML5: true,
-			// Calculate progress independently for each uploaded file
-			removeAfterUpload: true,
-			// XHR request headers
-			headers: [
-				{
-					name: 'X-Requested-With',
-					value: 'XMLHttpRequest',
-				},
-			],
-		};
-		this.uploader = new FileUploader(uploaderOptions);
-		
-		this.uploader.onBuildItemForm = (
-				fileItem: any,
-				form: FormData
-		): any =>
-		{
-			// Add Cloudinary's unsigned upload preset to the upload form
-			form.append('upload_preset', environment.CLOUDINARY_UNSIGNED_UPLOAD_PRESET);
-			// Add built-in and custom tags for displaying the uploaded photo in the list
-			let tags: string = "";
-			if(this.product.title)
-			{
-				form.append('context', `photo=${this.product.title}`);
-				tags += `,${this.product.title}`;
-			}
-			// Upload to a custom folder
-			// Note that by default, when uploading via the API, folders are not automatically created in your Media Library.
-			// In order to automatically create the folders based on the API requests,
-			// please go to your account upload settings and set the 'Auto-create folders' option to enabled.
-			// TODO: use settings from .env file
-			form.append('folder', this.warehouseName);
-			// Add custom tags
-			form.append('tags', tags);
-			// Add file to upload
-			form.append('file', fileItem);
-			
-			// Use default "withCredentials" value for CORS requests
-			fileItem.withCredentials = false;
-			return { fileItem, form };
-		};
+		super(modalController, storage);
+		this._setupFileUploader();
 	}
 	
-	@ViewChild('imageHolder', { static: true })
-	private _imageHolder: ElementRef;
+	async ngOnInit()
+	{
+		this.isAvailable = this.warehouseProduct.isProductAvailable;
+		this.product = this.warehouseProduct.product as Product;
+		this.lastProductCount = this.warehouseProduct.count;
+		this.lastProductPrice = this.warehouseProduct.price;
+		this.lastProductDescription = this.product.description;
+		this.lastProductTitle = this.product.title;
+		this.translLang = this.translate.currentLang;
+		this.takaProductDelivery = this.warehouseProduct.isDeliveryRequired;
+		this.takaProductTakeaway = this.warehouseProduct.isTakeaway;
+		
+		
+		this.currentLocale =
+				this.localeTranslateService.takeSelectedLang(this.translLang) ||
+				environment.DEFAULT_LANGUAGE;
+		this.storageService.deviceId
+		this._setupLocaleServiceValidationState();
+		
+		this._selectExistingProductCategories();
+		await this._loadProductsCategories();
+	}
 	
-	imageUrlChanged(ev)
+	public ngAfterViewInit(): void
+	{
+		const currentProductImage = this.localeTranslateService.getTranslate(
+				this.product.images
+		);
+		
+		this.hasImage = !!currentProductImage;
+		
+		this._setImageHolderBackground(currentProductImage);
+	}
+	
+	public imageUrlChanged(ev)
 	{
 		const reader = new FileReader();
 		
@@ -141,24 +141,24 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		reader.readAsDataURL(ev.target.files[0]);
 	}
 	
-	get buttonOK()
+	public get buttonOK()
 	{
 		return this._translate(this.PREFIX + this.OK);
 	}
 	
-	get buttonCancel()
+	public get buttonCancel()
 	{
 		return this._translate(this.PREFIX + this.CANCEL);
 	}
 	
-	get selectOptionTitle()
+	public get selectOptionTitle()
 	{
 		const title = this._translate(this.PREFIX + this.SELECT_CATEGORIES);
 		this.selectOptionsObj = { subTitle: title };
 		return this.selectOptionsObj;
 	}
 	
-	get isReadyToUpdate()
+	public get isReadyToUpdate()
 	{
 		return (
 				this.localeTranslateService.isServiceStateValid &&
@@ -167,16 +167,6 @@ export class EditProductTypePopupPage extends ProductTypePopup
 				this.warehouseProduct.price !== 0 &&
 				this.warehouseProduct.count >= 0
 		);
-	}
-	
-	get warehouseId()
-	{
-		return localStorage.getItem('_warehouseId');
-	}
-	
-	get isBrowser()
-	{
-		return localStorage.getItem('_platform') === 'browser';
 	}
 	
 	get currentLocale()
@@ -208,43 +198,23 @@ export class EditProductTypePopupPage extends ProductTypePopup
 	
 	set productDescription(memberValue: string)
 	{
-		this.localeTranslateService.setMemberValue('description', memberValue);
+		if(memberValue.length <= this.descrMaxLength)
+			this.localeTranslateService.setMemberValue('description', memberValue);
 	}
 	
-	async ngOnInit()
+	get productDetails()
 	{
-		this.isAvailable = this.warehouseProduct.isProductAvailable;
-		this.product = this.warehouseProduct.product as Product;
-		this.lastProductCount = this.warehouseProduct.count;
-		this.lastProductPrice = this.warehouseProduct.price;
-		this.lastProductDescription = this.product.description;
-		this.lastProductTitle = this.product.title;
-		this.translLang = this.translate.currentLang;
-		this.takaProductDelivery = this.warehouseProduct.isDeliveryRequired;
-		this.takaProductTakeaway = this.warehouseProduct.isTakeaway;
-		
-		this.currentLocale =
-				this.localeTranslateService.takeSelectedLang(this.translLang) ||
-				environment.DEFAULT_LANGUAGE;
-		
-		this._setupLocaleServiceValidationState();
-		
-		this._selectExistingProductCategories();
-		await this._loadProductsCategories();
-	}
-	
-	ngAfterViewInit(): void
-	{
-		const currentProductImage = this.localeTranslateService.getTranslate(
-				this.product.images
+		return this.localeTranslateService.getMemberValue(
+				this.product.details
 		);
-		
-		this.hasImage = !!currentProductImage;
-		
-		this._setImageHolderBackground(currentProductImage);
 	}
 	
-	getProductTypeChange(type: string)
+	set productDetails(memberValue: string)
+	{
+		this.localeTranslateService.setMemberValue('details', memberValue);
+	}
+	
+	public getProductTypeChange(type: string)
 	{
 		if(DeliveryType[type] === DeliveryType.Delivery)
 		{
@@ -262,12 +232,12 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		}
 	}
 	
-	localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this.localeTranslateService.getTranslate(member);
 	}
 	
-	async showPicturesPopup()
+	public async showPicturesPopup()
 	{
 		let images = this.product.images.filter(
 				(i) => i.locale === this.currentLocale
@@ -300,13 +270,13 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		}
 	}
 	
-	takePicture(sourceType: number)
+	public takePicture(sourceType: number)
 	{
 		const options: CameraOptions = {
-			quality: 50,
-			destinationType: this.camera.DestinationType.DATA_URL,
-			encodingType: this.camera.EncodingType.JPEG,
-			mediaType: this.camera.MediaType.PICTURE,
+			quality:            50,
+			destinationType:    this.camera.DestinationType.DATA_URL,
+			encodingType:       this.camera.EncodingType.JPEG,
+			mediaType:          this.camera.MediaType.PICTURE,
 			correctOrientation: true,
 			sourceType,
 		};
@@ -324,47 +294,43 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		                                     });
 	}
 	
-	urltoFile(url, filename, mimeType)
+	public urltoFile(url, filename, mimeType)
 	{
 		return fetch(url)
-				.then(function(res)
-				      {
-					      return res.arrayBuffer();
-				      })
-				.then(function(buf)
-				      {
-					      return new File([buf], filename, { type: mimeType });
-				      });
+				.then(res => res.arrayBuffer())
+				.then(buf => new File([buf], filename, { type: mimeType }));
 	}
 	
-	async presentActionSheet()
+	public async presentActionSheet()
 	{
-		const actionSheet = await this.actionSheetCtrl.create({
-			                                                      header: 'Select Image Source',
-			                                                      buttons: [
-				                                                      {
-					                                                      text: 'Load from Library',
-					                                                      handler: () =>
-					                                                      {
-						                                                      this.takePicture(
-								                                                      this.camera.PictureSourceType.PHOTOLIBRARY
-						                                                      );
-					                                                      },
-				                                                      },
-				                                                      {
-					                                                      text: 'Use Camera',
-					                                                      handler: () =>
-					                                                      {
-						                                                      this.takePicture(this.camera.PictureSourceType.CAMERA);
-					                                                      },
-				                                                      },
-				                                                      { text: 'Cancel', role: 'cancel' },
-			                                                      ],
-		                                                      });
+		const actionSheet =
+				      await this.actionSheetCtrl
+				                .create({
+					                        header:  'Select Image Source',
+					                        buttons: [
+						                        {
+							                        text:    'Load from Library',
+							                        handler: () =>
+							                                 {
+								                                 this.takePicture(
+										                                 this.camera.PictureSourceType.PHOTOLIBRARY
+								                                 );
+							                                 },
+						                        },
+						                        {
+							                        text:    'Use Camera',
+							                        handler: () =>
+							                                 {
+								                                 this.takePicture(this.camera.PictureSourceType.CAMERA);
+							                                 },
+						                        },
+						                        { text: 'Cancel', role: 'cancel' },
+					                        ],
+				                        });
 		await actionSheet.present();
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.warehouseProduct.count = this.lastProductCount;
 		this.warehouseProduct.price = this.lastProductPrice;
@@ -373,48 +339,53 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		this.modalController.dismiss();
 	}
 	
-	updateProduct()
+	public updateProduct()
 	{
 		if(this.uploader.queue.length >= 1)
 		{
 			this.uploader.queue[this.uploader.queue.length - 1].upload();
 			
-			this.uploader.response.subscribe((res) =>
-			                                 {
-				                                 res = JSON.parse(res);
-				
-				                                 const locale = this.currentLocale;
-				                                 const width = res.width;
-				                                 const height = res.height;
-				                                 const orientation =
-						                                 width !== height ? (width > height ? 2 : 1) : 0;
-				                                 const url = res.url;
-				
-				                                 const newImage = {
-					                                 locale,
-					                                 url,
-					                                 width,
-					                                 height,
-					                                 orientation,
-				                                 };
-				
-				                                 if(this.product.images.length > 0)
-				                                 {
-					                                 this.product.images.forEach((img, index) =>
-					                                                             {
-						                                                             if(img.locale === locale)
-						                                                             {
-							                                                             this.product.images[index] = newImage;
-						                                                             }
-					                                                             });
-				                                 }
-				                                 else
-				                                 {
-					                                 this.product.images.push(newImage);
-				                                 }
-				
-				                                 this.uploadProduct();
-			                                 });
+			this.uploader
+			    .response
+			    .subscribe(
+					    (res) =>
+					    {
+						    res = JSON.parse(res);
+						
+						    const locale = this.currentLocale;
+						    const width = res.width;
+						    const height = res.height;
+						    const orientation = width !== height
+						                        ? (width > height ? 2 : 1)
+						                        : 0;
+						    const url = res.url;
+						
+						    const newImage = {
+							    locale,
+							    url,
+							    width,
+							    height,
+							    orientation,
+						    };
+						
+						    if(this.product.images.length > 0)
+						    {
+							    this.product.images.forEach((img, index) =>
+							                                {
+								                                if(img.locale === locale)
+								                                {
+									                                this.product.images[index] = newImage;
+								                                }
+							                                });
+						    }
+						    else
+						    {
+							    this.product.images.push(newImage);
+						    }
+						
+						    this.uploadProduct();
+					    }
+			    );
 		}
 		else
 		{
@@ -422,7 +393,7 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		}
 	}
 	
-	uploadProduct()
+	public uploadProduct()
 	{
 		if(this.imagesData && this.imagesData.length > 0)
 		{
@@ -446,6 +417,10 @@ export class EditProductTypePopupPage extends ProductTypePopup
 				this.product.description,
 				'description'
 		);
+		this.localeTranslateService.assignPropertyValue(
+				this.product.details,
+				'details'
+		);
 		
 		this.product.categories = this.productsCategories
 		                              .filter(
@@ -458,34 +433,32 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		                              .map((category) =>
 		                                   {
 			                                   return {
-				                                   _id: category.id,
+				                                   _id:        category.id,
 				                                   _createdAt: null,
 				                                   _updatedAt: null,
-				                                   name: category.name,
+				                                   name:       category.name,
 			                                   };
 		                                   });
 		
-		this.productRouter.save(this.product).then((product: Product) =>
-		                                           {
-			                                           this.product = product;
-			                                           this.warehouseProduct.product = product.id;
-			                                           this.warehouseProduct.isDeliveryRequired = this.takaProductDelivery;
-			                                           this.warehouseProduct.isTakeaway = this.takaProductTakeaway;
-			                                           this.warehouseProduct.isProductAvailable = this.isAvailable;
+		this.productRouter
+		    .save(this.product)
+		    .then((product: Product) =>
+		          {
+			          this.product = product;
+			          this.warehouseProduct.product = product.id;
+			          this.warehouseProduct.isDeliveryRequired = this.takaProductDelivery;
+			          this.warehouseProduct.isTakeaway = this.takaProductTakeaway;
+			          this.warehouseProduct.isProductAvailable = this.isAvailable;
 			
-			                                           this.warehouseProductsRouter
-			                                               .saveUpdated(this.warehouseId, this.warehouseProduct)
-			                                               .then((warehouse) =>
-			                                                     {
-				                                                     this.modalController.dismiss();
-			                                                     });
-		                                           });
+			          this.warehouseProductsRouter
+			              .update(this.warehouseId, this.warehouseProduct)
+			              .then(() => this.modalController.dismiss());
+		          });
 	}
 	
 	private _setImageHolderBackground(imageUrl: string)
 	{
-		const gradient = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${imageUrl})`;
-		this._imageHolder.nativeElement.style.background = gradient;
+		this._imageHolder.nativeElement.style.background = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${imageUrl})`;
 		this._imageHolder.nativeElement.style.backgroundSize = `cover`;
 		this._imageHolder.nativeElement.style.backgroundRepeat = 'no-repeat';
 		this._imageHolder.nativeElement.style.color = `white`;
@@ -507,6 +480,54 @@ export class EditProductTypePopupPage extends ProductTypePopup
 	{
 		this.selectedProductCategories =
 				this.product.categories.map((category) => `${category}`) || [];
+	}
+	
+	private _setupFileUploader()
+	{
+		const uploaderOptions: FileUploaderOptions = {
+			url: environment.CLOUDINARY_UPLOAD_URL,
+			
+			// Use xhrTransport in favor of iframeTransport
+			isHTML5: true,
+			// Calculate progress independently for each uploaded file
+			removeAfterUpload: true,
+			// XHR request headers
+			headers: [
+				{
+					name:  'X-Requested-With',
+					value: 'XMLHttpRequest',
+				},
+			],
+		};
+		
+		this.uploader = new FileUploader(uploaderOptions);
+		
+		this.uploader.onBuildItemForm = (
+				fileItem: any,
+				form: FormData
+		): any =>
+		{
+			// Add Cloudinary's unsigned upload preset to the upload form
+			form.append('upload_preset', environment.CLOUDINARY_UNSIGNED_UPLOAD_PRESET);
+			// Add built-in and custom tags for displaying the uploaded photo in the list
+			let tags: string = "product";
+			if(this.product.title)
+			{
+				form.append('context', `photo=${this.product.title}`);
+				tags += `,${this.product.title}`
+			}
+			
+			// Upload to a custom folder
+			form.append('folder', this.warehouseId);
+			// Add custom tags
+			form.append('tags', tags);
+			// Add file to upload
+			form.append('file', fileItem);
+			
+			// Use default "withCredentials" value for CORS requests
+			fileItem.withCredentials = false;
+			return { fileItem, form };
+		};
 	}
 	
 	private _setupLocaleServiceValidationState()
@@ -531,13 +552,12 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		return new Date().getTime() + '.jpg';
 	}
 	
-	async clickHandler()
+	clickHandler()
 	{
-		this.isAvailable = !this.isAvailable;
-		await this.warehouseProductsRouter.changeProductAvailability(
+		this.warehouseProductsRouter.changeProductAvailability(
 				this.warehouseId,
 				this.warehouseProduct.productId,
 				this.isAvailable
-		);
+		).then(res => console.debug(res.isProductAvailable));
 	}
 }
