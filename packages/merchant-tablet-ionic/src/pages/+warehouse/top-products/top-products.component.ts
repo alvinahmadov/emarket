@@ -4,6 +4,10 @@ import { ILocaleMember }                       from '@modules/server.common/inte
 import Product                                 from '@modules/server.common/entities/Product';
 import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
 import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { ModalController }                     from "@ionic/angular";
+import { CreateProductTypePopupPage }          from "pages/+warehouse/create-product-type-popup/create-product-type-popup";
+import { EditProductTypePopupPage }            from "pages/+warehouse/edit-product-type-popup/edit-product-type-popup";
+import { ModalOptions }                        from "@ionic/core";
 
 @Component({
 	           selector:    'merchant-top-products',
@@ -16,16 +20,10 @@ export class TopProductsComponent implements OnInit, OnDestroy
 	public warehouseId: string;
 	
 	@Input()
-	public presentCreateProductPopover: () => Promise<void>;
-	
-	@Input()
 	public addProduct: (productId: string) => Promise<WarehouseProduct>;
 	
 	@Input()
 	public getWarehouseProductImageUrl: (product: Product) => string;
-	
-	@Input()
-	public openEditProductModal: (product: any) => Promise<void>;
 	
 	@Input()
 	public truncateTitle: (title: string) => string;
@@ -38,7 +36,10 @@ export class TopProductsComponent implements OnInit, OnDestroy
 	
 	public showNoProductsIcon: boolean = false;
 	
-	constructor(private warehouseProductsRouter: WarehouseProductsRouter)
+	constructor(
+			private warehouseProductsRouter: WarehouseProductsRouter,
+			public modalController: ModalController
+	)
 	{}
 	
 	public ngOnInit()
@@ -63,5 +64,37 @@ export class TopProductsComponent implements OnInit, OnDestroy
 		{
 			this.topProducts$.unsubscribe();
 		}
+	}
+	
+	public async presentCreateProductPopover(): Promise<void>
+	{
+		try
+		{
+			const modalOptions: ModalOptions = {
+				component:       CreateProductTypePopupPage,
+				backdropDismiss: true,
+				cssClass:        'mutation-product-modal',
+			};
+			
+			const modal = await this.modalController.create(modalOptions);
+			
+			await modal.present();
+		} catch(e)
+		{
+			console.error(e.stack);
+			console.error(e.message);
+		}
+	}
+	
+	public openEditProductModal(product: WarehouseProduct): void
+	{
+		const modalOptions: ModalOptions = {
+			component:       EditProductTypePopupPage,
+			backdropDismiss: true,
+			componentProps:  { warehouseProduct: product },
+			cssClass:        'mutation-product-modal',
+		};
+		
+		this.modalController.create(modalOptions).then(modal => modal.present);
 	}
 }
