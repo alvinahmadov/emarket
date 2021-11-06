@@ -1,14 +1,14 @@
 import { NgModule }                         from '@angular/core';
-import { FileTransfer }                     from '@ionic-native/file-transfer/ngx';
-import { FileUploadModule }                 from 'ng2-file-upload';
-import { EditProductTypePopupPage }         from './edit-product-type-popup';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { HttpClient }                       from '@angular/common/http';
-import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
-import { ProductsCategoryService }          from '../../../services/products-category.service';
-import { IonicModule }                      from '@ionic/angular';
-import { FormsModule }                      from '@angular/forms';
 import { CommonModule }                     from '@angular/common';
+import { HttpClient }                       from '@angular/common/http';
+import { FormsModule }                      from '@angular/forms';
+import { IonicModule }                      from '@ionic/angular';
+import { FileTransfer }                     from '@ionic-native/file-transfer/ngx';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader }              from '@ngx-translate/http-loader';
+import { FileUploadModule }                 from 'ng2-file-upload';
+import { ProductsCategoryService }          from 'services/products-category.service';
+import { EditProductTypePopupPage }         from './edit-product-type-popup';
 import { ProductImagesPopupModule }         from '../product-pictures-popup/product-images-popup.module';
 
 export function HttpLoaderFactory(http: HttpClient)
@@ -17,16 +17,16 @@ export function HttpLoaderFactory(http: HttpClient)
 }
 
 @NgModule({
-	          declarations: [EditProductTypePopupPage],
+	          declarations:    [EditProductTypePopupPage],
 	          entryComponents: [EditProductTypePopupPage],
-	          providers: [FileTransfer, ProductsCategoryService],
-	          imports: [
+	          providers:       [FileTransfer, ProductsCategoryService],
+	          imports:         [
 		          FileUploadModule,
 		          TranslateModule.forChild({
 			                                   loader: {
-				                                   provide: TranslateLoader,
+				                                   provide:    TranslateLoader,
 				                                   useFactory: HttpLoaderFactory,
-				                                   deps: [HttpClient],
+				                                   deps:       [HttpClient],
 			                                   },
 		                                   }),
 		          CommonModule,
