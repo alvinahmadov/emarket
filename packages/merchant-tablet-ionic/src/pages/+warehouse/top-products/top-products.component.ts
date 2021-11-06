@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { ModalOptions }                        from '@ionic/core';
+import { ModalController }                     from '@ionic/angular';
 import { Subscription }                        from 'rxjs';
 import { ILocaleMember }                       from '@modules/server.common/interfaces/ILocale';
 import Product                                 from '@modules/server.common/entities/Product';
 import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
 import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { ModalController }                     from "@ionic/angular";
-import { CreateProductTypePopupPage }          from "pages/+warehouse/create-product-type-popup/create-product-type-popup";
-import { EditProductTypePopupPage }            from "pages/+warehouse/edit-product-type-popup/edit-product-type-popup";
-import { ModalOptions }                        from "@ionic/core";
+import { CreateProductTypePopupPage }          from '../create-product-type-popup/create-product-type-popup';
+import { EditProductTypePopupPage }            from '../edit-product-type-popup/edit-product-type-popup';
 
 @Component({
 	           selector:    'merchant-top-products',
