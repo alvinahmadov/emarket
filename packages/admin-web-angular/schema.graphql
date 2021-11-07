@@ -600,6 +600,7 @@ type Warehouse {
 	carrierCompetition: Boolean!
 	carriers: [Carrier!]
 	carriersIds: [String!]
+	commentsEnabled: Boolean
 	contactEmail: String
 	contactPhone: String
 	customers: [Customer!]!
