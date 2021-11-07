@@ -9,11 +9,11 @@ type Warehouse {
     # Is Payment enabled
     isPaymentEnabled: Boolean
 
+    # Commenting products enabled
+    commentsEnabled: Boolean
+
     # Warehouse current location
     geoLocation: GeoLocation!
-
-    # Products available at this warehouse for customer to purchase
-    # TODO products: [WarehouseProduct!]!
 
     name: String!
 
