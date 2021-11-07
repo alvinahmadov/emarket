@@ -14,8 +14,8 @@ type WarehouseProductPromotion
 type WarehouseProduct {
 	id: String!
 	_id: String!
-	price: Int!
-	initialPrice: Int!
+	price: Float!
+	initialPrice: Float!
 	count: Int
 	soldCount: Int!
 	viewsCount: Int
@@ -33,8 +33,8 @@ type WarehouseProduct {
 }
 
 input WarehouseProductInput {
-	price: Int!
-	initialPrice: Int!
+	price: Float!
+	initialPrice: Float!
 	count: Int
 	product: String!
 	isManufacturing: Boolean
@@ -124,7 +124,7 @@ type Mutation {
 	changeWarehouseProductPrice(
 		storeId: String!
 		storeProductId: String!
-		price: Int!
+		price: Float!
 	): WarehouseProduct!
 
 	increaseWarehouseProductCount(
