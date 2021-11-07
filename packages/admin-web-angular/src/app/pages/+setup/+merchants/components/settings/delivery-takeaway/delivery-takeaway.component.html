@@ -39,6 +39,16 @@
             </div>
             <div class="row">
                 <div class="form-group offset-md-2 col-md-4">
+                    <nb-checkbox [(ngModel)]="commentsEnabled">
+                        {{
+                        'FAKE_DATA.SETUP_MERCHANTS.DELIVERY_AND_TAKEAWAY_SETTINGS.COMMENTS_ENABLE'
+                            | translate
+                        }}
+                    </nb-checkbox>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group offset-md-2 col-md-4">
                     <nb-checkbox
                             (change)="productsDeliveryChange()"
                             [(ngModel)]="productsDelivery"
