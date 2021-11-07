@@ -122,18 +122,18 @@ export class WarehousesService extends ApolloService
 	}
 	
 	public addProducts(
-			warehouseId: string,
-			products: IWarehouseProductCreateObject[]
+			storeId: string,
+			storeProducts: IWarehouseProductCreateObject[]
 	): Observable<WarehouseProduct[]>
 	{
 		return this.apollo
 		           .mutate<{
 			           products: IWarehouseProductCreateObject[];
 		           }>({
-			              mutation:  GQLMutation.Store.AddProducts,
+			              mutation:  GQLMutation.Store.Product.Add,
 			              variables: {
-				              warehouseId,
-				              products,
+				              storeId,
+				              storeProducts,
 			              },
 		              })
 		           .pipe(
@@ -144,14 +144,14 @@ export class WarehousesService extends ApolloService
 	}
 	
 	public removeProductsById(
-			warehouseId: string,
-			productsIds: string[]
+			storeId: string,
+			storeProductIds: string[]
 	): Observable<FetchResult<boolean>>
 	{
 		return this.apollo
 		           .mutate({
-			                   mutation:  GQLMutation.Store.RemoveProducts,
-			                   variables: { warehouseId, productsIds },
+			                   mutation:  GQLMutation.Store.Product.Remove,
+			                   variables: { storeId, storeProductIds },
 		                   });
 	}
 	
