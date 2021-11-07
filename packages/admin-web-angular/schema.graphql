@@ -268,7 +268,7 @@ type Mutation {
 	carrierLogin(password: String!, username: String!): CarrierLoginInfo
 	changeWarehouseProductAvailability(isAvailable: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	changeWarehouseProductDelivery(isDelivery: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
-	changeWarehouseProductPrice(price: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
+	changeWarehouseProductPrice(price: Float!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	changeWarehouseProductRating(count: Int!, customerId: String!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	changeWarehouseProductTakeaway(isTakeaway: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	createCurrency(createInput: CurrencyCreateInput!): MutationResponse
@@ -628,6 +628,10 @@ type Warehouse {
 	username: String!
 }
 
+type WarehouseAuthInfo {
+	warehouse: Warehouse!
+}
+
 type WarehouseLoginInfo {
 	token: String!
 	warehouse: Warehouse!
@@ -640,13 +644,13 @@ type WarehouseProduct {
 	deliveryTimeMax: Int
 	deliveryTimeMin: Int
 	id: String!
-	initialPrice: Int!
+	initialPrice: Float!
 	isCarrierRequired: Boolean
 	isDeliveryRequired: Boolean
 	isManufacturing: Boolean
 	isProductAvailable: Boolean
 	isTakeaway: Boolean
-	price: Int!
+	price: Float!
 	product: Product!
 	promotion: WarehouseProductPromotion
 	rating: [WarehouseProductRating]
@@ -655,10 +659,10 @@ type WarehouseProduct {
 }
 
 type WarehouseProductPromotion {
-	end: Date
-	isPromoted: Boolean
-	price: Float
-	start: Date
+	active: Boolean!
+	activeFrom: Date
+	activeTo: Date
+	requested: Boolean!
 }
 
 type WarehouseProductRating {
@@ -855,6 +859,7 @@ input CustomerFindInput {
 	id: String
 	lastName: String
 	phone: String
+	role: String
 	username: String
 }
 
@@ -1222,13 +1227,13 @@ input WarehouseProductInput {
 	count: Int
 	deliveryTimeMax: Int
 	deliveryTimeMin: Int
-	initialPrice: Int!
+	initialPrice: Float!
 	isCarrierRequired: Boolean
 	isDeliveryRequired: Boolean
 	isManufacturing: Boolean
 	isProductAvailable: Boolean
 	isTakeaway: Boolean
-	price: Int!
+	price: Float!
 	product: String!
 }
 
