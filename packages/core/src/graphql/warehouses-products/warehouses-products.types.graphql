@@ -88,7 +88,7 @@ type Mutation {
 	removeWarehouseProducts(
 		storeId: String!
 		storeProductIds: [String!]!
-	): Boolean
+	): [WarehouseProduct!]
 
 	updateWarehouseProduct(
 		storeId: String!
