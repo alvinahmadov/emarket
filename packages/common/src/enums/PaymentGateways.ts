@@ -33,13 +33,13 @@ export function paymentGatewaysLogo(paymentGateway: PaymentGateways): string
 	switch(paymentGateway)
 	{
 		case PaymentGateways.Stripe:
-			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956521/emarket/payment/stripe-logo_qbvwio.png';
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1636256142/payment-logos/stripe-logo.ico';
 		case PaymentGateways.PayPal:
-			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956520/emarket/payment/paypal-logo_klfdzh.png';
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1636256142/payment-logos/paypal-logo.ico';
 		case PaymentGateways.YooMoney:
-			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956521/emarket/payment/ukassa-logo_qnai6d.jpg';
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1636256142/payment-logos/yoomoney-logo.ico';
 		case PaymentGateways.Bitpay:
-			return 'https://res.cloudinary.com/alvindre/image/upload/v1627956521/emarket/payment/bitpay-logo_n7sew5.png';
+			return 'https://res.cloudinary.com/alvindre/image/upload/v1636256142/payment-logos/bitpay-logo.png';
 		default:
 			return 'BAD_PAYMENT_GATEWAY';
 	}
