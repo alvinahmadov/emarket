@@ -145,6 +145,7 @@ export interface IWarehouseCreateObject extends DBCreateObject
 	
 	productsDelivery?: boolean;
 	productsTakeaway?: boolean;
+	commentsEnabled?: boolean;
 	orderBarcodeType?: OrderBarcodeTypes;
 	barcodeData?: string;
 	useOnlyRestrictedCarriersForDelivery?: boolean;
