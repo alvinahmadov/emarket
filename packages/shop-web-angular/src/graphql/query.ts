@@ -90,11 +90,6 @@ export namespace GQLQuery
 		`;
 	}
 	
-	export namespace Comment
-	{
-	
-	}
-	
 	export namespace Customer
 	{
 		export const GetById = gql`
@@ -168,8 +163,12 @@ export namespace GQLQuery
 			{
 				customers {
 					_id
+					id
 					firstName
 					lastName
+					avatar
+					fullName
+					fullAddress
 					email
 					role
 					apartment
@@ -280,6 +279,28 @@ export namespace GQLQuery
 							initialPrice
 							count
 							soldCount
+							rating {
+								rate
+								ratedBy
+							}
+							promotion{
+								active
+								activeFrom
+								activeTo
+								requested
+							}
+							viewsCount
+							comments {
+								id
+								userId
+								productId
+								message
+								likes
+								dislikes
+								likesBy
+								dislikesBy
+								_id
+							}
 
 							product
 							{
@@ -839,7 +860,18 @@ export namespace GQLQuery
 						count
 						soldCount
 						viewsCount
-						likesCount
+						rating
+						{
+							rate
+							ratedBy
+						}
+						promotion
+						{
+							active
+							requested
+							activeFrom
+							activeTo
+						}
 						comments
 						{
 							id
@@ -908,6 +940,7 @@ export namespace GQLQuery
 						initialPrice
 						count
 						soldCount
+						viewsCount
 						product
 						{
 							description
@@ -948,12 +981,24 @@ export namespace GQLQuery
 							message
 							likes
 							dislikes
+							likesBy
+							dislikesBy
 							replyTo
 							_createdAt
 							_updatedAt
 						}
-						viewsCount
-						likesCount
+						rating
+						{
+							rate
+							ratedBy
+						}
+						promotion
+						{
+							active
+							requested
+							activeFrom
+							activeTo
+						}
 						deliveryTimeMin
 						deliveryTimeMax
 						isCarrierRequired
@@ -964,10 +1009,163 @@ export namespace GQLQuery
 				}
 			`;
 			
-			export const GetCount = gql`
+			export const Count = gql`
 				query GetProductsCount($storeId: String!)
 				{
-					getWarehouseProductsCount(id: $storeId)
+					getWarehouseProductsCount(storeId: $storeId)
+				}
+			`;
+			
+			export const GetAvailable = gql`
+				query GetAvailableWarehouseProducts(
+					$storeId: String!
+				){
+					getWarehouseProductsAvailable(storeId: $storeId)
+					{
+						id
+						price
+						initialPrice
+						count
+						soldCount
+						viewsCount
+						rating
+						{
+							rate
+							ratedBy
+						}
+						promotion
+						{
+							active
+							requested
+							activeFrom
+							activeTo
+						}
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+						product
+						{
+							id
+							title
+							{
+								locale
+								value
+							}
+							description
+							{
+								locale
+								value
+							}
+							details
+							{
+								locale
+								value
+							}
+							images
+							{
+								locale
+								url
+								width
+								height
+								orientation
+							}
+						}
+						isManufacturing
+						isCarrierRequired
+						isDeliveryRequired
+						isProductAvailable
+						isTakeaway
+						deliveryTimeMin
+						deliveryTimeMax
+					}
+				}
+			`;
+			
+			export const GetTop = gql`
+				query GetWarehouseProductsTop(
+					$storeId: String!
+					$quantity: Int!
+				)
+				{
+					getWarehouseProductsTop(storeId: $storeId, quantity: $quantity)
+					{
+						id
+						_id
+						price
+						initialPrice
+						count
+						soldCount
+						product
+						{
+							description
+							{
+								value
+								locale
+							}
+							_id
+							id
+							title
+							{
+								value
+								locale
+							}
+							details
+							{
+								value
+								locale
+							}
+							images
+							{
+								locale
+								url
+								orientation
+								width
+								height
+							}
+							categories
+							_createdAt
+							_updatedAt
+						}
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+						rating
+						{
+							rate
+							ratedBy
+						}
+						viewsCount
+						deliveryTimeMin
+						deliveryTimeMax
+						isCarrierRequired
+						isDeliveryRequired
+						isManufacturing
+						isTakeaway
+					}
 				}
 			`;
 			
@@ -993,6 +1191,8 @@ export namespace GQLQuery
 							message
 							likes
 							dislikes
+							likesBy
+							dislikesBy
 							replyTo
 							_createdAt
 							_updatedAt
@@ -1019,6 +1219,8 @@ export namespace GQLQuery
 							message
 							likes
 							dislikes
+							likesBy
+							dislikesBy
 							replyTo
 							_createdAt
 							_updatedAt
