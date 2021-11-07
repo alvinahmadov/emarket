@@ -110,6 +110,9 @@ export class RatingComponent implements OnInit
 	
 	public tooltip(ratingId: number): string
 	{
+		if(!this.customerId)
+			return this._translate("REGISTRATION_NEEDED");
+		
 		switch(ratingId)
 		{
 			case 1:
