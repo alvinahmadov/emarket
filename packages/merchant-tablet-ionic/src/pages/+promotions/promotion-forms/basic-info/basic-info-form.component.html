@@ -16,7 +16,7 @@
 			                    *ngFor="let lang of languages"
 			                    [value]="getLanguageCode(lang)"
 	                    >
-		                    {{ lang | translate }}
+		                    {{ getLanguage(lang) }}
 	                    </ion-select-option>
                     </ion-select>
                 </ion-item>
