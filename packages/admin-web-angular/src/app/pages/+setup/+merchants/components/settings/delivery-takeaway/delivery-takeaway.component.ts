@@ -1,66 +1,71 @@
 import {
 	Component,
 	ViewChild,
-	OnDestroy,
-	AfterViewInit,
 	Input,
 	Output,
 	EventEmitter,
+	OnDestroy,
 }                                               from '@angular/core';
-import { SetupMerchantSharedCarriersComponent } from './shared-carriers/shared-carriers.component';
+import { Subject }                              from 'rxjs';
+import { CommonUtils }                          from '@modules/server.common/utilities';
+import { CarrierRouter }                        from '@modules/client.common.angular2/routers/carrier-router.service';
 import {
 	CarriersSmartTableComponent,
 	CarrierSmartTableObject,
 }                                               from '@app/@shared/carrier/carriers-table/carriers-table.component';
-import { Subject }                              from 'rxjs';
+import { SetupMerchantSharedCarriersComponent } from './shared-carriers/shared-carriers.component';
 import { SetupMerchantAddNewCarrierComponent }  from './add-new-carrier/add-new-carrier.component';
-import { CommonUtils }                          from '@modules/server.common/utilities';
-import { CarrierRouter }                        from '@modules/client.common.angular2/routers/carrier-router.service';
 
 @Component({
-	           selector: 'ea-merchants-setup-delivery-takeaway',
+	           selector:    'ea-merchants-setup-delivery-takeaway',
 	           templateUrl: './delivery-takeaway.component.html',
-	           styleUrls: ['./delivery-takeaway.component.scss'],
+	           styleUrls:   ['./delivery-takeaway.component.scss'],
            })
-export class SetupMerchantDeliveryAndTakeawayComponent
-		implements AfterViewInit, OnDestroy
+export class SetupMerchantDeliveryAndTakeawayComponent implements OnDestroy
 {
 	@ViewChild('newCarrier')
-	newCarrier: SetupMerchantAddNewCarrierComponent;
+	public newCarrier: SetupMerchantAddNewCarrierComponent;
 	@ViewChild('sharedCarriers')
-	sharedCarriers: SetupMerchantSharedCarriersComponent;
+	public sharedCarriers: SetupMerchantSharedCarriersComponent;
 	@ViewChild('carriersTable')
-	carriersTable: CarriersSmartTableComponent;
+	public carriersTable: CarriersSmartTableComponent;
 	
 	@Output()
-	previousStep: EventEmitter<boolean> = new EventEmitter<boolean>();
+	public previousStep: EventEmitter<boolean> = new EventEmitter<boolean>();
 	@Output()
-	nextStep: EventEmitter<boolean> = new EventEmitter<boolean>();
+	public nextStep: EventEmitter<boolean> = new EventEmitter<boolean>();
 	
 	@Input()
-	locationForm: any;
+	public locationForm: any;
 	
-	componentViews = {
-		main: 'main',
+	public componentViews = {
+		main:          'main',
 		carriersTable: 'carriersTable',
 		addNewCarrier: 'addNewCarrier',
-		editCarrier: 'editCarrier',
+		editCarrier:   'editCarrier',
 	};
-	currentView = this.componentViews.main;
-	carriersPerPage = 3;
-	carrierId: string;
+	public currentView = this.componentViews.main;
+	public carriersPerPage = 3;
+	public carrierId: string;
 	
-	isCarrierRequired: boolean;
-	productsDelivery: boolean;
-	productsTakeaway: boolean;
+	public isCarrierRequired: boolean;
+	public productsDelivery: boolean;
+	public productsTakeaway: boolean;
+	public commentsEnabled: boolean = true;
 	
-	restrictedCarriers: CarrierSmartTableObject[] = [];
+	public restrictedCarriers: CarrierSmartTableObject[] = [];
 	
 	private ngDestroy$ = new Subject<void>();
 	
 	constructor(private carrierRouter: CarrierRouter) {}
 	
-	get haveCarriersForAdd()
+	public ngOnDestroy()
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public get haveCarriersForAdd()
 	{
 		let hasSelectedCarriers = false;
 		
@@ -80,7 +85,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		return hasSelectedCarriers;
 	}
 	
-	get isBasicInfoValid()
+	public get isBasicInfoValid()
 	{
 		let res = false;
 		
@@ -92,7 +97,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		return res;
 	}
 	
-	get restrictedCarriersIds()
+	public get restrictedCarriersIds()
 	{
 		let ids = [];
 		if(this.restrictedCarriers)
@@ -103,9 +108,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		return ids;
 	}
 	
-	ngAfterViewInit(): void {}
-	
-	async add()
+	public async add()
 	{
 		if(this.currentView === this.componentViews.carriersTable)
 		{
@@ -134,7 +137,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 			}
 			
 			let carrier = await this.carrierRouter.register({
-				                                                carrier: carrierCreateObj,
+				                                                carrier:  carrierCreateObj,
 				                                                password: this.newCarrier.basicInfoForm.getPassword(),
 			                                                });
 			
@@ -145,7 +148,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		this.currentView = this.componentViews.main;
 	}
 	
-	async save()
+	public async save()
 	{
 		const basicInfo = this.newCarrier.basicInfoForm.getValue();
 		
@@ -164,12 +167,12 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		this.currentView = this.componentViews.main;
 	}
 	
-	back()
+	public back()
 	{
 		this.currentView = this.componentViews.main;
 	}
 	
-	productsDeliveryChange()
+	public productsDeliveryChange()
 	{
 		if(!this.productsDelivery)
 		{
@@ -177,7 +180,7 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		}
 	}
 	
-	removeCarrier(e)
+	public removeCarrier(e)
 	{
 		if(this.restrictedCarriers)
 		{
@@ -189,15 +192,9 @@ export class SetupMerchantDeliveryAndTakeawayComponent
 		this.carriersTable.loadData(this.restrictedCarriers).then();
 	}
 	
-	editCarrier(e)
+	public editCarrier(e)
 	{
 		this.carrierId = e.data.id;
 		this.currentView = this.componentViews.editCarrier;
-	}
-	
-	ngOnDestroy()
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 }
