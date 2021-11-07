@@ -28,7 +28,7 @@ export interface IWarehouseProductsInput extends IStoreInput
 
 export interface IWarehouseProductIdsInput extends IStoreInput
 {
-	storeProductsIds: string[];
+	storeProductIds: string[];
 }
 
 export interface IWarehouseProductAvailableInput extends IWarehouseProductInput
@@ -181,11 +181,11 @@ export class WarehouseProductsResolver
 			_,
 			{
 				storeId,
-				storeProductsIds
+				storeProductIds
 			}: IWarehouseProductIdsInput
 	): Promise<WarehouseProduct[]>
 	{
-		return this._warehousesProductsService.remove(storeId, storeProductsIds);
+		return this._warehousesProductsService.remove(storeId, storeProductIds);
 	}
 	
 	@Mutation()
