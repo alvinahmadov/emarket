@@ -79,6 +79,11 @@ export class RatingComponent implements OnInit
 					}
 					this.readonly = false;
 				}
+				else
+				{
+					this.rate = 0;
+					this.readonly = true;
+				}
 			}
 		}
 	}
