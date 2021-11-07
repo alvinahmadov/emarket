@@ -1,32 +1,34 @@
-import Logger                     from 'bunyan';
-import { injectable }             from 'inversify';
-import _                          from 'lodash';
-import { Types }                  from 'mongoose'
-import { Observable, of }         from 'rxjs';
-import { exhaustMap, first, map } from 'rxjs/operators';
-import { _throw }                 from 'rxjs/observable/throw';
-import {
-	asyncListener, observableListener,
-	routerName, serialization
-}                                 from '@pyro/io';
-import { ExistenceEventType }     from '@pyro/db-server';
-import IWarehouseProduct,
-{ IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
-import IProduct                   from '@modules/server.common/interfaces/IProduct';
-import IPagingOptions             from '@modules/server.common/interfaces/IPagingOptions';
-import IWarehouse                 from '@modules/server.common/interfaces/IWarehouse';
-import IWarehouseProductsRouter   from '@modules/server.common/routers/IWarehouseProductsRouter';
-import DeliveryType               from '@modules/server.common/enums/DeliveryType';
-import WarehouseProduct           from '@modules/server.common/entities/WarehouseProduct';
-import Warehouse                  from '@modules/server.common/entities/Warehouse';
-import { WarehousesService }      from './WarehousesService';
-import IService                   from '../IService';
-import { createLogger }           from '../../helpers/Log';
+import Logger                                                           from 'bunyan';
+import { injectable }                                                   from 'inversify';
+import _                                                                from 'lodash';
+import { Types }                                                        from 'mongoose'
+import { Observable, of }                                               from 'rxjs';
+import { exhaustMap, first, map }                                       from 'rxjs/operators';
+import { _throw }                                                       from 'rxjs/observable/throw';
+import { asyncListener, observableListener, routerName, serialization } from '@pyro/io';
+import { ExistenceEventType }                                           from '@pyro/db-server';
+import IWarehouseProduct, { IWarehouseProductCreateObject }             from '@modules/server.common/interfaces/IWarehouseProduct';
+import IProduct                                                         from '@modules/server.common/interfaces/IProduct';
+import IPagingOptions                                                   from '@modules/server.common/interfaces/IPagingOptions';
+import IWarehouse                                                       from '@modules/server.common/interfaces/IWarehouse';
+import IWarehouseProductsRouter                                         from '@modules/server.common/routers/IWarehouseProductsRouter';
+import DeliveryType                                                     from '@modules/server.common/enums/DeliveryType';
+import WarehouseProduct                                                 from '@modules/server.common/entities/WarehouseProduct';
+import Warehouse                                                        from '@modules/server.common/entities/Warehouse';
+import { WarehousesService }                                            from './WarehousesService';
+import IService                                                         from '../IService';
+import { createLogger }                                                 from '../../helpers/Log';
 // import AsyncLock                  from 'async-lock'
 
 const noGetProductTypeMessage = `There should be true at least one of the two - "isCarrierRequired" or "isTakeaway"!`;
 
-type CountOpType = "sold" | "likes" | "views" | "qty";
+type CountOpType = "sold" | "rating" | "views" | "qty";
+
+interface Config
+{
+	type: CountOpType;
+	customerId?: string;
+}
 
 // const lock = new AsyncLock();
 
@@ -384,7 +386,7 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, count);
+		return this._changeCount(warehouseId, productId, count, { type: "qty" });
 	}
 	
 	/**
@@ -404,7 +406,7 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, count, "sold");
+		return this._changeCount(warehouseId, productId, count, { type: "sold" });
 	}
 	
 	/**
@@ -425,28 +427,7 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, count, "views");
-	}
-	
-	/**
-	 * Increase likes counter of given product by given count
-	 * It increased when customer presses like on product details
-	 * If no such product exists in warehouse yet, do nothing
-	 *
-	 * @param {string} warehouseId
-	 * @param {string} productId
-	 * @param {number} count
-	 * @returns {Promise<WarehouseProduct>}
-	 * @memberof WarehousesProductsService
-	 */
-	@asyncListener()
-	public async increaseLikesCount(
-			warehouseId: string,
-			productId: string,
-			count: number
-	): Promise<WarehouseProduct>
-	{
-		return this._changeCount(warehouseId, productId, count, "likes");
+		return this._changeCount(warehouseId, productId, count, { type: "views" });
 	}
 	
 	/**
@@ -466,7 +447,7 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, -count);
+		return this._changeCount(warehouseId, productId, -count, { type: "qty" });
 	}
 	
 	/**
@@ -485,7 +466,7 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, -count, "sold");
+		return this._changeCount(warehouseId, productId, -count, { type: "sold" });
 	}
 	
 	/**
@@ -504,29 +485,35 @@ export class WarehousesProductsService
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, -count, "views");
+		return this._changeCount(warehouseId, productId, -count, { type: "views" });
 	}
 	
 	/**
-	 * Decrease products likes count from warehouse (called when merchant is banned)
+	 * Updates rate counter of given product by given count
+	 * It increased when customer presses like on product details
+	 * If no such product exists in warehouse yet, do nothing
 	 *
 	 * @param {string} warehouseId
 	 * @param {string} productId
+	 * @param {string} customerId
 	 * @param {number} count
-	 *
-	 * @throws {Error} When warehouse with warehouseId or product with productId not found.
-	 *
 	 * @returns {Promise<WarehouseProduct>}
 	 * @memberof WarehousesProductsService
 	 */
 	@asyncListener()
-	public async decreaseLikesCount(
+	public async changeRate(
 			warehouseId: string,
 			productId: string,
+			customerId: string,
 			count: number
 	): Promise<WarehouseProduct>
 	{
-		return this._changeCount(warehouseId, productId, -count, "likes");
+		const config: Config = {
+			type:       "rating",
+			customerId: customerId
+		}
+		
+		return this._changeCount(warehouseId, productId, count, config);
 	}
 	
 	/**
@@ -807,8 +794,8 @@ export class WarehousesProductsService
 	 * @param {string} warehouseId Id of warehouse to update products
 	 * @param {string} productId Id of product to change count
 	 * @param {number} count Count to change, for increase must be positive value
-	 * @param {CountOpType} opType Type of change to apply on product in warehouse.
-	 * Available: qty, sold, likes, views. Default: qty
+	 * @param {Config} config - type: Type of change to apply on product in warehouse.
+	 * Available: qty, sold, rating, views. Default: qty
 	 *
 	 * @returns {Promise<WarehouseProduct>} Updated warehouse promise
 	 * */
@@ -816,7 +803,7 @@ export class WarehousesProductsService
 			warehouseId: string,
 			productId: string,
 			count: number,
-			opType: CountOpType = "qty"
+			config: Config
 	): Promise<WarehouseProduct>
 	{
 		// TODO: Some global distributed lock should be apply here so we can't change product (sold) count on 2 separate servers at the same time!
@@ -842,7 +829,7 @@ export class WarehousesProductsService
 			
 			let op = count > 0 ? 'increase' : 'decrease';
 			this.log.info(
-					`Product ${opType !== "qty" ? opType : ''} count before ${op}: ${
+					`Product ${config.type !== "qty" ? config.type : ''} count before ${op}: ${
 							currentCount
 					} and we want to ${op} ${Math.abs(changeCount)}`
 			);
@@ -851,7 +838,7 @@ export class WarehousesProductsService
 		if(!count)
 			return warehouseProduct;
 		
-		switch(opType)
+		switch(config.type)
 		{
 			case "qty":
 			{
@@ -874,11 +861,32 @@ export class WarehousesProductsService
 				warehouseProduct.viewsCount += count;
 			}
 				break;
-			case "likes":
+			case "rating":
 			{
 				if(count < 0)
-					countCheck(warehouseProduct.likesCount, count);
-				warehouseProduct.likesCount += count;
+					count = 0;
+				
+				if(count > 5)
+					count = 5;
+				
+				const ratingId = _.findIndex(
+						warehouseProduct.rating,
+						rating => rating.ratedBy === config.customerId
+				)
+				
+				if(ratingId >= 0)
+				{
+					warehouseProduct.rating[ratingId].rate = count;
+				}
+				else
+				{
+					warehouseProduct.rating.push(
+							{
+								ratedBy: config.customerId,
+								rate:    count
+							}
+					);
+				}
 			}
 		}
 		
