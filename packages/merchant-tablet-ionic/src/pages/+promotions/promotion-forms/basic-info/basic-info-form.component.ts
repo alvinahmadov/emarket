@@ -14,10 +14,12 @@ import {
 	LanguageCodesEnum,
 	LanguagesEnum,
 }                                              from '@modules/server.common/interfaces/ILanguage';
+import { getLanguage }                         from '@modules/server.common/data/languages';
+import { StorageService }                      from 'services/storage.service';
 
 @Component({
-	           selector: 'basic-info-form',
-	           styleUrls: ['./basic-info-form.component.scss'],
+	           selector:    'basic-info-form',
+	           styleUrls:   ['./basic-info-form.component.scss'],
 	           templateUrl: 'basic-info-form.component.html',
            })
 export class BasicInfoFormComponent implements OnInit, OnDestroy
@@ -39,36 +41,10 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 	
 	private translateProperties = ['title', 'description'];
 	
-	get locale()
-	{
-		return this.form.get('locale');
-	}
-	
-	get title()
-	{
-		return this.form.get('title');
-	}
-	
-	get description()
-	{
-		return this.form.get('description');
-	}
-	
-	get warehouseId()
-	{
-		return localStorage.getItem('_warehouseId');
-	}
-	
-	get language()
-	{
-		return localStorage.getItem('_language');
-	}
-	
-	private _ngDestroy$ = new Subject<void>();
-	
 	constructor(
 			private readonly warehouseProductService: WarehouseProductsRouter,
-			private readonly productLocalesService: ProductLocalesService
+			private readonly productLocalesService: ProductLocalesService,
+			private readonly storageService: StorageService
 	)
 	{}
 	
@@ -93,6 +69,33 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		this._ngDestroy$.complete();
 	}
 	
+	get locale()
+	{
+		return this.form.get('locale');
+	}
+	
+	get title()
+	{
+		return this.form.get('title');
+	}
+	
+	get description()
+	{
+		return this.form.get('description');
+	}
+	
+	get warehouseId()
+	{
+		return this.storageService.warehouseId;
+	}
+	
+	get language()
+	{
+		return this.storageService.locale;
+	}
+	
+	private _ngDestroy$ = new Subject<void>();
+	
 	getValue()
 	{
 		this._saveTranslationValues();
@@ -105,7 +108,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		                                                {
 			                                                return {
 				                                                locale: localeMember.locale,
-				                                                value: localeMember.value,
+				                                                value:  localeMember.value,
 			                                                };
 		                                                });
 		
@@ -114,7 +117,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 				{
 					return {
 						locale: localeMember.locale,
-						value: localeMember.value,
+						value:  localeMember.value,
 					};
 				}
 		);
@@ -129,12 +132,18 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		return LanguageCodesEnum[language];
 	}
 	
+	getLanguage(language: LanguagesEnum | string): string
+	{
+		const locale = LanguageCodesEnum[language];
+		return getLanguage(locale);
+	}
+	
 	private _setValue()
 	{
 		if(!this.promotion) return;
 		
 		const promotionFormValue = {
-			title: this.productLocalesService.getTranslate(
+			title:       this.productLocalesService.getTranslate(
 					this.promotion.title,
 					this.languageCode
 			),
@@ -142,9 +151,9 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 					this.promotion.description,
 					this.languageCode
 			),
-			activeFrom: this.promotion.activeFrom || new Date(),
-			activeTo: this.promotion.activeTo || null,
-			product: this.promotion.productId || null,
+			activeFrom:  this.promotion.activeFrom || new Date(),
+			activeTo:    this.promotion.activeTo || null,
+			product:     this.promotion.productId || null,
 		};
 		
 		this.form.patchValue(promotionFormValue);
@@ -153,12 +162,12 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 	static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		return formBuilder.group({
-			                         locale: ['en-US'],
-			                         title: ['', Validators.required],
+			                         locale:      ['en-US'],
+			                         title:       ['', Validators.required],
 			                         description: [''],
-			                         activeFrom: [null, Validators.required],
-			                         activeTo: [null, Validators.required],
-			                         product: [null, Validators.required],
+			                         activeFrom:  [null, Validators.required],
+			                         activeTo:    [null, Validators.required],
+			                         product:     [null, Validators.required],
 		                         });
 	}
 	
@@ -222,8 +231,8 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 			               this.availableProducts = resData.map((warehouseProduct) =>
 			                                                    {
 				                                                    return {
-					                                                    id: warehouseProduct.product['id'] || null,
-					                                                    title: warehouseProduct.product['title'] || [],
+					                                                    id:     warehouseProduct.product['id'] || null,
+					                                                    title:  warehouseProduct.product['title'] || [],
 					                                                    images: warehouseProduct.product['images'] || [],
 				                                                    };
 			                                                    });
@@ -239,7 +248,7 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 		this.displayProducts = this.availableProducts.map((product) =>
 		                                                  {
 			                                                  return {
-				                                                  id: product['id'],
+				                                                  id:    product['id'],
 				                                                  image: this.productLocalesService.getTranslate(product.images),
 				                                                  title: this.productLocalesService.getTranslate(product.title),
 			                                                  };
@@ -265,11 +274,11 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 	private static _initPromotion()
 	{
 		return {
-			title: [],
+			title:       [],
 			description: [],
-			activeFrom: new Date(),
-			activeTo: null,
-			product: null,
+			activeFrom:  new Date(),
+			activeTo:    null,
+			product:     null,
 		};
 	}
 	
