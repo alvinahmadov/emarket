@@ -272,6 +272,16 @@ class Warehouse extends DBObject<IWarehouse, IWarehouseCreateObject>
 	productsTakeaway?: boolean;
 	
 	/**
+	 * Is Store allows commenting products
+	 *
+	 * @type {boolean}
+	 * @memberof Warehouse
+	 */
+	@Schema({ type: Boolean, required: false, default: true })
+	@Column()
+	commentsEnabled?: boolean;
+	
+	/**
 	 * The type of order barcode
 	 *
 	 * @type {Number}
