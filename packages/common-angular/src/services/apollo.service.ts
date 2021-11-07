@@ -57,18 +57,25 @@ class ApolloService
 			{
 				if(!result)
 				{
-					console.warn(`Apollo result of type '${typeof result}' ` +
-					             `returned null from service ${this.serviceName}`);
+					console.warn({
+						             message: `Apollo result of type '${typeof result}' ` +
+						                      `returned null from service ${this.serviceName}`
+					             });
 				}
 				if(!result.data[key])
 				{
-					console.warn(`Apollo result of type '${typeof result.data[key]}' ` +
-					             `returned null from service ${this.serviceName}`);
+					console.warn({
+						             message: `Apollo result of type '${typeof result.data[key]}' ` +
+						                      `returned null from service ${this.serviceName}`,
+						             data:    result.data,
+						             key
+					             });
 				}
 				
-				console.debug(`ApolloService get keys for service ${this.serviceName}`);
-				console.debug(`${Object.keys(result.data)}: ${Object.entries(result.data)}`);
-				console.debug(result.data[key]);
+				console.debug({
+					              message: `ApolloService get keys for service ${this.serviceName}`,
+					              data:    result.data
+				              });
 			}
 			return result.data[key];
 		} catch(e)
@@ -114,7 +121,8 @@ class ApolloService
 				{
 					return _factory(item);
 				}
-			} else
+			}
+			else
 			{
 				console.warn("Unable to create data")
 			}
