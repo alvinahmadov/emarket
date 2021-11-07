@@ -1,130 +1,106 @@
-<mat-card *ngIf="warehouseProduct" class="product-details container">
-    <mat-card-content>
-        <div class="row m-0">
-            <div class="col-6 product-details-container brand-dark">
-                <button
-                        [routerLink]="['/products']"
-                        class="back-button"
-                        mat-icon-button
-                >
-                    <svg viewBox="0 0 24 24">
-                        <path
-                                d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
-                                fill="#000000"
-                                fill-opacity="0.54"
-                        />
-                    </svg>
-                </button>
+<div *ngIf="warehouseProduct; else spinner"
+     class=""
+>
+	<section class="brand-dark">
+		<mat-card class="product-details">
+			<mat-card-content>
+				<div class="row m-0">
+					<div class="col-6 p-0 product-details-container">
+						<button
+								[routerLink]="['/products']"
+								class="back-button"
+								mat-icon-button
+						>
+							<svg viewBox="0 0 24 24">
+								<path
+										d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
+										fill="#000000"
+										fill-opacity="0.54"
+								/>
+							</svg>
+						</button>
+						<div class="product-details-content">
+							<div class="product">
+								<h1 class="title">
+									{{ localeTranslate(warehouseProduct?.product?.title) }}
+								</h1>
+								<a [routerLink]="['warehouses/' + warehouse?._id.toString()]"
+								   class="warehouse">
+									<warehouse-logo
+											[border]="false"
+											[light]="false"
+											[logo]="warehouse?.logo"
+									></warehouse-logo>
+									<h2 class="warehouse-name">
+										{{ warehouse?.name }}
+									</h2>
+								</a>
+								
+								<h2 class="description">
+									{{ localeTranslate(warehouseProduct?.product?.description) }}
+								</h2>
+								
+								<h3 class="details">
+									{{ localeTranslate(warehouseProduct?.product?.details) }}
+								</h3>
+							</div>
+							
+							<div class="statistics">
+								<es-statistics [warehouseProduct]="warehouseProduct"
+								               [warehouseId]="warehouseId">
+								</es-statistics>
+							</div>
+							
+							<button (click)="createOrder()"
+							        class="purchase-button"
+							        color="accent"
+							        mat-raised-button
+							>
+								{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.BUY_FOR' | translate }}
+							</button>
+							
+							<div class="delivery-address">
+								<mat-icon *ngIf="!isTakeaway">directions_bike</mat-icon>
+								<mat-icon *ngIf="isTakeaway">flash_on</mat-icon>
+								{{ getDeliveryTime() }}
+								<span *ngIf="!isTakeaway">{{
+									'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.DELIVERY_FROM'
+											| translate
+									}}</span>
+								<span *ngIf="isTakeaway">{{
+									'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.TAKEOUT_FROM'
+											| translate
+									}}</span>
+								
+								{{ warehouse?.geoLocation?.streetAddress }}
+								{{ warehouse?.geoLocation?.house }},
+								{{ warehouse?.geoLocation?.city }}
+							</div>
+						
+						</div>
+					</div>
+					<div class="col-6 p-0">
+						<es-product-image [productImages]="images">
+						</es-product-image>
+					</div>
+				</div>
+			</mat-card-content>
+		</mat-card>
+	</section>
+	<section>
+		<!--		<es-product-comment [warehouseProductId]="warehouseProduct?.id"-->
+		<!--		                    [warehouseId]="warehouseId"-->
+		<!--		                    [customerId]="storage.customerId"-->
+		<!--		>-->
+		<!--		</es-product-comment>-->
+	</section>
+</div>
 
-                <div class="product-details-content">
-                    <div class="warehouse">
-                        <warehouse-logo
-                                [border]="true"
-                                [light]="true"
-                                [logo]="warehouse?.logo"
-                        ></warehouse-logo>
-                        <h2 class="warehouse-name">{{ warehouse?.name }}</h2>
-                    </div>
-
-                    <div class="product">
-                        <h1 class="title">
-                            {{
-                            localeTranslate(
-                                warehouseProduct?.product?.title
-                            )
-                            }}
-                        </h1>
-
-                        <h2 class="description">
-                            {{
-                            localeTranslate(
-                                warehouseProduct?.product?.description
-                            )
-                            }}
-                        </h2>
-
-                        <h3 class="details">
-                            {{
-                            localeTranslate(
-                                warehouseProduct?.product?.details
-                            )
-                            }}
-                        </h3>
-                    </div>
-
-                    <button
-                            (click)="createOrder()"
-                            class="purchase-button"
-                            color="accent"
-                            mat-raised-button
-                    >
-                        {{
-                        'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.BUY_FOR'
-                            | translate
-                        }}
-                        {{ warehouseProduct?.price }}$
-                    </button>
-
-                    <div class="delivery-address">
-                        <mat-icon *ngIf="!isTakeaway">directions_bike</mat-icon>
-                        <mat-icon *ngIf="isTakeaway">flash_on</mat-icon>
-                        {{ getDeliveryTime() }}
-                        <span *ngIf="!isTakeaway">{{
-                            'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.DELIVERY_FROM'
-                                | translate
-                            }}</span>
-                        <span *ngIf="isTakeaway">{{
-                            'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.TAKEOUT_FROM'
-                                | translate
-                            }}</span>
-
-                        {{ warehouse?.geoLocation?.streetAddress }}
-                        {{ warehouse?.geoLocation?.house }},
-                        {{ warehouse?.geoLocation?.city }}
-                    </div>
-                </div>
-            </div>
-            <div *ngIf="images.length" class="product-image col-6 p-0">
-                <product-discount [currentProduct]="warehouseProduct">
-                </product-discount>
-                <div
-                        [ngClass]="{ 'single-image': images.length == 1 }"
-                        class="top-image"
-                >
-                    <img #topImage [src]="images[0].url"/>
-                </div>
-                <div *ngIf="images.length > 1" class="bottom-images">
-                    <drag-scroll
-                        #dragScroll
-                        [drag-scroll-disabled]="true"
-                        class="image-slide"
-                    >
-                        <img
-                                (click)="topImage.src = image.url"
-                                *ngFor="let image of images"
-                                class="scroll-image"
-                                drag-scroll-item
-                                src="{{ image.url }}"
-                        />
-                    </drag-scroll>
-                    <button
-                            (click)="dragScroll.moveLeft()"
-                            class="drag-button left"
-                    >
-                        <i class="material-icons">
-                            keyboard_arrow_left
-                        </i>
-                    </button>
-                    <button
-                            (click)="dragScroll.moveRight()"
-                            class="drag-button right"
-                    >
-                        <i class="material-icons">
-                            keyboard_arrow_right
-                        </i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </mat-card-content>
-</mat-card>
+<ng-template #spinner>
+	<div class="wait-spinner d-flex justify-content-center">
+		<mat-progress-spinner
+				color="primary"
+				mode="indeterminate">
+		</mat-progress-spinner>
+	</div>
+</ng-template>
