@@ -2,7 +2,7 @@ import { Mutation, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { UseGuards }                               from '@nestjs/common';
 import { first }                                   from 'rxjs/operators';
 import IGeoLocation, { IGeoLocationCreateObject }  from '@modules/server.common/interfaces/IGeoLocation';
-import { default as IWarehouse }                   from '@modules/server.common/interfaces/IWarehouse';
+import IWarehouse                                  from '@modules/server.common/interfaces/IWarehouse';
 import Customer                                    from '@modules/server.common/entities/Customer';
 import GeoLocation                                 from '@modules/server.common/entities/GeoLocation';
 import Order                                       from '@modules/server.common/entities/Order';
