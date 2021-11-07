@@ -308,7 +308,7 @@ type Mutation {
 	removeProductsCategoriesByIds(ids: [String!]!): Remove
 	removePromotion(id: String!): Void
 	removePromotionsByIds(ids: [String!]!): Remove
-	removeWarehouseProducts(storeId: String!, storeProductIds: [String!]!): Boolean
+	removeWarehouseProducts(storeId: String!, storeProductIds: [String!]!): [WarehouseProduct!]
 	removeWarehousesByIds(ids: [String!]!): Void
 	saveProduct(product: ProductSaveInput!): Product!
 	unbanCustomer(id: String!): Customer
@@ -627,10 +627,6 @@ type Warehouse {
 	useOnlyRestrictedCarriersForDelivery: Boolean
 	usedCarriersIds: [String!]
 	username: String!
-}
-
-type WarehouseAuthInfo {
-	warehouse: Warehouse!
 }
 
 type WarehouseLoginInfo {
