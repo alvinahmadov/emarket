@@ -98,7 +98,7 @@ export class SetupMerchantsComponent
 		if(this.canCreateMerchant)
 		{
 			const geoLocationInput = this.stepLocation.locationForm.getValue();
-			// geoLocationInput.loc.coordinates.reverse();
+			geoLocationInput.loc.coordinates.reverse();
 			
 			const accountModel = this.stepAccount.accountModel;
 			
@@ -113,6 +113,7 @@ export class SetupMerchantsComponent
 				isCarrierRequired:     this.stepDeliveryAndTakeaway.isCarrierRequired,
 				productsDelivery:      this.stepDeliveryAndTakeaway.productsDelivery,
 				productsTakeaway:      this.stepDeliveryAndTakeaway.productsTakeaway,
+				commentsEnabled:       this.stepDeliveryAndTakeaway.commentsEnabled,
 				hasRestrictedCarriers: this.stepDeliveryAndTakeaway.restrictedCarriersIds.length > 0,
 				carriersIds:           this.stepDeliveryAndTakeaway.restrictedCarriersIds,
 				orderBarcodeType:      this.stepOrdersSettings.iorderBarcodeType,
