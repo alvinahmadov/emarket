@@ -10,7 +10,7 @@ type SegmentSection = 'options' | 'select/add' | 'type' | 'order';
            })
 export class OrderComponent implements OnInit
 {
-	readonly availSegmentOptions = {
+	public readonly availSegmentOptions = {
 		options: 'options' as SegmentSection,
 		selectAdd: 'select/add' as SegmentSection,
 		type: 'type' as SegmentSection,
@@ -18,28 +18,28 @@ export class OrderComponent implements OnInit
 	};
 	
 	@Output()
-	orderFinishedEmitter = new EventEmitter<void>();
+	public orderFinishedEmitter = new EventEmitter<void>();
 	
-	segmentSection: SegmentSection = this.availSegmentOptions.options;
-	selectAddCustomerOption: number;
-	customerIdToOrder: string;
-	orderType: DeliveryType;
+	public segmentSection: SegmentSection = this.availSegmentOptions.options;
+	public selectAddCustomerOption: number;
+	public customerIdToOrder: string;
+	public orderType: DeliveryType;
 	
-	ngOnInit() {}
+	public ngOnInit() {}
 	
-	onOptionSelected(optionBit: number)
+	public onOptionSelected(optionBit: number)
 	{
 		this.segmentSection = this.availSegmentOptions.selectAdd;
 		this.selectAddCustomerOption = optionBit;
 	}
 	
-	onCustomerSelected(customerId: string)
+	public onCustomerSelected(customerId: string)
 	{
 		this.segmentSection = this.availSegmentOptions.type;
 		this.customerIdToOrder = customerId;
 	}
 	
-	onOrderTypeSelected(type: DeliveryType)
+	public onOrderTypeSelected(type: DeliveryType)
 	{
 		this.segmentSection = this.availSegmentOptions.order;
 		this.orderType = type;
