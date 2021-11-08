@@ -1,6 +1,7 @@
+import { Apollo }            from 'apollo-angular';
 import { ApolloQueryResult } from 'apollo-client';
 import { FetchResult }       from 'apollo-link';
-import { Apollo }            from "apollo-angular";
+import { environment }       from 'environments/environment';
 
 export type ApolloResult<T> = ApolloQueryResult<T> | FetchResult<T>
 
@@ -23,7 +24,10 @@ class ApolloService
 	)
 	{
 		this.pollInterval = config.pollInterval ?? 5000;
-		this.debug = config.debug ?? false;
+		this.debug = environment.production
+		             ? false
+		             : config.debug
+		               ?? false;
 		this.serviceName = config.serviceName ?? ApolloService.name;
 	}
 	
@@ -73,16 +77,18 @@ class ApolloService
 				}
 				
 				console.debug({
-					              message: `ApolloService get keys for service ${this.serviceName}`,
-					              data:    result.data
+					              message: `Success: ${this.serviceName}`,
+					              data:    result.data,
+					              key,
+					              keys
 				              });
 			}
-			return result.data[key];
+			return result.data[key] as R;
 		} catch(e)
 		{
 			const err: Error = e;
-			console.error(`Caught ${err.name} error on ApolloService::get: ${err.stack}`);
-			console.error(`${err.name} message was: ${err.message}`);
+			console.error(`Caught ${err.name} error on ApolloService::get(): ${err.message}`);
+			console.error(err.stack);
 			return null;
 		}
 	}
@@ -124,7 +130,8 @@ class ApolloService
 			}
 			else
 			{
-				console.warn("Unable to create data")
+				if(this.debug)
+					console.warn("Unable to create data")
 			}
 		} catch(e)
 		{
