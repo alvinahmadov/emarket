@@ -2,7 +2,10 @@ import { NgModule }             from '@angular/core';
 import { TranslateModule }      from '@ngx-translate/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CommonModule }         from '@angular/common';
-import { FormsModule }          from '@angular/forms';
+import {
+	FormsModule,
+	ReactiveFormsModule
+}                               from '@angular/forms';
 import { IonicModule }          from '@ionic/angular';
 import { TabModule }            from '@modules/client.common.angular2/components/tabs/tab.module';
 import { AuthPage }             from './auth';
@@ -33,6 +36,7 @@ const routes: Routes = [
 		          FormsModule,
 		          TranslateModule.forChild(),
 		          TabModule,
+		          ReactiveFormsModule,
 	          ],
           })
 export class AuthPageModule {}
