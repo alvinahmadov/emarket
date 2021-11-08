@@ -46,9 +46,17 @@ export class HeaderComponent implements OnInit, OnDestroy
 		this.admin$
 		    .pipe(rxops.takeUntil(this.ngDestroy$))
 		    .subscribe(
-				    (admin) => this.chatsService
-				                   .createCurrentSession(admin)
-				                   .then(() => this.unreadMessageCount = this.chatsService.unreadCount)
+				    (admin) =>
+				    {
+					    if(admin)
+						    this.chatsService
+						        .createCurrentSession(admin).then(
+								    (session) =>
+										    this.unreadMessageCount
+												    = this.chatsService
+												          .handleUnreadEvents(session).unreadCount
+						    );
+				    }
 		    );
 	}
 	
