@@ -31,7 +31,7 @@ export class AdminsService extends ApolloService
 				           this.factory(result, Admin)));
 	}
 	
-	public getAdmins(): Observable<Admin[]>
+	public getAdmins(): Observable<Admin[] | Admin>
 	{
 		return this.apollo
 		           .watchQuery<{
@@ -42,8 +42,7 @@ export class AdminsService extends ApolloService
 		              })
 		           .valueChanges
 		           .pipe(
-				           map((result) => <Admin[]>
-						           this.factory(result, Admin)),
+				           map((result) => this.factory(result, Admin)),
 				           share()
 		           );
 	}
@@ -52,12 +51,11 @@ export class AdminsService extends ApolloService
 	{
 		return this.apollo
 		           .query<{
-			           admin: IAdmin
+			           admin: Admin
 		           }>({
 			              query:     GQLQuery.Admin.Find,
 			              variables: { findInput }
 		              })
-		           .pipe(map((result) => <Admin>
-				           this.factory(result, Admin)));
+		           .pipe(map((result) => <Admin> this.get(result)));
 	}
 }
