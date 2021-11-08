@@ -1,10 +1,13 @@
-import { Component, Input, OnDestroy, OnInit }         from '@angular/core';
+import {
+	Component, Input, OnDestroy, OnInit,
+	AfterViewChecked
+}                                                      from '@angular/core';
 import { NbMenuService, NbSidebarService, NbMenuItem } from '@nebular/theme';
 import { TranslateService }                            from '@ngx-translate/core';
 import { Subject, Observable }                         from 'rxjs';
 import * as rxops                                      from 'rxjs/operators';
 import Admin                                           from '@modules/server.common/entities/Admin';
-import { ChatService }                                 from '@modules/client.common.angular2/services/chat.service';
+import { ChatService, ChatSession }                    from '@modules/client.common.angular2/services/chat.service';
 import { AdminsService }                               from '@app/@core/data/admins.service';
 import { StorageService }                              from '@app/@core/data/store.service';
 
@@ -13,12 +16,14 @@ import { StorageService }                              from '@app/@core/data/sto
 	           styleUrls:   ['./header.component.scss'],
 	           templateUrl: './header.component.html',
            })
-export class HeaderComponent implements OnInit, OnDestroy
+export class HeaderComponent implements OnInit, OnDestroy, AfterViewChecked
 {
 	@Input()
 	public position = 'normal';
 	
 	public admin$: Observable<Admin>;
+	
+	public session: ChatSession;
 	
 	public adminMenu: NbMenuItem[];
 	
@@ -50,14 +55,17 @@ export class HeaderComponent implements OnInit, OnDestroy
 				    {
 					    if(admin)
 						    this.chatsService
-						        .createCurrentSession(admin).then(
-								    (session) =>
-										    this.unreadMessageCount
-												    = this.chatsService
-												          .handleUnreadEvents(session).unreadCount
-						    );
+						        .createCurrentSession(admin)
+						        .then(session => this.session = session);
+					    
+					    this.chatsService.handleUnreadEvents(this.session);
 				    }
 		    );
+	}
+	
+	public ngAfterViewChecked(): void
+	{
+		this.unreadMessageCount = this.chatsService.unreadCount;
 	}
 	
 	private async initialize()
