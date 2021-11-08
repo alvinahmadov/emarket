@@ -1,97 +1,94 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
-import Warehouse                                           from '@modules/server.common/entities/Warehouse';
-import PaymentGateways, {
-	paymentGatewaysToString,
-	paymentGatewaysLogo,
-}                                                          from '@modules/server.common/enums/PaymentGateways';
-import { ModalController }                                 from '@ionic/angular';
-import { PaymentMutationComponent }                        from './mutation/mutation';
-import { ConfirmDeletePopupPage }                          from 'components/confirm-delete-popup/confirm-delete-popup';
-import { countriesDefaultCurrencies }                      from '@modules/server.common/entities/Currency';
-import { Country }                                         from '@modules/server.common/entities';
-import { first }                                           from 'rxjs/operators';
+import { Component, Input, OnInit }               from '@angular/core';
+import { ModalController }                        from '@ionic/angular';
+import { first }                                  from 'rxjs/operators';
+import Warehouse                                  from '@modules/server.common/entities/Warehouse';
+import PaymentGateways,
+{ paymentGatewaysLogo, paymentGatewaysToString, } from '@modules/server.common/enums/PaymentGateways';
+import { getCurrency }                            from '@modules/server.common/data/currencies';
+import Country                                    from '@modules/server.common/enums/Country';
+import { ConfirmDeletePopupPage }                 from 'components/confirm-delete-popup/confirm-delete-popup';
+import { PaymentMutationComponent }               from './mutation/mutation';
+import PaymentGateway                             from '@ever-platform/common/src/entities/PaymentGateway';
 
 @Component({
-	           selector: 'merchant-payments-settings',
-	           templateUrl: 'payments.html',
-	           styleUrls: ['payments.scss'],
+	           selector:    'merchant-payments-settings',
+	           styleUrls:   ['./payments.scss'],
+	           templateUrl: './payments.html',
            })
 export class SettingsPaymentsComponent implements OnInit
 {
 	@Input()
-	currWarehouse: Warehouse;
+	public currentWarehouse: Warehouse;
 	
-	showPaymentsGateways: boolean;
-	hasChanged: boolean;
-	myPaymentsGateways = [];
-	paymentsGateways = [];
-	selectedMyPaymentsGateways: PaymentGateways[];
-	selectedPaymentsGateways: PaymentGateways[];
+	public showPaymentsGateways: boolean;
+	public hasChanged: boolean;
+	public storePaymentsGateways = [];
+	public paymentsGateways = [];
+	public selectedStorePaymentsGateways: PaymentGateways[];
+	public selectedPaymentsGateways: PaymentGateways[];
 	
 	constructor(public modalCtrl: ModalController) {}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
-		const merchantPaymentsGateways = this.currWarehouse.paymentGateways.map(
-				(mpg) => mpg.paymentGateway
-		);
-		const allPaymentGateways = Object.values(PaymentGateways).filter(
-				(r) => !isNaN(<number>r)
-		);
+		const merchantPaymentsGateways = this.currentWarehouse
+		                                     .paymentGateways
+		                                     .map((mpg) => mpg.paymentGateway);
+		const allPaymentGateways = Object.values(PaymentGateways)
+		                                 .filter((paymentGateway) => !isNaN(<number>paymentGateway));
 		
 		if(merchantPaymentsGateways)
 		{
-			this.myPaymentsGateways = allPaymentGateways.filter((pg) =>
-					                                                    merchantPaymentsGateways.includes(<PaymentGateways>pg)
+			this.storePaymentsGateways = allPaymentGateways.filter(
+					(paymentGateway) =>
+							merchantPaymentsGateways
+									.includes(<PaymentGateways>paymentGateway)
 			);
 		}
 		
-		this.paymentsGateways = allPaymentGateways.filter(
-				(pg) => !this.myPaymentsGateways.includes(pg)
-		);
+		this.paymentsGateways = allPaymentGateways
+				.filter((paymentGateway) => !this.storePaymentsGateways.includes(paymentGateway));
 		
 		this.showPaymentsGateways = true;
 	}
 	
-	get isValid()
+	public get isValid()
 	{
-		return (
-				this.hasChanged &&
-				(!this.currWarehouse.isPaymentEnabled ||
-				 this.myPaymentsGateways.length > 0)
+		return this.hasChanged &&
+		       (!this.currentWarehouse.isPaymentEnabled ||
+		        this.storePaymentsGateways.length > 0);
+	}
+	
+	public getPaymentName(ePaymentGateways: PaymentGateways)
+	{
+		return paymentGatewaysToString(ePaymentGateways);
+	}
+	
+	public getPaymentLogo(ePaymentGateways: PaymentGateways)
+	{
+		return paymentGatewaysLogo(ePaymentGateways);
+	}
+	
+	public async showMutation(ePaymentGateways: PaymentGateways)
+	{
+		const foundPaymentGateway = this.currentWarehouse.paymentGateways.find(
+				(pg: PaymentGateway) => pg.paymentGateway === ePaymentGateways
 		);
-	}
-	
-	getPaymentName(pg: PaymentGateways)
-	{
-		return paymentGatewaysToString(pg);
-	}
-	
-	getPaymentLogo(pg: PaymentGateways)
-	{
-		return paymentGatewaysLogo(pg);
-	}
-	
-	async showMutation(e)
-	{
-		const paymentGateway = this.currWarehouse.paymentGateways.find(
-				(pg) => pg.paymentGateway === e
-		);
-		
-		const modal = await this.modalCtrl.create({
-			                                          component: PaymentMutationComponent,
-			                                          componentProps: {
-				                                          configureObject:
-						                                          paymentGateway && paymentGateway.configureObject,
-				                                          paymentGateway: e,
-				                                          defaultCompanyBrandLogo: this.currWarehouse.logo,
-				                                          defaultCurrency:
-						                                          countriesDefaultCurrencies[
-								                                          Country[this.currWarehouse.geoLocation.countryId]
-								                                          ],
-			                                          },
-			                                          cssClass: 'payments-mutation-wrapper',
-		                                          });
+		const country = Country[this.currentWarehouse.geoLocation.countryId];
+		const modal = await this.modalCtrl
+		                        .create({
+			                                component:      PaymentMutationComponent,
+			                                componentProps: {
+				                                configureObject:
+						                                foundPaymentGateway &&
+						                                foundPaymentGateway.configureObject,
+				                                paymentGateway:          ePaymentGateways,
+				                                defaultCompanyBrandLogo: this.currentWarehouse.logo,
+				                                defaultCurrency:
+						                                getCurrency(country).code,
+			                                },
+			                                cssClass:       'payments-mutation-wrapper',
+		                                });
 		
 		await modal.present();
 		
@@ -101,15 +98,15 @@ export class SettingsPaymentsComponent implements OnInit
 		{
 			const res = await data.pipe(first()).toPromise();
 			
-			this.currWarehouse.paymentGateways = this.currWarehouse.paymentGateways.filter(
+			this.currentWarehouse.paymentGateways = this.currentWarehouse.paymentGateways.filter(
 					(pg) => pg.paymentGateway !== res.paymentGateway
 			);
-			this.currWarehouse.paymentGateways.push(res);
+			this.currentWarehouse.paymentGateways.push(res);
 			
-			this.myPaymentsGateways = this.myPaymentsGateways.filter(
+			this.storePaymentsGateways = this.storePaymentsGateways.filter(
 					(pg) => pg !== res.paymentGateway
 			);
-			this.myPaymentsGateways.push(res.paymentGateway);
+			this.storePaymentsGateways.push(res.paymentGateway);
 			
 			this.paymentsGateways = this.paymentsGateways.filter(
 					(pg) => pg !== res.paymentGateway
@@ -117,23 +114,25 @@ export class SettingsPaymentsComponent implements OnInit
 			this.hasChanged = true;
 		}
 		
-		this.selectedMyPaymentsGateways = [];
+		this.selectedStorePaymentsGateways = [];
 		this.selectedPaymentsGateways = [];
 	}
 	
-	async confirmRemovePaymentGateway(pg: PaymentGateways)
+	public async confirmRemovePaymentGateway(ePaymentGateways: PaymentGateways)
 	{
-		const modal = await this.modalCtrl.create({
-			                                          component: ConfirmDeletePopupPage,
-			                                          componentProps: {
-				                                          data: {
-					                                          image: this.getPaymentLogo(pg),
-					                                          name: this.getPaymentName(pg),
-				                                          },
-				                                          isRemove: true,
-			                                          },
-			                                          cssClass: 'confirm-delete-wrapper',
-		                                          });
+		const modal = await this.modalCtrl.create(
+				{
+					component:      ConfirmDeletePopupPage,
+					componentProps: {
+						data:     {
+							image: this.getPaymentLogo(ePaymentGateways),
+							name:  this.getPaymentName(ePaymentGateways),
+						},
+						isRemove: true,
+					},
+					cssClass:       'confirm-delete-wrapper',
+				}
+		);
 		
 		await modal.present();
 		
@@ -141,19 +140,19 @@ export class SettingsPaymentsComponent implements OnInit
 		
 		if(res.data)
 		{
-			this.removePaymentGateway(pg);
+			this.removePaymentGateway(ePaymentGateways);
 		}
 	}
 	
-	private removePaymentGateway(pg)
+	private removePaymentGateway(ePaymentGateways: PaymentGateways)
 	{
-		this.paymentsGateways = [...this.paymentsGateways, pg];
+		this.paymentsGateways = [...this.paymentsGateways, ePaymentGateways];
 		
-		this.myPaymentsGateways = this.myPaymentsGateways.filter(
-				(existedPG) => existedPG !== pg
+		this.storePaymentsGateways = this.storePaymentsGateways.filter(
+				(existedPG: PaymentGateways) => existedPG !== ePaymentGateways
 		);
-		this.currWarehouse.paymentGateways = this.currWarehouse.paymentGateways.filter(
-				(existedPG) => existedPG.paymentGateway !== pg
+		this.currentWarehouse.paymentGateways = this.currentWarehouse.paymentGateways.filter(
+				(existedPG: PaymentGateway) => existedPG.paymentGateway !== ePaymentGateways
 		);
 		this.hasChanged = true;
 	}
