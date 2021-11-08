@@ -21,6 +21,7 @@ const routes: Routes = [
 				.then((m) => m.AuthPageModule)
 				.catch(err => catchModuleErr(err)),
 		canLoad:      [AuthModuleGuard],
+		canActivate:  [AuthModuleGuard]
 	},
 	{
 		path:         'login',
