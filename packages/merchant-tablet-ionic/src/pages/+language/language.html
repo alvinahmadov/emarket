@@ -8,11 +8,11 @@
 			</div>
 		</span>
     </div>
-	<h1 class="title">{{ 'LANGUAGE_VIEW.TITLE' | translate }}</h1>
+	<h1 class="title text-center">{{ 'LANGUAGE_VIEW.TITLE' | translate }}</h1>
 </div>
 
 <ion-content class="language-content" scroll="false" padding>
-    <ion-list>
+    <ion-list class="language-container">
         <ion-item>
             <ion-label
             >{{ 'SIDE_MENU.GROUPS.SETTINGS.ITEMS.LANGUAGE' | translate
@@ -29,7 +29,7 @@
                         value="{{ lang }}"
                         selected="lang === translate.currentLang"
                 >
-                    {{ lang }}
+                    {{ translateLanguage(lang) }}
                 </ion-select-option>
             </ion-select>
         </ion-item>
