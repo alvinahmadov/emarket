@@ -2,88 +2,33 @@
 	<div class="auth-view">
 		<div class="auth-view-content">
 			<div class="logo">
-				<img src="{{ loginLogo }}" />
+				<img src="{{ loginLogo }}" height="100" alt=""/>
 			</div>
 			<tabs>
 				<!-- Login -->
 				<tab title="{{ 'LOGIN_VIEW.AUTHORIZE' | translate }}">
-					<div class="auth-form">
-						<div>
-							<input
+					<form [formGroup]="loginForm"
+					      (ngSubmit)="login()"
+					      class="auth-form"
+					>
+						<input
+								formControlName="username"
 								class="auth-input"
 								placeholder="{{ 'LOGIN_VIEW.USER_NAME' | translate }}"
-								[(ngModel)]="username"
-							/>
-						</div>
-						<div>
-							<input
+								autocomplete
+						/>
+						<input
 								class="auth-input"
 								type="password"
+								formControlName="password"
 								placeholder="{{ 'LOGIN_VIEW.USER_PASSWORD' | translate }}"
-								[(ngModel)]="password"
-							/>
-						</div>
-						<div>
-							<button class="auth-button" (click)="login()">
-								{{ 'LOGIN_VIEW.LOGIN' | translate }}
-							</button>
-						</div>
-					</div>
-				</tab>
-				<!-- Register -->
-				<tab title="{{ 'REGISTER_VIEW.REGISTER' | translate }}">
-					<div class="auth-form">
-						<div>
-							<input
-									class="auth-input"
-									placeholder="{{ 'REGISTER_VIEW.WAREHOUSE_NAME' | translate }}"
-									[(ngModel)]="registrationInput.name"
-							/>
-						</div>
-						<div>
-							<input
-									class="auth-input"
-									placeholder="{{ 'REGISTER_VIEW.USER_NAME' | translate }}"
-									[(ngModel)]="registrationInput.username"
-							/>
-						</div>
-						<div>
-							<input
-									class="auth-input"
-									placeholder="{{ 'REGISTER_VIEW.USER_MAIL' | translate }}"
-									[(ngModel)]="registrationInput.email"
-							/>
-						</div>
-						<div>
-							<input
-									class="auth-input"
-									type="password"
-									placeholder="{{ 'REGISTER_VIEW.USER_PASSWORD' | translate }}"
-									[(ngModel)]="registrationInput.password"
-							/>
-						</div>
-						<div class="auth-terms">
-							<input
-									id="terms"
-									type="checkbox"
-									[(ngModel)]="registrationInput.acceptTerms"
-							/>
-							<label for="terms">
-								<a href="#">
-									{{ 'REGISTER_VIEW.TERMS' | translate }}
-								</a>
-							</label>
-						</div>
-						<div>
-							<button
-									class="auth-button"
-									(click)="register()"
-									[disabled]="!registrationInput.acceptTerms"
-							>
-								{{ 'REGISTER_VIEW.REGISTER' | translate }}
-							</button>
-						</div>
-					</div>
+								autocomplete
+						/>
+						<button type="submit"
+						        class="auth-button">
+							{{ 'LOGIN_VIEW.LOGIN' | translate }}
+						</button>
+					</form>
 				</tab>
 			</tabs>
 		</div>
