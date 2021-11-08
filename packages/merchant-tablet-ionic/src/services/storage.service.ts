@@ -136,9 +136,9 @@ export class StorageService
 		localStorage.setItem('serverConnection', val);
 	}
 	
-	public isLogged()
+	public async isLogged()
 	{
-		return this.warehouseAuthRouter.isAuthenticated(this.token)
+		return this.warehouseAuthRouter.isAuthenticated(this.token);
 	}
 	
 	public clearMaintenanceMode()
