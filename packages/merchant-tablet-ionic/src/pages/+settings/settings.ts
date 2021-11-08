@@ -12,7 +12,7 @@ export class SettingsPage
 {
 	public selectedSegment: any = 'account';
 	
-	public _currWarehouse: Warehouse;
+	public currentWarehouse: Warehouse;
 	
 	constructor(
 			private warehouseRouter: WarehouseRouter,
@@ -42,10 +42,7 @@ export class SettingsPage
 	public getLocalWarehouse()
 	{
 		this.warehouseRouter
-		    .get(localStorage.getItem('_warehouseId'))
-		    .subscribe((warehouse) =>
-		               {
-			               this._currWarehouse = warehouse;
-		               });
+		    .get(this.storageService.warehouseId)
+		    .subscribe((warehouse) =>  this.currentWarehouse = warehouse);
 	}
 }
