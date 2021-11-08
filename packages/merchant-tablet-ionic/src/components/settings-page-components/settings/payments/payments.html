@@ -34,12 +34,13 @@
 							height="15"
 							width="15"
 							class="mr-2"
+							[alt]="getPaymentName(item)"
 							[src]="getPaymentLogo(item)"
 					/>
 					{{ getPaymentName(item) }}
 				</ng-template>
 				
-				<ng-template ng-option-tmp let-item="item" let-index="index">
+				<ng-template ng-option-tmp let-item="item">
 					<p class="card-title">
 						<img
 								*ngIf="getPaymentLogo(item)"
@@ -47,6 +48,7 @@
 								width="35"
 								class="mr-1"
 								[src]="getPaymentLogo(item)"
+								[alt]="getPaymentName(item)"
 						/>
 						{{ getPaymentName(item) }}
 					</p>
@@ -62,14 +64,14 @@
 				class="selected-payment-gateways col-6"
 		>
 			<ion-label>
-				<div class="mt-2">
-					Selected Payment Gateways
+				<div class="mt-2" style="font-size: 12px;">
+					{{ 'SETTINGS_VIEW.PAYMENTS.SELECTED_PAYMENT_GATEWAYS' | translate }}
 				</div>
 			</ion-label>
 			<ion-list class="pt-2">
 				<ion-item *ngFor="let pg of myPaymentsGateways">
 					<ion-avatar slot="start">
-						<img src="{{ getPaymentLogo(pg) }}"/>
+						<img src="{{ getPaymentLogo(pg) }}" alt="{{ getPaymentName(pg) }}"/>
 					</ion-avatar>
 					<ion-label
 					>{{ getPaymentName(pg) }}
