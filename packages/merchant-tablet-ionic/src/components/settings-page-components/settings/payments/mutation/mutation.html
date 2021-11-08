@@ -2,14 +2,15 @@
     <h4 class="custom-title-popup mb-0">
         {{ titleText }}
     </h4>
-    <button class="close" (click)="cancelModal()">
+    <button class="close"
+            (click)="cancelModal()">
         <i class="fa fa-close"></i>
     </button>
 
     <div class="mb-2">
         <e-cu-stripe-gateway
                 *ngIf="paymentGateway === paymentGateways.Stripe"
-                [currenciesCodes]="currenciesCodes"
+                [currencies]="currencies"
                 [data]="configureObject"
                 [defaultCompanyBrandLogo]="defaultCompanyBrandLogo"
                 [defaultCurrency]="defaultCurrency"
@@ -19,7 +20,7 @@
 
         <e-cu-paypal-gateway
                 *ngIf="paymentGateway === paymentGateways.PayPal"
-                [currenciesCodes]="currenciesCodes"
+                [currencies]="currencies"
                 [data]="configureObject"
                 [defaultCurrency]="defaultCurrency"
                 (configureObject)="updateConfigureObject($event)"
