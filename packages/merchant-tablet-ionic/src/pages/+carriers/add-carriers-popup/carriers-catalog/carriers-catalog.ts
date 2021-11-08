@@ -1,32 +1,32 @@
 import { Component, EventEmitter, OnDestroy } from '@angular/core';
 import { DomSanitizer }                       from '@angular/platform-browser';
+import { TranslateService }                   from '@ngx-translate/core';
+import { LocalDataSource }                    from 'ng2-smart-table';
+import { forkJoin, Subject, Observable }      from 'rxjs';
+import { first, takeUntil }                   from 'rxjs/operators';
 import Carrier                                from '@modules/server.common/entities/Carrier';
 import { CarrierRouter }                      from '@modules/client.common.angular2/routers/carrier-router.service';
 import { WarehouseRouter }                    from '@modules/client.common.angular2/routers/warehouse-router.service';
 import { AddressComponent }                   from './address.component';
-import { Store }                              from '../../../../services/store.service';
-import { first, takeUntil }                   from 'rxjs/operators';
-import { TranslateService }                   from '@ngx-translate/core';
-import { LocalDataSource }                    from 'ng2-smart-table';
-import { forkJoin, Subject, Observable }      from 'rxjs';
+import { StorageService }                     from 'services/storage.service';
 
 @Component({
-	           selector: 'carriers-catalog',
+	           selector:    'carriers-catalog',
 	           templateUrl: 'carriers-catalog.html',
            })
 export class CarriersCatalogComponent implements OnDestroy
 {
-	settingsSmartTable: object;
-	sourceSmartTable = new LocalDataSource();
-	selecteCarriers: Carrier[];
-	hasChanges: EventEmitter<boolean> = new EventEmitter();
+	public settingsSmartTable: object;
+	public sourceSmartTable = new LocalDataSource();
+	public selecteCarriers: Carrier[];
+	public hasChanges: EventEmitter<boolean> = new EventEmitter();
 	
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(
 			private readonly carrierRouter: CarrierRouter,
 			private readonly warehouseRouter: WarehouseRouter,
-			private readonly store: Store,
+			private readonly storageService: StorageService,
 			private readonly _sanitizer: DomSanitizer,
 			private readonly _translateService: TranslateService
 	)
@@ -35,7 +35,13 @@ export class CarriersCatalogComponent implements OnDestroy
 		this._loadDataSmartTable();
 	}
 	
-	selectCarriersTmp(ev)
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public selectCarriersTmp(ev)
 	{
 		this.selecteCarriers = ev.selected;
 		this.hasChanges.emit();
@@ -57,31 +63,31 @@ export class CarriersCatalogComponent implements OnDestroy
 				.subscribe(([name, phone, address, logo]) =>
 				           {
 					           this.settingsSmartTable = {
-						           actions: false,
+						           actions:    false,
 						           selectMode: 'multi',
-						           columns: {
-							           name: { title: name },
-							           phone: { title: phone },
+						           columns:    {
+							           name:    { title: name },
+							           phone:   { title: phone },
 							           address: {
-								           title: address,
-								           type: 'custom',
+								           title:           address,
+								           type:            'custom',
 								           renderComponent: AddressComponent,
 							           },
-							           logo: {
-								           title: logo,
-								           type: 'html',
+							           logo:    {
+								           title:                logo,
+								           type:                 'html',
 								           valuePrepareFunction: (_, carrier: Carrier) =>
-								           {
-									           return this._sanitizer.bypassSecurityTrustHtml(
-											           `<div class='text-center'>
+								                                 {
+									                                 return this._sanitizer.bypassSecurityTrustHtml(
+											                                 `<div class='text-center'>
 								<img src="${carrier.logo}" alt="Product Image" class='logo'">
 							<div>`
-									           );
-								           },
-								           filter: false,
+									                                 );
+								                                 },
+								           filter:               false,
 							           },
 						           },
-						           pager: {
+						           pager:      {
 							           display: true,
 							           perPage: 3,
 						           },
@@ -92,7 +98,7 @@ export class CarriersCatalogComponent implements OnDestroy
 	private async _loadDataSmartTable()
 	{
 		const warehouse = await this.warehouseRouter
-		                            .get(this.store.warehouseId)
+		                            .get(this.storageService.warehouseId)
 		                            .pipe(first())
 		                            .toPromise();
 		
@@ -101,30 +107,26 @@ export class CarriersCatalogComponent implements OnDestroy
 			const carriersVM = carriers.map((c: Carrier) =>
 			                                {
 				                                return {
-					                                name: c.firstName + ' ' + c.lastName,
-					                                phone: c.phone,
+					                                name:    c.firstName + ' ' + c.lastName,
+					                                phone:   c.phone,
 					                                carrier: c,
-					                                logo: c.logo,
-					                                id: c.id,
+					                                logo:    c.logo,
+					                                id:      c.id,
 				                                };
 			                                });
 			
 			this.sourceSmartTable.load(carriersVM);
 		};
 		
-		this.carrierRouter.getAllActive().subscribe((carriers: Carrier[]) =>
-		                                            {
-			                                            loadData(
-					                                            carriers.filter(
-							                                            (c: Carrier) => !warehouse.usedCarriersIds.includes(c.id)
-					                                            )
-			                                            );
-		                                            });
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
+		this.carrierRouter
+		    .getAllActive()
+		    .subscribe((carriers: Carrier[]) =>
+		               {
+			               loadData(
+					               carriers.filter(
+							               (c: Carrier) => !warehouse.usedCarriersIds.includes(c.id)
+					               )
+			               );
+		               });
 	}
 }
