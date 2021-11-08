@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { DOCUMENT }                  from '@angular/common';
 import { TranslateService }          from '@ngx-translate/core';
+import { getLanguage }               from '@modules/server.common/data/languages';
 import ILanguage                     from '@modules/server.common/interfaces/ILanguage';
 import { DeviceRouter }              from '@modules/client.common.angular2/routers/device-router.service';
 import { environment as env }        from 'environments/environment';
@@ -48,6 +49,11 @@ export class LanguagePage implements OnInit
 	public get buttonCancel(): string
 	{
 		return this._translate(this.PREFIX + this.CANCEL);
+	}
+	
+	public translateLanguage(locale: string): string
+	{
+		return getLanguage(locale);
 	}
 	
 	public switchLanguage(language: string)
