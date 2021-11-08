@@ -6,14 +6,14 @@
 		</h5>
 	</div>
 	<div class="body">
-		<div *ngIf="customer.avatar" class="customer-image">
-			<img src="{{ customer.avatar }}" alt=""/>
+		<div *ngIf="customer?.avatar" class="customer-image">
+			<img src="{{ customer?.avatar }}" alt=""/>
 		</div>
 		<div class="customer-details">
-			<div>{{ customer.fullName.trim() }}</div>
-			<user-phone [customer]="customer"></user-phone>
+			<div *ngIf="fullName">{{ fullName.trim() }}</div>
+			<user-phone [customer]="asCustomer"></user-phone>
 			<div>{{ customer.email }}</div>
-			<div>{{ customer.fullAddress }}</div>
+			<div>{{ fullAddress }}</div>
 			<div> {{ 'CUSTOMERS_VIEW.NOTES' | translate }} : {{ customer.geoLocation.notes }}
 			</div>
 		</div>
