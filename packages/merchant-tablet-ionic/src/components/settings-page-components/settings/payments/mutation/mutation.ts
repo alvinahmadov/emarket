@@ -1,55 +1,56 @@
+import { Subject }                 from 'rxjs';
+import { first }                   from 'rxjs/operators';
 import { Component }               from '@angular/core';
 import { ModalController }         from '@ionic/angular';
+import IPaymentGatewayCreateObject from '@modules/server.common/interfaces/IPaymentGateway';
+import Currency                    from '@modules/server.common/entities/Currency';
 import PaymentGateways, {
 	paymentGatewaysToString,
 }                                  from '@modules/server.common/enums/PaymentGateways';
-import { first }                   from 'rxjs/operators';
 import { CurrenciesService }       from 'services/currencies.service';
-import { Subject }                 from 'rxjs';
-import IPaymentGatewayCreateObject from '@modules/server.common/interfaces/IPaymentGateway';
 
 @Component({
-	           selector: 'merchant-payments-mutation',
+	           selector:    'merchant-payments-mutation',
 	           templateUrl: 'mutation.html',
-	           styleUrls: ['mutation.scss'],
+	           styleUrls:   ['mutation.scss'],
            })
 export class PaymentMutationComponent
 {
-	defaultCompanyBrandLogo: string;
-	defaultCurrency: string;
-	configureObject: any;
-	paymentGateway: PaymentGateways;
-	currenciesCodes: string[] = [];
-	paymentGateways = PaymentGateways;
-	newConfigureObject = new Subject<IPaymentGatewayCreateObject>();
-	isValid: boolean;
+	public defaultCompanyBrandLogo: string;
+	public defaultCurrency: string;
+	public configureObject: any;
+	public paymentGateway: PaymentGateways;
+	public currencies: Currency[] = [];
+	public paymentGateways = PaymentGateways;
+	public newConfigureObject = new Subject<IPaymentGatewayCreateObject>();
+	public isValid: boolean;
 	
 	constructor(
 			public modalController: ModalController,
 			private currenciesService: CurrenciesService
 	)
 	{
-		this.loadCurrenciesCodes();
+		this.loadCurrencies();
 	}
 	
-	get titleText()
+	public get titleText()
 	{
 		return `${
 				this.configureObject ? 'Update' : 'Add'
 		}  ${paymentGatewaysToString(this.paymentGateway)} gateway`;
 	}
 	
-	cancelModal(newConfigureObject?: Subject<IPaymentGatewayCreateObject>)
+	public cancelModal(newConfigureObject?: Subject<IPaymentGatewayCreateObject>)
 	{
 		this.modalController.dismiss(newConfigureObject);
 	}
 	
-	updateConfigureObject(e)
+	public updateConfigureObject(e)
 	{
 		this.newConfigureObject.next(e);
 	}
 	
-	private async loadCurrenciesCodes()
+	private async loadCurrencies()
 	{
 		const res = await this.currenciesService
 		                      .getCurrencies()
@@ -58,7 +59,7 @@ export class PaymentMutationComponent
 		
 		if(res)
 		{
-			this.currenciesCodes = res.map((r) => r.currencyCode);
+			this.currencies = res.map((r) => r);
 		}
 	}
 }
