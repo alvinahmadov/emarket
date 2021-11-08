@@ -189,9 +189,13 @@ export namespace GQLQuery
 				$pagingOptions: PagingOptionsInput
 			)
 			{
-				findCustomers(findInput: $findInput, pagingOptions: $pagingOptions)
+				findCustomers(
+					findInput: $findInput,
+					pagingOptions: $pagingOptions
+				)
 				{
 					_id
+					id
 					username
 					firstName
 					lastName
@@ -463,15 +467,16 @@ export namespace GQLQuery
 				{
 					id
 					name
+					username
 					logo
 					usedCarriersIds
 					contactEmail
 					contactPhone
-					orderCancelation
-					{
-						enabled
-						onState
-					}
+					#					orderCancelation
+					#					{
+					#						enabled
+					#						onState
+					#					}
 					geoLocation
 					{
 						city
@@ -692,6 +697,86 @@ export namespace GQLQuery
 		
 		export namespace Product
 		{
+			export const Get = gql`
+				query GetWarehouseProduct(
+					$storeId: String!
+					$productId: String!
+				)
+				{
+					getWarehouseProduct(
+						storeId: $storeId
+						productId: $productId
+					)
+					{
+						id
+						price
+						initialPrice
+						count
+						soldCount
+						viewsCount
+						rating
+						{
+							rate
+							ratedBy
+						}
+						promotion
+						{
+							active
+							requested
+							activeFrom
+							activeTo
+						}
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+						product
+						{
+							id
+							title
+							{
+								locale
+								value
+							}
+							description
+							{
+								locale
+								value
+							}
+							details
+							{
+								locale
+								value
+							}
+							images
+							{
+								locale
+								url
+								width
+								height
+								orientation
+							}
+						}
+						isManufacturing
+						isCarrierRequired
+						isDeliveryRequired
+						isProductAvailable
+						isTakeaway
+						deliveryTimeMin
+						deliveryTimeMax
+					}
+				}
+			`;
+			
 			export const GetWithPagination = gql`
 				query GetProductsWithPagination(
 					$storeId: String!
@@ -702,6 +787,174 @@ export namespace GQLQuery
 						storeId: $storeId
 						pagingOptions: $pagingOptions
 					)
+					{
+						id
+						_id
+						price
+						initialPrice
+						count
+						soldCount
+						viewsCount
+						product
+						{
+							description
+							{
+								value
+								locale
+							}
+							_id
+							id
+							title
+							{
+								value
+								locale
+							}
+							details
+							{
+								value
+								locale
+							}
+							images
+							{
+								locale
+								url
+								orientation
+								width
+								height
+							}
+							categories
+							_createdAt
+							_updatedAt
+						}
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+						rating
+						{
+							rate
+							ratedBy
+						}
+						promotion
+						{
+							active
+							requested
+							activeFrom
+							activeTo
+						}
+						deliveryTimeMin
+						deliveryTimeMax
+						isCarrierRequired
+						isDeliveryRequired
+						isManufacturing
+						isTakeaway
+					}
+				}
+			`;
+			
+			export const Count = gql`
+				query GetProductsCount($storeId: String!)
+				{
+					getWarehouseProductsCount(storeId: $storeId)
+				}
+			`;
+			
+			export const GetAvailable = gql`
+				query GetAvailableWarehouseProducts(
+					$storeId: String!
+				){
+					getWarehouseProductsAvailable(storeId: $storeId)
+					{
+						id
+						price
+						initialPrice
+						count
+						soldCount
+						viewsCount
+						rating
+						{
+							rate
+							ratedBy
+						}
+						promotion
+						{
+							active
+							requested
+							activeFrom
+							activeTo
+						}
+						comments
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+						product
+						{
+							id
+							title
+							{
+								locale
+								value
+							}
+							description
+							{
+								locale
+								value
+							}
+							details
+							{
+								locale
+								value
+							}
+							images
+							{
+								locale
+								url
+								width
+								height
+								orientation
+							}
+							categories
+						}
+						isManufacturing
+						isCarrierRequired
+						isDeliveryRequired
+						isProductAvailable
+						isTakeaway
+						deliveryTimeMin
+						deliveryTimeMax
+					}
+				}
+			`;
+			
+			export const GetTop = gql`
+				query GetWarehouseProductsTop(
+					$storeId: String!
+					$quantity: Int!
+				)
+				{
+					getWarehouseProductsTop(storeId: $storeId, quantity: $quantity)
 					{
 						id
 						_id
@@ -740,15 +993,25 @@ export namespace GQLQuery
 							_createdAt
 							_updatedAt
 						}
-						comments {
+						comments
+						{
 							id
 							_id
+							userId
+							productId
 							message
 							likes
 							dislikes
 							likesBy
 							dislikesBy
 							replyTo
+							_createdAt
+							_updatedAt
+						}
+						rating
+						{
+							rate
+							ratedBy
 						}
 						viewsCount
 						deliveryTimeMin
@@ -756,20 +1019,83 @@ export namespace GQLQuery
 						isCarrierRequired
 						isDeliveryRequired
 						isManufacturing
-						isProductAvailable
 						isTakeaway
 					}
 				}
 			`;
 			
-			export const Count = gql`
-				query GetProductsCount($storeId: String!)
-				{
-					getWarehouseProductsCount(storeId: $storeId)
-				}
-			`;
+			export namespace Comment
+			{
+				export const GetComment = gql`
+					query GetComment(
+						$storeId: String!
+						$storeProductId: String!
+						$commentId: String!
+					)
+					{
+						comment(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							commentId: $commentId
+						)
+						{
+							id
+							_id
+							userId
+							productId
+							message
+							likes
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+				
+				export const GetComments = gql`
+					query GetComments(
+						$storeId: String!
+						$storeProductId: String!
+						$pagingOptions: PagingOptionsInput
+					)
+					{
+						comments(
+							storeId: $storeId,
+							storeProductId: $storeProductId,
+							pagingOptions: $pagingOptions
+						)
+						{
+							id
+							_id
+							userId
+							message
+							likes
+							dislikes
+							likesBy
+							dislikesBy
+							replyTo
+							_createdAt
+							_updatedAt
+						}
+					}
+				`;
+				
+				export const Count = gql`
+					query GetCountOfComments(
+						$storeId: String!
+						$storeProductId: String!
+					) {
+						getCountOfComments(
+							storeId: $storeId,
+							storeProductId: $storeProductId
+						)
+					}
+				`
+			}
 		}
-		
 	}
 }
 
