@@ -60,7 +60,7 @@ class GeoLocation extends DBObject<IGeoLocation, IGeoLocationCreateObject>
 	
 	public get countryName(): string
 	{
-		return this.getCountryName('ru-RU');
+		return this.getCountryName('en-US');
 	}
 	
 	public getCountryName(lang: string): string
