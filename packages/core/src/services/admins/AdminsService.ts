@@ -65,7 +65,7 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter, ISe
 	}
 	
 	@observableListener()
-	get(id: Admin['id']): Observable<Admin>
+	get(id: Admin['id']): Observable<Admin | null>
 	{
 		return super.get(id)
 		            .pipe(
