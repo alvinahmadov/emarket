@@ -1,11 +1,11 @@
+import { UseGuards }                  from '@nestjs/common';
 import { Resolver, Query, Mutation }  from '@nestjs/graphql';
-import { InvitesRequestsService }     from '../../services/invites';
-import { IInviteRequestCreateObject } from '@modules/server.common/interfaces/IInviteRequest';
 import { first }                      from 'rxjs/operators';
+import { IInviteRequestCreateObject } from '@modules/server.common/interfaces/IInviteRequest';
 import Invite                         from '@modules/server.common/entities/Invite';
 import InviteRequest                  from '@modules/server.common/entities/InviteRequest';
-import { UseGuards }                  from '@nestjs/common';
 import { FakeDataGuard }              from '../../auth/guards/fake-data.guard';
+import { InvitesRequestsService }     from '../../services/invites';
 
 @Resolver('Invite-request')
 export class InviteRequestResolver
@@ -17,10 +17,10 @@ export class InviteRequestResolver
 	
 	@Query()
 	@UseGuards(FakeDataGuard)
-	async generate1000InviteRequests(
+	public async generate1000InviteRequests(
 			_,
 			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
-	)
+	): Promise<void>
 	{
 		await this._invitesRequestsService.generate1000InviteRequests(
 				defaultLng,
@@ -29,13 +29,13 @@ export class InviteRequestResolver
 	}
 	
 	@Query('inviteRequest')
-	async getInviteRequest(_, { id }: { id: string })
+	public async getInviteRequest(_, { id }: { id: string }): Promise<InviteRequest>
 	{
 		return this._invitesRequestsService.get(id).pipe(first()).toPromise();
 	}
 	
 	@Query('notifyAboutLaunch')
-	async notifyAboutLaunch(
+	public async notifyAboutLaunch(
 			_,
 			{
 				devicesIds,
@@ -44,7 +44,7 @@ export class InviteRequestResolver
 				invite: Invite;
 				devicesIds: string[];
 			}
-	)
+	): Promise<void>
 	{
 		return this._invitesRequestsService.notifyAboutLaunch(
 				invite,
@@ -53,7 +53,7 @@ export class InviteRequestResolver
 	}
 	
 	@Query('invitesRequests')
-	async getInvitesRequests(_, { findInput, invited, pagingOptions = {} })
+	public async getInvitesRequests(_, { findInput, invited, pagingOptions = {} }): Promise<InviteRequest[]>
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
@@ -70,7 +70,7 @@ export class InviteRequestResolver
 	}
 	
 	@Query()
-	async getCountOfInvitesRequests(_, { invited })
+	public async getCountOfInvitesRequests(_, { invited }): Promise<number>
 	{
 		const findObj = { isDeleted: { $eq: false } };
 		
@@ -85,36 +85,36 @@ export class InviteRequestResolver
 	}
 	
 	@Mutation()
-	async createInviteRequest(
+	public async createInviteRequest(
 			_,
 			{ createInput }: { createInput: IInviteRequestCreateObject }
-	)
+	): Promise<InviteRequest>
 	{
 		return this._invitesRequestsService.create(createInput);
 	}
 	
 	@Mutation()
-	async updateInviteRequest(
+	public async updateInviteRequest(
 			_,
 			{ id, updateInput }: { id: string; updateInput }
-	)
+	): Promise<InviteRequest>
 	{
 		await this._invitesRequestsService.throwIfNotExists(id);
 		return this._invitesRequestsService.update(id, updateInput);
 	}
 	
 	@Mutation()
-	async removeInviteRequest(_, { id }: { id: string })
+	public async removeInviteRequest(_, { id }: { id: string }): Promise<void>
 	{
 		await this._invitesRequestsService.throwIfNotExists(id);
 		return this._invitesRequestsService.remove(id);
 	}
 	
 	@Mutation()
-	async removeInvitesRequestsByIds(_, { ids }: { ids: string[] })
+	public async removeInvitesRequestsByIds(_, { ids }: { ids: string[] }): Promise<void>
 	{
 		const inviteRequests = await this._invitesRequestsService.find({
-			                                                               _id: { $in: ids },
+			                                                               _id:       { $in: ids },
 			                                                               isDeleted: { $eq: false }
 		                                                               });
 		
