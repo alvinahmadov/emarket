@@ -61,23 +61,23 @@ type Query {
 
 	findCustomers(findInput: CustomerFindInput, pagingOptions: PagingOptionsInput): [Customer]!
 
-	getOrders(customerId: String!): [Order!]!
-
-	isCustomerExists(conditions: CustomerMemberInput!): Boolean!
-
 	getSocial(socialId: String!): Customer
 
-	isCustomerEmailExists(email: String!): Boolean!
+	getOrders(id: String!): [Order!]!
 
-    generateCustomers(
-        qty: Int!
-        defaultLng: Float!
-        defaultLat: Float!
-    ): ResponseGenerateCustomers
+	getCustomerMetrics(id: String!): CustomerMetrics
 
 	getCountOfCustomers: Int!
 
-    getCustomerMetrics(id: String!): CustomerMetrics
+	isCustomerExists(conditions: CustomerMemberInput!): Boolean!
+
+	isCustomerEmailExists(email: String!): Boolean!
+
+	generateCustomers(
+		defaultLng: Float!
+		defaultLat: Float!
+		qty: Int!
+	): ResponseGenerateCustomers
 }
 
 type ResponseGenerateCustomers {
