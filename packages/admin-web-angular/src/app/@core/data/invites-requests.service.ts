@@ -162,12 +162,12 @@ export class InvitesRequestsService extends ApolloService
 		};
 	}
 	
-	public generate1000InviteRequests(defaultLng: number, defaultLat: number)
+	public generateInviteRequests(defaultLng: number, defaultLat: number, qty?: number)
 	{
 		return this.apollo
 		           .query({
 			                  query:     GQLQuery.InviteRequest.Generate,
-			                  variables: { defaultLng, defaultLat },
+			                  variables: { qty, defaultLng, defaultLat },
 		                  });
 	}
 	
