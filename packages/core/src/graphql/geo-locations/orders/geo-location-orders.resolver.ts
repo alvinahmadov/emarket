@@ -12,7 +12,7 @@ export class GeoLocationOrdersResolver
 	constructor(public geoLocationsOrdersService: GeoLocationsOrdersService) {}
 	
 	@Query('getOrderForWork')
-	async getOrderForWork(
+	public async getOrderForWork(
 			_,
 			{
 				geoLocation,
@@ -33,7 +33,7 @@ export class GeoLocationOrdersResolver
 	}
 	
 	@Query('getOrdersForWork')
-	async getOrdersForWork(
+	public async getOrdersForWork(
 			_,
 			{
 				geoLocation,
@@ -54,7 +54,7 @@ export class GeoLocationOrdersResolver
 	}
 	
 	@Query()
-	async getCountOfOrdersForWork(
+	public async getCountOfOrdersForWork(
 			_,
 			{
 				geoLocation,
