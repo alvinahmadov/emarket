@@ -1,49 +1,51 @@
-import { Component, OnDestroy, OnInit }              from '@angular/core';
-import _                                             from 'lodash';
-import { Subject }                                   from 'rxjs';
-import { first, takeUntil }                          from 'rxjs/operators';
-import { ToasterService }                            from 'angular2-toaster';
-import { IProductsCategory, IProductsCategoryName, } from '@modules/server.common/interfaces/IProductsCategory';
-import { IWarehouseProductCreateObject }             from '@modules/server.common/interfaces/IWarehouseProduct';
-import { ICarrierRegistrationInput }                 from '@modules/server.common/routers/ICarrierRouter';
-import { CountryAbbreviations }                      from '@modules/server.common/data/abbreviation-to-country';
-import { getCurrency }                               from '@modules/server.common/data/currencies';
-import Carrier                                       from '@modules/server.common/entities/Carrier';
-import Customer                                      from '@modules/server.common/entities/Customer';
-import Invite                                        from '@modules/server.common/entities/Invite';
-import Order                                         from '@modules/server.common/entities/Order';
-import Product                                       from '@modules/server.common/entities/Product';
-import ProductsCategory                              from '@modules/server.common/entities/ProductsCategory';
-import Warehouse                                     from '@modules/server.common/entities/Warehouse';
-import { CarrierRouter }                             from '@modules/client.common.angular2/routers/carrier-router.service';
-import { CustomerRouter }                            from '@modules/client.common.angular2/routers/customer-router.service';
-import { CustomerAuthRouter }                        from '@modules/client.common.angular2/routers/customer-auth-router.service';
-import { InviteRouter }                              from '@modules/client.common.angular2/routers/invite-router.service';
-import { OrderRouter }                               from '@modules/client.common.angular2/routers/order-router.service';
-import { ProductRouter }                             from '@modules/client.common.angular2/routers/product-router.service';
-import { WarehouseRouter }                           from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { WarehouseAuthRouter }                       from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
-import { WarehouseOrdersRouter }                     from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { WarehouseProductsRouter }                   from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { FakeDataBtnState }                          from '@app/models/FakeDataBtnState';
-import FakeDataCarriers                              from '@app/@core/data/fakeDataServices/carriers';
-import FakeDataUsers                                 from '@app/@core/data/fakeDataServices/customers';
-import FakeDataInvites                               from '@app/@core/data/fakeDataServices/invites';
-import FakeDataProducts                              from '@app/@core/data/fakeDataServices/products';
-import FakeDataProductsCategories                    from '@app/@core/data/fakeDataServices/productsCategories';
-import FakeDataWarehouses                            from '@app/@core/data/fakeDataServices/warehouses';
-import FakeDataWarehousesProducts                    from '@app/@core/data/fakeDataServices/warehousesProducts';
-import { CarriersService }                           from '@app/@core/data/carriers.service';
-import { CurrenciesService }                         from '@app/@core/data/currencies.service';
-import { CustomersService }                          from '@app/@core/data/customers.service';
-import { DataService }                               from '@app/@core/data/data.service';
-import { InvitesService }                            from '@app/@core/data/invites.service';
-import { InvitesRequestsService }                    from '@app/@core/data/invites-requests.service';
-import { OrdersService }                             from '@app/@core/data/orders.service';
-import { ProductsCategoryService }                   from '@app/@core/data/productsCategory.service';
-import { WarehousesService }                         from '@app/@core/data/warehouses.service';
-import { NotifyService }                             from '@app/@core/services/notify/notify.service';
-import { environment }                               from 'environments/environment';
+import { Component, OnDestroy, OnInit }             from '@angular/core';
+import _                                            from 'lodash';
+import faker                                        from 'faker';
+import { Subject }                                  from 'rxjs';
+import { first, takeUntil }                         from 'rxjs/operators';
+import { ToasterService }                           from 'angular2-toaster';
+import { IProductsCategory, IProductsCategoryName } from '@modules/server.common/interfaces/IProductsCategory';
+import { IWarehouseProductCreateObject }            from '@modules/server.common/interfaces/IWarehouseProduct';
+import { ICarrierRegistrationInput }                from '@modules/server.common/routers/ICarrierRouter';
+import { CountryAbbreviations }                     from '@modules/server.common/data/abbreviation-to-country';
+import { getCurrency }                              from '@modules/server.common/data/currencies';
+import Carrier                                      from '@modules/server.common/entities/Carrier';
+import Customer                                     from '@modules/server.common/entities/Customer';
+import Invite                                       from '@modules/server.common/entities/Invite';
+import Order                                        from '@modules/server.common/entities/Order';
+import Product                                      from '@modules/server.common/entities/Product';
+import ProductsCategory                             from '@modules/server.common/entities/ProductsCategory';
+import Warehouse                                    from '@modules/server.common/entities/Warehouse';
+import FakeDataUtils                                from '@modules/server.common/utilities/fake-data';
+import { CarrierRouter }                            from '@modules/client.common.angular2/routers/carrier-router.service';
+import { CustomerRouter }                           from '@modules/client.common.angular2/routers/customer-router.service';
+import { CustomerAuthRouter }                       from '@modules/client.common.angular2/routers/customer-auth-router.service';
+import { InviteRouter }                             from '@modules/client.common.angular2/routers/invite-router.service';
+import { OrderRouter }                              from '@modules/client.common.angular2/routers/order-router.service';
+import { ProductRouter }                            from '@modules/client.common.angular2/routers/product-router.service';
+import { WarehouseRouter }                          from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseAuthRouter }                      from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
+import { WarehouseOrdersRouter }                    from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { WarehouseProductsRouter }                  from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { FakeDataBtnState }                         from '@app/models/FakeDataBtnState';
+import FakeDataCarriers                             from '@app/@core/data/fakeDataServices/carriers';
+import FakeDataUsers                                from '@app/@core/data/fakeDataServices/customers';
+import FakeDataInvites                              from '@app/@core/data/fakeDataServices/invites';
+import FakeDataProducts                             from '@app/@core/data/fakeDataServices/products';
+import FakeDataProductsCategories                   from '@app/@core/data/fakeDataServices/productsCategories';
+import FakeDataWarehouses                           from '@app/@core/data/fakeDataServices/warehouses';
+import FakeDataWarehousesProducts                   from '@app/@core/data/fakeDataServices/warehousesProducts';
+import { CarriersService }                          from '@app/@core/data/carriers.service';
+import { CurrenciesService }                        from '@app/@core/data/currencies.service';
+import { CustomersService }                         from '@app/@core/data/customers.service';
+import { DataService }                              from '@app/@core/data/data.service';
+import { InvitesService }                           from '@app/@core/data/invites.service';
+import { InvitesRequestsService }                   from '@app/@core/data/invites-requests.service';
+import { OrdersService }                            from '@app/@core/data/orders.service';
+import { ProductsCategoryService }                  from '@app/@core/data/productsCategory.service';
+import { WarehousesService }                        from '@app/@core/data/warehouses.service';
+import { NotifyService }                            from '@app/@core/services/notify/notify.service';
+import { environment }                              from 'environments/environment';
 
 const NEED_DEFAULT_SETTINGS_MESSAGE =
 		      "Can't generate fake data without DEFAULT_LONGITUDE and DEFAULT_LATITUDE";
@@ -72,7 +74,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	customer: Customer;
 	order1: Order;
 	order2: Order;
-	includeHardcodedData: boolean = true;
+	includeHardcodedData: boolean = false;
 	
 	public loading: FakeDataBtnState;
 	isBtnDisabled: FakeDataBtnState;
@@ -81,12 +83,7 @@ export class FakeDataComponent implements OnInit, OnDestroy
 	private _ngDestroy$ = new Subject<void>();
 	private _hardcodedCarrierIds: string[] = [];
 	// PRODUCT CATEGORIES
-	private _productCategories: Array<{
-		_id: string;
-		name: Array<{ locale: string; value: string }>;
-		_createdAt: string | Date;
-		_updatedAt: string | Date;
-	}> = [];
+	private _productCategories: Array<IProductsCategory> = [];
 	private _hardcodedWarehouses: Warehouse[] = [];
 	
 	constructor(
@@ -192,8 +189,8 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		await this.createInvite2();
 		await this.createInvite3();
 		await this.createInvite4();
-		await this._generate1000InvitesConnectedToInviteRequests();
-		await this._generate1000InviteRequests();
+		await this._generateInvitesConnectedToInviteRequests();
+		await this._generateInviteRequests();
 		await this.createUser();
 		await this.createCarrier1();
 		await this.createCarrier2();
@@ -343,13 +340,23 @@ export class FakeDataComponent implements OnInit, OnDestroy
 			await this._createInvite();
 		}
 		
+		const firstName = faker.name.firstName();
+		const lastName = faker.name.lastName();
+		const username = faker.internet.userName(firstName, lastName);
+		const email = faker.internet.email(firstName, lastName, 'emarket');
+		const avatar = FakeDataUtils.getFakeImg(300, 300, 12, firstName + ' ' + lastName);
 		this.customer = await this.customerAuthRouter.register({
-			                                                       user: {
-				                                                       username:    '',
-				                                                       email:       '',
+			                                                       user:     {
+				                                                       username:    username,
+				                                                       firstName:   firstName,
+				                                                       lastName:    lastName,
+				                                                       role:        "customer",
+				                                                       avatar:      avatar,
+				                                                       email:       email,
 				                                                       geoLocation: this.invite.geoLocation,
 				                                                       apartment:   this.invite.apartment,
 			                                                       },
+			                                                       password: '123456'
 		                                                       });
 		
 		this.isBtnDisabled.user = false;
@@ -772,12 +779,12 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	private async _generate1000InviteRequests()
+	private async _generateInviteRequests()
 	{
 		if(lng && lat)
 		{
 			await this._inviteRequestsService
-			          .generate1000InviteRequests(lng, lat)
+			          .generateInviteRequests(lng, lat, qty)
 			          .toPromise();
 		}
 		else
@@ -786,12 +793,12 @@ export class FakeDataComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	private async _generate1000InvitesConnectedToInviteRequests()
+	private async _generateInvitesConnectedToInviteRequests()
 	{
 		if(lng && lat)
 		{
 			await this._invitesService
-			          .generate1000InvitesConnectedToInviteRequests(lng, lat)
+			          .generateInvitesConnectedToInviteRequests(lng, lat, qty)
 			          .toPromise();
 		}
 		else
