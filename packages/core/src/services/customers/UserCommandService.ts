@@ -69,10 +69,6 @@ export class GetAboutUsHandler implements ICommandHandler<GetAboutUsCommand>
 	{
 		const { userId, deviceId, selectedLanguage } = command;
 		
-		console.log('COMMAND PARAM 1:', userId);
-		console.log('COMMAND PARAM 2:', deviceId);
-		console.log('COMMAND PARAM 2:', selectedLanguage);
-		
 		return this._userService.getAboutUs(
 				userId,
 				deviceId,
