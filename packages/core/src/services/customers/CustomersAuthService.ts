@@ -62,7 +62,7 @@ export class CustomersAuthService extends EntityService<Customer>
 	 *
 	 * @param {ICustomerRegistrationInput} input
 	 * @returns {Promise<User>}
-	 * @memberof UsersAuthService
+	 * @memberof CustomersAuthService
 	 */
 	@asyncListener()
 	async register(input: ICustomerRegistrationInput): Promise<Customer>
@@ -108,7 +108,7 @@ export class CustomersAuthService extends EntityService<Customer>
 	 * @param {User['id']} id
 	 * @param {{ current: string; new: string }} password
 	 * @returns {Promise<void>}
-	 * @memberof UsersAuthService
+	 * @memberof CustomersAuthService
 	 */
 	@asyncListener()
 	async updatePassword(
@@ -132,7 +132,7 @@ export class CustomersAuthService extends EntityService<Customer>
 	 * 			phone
 	 * 		}
 	 * @returns {Promise<void>}
-	 * @memberof UsersAuthService
+	 * @memberof CustomersAuthService
 	 */
 	@asyncListener()
 	async addRegistrationInfo(
@@ -162,23 +162,25 @@ export class CustomersAuthService extends EntityService<Customer>
 	/**
 	 * Login Customer (returns user record and Auth token)
 	 *
-	 * @param {string} emailOrUsername
+	 * @param {string} authInfo Customer's email or username
 	 * @param {string} password
+	 * @param {string | number} expiresIn Token lifetime ('7d', 3600)
 	 * @returns {(Promise<ICustomerLoginResponse | null>)}
-	 * @memberof UsersAuthService
+	 * @memberof CustomersAuthService
 	 */
 	@asyncListener()
 	async login(
-			emailOrUsername: string,
-			password: string
+			authInfo: string,
+			password: string,
+			expiresIn?: string | number
 	): Promise<ICustomerLoginResponse | null>
 	{
 		const res = await this.authService.login({
 			                                         $or: [
-				                                         { email: emailOrUsername },
-				                                         { username: emailOrUsername }
+				                                         { email: authInfo },
+				                                         { username: authInfo }
 			                                         ]
-		                                         }, password);
+		                                         }, password, expiresIn);
 		
 		if(!res || res.entity.isDeleted)
 		{
@@ -194,7 +196,7 @@ export class CustomersAuthService extends EntityService<Customer>
 	/**
 	 * Get current Registration settings (e.g. registrationRequiredOnStart)
 	 *
-	 * @memberof UsersAuthService
+	 * @memberof CustomersAuthService
 	 */
 	@asyncListener()
 	async getRegistrationsSettings(): Promise<{
