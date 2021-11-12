@@ -30,7 +30,7 @@ import {
 	ICustomerCreateObject,
 	ICustomerUpdateObject,
 	ICustomerInitializeObject,
-	ICustomerFindInput
+	ICustomerFindObject
 }                            from '@modules/server.common/interfaces/ICustomer';
 import IPagingOptions        from '@modules/server.common/interfaces/IPagingOptions';
 import IGeoLocation          from '@modules/server.common/interfaces/IGeoLocation';
@@ -152,13 +152,13 @@ export class CustomersService extends DBService<Customer>
 	/**
 	 * Get Customers
 	 *
-	 * @param {ICustomerFindInput} customerInput
+	 * @param {ICustomerFindObject} customerInput
 	 * @param {IPagingOptions} pagingOptions
 	 * @returns
 	 * @memberof CustomersService
 	 */
 	public async getCustomers(
-			customerInput: ICustomerFindInput,
+			customerInput: ICustomerFindObject,
 			pagingOptions: IPagingOptions = {}
 	) : Promise<Customer[]>
 	{
