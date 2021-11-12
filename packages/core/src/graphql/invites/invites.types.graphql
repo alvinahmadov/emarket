@@ -51,6 +51,12 @@ type Query {
         defaultLat: Float!
     ): Void
 
+    generateInvitesConnectedToInviteRequests(
+        qty: Int
+        defaultLng: Float!
+        defaultLat: Float!
+    ): Void
+
     getCountOfInvites: Int!
 }
 
