@@ -1,8 +1,10 @@
 import { Resolver, Query }           from '@nestjs/graphql';
-import { GeoLocationsOrdersService } from '../../../services/geo-locations/GeoLocationsOrdersService';
-import { GeoLocationOrdersOptions }  from '../../../services/geo-locations/GeoLocationOrdersOptions';
-import IGeoLocation                  from '@modules/server.common/interfaces/IGeoLocation';
 import Order                         from '@modules/server.common/entities/Order';
+import { GeoLocationsOrdersService } from '../../../services/geo-locations/GeoLocationsOrdersService';
+import {
+	IGeoLocationWorkOrderInput,
+	IGeoLocationWorkOrdersInput
+}                                    from '../../../services/geo-locations/GeoLocationOrdersOptions';
 
 @Resolver('GeoLocationOrders')
 export class GeoLocationOrdersResolver
@@ -17,16 +19,8 @@ export class GeoLocationOrdersResolver
 				skippedOrderIds,
 				options,
 				searchObj
-			}: {
-				geoLocation: IGeoLocation;
-				skippedOrderIds: string[];
-				options: GeoLocationOrdersOptions;
-				searchObj?: {
-					isCancelled?: boolean;
-					byRegex?: Array<{ key: string; value: string }>;
-				};
-			}
-	)
+			}: IGeoLocationWorkOrderInput
+	): Promise<Order>
 	{
 		const orders = await this.geoLocationsOrdersService.getOrdersForWork(
 				geoLocation,
@@ -46,13 +40,8 @@ export class GeoLocationOrdersResolver
 				skippedOrderIds,
 				options,
 				searchObj
-			}: {
-				geoLocation: IGeoLocation;
-				skippedOrderIds: string[];
-				options: GeoLocationOrdersOptions;
-				searchObj?: { byRegex: Array<{ key: string; value: string }> };
-			}
-	)
+			}: IGeoLocationWorkOrdersInput
+	): Promise<Order[]>
 	{
 		const orders = await this.geoLocationsOrdersService.getOrdersForWork(
 				geoLocation,
@@ -71,12 +60,8 @@ export class GeoLocationOrdersResolver
 				geoLocation,
 				skippedOrderIds,
 				searchObj
-			}: {
-				geoLocation: IGeoLocation;
-				skippedOrderIds: string[];
-				searchObj?: { byRegex: Array<{ key: string; value: string }> };
-			}
-	)
+			}: Omit<IGeoLocationWorkOrdersInput, 'options'>
+	): Promise<number>
 	{
 		return this.geoLocationsOrdersService.getCountOfOrdersForWork(
 				geoLocation,
