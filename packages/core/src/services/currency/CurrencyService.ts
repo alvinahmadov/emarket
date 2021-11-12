@@ -3,20 +3,16 @@ import Logger                    from 'bunyan';
 import { routerName }            from '@pyro/io';
 import { DBService }             from '@pyro/db-server';
 import { ICurrencyCreateObject } from '@modules/server.common/interfaces/ICurrency';
+import ICurrencyRouter,
+{ ICurrencyMutationRespone }     from '@modules/server.common/routers/ICurrencyRouter';
 import Currency                  from '@modules/server.common/entities/Currency';
 import IService                  from 'services/IService';
 import { createLogger }          from '../../helpers/Log';
 
-export interface CurrencyMutationRespone
-{
-	success: boolean;
-	message?: string;
-	data?: Currency;
-}
-
 @injectable()
 @routerName('currency')
-export class CurrenciesService extends DBService<Currency> implements IService
+export class CurrenciesService extends DBService<Currency>
+		implements ICurrencyRouter, IService
 {
 	public readonly DBObject: any = Currency;
 	
@@ -24,9 +20,7 @@ export class CurrenciesService extends DBService<Currency> implements IService
 		                                              name: 'currenciesService'
 	                                              });
 	
-	public async createCurrency(
-			currency: ICurrencyCreateObject
-	): Promise<CurrencyMutationRespone>
+	public async createCurrency(currency: ICurrencyCreateObject): Promise<ICurrencyMutationRespone>
 	{
 		let success;
 		let message;
