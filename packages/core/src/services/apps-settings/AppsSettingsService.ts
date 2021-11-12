@@ -1,6 +1,6 @@
 import { injectable }        from 'inversify';
-import { env }               from '../../env';
 import { IAdminAppSettings } from '@modules/server.common/interfaces/IAppsSettings';
+import { env }               from '../../env';
 
 @injectable()
 export class AppsSettingsService
@@ -9,7 +9,7 @@ export class AppsSettingsService
 	{
 		return {
 			adminPasswordReset: env.ADMIN_PASSWORD_RESET ? 1 : 0,
-			fakeDataGenerator: env.FAKE_DATA_GENERATOR ? 1 : 0
+			fakeDataGenerator:  env.FAKE_DATA_GENERATOR ? 1 : 0
 		};
 	}
 }
