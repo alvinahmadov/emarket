@@ -1,11 +1,11 @@
-import { Injectable }                    from '@angular/core';
-import { Apollo }                        from 'apollo-angular';
-import { map, share }                    from 'rxjs/operators';
-import { Observable }                    from 'rxjs';
-import ICustomer, { ICustomerFindInput } from '@modules/server.common/interfaces/ICustomer';
-import Customer                          from '@modules/server.common/entities/Customer';
-import ApolloService                     from '@modules/client.common.angular2/services/apollo.service';
-import { GQLQuery }                      from 'graphql/definitions';
+import { Injectable }                     from '@angular/core';
+import { Apollo }                         from 'apollo-angular';
+import { map, share }                     from 'rxjs/operators';
+import { Observable }                     from 'rxjs';
+import ICustomer, { ICustomerFindObject } from '@modules/server.common/interfaces/ICustomer';
+import Customer                           from '@modules/server.common/entities/Customer';
+import ApolloService                      from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }                       from 'graphql/definitions';
 
 @Injectable()
 export class CustomersService extends ApolloService
@@ -47,7 +47,7 @@ export class CustomersService extends ApolloService
 		           );
 	}
 	
-	public findCustomers(findInput: ICustomerFindInput): Observable<Customer[] | Customer>
+	public findCustomers(findInput: ICustomerFindObject): Observable<Customer[] | Customer>
 	{
 		return this.apollo
 		           .query<{
