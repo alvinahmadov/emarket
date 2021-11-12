@@ -65,8 +65,9 @@ export class CustomersService extends ApolloService
 	}
 	
 	public login(
-			username: string,
-			password: string
+			authInfo: string,
+			password: string,
+			expiresIn?: string | number
 	): Observable<ICustomerLoginResponse>
 	{
 		return this.apollo
@@ -75,8 +76,9 @@ export class CustomersService extends ApolloService
 		           }>({
 			              mutation:  GQLMutation.Customer.Login,
 			              variables: {
-				              email: username,
+				              authInfo,
 				              password,
+				              expiresIn
 			              },
 		              })
 		           .pipe(
