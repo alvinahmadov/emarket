@@ -20,7 +20,7 @@ import IEnterByLocation                                  from '@modules/server.c
 import IPagingOptions                                    from '@modules/server.common/interfaces/IPagingOptions';
 import IStreetLocation                                   from '@modules/server.common/interfaces/IStreetLocation';
 import Invite                                            from '@modules/server.common/entities/Invite';
-import IInviteRouter                                     from '@modules/server.common/routers/IInviteRouter';
+import IInviteRouter, { IInvitesFindInput }              from '@modules/server.common/routers/IInviteRouter';
 import FakeDataUtils                                     from '@modules/server.common/utilities/fake-data';
 import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
 import IService                                          from '../IService';
@@ -110,10 +110,9 @@ export class InvitesService extends DBService<Invite>
 			findObject['geoLocation.loc'] = {
 				$near: {
 					$geometry: {
-						type: 'Point',
+						type:        'Point',
 						coordinates: info.location.coordinates
 					},
-					// $maxDistance: InvitesService.InviteWorkingDistance // 50Km distance for testing only!
 				}
 			};
 		}
@@ -154,11 +153,11 @@ export class InvitesService extends DBService<Invite>
 	public getByLocation(info: IEnterByLocation): Observable<Invite | null>
 	{
 		const findObject = {
-			'geoLocation.city': info.city,
+			'geoLocation.city':          info.city,
 			'geoLocation.streetAddress': info.streetAddress,
-			'geoLocation.house': info.house,
-			'geoLocation.countryId': info.countryId,
-			apartment: info.apartment
+			'geoLocation.house':         info.house,
+			'geoLocation.countryId':     info.countryId,
+			apartment:                   info.apartment
 		};
 		
 		if(info.postcode != null)
@@ -193,9 +192,9 @@ export class InvitesService extends DBService<Invite>
 	
 	@asyncListener()
 	public async getInvites(
-			findInput: any,
+			findInput: IInvitesFindInput,
 			pagingOptions: IPagingOptions
-	): Promise<any>
+	): Promise<Invite[] | null>
 	{
 		const sortObj = {};
 		if(pagingOptions.sort)
@@ -203,10 +202,12 @@ export class InvitesService extends DBService<Invite>
 			sortObj[pagingOptions.sort.field] = pagingOptions.sort.sortBy;
 		}
 		
-		return this.Model.find({
-			                       ...findInput,
-			                       isDeleted: { $eq: false }
-		                       })
+		const input = _.assign(
+				{ isDeleted: { $eq: false } },
+				(findInput ? { ...findInput } : {})
+		)
+		
+		return this.Model.find(input)
 		           .sort(sortObj)
 		           .skip(pagingOptions.skip)
 		           .limit(pagingOptions.limit)
@@ -230,8 +231,8 @@ export class InvitesService extends DBService<Invite>
 		                          .group({
 			                                 _id: {
 				                                 streetAddress: '$geoLocation.streetAddress',
-				                                 city: '$geoLocation.city',
-				                                 country: '$geoLocation.countryId'
+				                                 city:          '$geoLocation.city',
+				                                 country:       '$geoLocation.countryId'
 			                                 }
 		                                 })
 		                          .exec();
