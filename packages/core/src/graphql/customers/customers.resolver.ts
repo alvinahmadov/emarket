@@ -7,11 +7,12 @@ import {
 import { UseGuards }            from '@nestjs/common';
 import { Types }                from 'mongoose';
 import { first }                from 'rxjs/operators';
-import {
-	default as ICustomer,
+import ICustomer, {
 	IResponseGenerateCustomers,
-	ICustomerUpdateObject
+	ICustomerUpdateObject,
+	ICustomerFindInput
 }                               from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions           from '@modules/server.common/interfaces/IPagingOptions';
 import Customer                 from '@modules/server.common/entities/Customer';
 import {
 	AddableRegistrationInfo,
@@ -74,13 +75,17 @@ export class CustomerResolver
 	}
 	
 	@Query('customers')
-	async getCustomers(_, { pagingOptions = {} })
+	async getCustomers(_, { pagingOptions = {} }): Promise<Customer[]>
 	{
-		return this.findCustomers(_, { findInput: {}, pagingOptions });
+		return this.searchCustomers(_, { pagingOptions });
 	}
 	
 	@Query('findCustomers')
-	async findCustomers(_, { findInput, pagingOptions = {} })
+	async searchCustomers(
+			_,
+			{ findInput, pagingOptions = {} }:
+					{ findInput?: ICustomerFindInput, pagingOptions?: IPagingOptions }
+	)
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
