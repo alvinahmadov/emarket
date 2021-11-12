@@ -3,7 +3,13 @@ import { Mutation, Query, Resolver } from '@nestjs/graphql';
 import { first }                     from 'rxjs/operators';
 import IEnterByCode                  from '@modules/server.common/interfaces/IEnterByCode';
 import IEnterByLocation              from '@modules/server.common/interfaces/IEnterByLocation';
-import { IInviteCreateObject }       from '@modules/server.common/interfaces/IInvite';
+import IPagingOptions                from '@modules/server.common/interfaces/IPagingOptions';
+import {
+	IInviteCreateInput,
+	IInviteIdInput,
+	IInvitesFindInput,
+	IInviteUpdateInput
+}                                    from '@modules/server.common/routers/IInviteRouter';
 import Invite                        from '@modules/server.common/entities/Invite';
 import { FakeDataGuard }             from '../../auth/guards/fake-data.guard';
 import { InvitesRequestsService }    from '../../services/invites';
@@ -26,12 +32,28 @@ export class InviteResolver
 			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
 	): Promise<void>
 	{
+		return this.generateInvitesConnectedToInviteRequests(
+				_,
+				{ defaultLat, defaultLng }
+		);
+	}
+	
+	@Query()
+	@UseGuards(FakeDataGuard)
+	public async generateInvitesConnectedToInviteRequests(
+			_,
+			{ qty, defaultLng, defaultLat }: { qty?: number, defaultLng: number; defaultLat: number }
+	): Promise<void>
+	{
+		if(!qty)
+			qty = 1000;
+		
 		const fakeInvitesService = new FakeInvitesService();
 		const {
-			invitesRequestsToCreate,
-			invitesToCreate
-		} = await fakeInvitesService.generateInvitesConnectedToInviteRequests(
-				1000,
+			      invitesRequestsToCreate,
+			      invitesToCreate
+		      } = await fakeInvitesService.generateInvitesConnectedToInviteRequests(
+				qty,
 				defaultLng,
 				defaultLat
 		)
@@ -47,7 +69,7 @@ export class InviteResolver
 	}
 	
 	@Query('invite')
-	public async getInvite(_, { id }: { id: string }): Promise<Invite>
+	public async getInvite(_, { id }: IInviteIdInput): Promise<Invite>
 	{
 		return this._invitesService
 		           .get(id)
@@ -80,7 +102,11 @@ export class InviteResolver
 	}
 	
 	@Query('invites')
-	public async getInvites(_, { findInput, pagingOptions = {} }): Promise<any>
+	public async getInvites(
+			_,
+			{ findInput, pagingOptions = {} }:
+					{ findInput: IInvitesFindInput, pagingOptions: IPagingOptions }
+	): Promise<Invite[]>
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
@@ -99,7 +125,8 @@ export class InviteResolver
 	@Query()
 	public async getCountOfInvites(): Promise<number>
 	{
-		return this._invitesService.Model
+		return this._invitesService
+		           .Model
 		           .find({ isDeleted: { $eq: false } })
 		           .countDocuments()
 		           .exec();
@@ -108,7 +135,7 @@ export class InviteResolver
 	@Mutation()
 	public async createInvite(
 			_,
-			{ createInput }: { createInput: IInviteCreateObject }
+			{ createInput }: IInviteCreateInput
 	): Promise<Invite>
 	{
 		return this._invitesService.create(createInput);
@@ -117,7 +144,7 @@ export class InviteResolver
 	@Mutation()
 	public async updateInvite(
 			_,
-			{ id, updateInput }: { id: string; updateInput }
+			{ id, updateInput }: IInviteUpdateInput
 	): Promise<Invite>
 	{
 		await this._invitesService.throwIfNotExists(id);
@@ -125,7 +152,7 @@ export class InviteResolver
 	}
 	
 	@Mutation()
-	public async removeInvite(_, { id }: { id: string }): Promise<void>
+	public async removeInvite(_, { id }: IInviteIdInput): Promise<void>
 	{
 		await this._invitesService.throwIfNotExists(id);
 		return this._invitesService.remove(id);
@@ -135,7 +162,7 @@ export class InviteResolver
 	public async removeInvitesByIds(_, { ids }: { ids: string[] }): Promise<void>
 	{
 		const invites = await this._invitesService.find({
-			                                                _id: { $in: ids },
+			                                                _id:       { $in: ids },
 			                                                isDeleted: { $eq: false }
 		                                                });
 		
