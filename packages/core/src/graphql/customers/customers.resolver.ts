@@ -9,7 +9,6 @@ import { Types }                 from 'mongoose';
 import { first }                 from 'rxjs/operators';
 import ICustomer, {
 	IResponseGenerateCustomers,
-	ICustomerUpdateObject,
 	ICustomerFindInput
 }                                from '@modules/server.common/interfaces/ICustomer';
 import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
@@ -17,10 +16,17 @@ import { ICustomerOrderMetrics } from '@modules/server.common/interfaces/ICustom
 import Device                    from '@modules/server.common/entities/Device';
 import Customer                  from '@modules/server.common/entities/Customer';
 import {
-	AddableRegistrationInfo,
 	ICustomerRegistrationInput,
-	ICustomerLoginResponse
+	ICustomerRegistrationInfoInput,
+	ICustomerLoginInput,
+	ICustomerLoginResponse,
+	ICustomerPasswordUpdateInput
 }                                from '@modules/server.common/routers/ICustomerAuthRouter';
+import {
+	ICustomerIdInput,
+	ICustomerEmailInput,
+	ICustomerUpdateInput
+}                                from '@modules/server.common/routers/ICustomerRouter';
 import { DevicesService }        from '../../services/devices';
 import {
 	CustomersOrdersService,
@@ -31,48 +37,11 @@ import { OrdersService }         from '../../services/orders';
 import { FakeUsersService }      from '../../services/fake-data';
 import { FakeDataGuard }         from '../../auth/guards/fake-data.guard';
 
-export interface ICustomerIdInput
-{
-	id: Customer['id']
-}
-
-export interface ICustomerEmailInput extends ICustomerIdInput
-{
-	email: string;
-}
-
-export interface ICustomerUpdateInput extends ICustomerIdInput
-{
-	updateObject: ICustomerUpdateObject;
-}
-
-export interface ICustomerLoginInput
-{
-	email: string;
-	password: string
-}
-
 export interface ICustomerGenerateInput
 {
 	defaultLng: number;
 	defaultLat: number,
 	qty?: number
-}
-
-interface IPasswordUpdateInput
-{
-	current: string;
-	new: string
-}
-
-export interface ICustomerPasswordUpdateInput extends ICustomerIdInput
-{
-	password: IPasswordUpdateInput;
-}
-
-export interface ICustomerRegistrationInfoInput extends ICustomerIdInput
-{
-	registrationInfo: AddableRegistrationInfo
 }
 
 @Resolver('Customer')
