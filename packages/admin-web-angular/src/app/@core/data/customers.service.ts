@@ -152,9 +152,7 @@ export class CustomersService extends ApolloService
 		                 .toPromise();
 	}
 	
-	public async getCustomerMetrics(
-			id: string
-	): Promise<ICustomerOrderMetrics>
+	public async getCustomerMetrics(id: string): Promise<ICustomerOrderMetrics>
 	{
 		return await this.apollo
 		                 .query<{
