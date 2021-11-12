@@ -45,13 +45,14 @@ import { WarehousesService } from '../../services/warehouses';
 import { createLogger }      from '../../helpers/Log';
 import { observeFile }       from '../../utils';
 import { env }               from '../../env';
+import * as path             from 'path';
 
 interface IWatchedFiles
 {
-	aboutUs: { [language in ILanguage]: Observable<string> };
-	privacy: { [language in ILanguage]: Observable<string> };
-	termsOfUse: { [language in ILanguage]: Observable<string> };
-	help: { [language in ILanguage]: Observable<string> };
+	aboutUs?: { [language in ILanguage]: Observable<string> };
+	privacy?: { [language in ILanguage]: Observable<string> };
+	termsOfUse?: { [language in ILanguage]: Observable<string> };
+	help?: { [language in ILanguage]: Observable<string> };
 }
 
 /**
@@ -152,12 +153,12 @@ export class CustomersService extends DBService<Customer>
 	/**
 	 * Get Customers
 	 *
-	 * @param {*} findInput
+	 * @param {ICustomerFindInput} customerInput
 	 * @param {IPagingOptions} pagingOptions
 	 * @returns
 	 * @memberof UsersService
 	 */
-	public async getCustomers(findInput: ICustomerFindInput, pagingOptions: IPagingOptions = {})
+	public async getCustomers(customerInput: ICustomerFindInput, pagingOptions: IPagingOptions = {})
 	{
 		const sortObj = {};
 		if(pagingOptions.sort)
@@ -165,10 +166,12 @@ export class CustomersService extends DBService<Customer>
 			sortObj[pagingOptions.sort.field] = pagingOptions.sort.sortBy;
 		}
 		
-		return this.Model.find({
-			                       ...findInput,
-			                       isDeleted: { $eq: false }
-		                       })
+		const findInput = _.assign(
+				customerInput ? { ...customerInput } : {},
+				{ isDeleted: { $eq: false } }
+		);
+		
+		return this.Model.find(findInput)
 		           .sort(sortObj)
 		           .skip(pagingOptions.skip)
 		           .limit(pagingOptions.limit)
@@ -399,28 +402,39 @@ export class CustomersService extends DBService<Customer>
 			selectedLanguage: string
 	): Observable<string> /*returns html*/
 	{
-		return this.devicesService
-		           .get(deviceId)
-		           .pipe(
-				           exhaustMap((device) =>
-				                      {
-					                      if(device === null)
+		try
+		{
+			return this.devicesService
+			           .get(deviceId)
+			           .pipe(
+					           exhaustMap((device) =>
 					                      {
-						                      return _throw(
-								                      new Error(`Customer with the id ${customerId} doesn't exist`)
-						                      );
-					                      }
-					                      else
-					                      {
-						                      return of(device);
-					                      }
-				                      }),
-				           distinctUntilChanged(
-						           (oldDevice, newDevice) =>
-								           oldDevice.language !== newDevice.language
-				           ),
-				           switchMap(() => this.watchedFiles.aboutUs[selectedLanguage as ILanguage])
-		           );
+						                      if(device === null)
+						                      {
+							                      return _throw(
+									                      new Error(`Customer with the id ${customerId} doesn't exist`)
+							                      );
+						                      }
+						                      else
+						                      {
+							                      return of(device);
+						                      }
+					                      }),
+					           distinctUntilChanged(
+							           (oldDevice, newDevice) =>
+									           oldDevice.language !== newDevice.language
+					           ),
+					           switchMap(() => this.watchedFiles?.aboutUs[selectedLanguage as ILanguage])
+			           );
+		} catch(e)
+		{
+			this.log.error({
+				               message:  e.message,
+				               listener: "getAboutUs",
+			               });
+		}
+		
+		return of("");
 	}
 	
 	/**
@@ -438,30 +452,41 @@ export class CustomersService extends DBService<Customer>
 			selectedLanguage: string
 	): Observable<string>
 	{
-		return this.devicesService
-		           .get(deviceId)
-		           .pipe(
-				           exhaustMap((device) =>
-				                      {
-					                      if(device === null)
+		try
+		{
+			return this.devicesService
+			           .get(deviceId)
+			           .pipe(
+					           exhaustMap((device) =>
 					                      {
-						                      return _throw(
-								                      new Error(
-										                      `Device with the id ${deviceId} doesn't exist`
-								                      )
-						                      );
-					                      }
-					                      else
-					                      {
-						                      return of(device);
-					                      }
-				                      }),
-				           distinctUntilChanged(
-						           (oldDevice, newDevice) =>
-								           oldDevice.language !== newDevice.language
-				           ),
-				           switchMap(() => this.watchedFiles.termsOfUse[selectedLanguage as ILanguage])
-		           );
+						                      if(device === null)
+						                      {
+							                      return _throw(
+									                      new Error(
+											                      `Device with the id ${deviceId} doesn't exist`
+									                      )
+							                      );
+						                      }
+						                      else
+						                      {
+							                      return of(device);
+						                      }
+					                      }),
+					           distinctUntilChanged(
+							           (oldDevice, newDevice) =>
+									           oldDevice.language !== newDevice.language
+					           ),
+					           switchMap(() => this.watchedFiles.termsOfUse[selectedLanguage as ILanguage])
+			           );
+		} catch(e)
+		{
+			this.log.error({
+				               message:  e.message,
+				               listener: "getTermsOfUse",
+			               });
+		}
+		
+		return of("");
 	}
 	
 	/**
@@ -479,28 +504,39 @@ export class CustomersService extends DBService<Customer>
 			selectedLanguage: string
 	): Observable<string>
 	{
-		return this.devicesService
-		           .get(deviceId)
-		           .pipe(
-				           exhaustMap((device) =>
-				                      {
-					                      if(device === null)
+		try
+		{
+			return this.devicesService
+			           .get(deviceId)
+			           .pipe(
+					           exhaustMap((device) =>
 					                      {
-						                      return _throw(
-								                      new Error(`Customer with the id ${customerId} doesn't exist`)
-						                      );
-					                      }
-					                      else
-					                      {
-						                      return of(device);
-					                      }
-				                      }),
-				           distinctUntilChanged(
-						           (oldDevice, newDevice) =>
-								           oldDevice.language !== newDevice.language
-				           ),
-				           switchMap(() => this.watchedFiles.privacy[selectedLanguage as ILanguage])
-		           );
+						                      if(device === null)
+						                      {
+							                      return _throw(
+									                      new Error(`Customer with the id ${customerId} doesn't exist`)
+							                      );
+						                      }
+						                      else
+						                      {
+							                      return of(device);
+						                      }
+					                      }),
+					           distinctUntilChanged(
+							           (oldDevice, newDevice) =>
+									           oldDevice.language !== newDevice.language
+					           ),
+					           switchMap(() => this.watchedFiles.privacy[selectedLanguage as ILanguage])
+			           );
+		} catch(e)
+		{
+			this.log.error({
+				               message:  e.message,
+				               listener: "getPrivacy",
+			               });
+		}
+		
+		return of("");
 	}
 	
 	/**
@@ -518,28 +554,39 @@ export class CustomersService extends DBService<Customer>
 			selectedLanguage: string
 	): Observable<string>
 	{
-		return this.devicesService
-		           .get(deviceId)
-		           .pipe(
-				           exhaustMap((device) =>
-				                      {
-					                      if(device === null)
+		try
+		{
+			return this.devicesService
+			           .get(deviceId)
+			           .pipe(
+					           exhaustMap((device) =>
 					                      {
-						                      return _throw(
-								                      new Error(`Customer with the id ${customerId} doesn't exist`)
-						                      );
-					                      }
-					                      else
-					                      {
-						                      return of(device);
-					                      }
-				                      }),
-				           distinctUntilChanged(
-						           (oldDevice, newDevice) =>
-								           oldDevice.language !== newDevice.language
-				           ),
-				           switchMap(() => this.watchedFiles.help[selectedLanguage as ILanguage])
-		           );
+						                      if(device === null)
+						                      {
+							                      return _throw(
+									                      new Error(`Customer with the id ${customerId} doesn't exist`)
+							                      );
+						                      }
+						                      else
+						                      {
+							                      return of(device);
+						                      }
+					                      }),
+					           distinctUntilChanged(
+							           (oldDevice, newDevice) =>
+									           oldDevice.language !== newDevice.language
+					           ),
+					           switchMap(() => this.watchedFiles.help[selectedLanguage as ILanguage])
+			           );
+		} catch(e)
+		{
+			this.log.error({
+				               message:  e.message,
+				               listener: "getHelp",
+			               });
+		}
+		
+		return of("");
 	}
 	
 	public async banUser(id: string): Promise<Customer>
