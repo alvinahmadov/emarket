@@ -35,9 +35,9 @@ export class AdminResolver
 	}
 	
 	@Query('adminSearch')
-	async findAdmin(_, { findInput }: { findInput: IAdminFindInput })
+	async findAdmin(_, { findInput }: { findInput?: IAdminFindInput }): Promise<Admin | null>
 	{
-		return this._adminsService.findAdmin(findInput)
+		return this._adminsService.findAdmin(findInput);
 	}
 	
 	@Mutation()
