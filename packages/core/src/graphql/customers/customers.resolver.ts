@@ -9,7 +9,7 @@ import { Types }                 from 'mongoose';
 import { first }                 from 'rxjs/operators';
 import ICustomer, {
 	IResponseGenerateCustomers,
-	ICustomerFindInput
+	ICustomerFindObject
 }                                from '@modules/server.common/interfaces/ICustomer';
 import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
 import { ICustomerOrderMetrics } from '@modules/server.common/interfaces/ICustomerOrder';
@@ -100,7 +100,7 @@ export class CustomerResolver
 	public async searchCustomers(
 			_,
 			{ findInput, pagingOptions = {} }:
-					{ findInput?: ICustomerFindInput, pagingOptions?: IPagingOptions }
+					{ findInput?: ICustomerFindObject, pagingOptions?: IPagingOptions }
 	)
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
