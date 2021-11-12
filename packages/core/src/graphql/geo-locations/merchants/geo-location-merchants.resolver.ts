@@ -38,7 +38,10 @@ export class GeoLocationMerchantsResolver
 	 * @memberOf {GeoLocationMerchantsResolver}
 	 * */
 	@Query('getCloseMerchants')
-	public async getCloseMerchants(_, { geoLocation }: { geoLocation: IGeoLocation })
+	public async getCloseMerchants(
+			_,
+			{ geoLocation }: { geoLocation: IGeoLocation }
+	): Promise<Warehouse[] | null>
 	{
 		return this.getNearMerchants(
 				_,
@@ -72,7 +75,7 @@ export class GeoLocationMerchantsResolver
 	public async getNearMerchants(
 			_,
 			{ geoLocation, options }: INearStoresInput
-	)
+	): Promise<Warehouse[] | null>
 	{
 		const maxDistance = options?.maxDistance ?? IN_STORE_DISTANCE;
 		
