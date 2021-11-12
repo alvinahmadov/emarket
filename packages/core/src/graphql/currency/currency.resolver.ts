@@ -8,13 +8,13 @@ export class CurrencyResolver
 	constructor(private readonly _currenciesService: CurrenciesService) {}
 	
 	@Query('currencies')
-	async getCurrencies(_)
+	public async getCurrencies(_)
 	{
 		return this._currenciesService.getAllCurrencies();
 	}
 	
 	@Mutation()
-	async createCurrency(
+	public async createCurrency(
 			_,
 			{ createInput }: { createInput: ICurrencyCreateObject }
 	)
