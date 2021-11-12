@@ -194,7 +194,7 @@ export class CustomersService extends DBService<Customer>
 	public async updateCustomer(
 			id: string,
 			userCreateObject: ICustomerUpdateObject
-	): Promise<Customer>
+	): Promise<Customer | null>
 	{
 		await this.throwIfNotExists(id);
 		return super.update(id, userCreateObject);
@@ -208,7 +208,7 @@ export class CustomersService extends DBService<Customer>
 	 * @memberof CustomersService
 	 */
 	@observableListener()
-	public get(customerId: string): Observable<Customer>
+	public get(customerId: string): Observable<Customer | null>
 	{
 		return super.get(customerId)
 		            .pipe(
