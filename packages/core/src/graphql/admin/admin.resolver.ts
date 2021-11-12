@@ -4,8 +4,13 @@ import { ExtractJwt }                from 'passport-jwt';
 import { first }                     from 'rxjs/operators';
 import { IAdminFindInput }           from '@modules/server.common/interfaces/IAdmin';
 import {
+	IAdminLoginResponse,
 	IAdminRegistrationInput,
-	IAdminLoginResponse
+	IAdminIdInput,
+	IAdminEmailInput,
+	IAdminLoginInput,
+	IAdminUpdateInput,
+	IAdminPasswordUpdateInput
 }                                    from '@modules/server.common/routers/IAdminRouter';
 import Admin                         from '@modules/server.common/entities/Admin';
 import { env }                       from '../../env';
@@ -19,7 +24,7 @@ export class AdminResolver
 	
 	@Query('admin')
 	@UseGuards(GqlAdminGuard)
-	public async getAdmin(_, { id }: { id: string }): Promise<Admin>
+	public async getAdmin(_, { id }: IAdminIdInput): Promise<Admin>
 	{
 		return this._adminsService
 		           .get(id)
@@ -29,7 +34,7 @@ export class AdminResolver
 	
 	@Query('adminByEmail')
 	@UseGuards(GqlAdminGuard)
-	public async getByEmail(_, { email }: { email: string }): Promise<Admin>
+	public async getByEmail(_, { email }: IAdminEmailInput): Promise<Admin>
 	{
 		return this._adminsService.getByEmail(email);
 	}
@@ -52,7 +57,7 @@ export class AdminResolver
 	@Mutation()
 	public async adminLogin(
 			_,
-			{ email, password }: { email: string; password: string }
+			{ email, password }: IAdminLoginInput
 	): Promise<IAdminLoginResponse>
 	{
 		return this._adminsService.login(email, password);
@@ -70,7 +75,7 @@ export class AdminResolver
 	@UseGuards(GqlAdminGuard)
 	public async updateAdmin(
 			_,
-			{ id, updateInput }: { id: string; updateInput }
+			{ id, updateInput }: IAdminUpdateInput
 	): Promise<Admin>
 	{
 		await this._adminsService.throwIfNotExists(id);
@@ -81,10 +86,7 @@ export class AdminResolver
 	@UseGuards(GqlAdminGuard)
 	public async updateAdminPassword(
 			_,
-			{
-				id,
-				password
-			}: { id: Admin['id']; password: { current: string; new: string } }
+			{ id, password }: IAdminPasswordUpdateInput
 	): Promise<void>
 	{
 		if(!env.ADMIN_PASSWORD_RESET)
