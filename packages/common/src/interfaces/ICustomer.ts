@@ -22,7 +22,7 @@ export interface ICustomerCreateObject extends ICustomerInitializeObject
 	stripeCustomerId?: string;
 }
 
-export interface ICustomerFindInput
+export interface ICustomerFindObject
 {
 	id?: string
 	firstName?: string
