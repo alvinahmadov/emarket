@@ -1,14 +1,17 @@
-import { Observable }                         from 'rxjs';
-import { map }                                from 'rxjs/operators';
-import { cards }                              from 'stripe';
-import { Injectable }                         from '@angular/core';
+import { Observable }            from 'rxjs';
+import { map }                   from 'rxjs/operators';
+import { cards }                 from 'stripe';
+import { Injectable }            from '@angular/core';
 import ICustomer,
-{ ICustomerUpdateObject, ICustomerFindInput } from '@modules/server.common/interfaces/ICustomer';
-import IPagingOptions                         from '@modules/server.common/interfaces/IPagingOptions';
-import Customer                               from '@modules/server.common/entities/Customer';
-import GeoLocation                            from '@modules/server.common/entities/GeoLocation';
-import ICustomerRouter                        from '@modules/server.common/routers/ICustomerRouter';
-import { Router, RouterFactory }              from '../lib/router';
+{
+	ICustomerUpdateObject,
+	ICustomerFindObject
+}                                from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
+import Customer                  from '@modules/server.common/entities/Customer';
+import GeoLocation               from '@modules/server.common/entities/GeoLocation';
+import ICustomerRouter           from '@modules/server.common/routers/ICustomerRouter';
+import { Router, RouterFactory } from '../lib/router';
 
 @Injectable()
 export class CustomerRouter implements ICustomerRouter
@@ -27,7 +30,7 @@ export class CustomerRouter implements ICustomerRouter
 		           .pipe(map((user) => this._customerFactory(user)));
 	}
 	
-	getCustomers(findObj: ICustomerFindInput, pagingOptions?: IPagingOptions): Observable<Customer>
+	getCustomers(findObj: ICustomerFindObject, pagingOptions?: IPagingOptions): Observable<Customer>
 	{
 		return this.router.runAndObserve<Customer>(
 				'getCustomers',
