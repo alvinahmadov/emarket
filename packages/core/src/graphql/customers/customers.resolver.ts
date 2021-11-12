@@ -25,7 +25,8 @@ import {
 import {
 	ICustomerIdInput,
 	ICustomerEmailInput,
-	ICustomerUpdateInput
+	ICustomerUpdateInput,
+	ICustomerMemberInput
 }                                from '@modules/server.common/routers/ICustomerRouter';
 import { DevicesService }        from '../../services/devices';
 import {
@@ -69,15 +70,14 @@ export class CustomerResolver
 	}
 	
 	@Query('isCustomerExists')
-	public async customerExists(_, { conditions }): Promise<boolean>
+	public async customerExists(
+			_,
+			{ exceptCustomerId, memberKey, memberValue }: ICustomerMemberInput
+	): Promise<boolean>
 	{
-		const userId = conditions.exceptCustomerId;
-		const memberKey = conditions.memberKey;
-		const memberValue = conditions.memberValue;
-		
 		return (
 				(await this._customersService.count({
-					                                    _id:         { $nin: [new Types.ObjectId(userId)] },
+					                                    _id:         { $nin: [new Types.ObjectId(exceptCustomerId)] },
 					                                    isDeleted:   { $eq: false },
 					                                    [memberKey]: memberValue
 				                                    })) > 0
