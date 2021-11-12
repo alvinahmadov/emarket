@@ -8,7 +8,7 @@ import Invite                        from '@modules/server.common/entities/Invit
 import { FakeDataGuard }             from '../../auth/guards/fake-data.guard';
 import { InvitesRequestsService }    from '../../services/invites';
 import { InvitesService }            from '../../services/invites/InvitesService';
-import { FakeInvitesService }        from "../../services/fake-data/FakeInvitesService";
+import { FakeInvitesService }        from '../../services/fake-data/FakeInvitesService';
 
 @Resolver('Invite')
 export class InviteResolver
@@ -21,7 +21,7 @@ export class InviteResolver
 	
 	@Query()
 	@UseGuards(FakeDataGuard)
-	async generate1000InvitesConnectedToInviteRequests(
+	public async generate1000InvitesConnectedToInviteRequests(
 			_,
 			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
 	): Promise<void>
@@ -47,7 +47,7 @@ export class InviteResolver
 	}
 	
 	@Query('invite')
-	async getInvite(_, { id }: { id: string }): Promise<Invite>
+	public async getInvite(_, { id }: { id: string }): Promise<Invite>
 	{
 		return this._invitesService
 		           .get(id)
@@ -56,7 +56,7 @@ export class InviteResolver
 	}
 	
 	@Query('getInviteByCode')
-	async getInviteByCode(
+	public async getInviteByCode(
 			_,
 			{ info }: { info: IEnterByCode }
 	): Promise<Invite>
@@ -68,7 +68,7 @@ export class InviteResolver
 	}
 	
 	@Query('getInviteByLocation')
-	async getInviteByLocation(
+	public async getInviteByLocation(
 			_,
 			{ info }: { info: IEnterByLocation }
 	): Promise<Invite>
@@ -80,7 +80,7 @@ export class InviteResolver
 	}
 	
 	@Query('invites')
-	async getInvites(_, { findInput, pagingOptions = {} }): Promise<any>
+	public async getInvites(_, { findInput, pagingOptions = {} }): Promise<any>
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
@@ -97,7 +97,7 @@ export class InviteResolver
 	}
 	
 	@Query()
-	async getCountOfInvites(): Promise<number>
+	public async getCountOfInvites(): Promise<number>
 	{
 		return this._invitesService.Model
 		           .find({ isDeleted: { $eq: false } })
@@ -106,7 +106,7 @@ export class InviteResolver
 	}
 	
 	@Mutation()
-	async createInvite(
+	public async createInvite(
 			_,
 			{ createInput }: { createInput: IInviteCreateObject }
 	): Promise<Invite>
@@ -115,7 +115,7 @@ export class InviteResolver
 	}
 	
 	@Mutation()
-	async updateInvite(
+	public async updateInvite(
 			_,
 			{ id, updateInput }: { id: string; updateInput }
 	): Promise<Invite>
@@ -125,14 +125,14 @@ export class InviteResolver
 	}
 	
 	@Mutation()
-	async removeInvite(_, { id }: { id: string }): Promise<void>
+	public async removeInvite(_, { id }: { id: string }): Promise<void>
 	{
 		await this._invitesService.throwIfNotExists(id);
 		return this._invitesService.remove(id);
 	}
 	
 	@Mutation()
-	async removeInvitesByIds(_, { ids }: { ids: string[] }): Promise<void>
+	public async removeInvitesByIds(_, { ids }: { ids: string[] }): Promise<void>
 	{
 		const invites = await this._invitesService.find({
 			                                                _id: { $in: ids },
