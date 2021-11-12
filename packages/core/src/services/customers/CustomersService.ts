@@ -45,7 +45,6 @@ import { WarehousesService } from '../../services/warehouses';
 import { createLogger }      from '../../helpers/Log';
 import { observeFile }       from '../../utils';
 import { env }               from '../../env';
-import * as path             from 'path';
 
 interface IWatchedFiles
 {
