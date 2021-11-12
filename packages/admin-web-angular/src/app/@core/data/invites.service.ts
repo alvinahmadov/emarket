@@ -168,15 +168,16 @@ export class InvitesService extends ApolloService
 		           .toPromise();
 	}
 	
-	public generate1000InvitesConnectedToInviteRequests(
+	public generateInvitesConnectedToInviteRequests(
 			defaultLng: number,
-			defaultLat: number
+			defaultLat: number,
+			qty?: number
 	): Observable<ApolloQueryResult<void>>
 	{
 		return this.apollo
 		           .query({
 			                  query:     GQLQuery.Invite.GenerateInvitesToInviteRequests,
-			                  variables: { defaultLng, defaultLat },
+			                  variables: { defaultLng, defaultLat, qty },
 		                  });
 	}
 	
