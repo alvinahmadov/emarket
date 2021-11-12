@@ -17,7 +17,7 @@ export class GeoLocationResolver
 	{}
 	
 	@Query('geoLocationProducts')
-	async getGeoLocationProducts(
+	public async getGeoLocationProducts(
 			_,
 			{ geoLocation }: { geoLocation: GeoLocation }
 	): Promise<ProductInfo[]>
@@ -29,7 +29,7 @@ export class GeoLocationResolver
 	}
 	
 	@Query()
-	async geoLocationProductsByPaging(
+	public async geoLocationProductsByPaging(
 			_,
 			{
 				geoLocation,
@@ -48,7 +48,7 @@ export class GeoLocationResolver
 	}
 	
 	@Query()
-	async getCountOfGeoLocationProducts(
+	public async getCountOfGeoLocationProducts(
 			_,
 			{
 				geoLocation,
