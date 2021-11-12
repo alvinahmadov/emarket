@@ -1,11 +1,9 @@
-// TODO: move all utils into shared/core
-
-import { Observable } from 'rxjs';
-import fs             from 'fs';
+import { Observable, Subscriber } from 'rxjs';
+import fs                         from 'fs';
 
 export function observeFile(fileName: string): Observable<string>
 {
-	return Observable.create((observer) =>
+	return Observable.create((observer: Subscriber<string>) =>
 	                         {
 		                         const fetchTranslations = () =>
 		                         {
@@ -24,9 +22,6 @@ export function observeFile(fileName: string): Observable<string>
 		
 		                         fs.watchFile(fileName, fetchTranslations);
 		
-		                         return () =>
-		                         {
-			                         fs.unwatchFile(fileName, fetchTranslations);
-		                         };
+		                         return () => fs.unwatchFile(fileName, fetchTranslations);
 	                         });
 }
