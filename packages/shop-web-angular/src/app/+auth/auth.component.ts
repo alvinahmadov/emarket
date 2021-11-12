@@ -71,8 +71,9 @@ export class AuthComponent implements ToolbarController, OnInit, OnDestroy
 	public readonly toolbarDisabled = true;
 	
 	public formControl = this.fb.group({
-		                                   email:    ['', Validators.required],
-		                                   password: ['', Validators.required]
+		                                   email:      ['', Validators.required],
+		                                   password:   ['', Validators.required],
+		                                   rememberMe: [false]
 	                                   });
 	
 	public matcher = new MyErrorStateMatcher();
@@ -80,6 +81,7 @@ export class AuthComponent implements ToolbarController, OnInit, OnDestroy
 	public authLogo = env.AUTH_LOGO;
 	
 	private emailControl: AbstractControl = this.formControl.get('email');
+	private rememberMeControl: AbstractControl = this.formControl.get('rememberMe');
 	private passwordControl: AbstractControl = this.formControl.get('password');
 	
 	private _ngDestroy$ = new Subject<void>();
@@ -128,6 +130,16 @@ export class AuthComponent implements ToolbarController, OnInit, OnDestroy
 		this.passwordControl.setValue(value);
 	}
 	
+	public get rememberMe(): boolean
+	{
+		return this.rememberMeControl.value;
+	}
+	
+	public set rememberMe(value: boolean)
+	{
+		this.rememberMeControl.setValue(value);
+	}
+	
 	public get hasEmailErrors(): boolean
 	{
 		return (this.emailControl.errors &&
@@ -166,9 +178,12 @@ export class AuthComponent implements ToolbarController, OnInit, OnDestroy
 	
 	public async login()
 	{
+		const expiresIn = this.rememberMe ? env.JWT_EXPIRES_MAX : env.JWT_EXPIRES_MIN;
+		
 		const response = await this.customerAuthRouter
 		                           .login(this.email,
-		                                  this.password);
+		                                  this.password,
+		                                  expiresIn);
 		if(response)
 		{
 			this.storage.customerId = response?.user.id;
