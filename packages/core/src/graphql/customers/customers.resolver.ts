@@ -8,10 +8,8 @@ import { UseGuards }             from '@nestjs/common';
 import { Types }                 from 'mongoose';
 import { first }                 from 'rxjs/operators';
 import ICustomer, {
-	IResponseGenerateCustomers,
-	ICustomerFindObject
+	IResponseGenerateCustomers
 }                                from '@modules/server.common/interfaces/ICustomer';
-import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
 import { ICustomerOrderMetrics } from '@modules/server.common/interfaces/ICustomerOrder';
 import Device                    from '@modules/server.common/entities/Device';
 import Customer                  from '@modules/server.common/entities/Customer';
@@ -26,6 +24,7 @@ import {
 	ICustomerIdInput,
 	ICustomerEmailInput,
 	ICustomerUpdateInput,
+	ICustomerFindInput,
 	ICustomerMemberInput
 }                                from '@modules/server.common/routers/ICustomerRouter';
 import { DevicesService }        from '../../services/devices';
@@ -97,19 +96,12 @@ export class CustomerResolver
 	}
 	
 	@Query('findCustomers')
-	public async searchCustomers(
-			_,
-			{ findInput, pagingOptions = {} }:
-					{ findInput?: ICustomerFindObject, pagingOptions?: IPagingOptions }
-	)
+	public async searchCustomers(_, { findInput, pagingOptions = {} }: ICustomerFindInput)
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
 			pagingOptions['sort'] = { field: '_createdAt', sortBy: 'desc' };
 		}
-		
-		if(!findInput)
-			findInput = {}
 		
 		const customers = await this._customersService.getCustomers(
 				findInput,
