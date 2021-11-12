@@ -1,6 +1,13 @@
 import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
 import IGeoLocation, { IGeoLocationCreateObject }    from './IGeoLocation';
 
+export interface ICustomerOrderMetrics
+{
+	totalOrders: number;
+	canceledOrders: number;
+	completedOrdersTotalSum: number;
+}
+
 export interface ICustomerOrderInitializeObject extends DBCreateObject
 {
 	firstName?: string;
