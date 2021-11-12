@@ -1,9 +1,10 @@
-import { Observable }            from 'rxjs';
-import { cards }                 from 'stripe';
-import { ICustomerUpdateObject } from '../interfaces/ICustomer';
-import Customer                  from '../entities/Customer';
-import GeoLocation               from '../entities/GeoLocation';
-import Device                    from '../entities/Device';
+import { Observable }                                 from 'rxjs';
+import { cards }                                      from 'stripe';
+import { ICustomerFindObject, ICustomerUpdateObject } from '../interfaces/ICustomer';
+import Customer                                       from '../entities/Customer';
+import GeoLocation                                    from '../entities/GeoLocation';
+import Device                                         from '../entities/Device';
+import IPagingOptions                                 from "interfaces/IPagingOptions";
 
 export interface ICustomerIdInput
 {
@@ -18,6 +19,12 @@ export interface ICustomerEmailInput extends ICustomerIdInput
 export interface ICustomerUpdateInput extends ICustomerIdInput
 {
 	updateObject: ICustomerUpdateObject;
+}
+
+export interface ICustomerFindInput
+{
+	findInput?: ICustomerFindObject,
+	pagingOptions?: IPagingOptions
 }
 
 export interface ICustomerMemberInput
