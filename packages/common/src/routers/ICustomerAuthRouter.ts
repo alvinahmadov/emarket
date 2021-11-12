@@ -1,5 +1,6 @@
-import { CreateObject } from '@pyro/db/db-create-object';
-import Customer         from '../entities/Customer';
+import { CreateObject }     from '@pyro/db/db-create-object';
+import Customer             from '../entities/Customer';
+import { ICustomerIdInput } from './ICustomerRouter';
 
 export interface AddableRegistrationInfo
 {
@@ -17,10 +18,32 @@ export interface ICustomerRegistrationInput
 	password?: string;
 }
 
+export interface ICustomerRegistrationInfoInput extends ICustomerIdInput
+{
+	registrationInfo: AddableRegistrationInfo
+}
+
+export interface ICustomerLoginInput
+{
+	email: string;
+	password: string
+}
+
+interface IPasswordUpdateInput
+{
+	current: string;
+	new: string
+}
+
 export interface ICustomerLoginResponse
 {
 	user: Customer;
 	token: string;
+}
+
+export interface ICustomerPasswordUpdateInput extends ICustomerIdInput
+{
+	password: IPasswordUpdateInput;
 }
 
 interface ICustomerAuthRouter
