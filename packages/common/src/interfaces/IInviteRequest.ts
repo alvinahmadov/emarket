@@ -24,6 +24,15 @@ export interface IInviteRequestUpdateObject
 	invitedDate?: Date;
 }
 
+export interface IInviteRequestFindObject
+{
+	apartment?: string;
+	isManual?: boolean;
+	isInvited?: boolean;
+	invitedDate?: Date;
+	// TODO: GeoLocation
+}
+
 export interface IInviteRequestRawObject
 		extends IInviteRequestCreateObject,
 		        DBRawObject
