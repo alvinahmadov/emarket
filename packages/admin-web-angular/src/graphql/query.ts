@@ -473,7 +473,7 @@ export namespace GQLQuery
 			}
 		`;
 		
-		export const GenerateCustom = gql`
+		export const GenerateFakeCustomers = gql`
 			query GenerateCustomers(
 				$qty: Int!
 				$defaultLng: Float!
@@ -739,11 +739,13 @@ export namespace GQLQuery
 		`;
 		
 		export const GenerateInvitesToInviteRequests = gql`
-			query Generate1000InvitesConnectedToInviteRequests(
+			query GenerateInvitesConnectedToInviteRequests(
+				$qty: Int
 				$defaultLng: Float!
 				$defaultLat: Float!
 			) {
-				generate1000InvitesConnectedToInviteRequests(
+				generateInvitesConnectedToInviteRequests(
+					qty: $qty
 					defaultLng: $defaultLng
 					defaultLat: $defaultLat
 				)
@@ -813,12 +815,14 @@ export namespace GQLQuery
 		`;
 		
 		export const Generate = gql`
-			query Generate1000InviteRequests(
+			query GenerateInviteRequests(
+				$qty: Int
 				$defaultLng: Float!
 				$defaultLat: Float!
 			)
 			{
-				generate1000InviteRequests(
+				generateInviteRequests(
+					qty: $qty
 					defaultLng: $defaultLng
 					defaultLat: $defaultLat
 				)
