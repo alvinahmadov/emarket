@@ -1,7 +1,29 @@
 import { Observable }   from 'rxjs';
 import { CreateObject } from '@pyro/db/db-create-object';
+import { UpdateObject } from '@pyro/db/db-update-object';
 import IAdmin           from '../interfaces/IAdmin';
 import Admin            from '../entities/Admin';
+
+export interface IAdminLoginResponse
+{
+	admin: Admin;
+	token: string;
+}
+
+export interface IAdminIdInput
+{
+	id: Admin['id'];
+}
+
+export interface IAdminEmailInput
+{
+	email: string;
+}
+
+export interface IAdminLoginInput extends IAdminEmailInput
+{
+	password: string;
+}
 
 export interface IAdminRegistrationInput
 {
@@ -9,10 +31,20 @@ export interface IAdminRegistrationInput
 	password?: string;
 }
 
-export interface IAdminLoginResponse
+export interface IAdminUpdateInput extends IAdminIdInput
 {
-	admin: Admin;
-	token: string;
+	updateInput: UpdateObject<Admin>;
+}
+
+interface IPasswordUpdateInput
+{
+	current: string;
+	new: string;
+}
+
+export interface IAdminPasswordUpdateInput extends IAdminIdInput
+{
+	password: IPasswordUpdateInput;
 }
 
 interface IAdminRouter
