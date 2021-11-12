@@ -37,7 +37,7 @@ export class GeoLocationMerchantsResolver
 	 * @memberOf {GeoLocationMerchantsResolver}
 	 * */
 	@Query('getCloseMerchants')
-	async getCloseMerchants(_, { geoLocation }: { geoLocation: IGeoLocation })
+	public async getCloseMerchants(_, { geoLocation }: { geoLocation: IGeoLocation })
 	{
 		return this.getNearMerchants(
 				_,
@@ -69,7 +69,7 @@ export class GeoLocationMerchantsResolver
 	 * @memberOf {GeoLocationMerchantsResolver}
 	 * */
 	@Query('getNearMerchants')
-	async getNearMerchants(
+	public async getNearMerchants(
 			_,
 			{ geoLocation, options }:
 					{
