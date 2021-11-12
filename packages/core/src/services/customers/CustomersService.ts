@@ -115,7 +115,7 @@ export class CustomersService extends DBService<Customer>
 	 *
 	 * @param {string} email
 	 * @returns {Promise<boolean>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	public async isUserEmailExists(email: string): Promise<boolean>
 	{
@@ -127,7 +127,7 @@ export class CustomersService extends DBService<Customer>
 	 *
 	 * @param {string} socialId
 	 * @returns {Promise<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	public async getSocial(socialId: string): Promise<Customer>
 	{
@@ -142,7 +142,7 @@ export class CustomersService extends DBService<Customer>
 	 *
 	 * @param {ICustomerInitializeObject} customerInitializeObject
 	 * @returns {Promise<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	public async initCustomer(customerInitializeObject: ICustomerInitializeObject): Promise<Customer>
 	{
@@ -155,9 +155,12 @@ export class CustomersService extends DBService<Customer>
 	 * @param {ICustomerFindInput} customerInput
 	 * @param {IPagingOptions} pagingOptions
 	 * @returns
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
-	public async getCustomers(customerInput: ICustomerFindInput, pagingOptions: IPagingOptions = {})
+	public async getCustomers(
+			customerInput: ICustomerFindInput,
+			pagingOptions: IPagingOptions = {}
+	) : Promise<Customer[]>
 	{
 		const sortObj = {};
 		if(pagingOptions.sort)
@@ -185,7 +188,7 @@ export class CustomersService extends DBService<Customer>
 	 * @param {string} id
 	 * @param {ICustomerCreateObject} userCreateObject
 	 * @returns {Promise<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@asyncListener()
 	public async updateCustomer(
@@ -202,7 +205,7 @@ export class CustomersService extends DBService<Customer>
 	 *
 	 * @param {string} customerId
 	 * @returns {Observable<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@observableListener()
 	public get(customerId: string): Observable<Customer>
@@ -220,7 +223,7 @@ export class CustomersService extends DBService<Customer>
 	 *
 	 * @param {string} customerId
 	 * @returns {Promise<Stripe.cards.ICard[]>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@asyncListener()
 	public async getCards(customerId: string): Promise<Stripe.cards.ICard[]>
@@ -263,7 +266,7 @@ export class CustomersService extends DBService<Customer>
 	 * @param {string} customerId
 	 * @param {string} tokenId
 	 * @returns {Promise<string>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@asyncListener()
 	public async addPaymentMethod(customerId: string, tokenId: string): Promise<string>
@@ -342,7 +345,7 @@ export class CustomersService extends DBService<Customer>
 	 * @param {string} customerId
 	 * @param {string} email
 	 * @returns {Promise<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@asyncListener()
 	public async updateEmail(customerId: string, email: string): Promise<Customer>
@@ -357,7 +360,7 @@ export class CustomersService extends DBService<Customer>
 	 * @param {string} customerId
 	 * @param {Role | string} role
 	 * @returns {Promise<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@asyncListener()
 	public async updateRole(customerId: string, role: Role | string): Promise<Customer>
@@ -372,7 +375,7 @@ export class CustomersService extends DBService<Customer>
 	 * @param {string} customerId
 	 * @param {GeoLocation} geoLocation
 	 * @returns {Promise<Customer>}
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	@asyncListener()
 	public async updateGeoLocation(
@@ -606,7 +609,7 @@ export class CustomersService extends DBService<Customer>
 	 * not exists or deleted
 	 *
 	 * @param {string} customerId
-	 * @memberof UsersService
+	 * @memberof CustomersService
 	 */
 	public async throwIfNotExists(customerId: string)
 	{
