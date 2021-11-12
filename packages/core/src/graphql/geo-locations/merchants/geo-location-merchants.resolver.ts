@@ -1,19 +1,20 @@
 import { Query, Resolver }               from '@nestjs/graphql';
-import { GeoLocationsWarehousesService } from '../../../services/geo-locations';
 import IGeoLocation                      from '@modules/server.common/interfaces/IGeoLocation';
+import { INearStoresInput }              from '@modules/server.common/routers/IGeoLocationWarehousesRouter';
 import Warehouse                         from '@modules/server.common/entities/Warehouse';
-import { GeoUtils }                      from '@modules/server.common/utilities';
 import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
+import { GeoUtils }                      from '@modules/server.common/utilities';
+import { GeoLocationsWarehousesService } from '../../../services/geo-locations';
 
 const IN_STORE_DISTANCE = 50;
 
-type TGetGeoLocationWarehousesOptions =
-		{
-			activeOnly?: boolean;
-			inStoreMode?: boolean;
-			maxDistance?: number;
-			fullProducts?: boolean;
-		}
+export interface IGetGeoLocationWarehousesOptions
+{
+	activeOnly?: boolean;
+	inStoreMode?: boolean;
+	maxDistance?: number;
+	fullProducts?: boolean;
+}
 
 @Resolver('GeoLocationMerchants')
 export class GeoLocationMerchantsResolver
@@ -53,7 +54,6 @@ export class GeoLocationMerchantsResolver
 		);
 	}
 	
-	
 	/**
 	 * Tries to find warehouses/merchants
 	 * in range of 0 and max distance meters
@@ -62,7 +62,7 @@ export class GeoLocationMerchantsResolver
 	 * @param _
 	 * @param {IGeoLocation} geoLocation Geolocation object
 	 * for distance measures
-	 * @param {TGetGeoLocationWarehousesOptions} options
+	 * @param {IGetGeoLocationWarehousesOptions} options
 	 *
 	 * @returns {Promise<Warehouse[]>} Found merchants
 	 *
@@ -71,17 +71,15 @@ export class GeoLocationMerchantsResolver
 	@Query('getNearMerchants')
 	public async getNearMerchants(
 			_,
-			{ geoLocation, options }:
-					{
-						geoLocation: IGeoLocation,
-						options?: TGetGeoLocationWarehousesOptions
-					}
+			{ geoLocation, options }: INearStoresInput
 	)
 	{
+		const maxDistance = options?.maxDistance ?? IN_STORE_DISTANCE;
+		
 		let merchants = await this.geoLocationsWarehousesService
 		                          .getStores(
 				                          geoLocation,
-				                          options?.maxDistance ?? 50,
+				                          maxDistance,
 				                          {
 					                          activeOnly:   options?.activeOnly ?? true,
 					                          inStoreMode:  options?.inStoreMode ?? true,
