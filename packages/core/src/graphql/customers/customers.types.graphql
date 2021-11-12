@@ -149,7 +149,7 @@ type Mutation {
 
 	registerCustomer(registerInput: CustomerRegisterInput!): Customer!
 
-	customerLogin(email: String!, password: String!): CustomerLoginInfo
+	customerLogin(authInfo: String!, password: String!, expiresIn: Any): CustomerLoginInfo
 
 	removeCustomersByIds(ids: [String]!): String!
 
