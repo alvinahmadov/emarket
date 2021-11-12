@@ -196,9 +196,9 @@ export class CustomerResolver
 	}
 	
 	@Mutation()
-	public async customerLogin(_, { email, password }: ICustomerLoginInput): Promise<ICustomerLoginResponse>
+	public async customerLogin(_, { authInfo, password, expiresIn }: ICustomerLoginInput): Promise<ICustomerLoginResponse>
 	{
-		return this._customersAuthService.login(email, password);
+		return this._customersAuthService.login(authInfo, password, expiresIn);
 	}
 	
 	@Mutation()
