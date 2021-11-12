@@ -10,6 +10,7 @@ import OrderWarehouseStatus                         from '@modules/server.common
 import Order                                        from '@modules/server.common/entities/Order';
 import Customer                                     from '@modules/server.common/entities/Customer';
 import ICustomerOrdersRouter                        from '@modules/server.common/routers/ICustomerOrdersRouter';
+import { ICustomerOrderMetrics }                    from '@modules/server.common/interfaces/ICustomerOrder';
 import { CustomersService }                         from './CustomersService';
 import IService                                     from '../IService';
 import { OrdersService }                            from '../orders';
@@ -45,12 +46,12 @@ export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 	 * Get Orders for given Customers
 	 * TODO: add paging
 	 *
-	 * @param {Customer['id']} userId
+	 * @param {Customer['id']} id
 	 * @returns {Observable<Order[]>}
 	 * @memberof UsersOrdersService
 	 */
 	@observableListener()
-	get(userId: Customer['id']): Observable<Order[]>
+	public get(id: Customer['id']): Observable<Order[]>
 	{
 		return concat(
 				of(null),
@@ -58,25 +59,25 @@ export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 				    .existence
 				    .pipe(
 						    filter((e: ExistenceEvent<Order>) =>
-								           CustomersOrdersService._shouldPull(userId, e)),
+								           CustomersOrdersService._shouldPull(id, e)),
 						    share()
 				    )
-		).pipe(exhaustMap(() => this.getCurrent(userId)));
+		).pipe(exhaustMap(() => this.getCurrent(id)));
 	}
 	
 	/**
 	 * Get Orders for given Customers
 	 * TODO: add paging
 	 *
-	 * @param {string} userId
+	 * @param {string} id
 	 * @returns {Promise<Order[]>}
 	 * @memberof UsersOrdersService
 	 */
-	async getCurrent(userId: string): Promise<Order[]>
+	public async getCurrent(id: string): Promise<Order[]>
 	{
 		const orders = await this.ordersService
 		                         .find({
-			                               'customer._id': new mongoose.Types.ObjectId(userId),
+			                               'customer._id': new mongoose.Types.ObjectId(id),
 			                               isDeleted:      { $eq: false }
 		                               });
 		
@@ -87,7 +88,7 @@ export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 		);
 	}
 	
-	async getCustomerMetrics(id: string)
+	public async getCustomerMetrics(id: string): Promise<ICustomerOrderMetrics>
 	{
 		const completedUserOrders =
 				      await this.ordersService
@@ -108,29 +109,29 @@ export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 					                      ]
 				                      }).select({ products: 1 });
 		
-		const completedOrdersTotalSum = completedUserOrders
+		const completedOrdersTotalSum: number = completedUserOrders
 				.map((o) => o.products
 				             .map((p) => p.price * p.count)
 				             .reduce((a, b) => a + b, 0))
 				.reduce((a, b) => a + b, 0);
 		
-		const totalOrders = await this.ordersService
-		                              .Model
-		                              .find({
-			                                    'customer._id': id
-		                                    })
-		                              .countDocuments()
-		                              .exec();
+		const totalOrders: number = await this.ordersService
+		                                      .Model
+		                                      .find({
+			                                            'customer._id': id
+		                                            })
+		                                      .countDocuments()
+		                                      .exec();
 		
-		const canceledOrders = await this.ordersService
-		                                 .Model
-		                                 .find({
-			                                       $and: [
-				                                       { 'customer._id': id }, { isCancelled: true }
-			                                       ]
-		                                       })
-		                                 .countDocuments()
-		                                 .exec();
+		const canceledOrders: number = await this.ordersService
+		                                         .Model
+		                                         .find({
+			                                               $and: [
+				                                               { 'customer._id': id }, { isCancelled: true }
+			                                               ]
+		                                               })
+		                                         .countDocuments()
+		                                         .exec();
 		
 		return {
 			totalOrders,
@@ -139,24 +140,24 @@ export class CustomersOrdersService implements ICustomerOrdersRouter, IService
 		};
 	}
 	
-	private static _shouldPull(customerId: Customer['id'], event: ExistenceEvent<Order>)
+	private static _shouldPull(id: Customer['id'], event: ExistenceEvent<Order>): boolean
 	{
 		switch(event.type as ExistenceEventType)
 		{
 			case ExistenceEventType.Created:
-				return event.value != null && event.value.customer.id === customerId;
+				return event.value != null && event.value.customer.id === id;
 			
 			case ExistenceEventType.Updated:
 				return (
-						(event.value != null && event.value.customer.id === customerId) ||
+						(event.value != null && event.value.customer.id === id) ||
 						(event.lastValue != null &&
-						 event.lastValue.customer.id === customerId)
+						 event.lastValue.customer.id === id)
 				);
 			
 			case ExistenceEventType.Removed:
 				return (
 						event.lastValue != null &&
-						event.lastValue.customer.id === customerId
+						event.lastValue.customer.id === id
 				);
 		}
 	}
