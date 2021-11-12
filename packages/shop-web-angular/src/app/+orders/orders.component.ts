@@ -15,12 +15,12 @@ export class OrdersComponent implements OnInit
 	
 	constructor() {}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.getTotalOrdersSum();
 	}
 	
-	getTotalOrdersSum()
+	public getTotalOrdersSum()
 	{
 		this.ordersSum = this.orders
 		                     .map((order) => order.totalPrice)
