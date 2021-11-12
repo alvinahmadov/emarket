@@ -10,13 +10,7 @@ import { ICustomerRegistrationInput }            from '@modules/server.common/ro
 import { ICustomerMemberInput }                  from '@modules/server.common/routers/ICustomerRouter';
 import ApolloService                             from '@modules/client.common.angular2/services/apollo.service';
 import { GQLMutation, GQLQuery }                 from 'graphql/definitions';
-
-export interface ICustomerMetrics
-{
-	totalOrders: number;
-	canceledOrders: number;
-	completedOrdersTotalSum: number;
-}
+import { ICustomerOrderMetrics } from '@modules/server.common/interfaces/ICustomerOrder';
 
 @Injectable()
 export class CustomersService extends ApolloService
@@ -160,11 +154,11 @@ export class CustomersService extends ApolloService
 	
 	public async getCustomerMetrics(
 			id: string
-	): Promise<ICustomerMetrics>
+	): Promise<ICustomerOrderMetrics>
 	{
 		return await this.apollo
 		                 .query<{
-			                 metrics: ICustomerMetrics
+			                 metrics: ICustomerOrderMetrics
 		                 }>({
 			                    query:     GQLQuery.Customer.Metrics,
 			                    variables: { id },
@@ -183,7 +177,7 @@ export class CustomersService extends ApolloService
 		           .query<{
 			           generateCustomers: IResponseGenerateCustomers
 		           }>({
-			              query:     GQLQuery.Customer.GenerateCustom,
+			              query:     GQLQuery.Customer.GenerateFakeCustomers,
 			              variables: { qty, defaultLng, defaultLat },
 		              })
 		           .pipe(map((result) => this.get(result)));
