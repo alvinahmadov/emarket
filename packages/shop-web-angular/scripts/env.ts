@@ -12,6 +12,9 @@ export type Env = Readonly<{
 	GQL_ENDPOINT: string;
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
+	JWT_EXPIRES_MAX: string;
+	JWT_EXPIRES_MIN: string;
+	
 	DEFAULT_COORDINATES: boolean;
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
@@ -56,6 +59,9 @@ export const env: Env = cleanEnv(
 			GQL_SUBSCRIPTIONS_ENDPOINT: str({
 				                                default: 'ws://localhost:5050/subscriptions',
 			                                }),
+			
+			JWT_EXPIRES_MAX: str({ default: '14d' }),
+			JWT_EXPIRES_MIN: str({ default: '2d' }),
 			
 			DEFAULT_COORDINATES: bool({ default: false }),
 			DEFAULT_LATITUDE:    num({ default: 37.6156 }),
