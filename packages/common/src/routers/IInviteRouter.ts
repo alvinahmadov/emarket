@@ -1,9 +1,35 @@
 import { Observable }   from 'rxjs';
-import Invite           from '../entities/Invite';
+import { CreateObject } from '@pyro/db/db-create-object';
 import IEnterByLocation from '../interfaces/IEnterByLocation';
 import IEnterByCode     from '../interfaces/IEnterByCode';
 import IStreetLocation  from '../interfaces/IStreetLocation';
-import { CreateObject } from '@pyro/db/db-create-object';
+import {
+	IInviteCreateObject,
+	IInviteUpdateObject
+}                       from '../interfaces/IInvite';
+import Invite           from '../entities/Invite';
+
+export interface IInvitesFindInput
+{
+	code?: string;
+	apartment?: string
+	// TODO: GeoLocation
+}
+
+export interface IInviteIdInput
+{
+	id: string;
+}
+
+export interface IInviteUpdateInput extends IInviteIdInput
+{
+	updateInput: IInviteUpdateObject;
+}
+
+export interface IInviteCreateInput
+{
+	createInput: IInviteCreateObject;
+}
 
 interface IInviteRouter
 {
