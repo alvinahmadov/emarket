@@ -20,6 +20,13 @@ export interface ICustomerUpdateInput extends ICustomerIdInput
 	updateObject: ICustomerUpdateObject;
 }
 
+export interface ICustomerMemberInput
+{
+	exceptCustomerId?: string;
+	memberKey: string;
+	memberValue: string;
+}
+
 interface ICustomerRouter
 {
 	get(id: Customer['id']): Observable<Customer | null>;
