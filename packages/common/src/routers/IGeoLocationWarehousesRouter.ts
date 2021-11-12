@@ -8,6 +8,20 @@ export interface IGeoLocationWarehousesRouterGetOptions
 	activeOnly?: boolean;
 }
 
+export interface IGeoLocationWarehousesOptions
+{
+	activeOnly?: boolean;
+	inStoreMode?: boolean;
+	maxDistance?: number;
+	fullProducts?: boolean;
+}
+
+export interface INearStoresInput
+{
+	geoLocation: IGeoLocation,
+	options?: IGeoLocationWarehousesOptions
+}
+
 interface IGeoLocationWarehousesRouter
 {
 	get(
