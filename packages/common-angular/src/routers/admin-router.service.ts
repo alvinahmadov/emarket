@@ -17,7 +17,7 @@ export class AdminRouter implements IAdminRouter
 		this.router = routerFactory.create('admin');
 	}
 	
-	public get(id: string): Observable<Admin | null>
+	public get(id: Admin['id']): Observable<Admin | null>
 	{
 		return this.router
 		           .runAndObserve<IAdmin>('get', id)
@@ -34,7 +34,7 @@ export class AdminRouter implements IAdminRouter
 		return Promise.reject("Method not allowed");
 	}
 	
-	public updateById(id: Admin["id"], updateObject: Partial<IAdmin>): Promise<Admin>
+	public updateById(id: Admin['id'], updateObject: Partial<IAdmin>): Promise<Admin>
 	{
 		return Promise.reject("Method not allowed");
 	}
