@@ -12,6 +12,16 @@ namespace CommonUtils
 		return minutes + ':' + (+seconds < 10 ? '0' : '') + seconds;
 	}
 	
+	export function formatString(value: string, ...args)
+	{
+		return value.replace(/{(\d+)}/g, (match, n) =>
+		{
+			return typeof args[n] != 'undefined'
+			       ? args[n]
+			       : match;
+		})
+	}
+	
 	export const generateObjectIdString = (
 			m = Math, d = Date,
 			h           = 16, s   = (x) => m.floor(x).toString(h)
