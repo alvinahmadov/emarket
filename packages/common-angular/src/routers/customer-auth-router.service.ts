@@ -19,14 +19,16 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 	}
 	
 	public async login(
-			emailOrUsername: string,
-			password: string
+			authInfo: string,
+			password: string,
+			expiresIn?: string | number
 	): Promise<ICustomerLoginResponse | null>
 	{
 		const res = await this.router.run<ICustomerLoginResponse>(
 				'login',
-				emailOrUsername,
-				password
+				authInfo,
+				password,
+				expiresIn
 		);
 		
 		if(res == null)
