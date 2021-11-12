@@ -24,7 +24,6 @@ export interface ICustomerCreateObject extends ICustomerInitializeObject
 
 export interface ICustomerFindObject
 {
-	id?: string
 	firstName?: string
 	lastName?: string
 	username?: string
