@@ -46,11 +46,6 @@ type Query {
 
     getInviteByLocation(info: InviteByLocationInput): Invite
 
-    generate1000InvitesConnectedToInviteRequests(
-        defaultLng: Float!
-        defaultLat: Float!
-    ): Void
-
     generateInvitesConnectedToInviteRequests(
         qty: Int
         defaultLng: Float!
