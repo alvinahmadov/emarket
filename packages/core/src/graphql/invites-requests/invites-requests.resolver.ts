@@ -17,14 +17,15 @@ export class InviteRequestResolver
 	
 	@Query()
 	@UseGuards(FakeDataGuard)
-	public async generate1000InviteRequests(
+	public async generateInviteRequests(
 			_,
-			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
+			{ qty = 1000, defaultLng, defaultLat }: { qty?: number; defaultLng: number; defaultLat: number; }
 	): Promise<void>
 	{
-		await this._invitesRequestsService.generate1000InviteRequests(
+		await this._invitesRequestsService.generateInviteRequests(
 				defaultLng,
-				defaultLat
+				defaultLat,
+				qty
 		);
 	}
 	
