@@ -7,6 +7,7 @@ import ICustomer, { IResponseGenerateCustomers } from '@modules/server.common/in
 import IPagingOptions                            from '@modules/server.common/interfaces/IPagingOptions';
 import Customer                                  from '@modules/server.common/entities/Customer';
 import { ICustomerRegistrationInput }            from '@modules/server.common/routers/ICustomerAuthRouter';
+import { ICustomerMemberInput }                  from '@modules/server.common/routers/ICustomerRouter';
 import ApolloService                             from '@modules/client.common.angular2/services/apollo.service';
 import { GQLMutation, GQLQuery }                 from 'graphql/definitions';
 
@@ -24,7 +25,7 @@ export class CustomersService extends ApolloService
 	{
 		super(apollo,
 		      {
-			      serviceName:  "Admin::CustomersService"
+			      serviceName: "Admin::CustomersService"
 		      });
 	}
 	
@@ -41,11 +42,7 @@ export class CustomersService extends ApolloService
 		           .toPromise();
 	}
 	
-	public isCustomerExists(conditions: {
-		exceptCustomerId: string;
-		memberKey: string;
-		memberValue: string;
-	}): Observable<boolean>
+	public isCustomerExists(conditions: ICustomerMemberInput): Observable<boolean>
 	{
 		return this.apollo
 		           .query<{
