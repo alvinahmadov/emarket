@@ -1,25 +1,18 @@
 import { Query, Resolver }             from '@nestjs/graphql';
-import { GeoLocationsProductsService } from '../../services/geo-locations';
-import GeoLocation                     from '@modules/server.common/entities/GeoLocation';
 import { first }                       from 'rxjs/operators';
-import IGeoLocation                    from '@modules/server.common/interfaces/IGeoLocation';
-
-export interface IGetGeoLocationProductsOptions
-{
-	isDeliveryRequired?: boolean;
-	isTakeaway?: boolean;
-	trackingDistance?: number;
-	merchantIds?: string[];
-	imageOrientation?: number;
-	locale?: string;
-	withoutCount?: boolean;
-}
+import {
+	IGeoLocationProductsInput,
+	ICountOfGeoLocationProducts
+}                                      from '@modules/server.common/routers/IGeoLocationProductsRouter';
+import GeoLocation                     from '@modules/server.common/entities/GeoLocation';
+import ProductInfo                     from '@modules/server.common/entities/ProductInfo';
+import { GeoLocationsProductsService } from '../../services/geo-locations';
 
 @Resolver('GeoLocation')
 export class GeoLocationResolver
 {
 	constructor(
-			private readonly geoLocationsProductsService: GeoLocationsProductsService
+			private readonly _geoLocationsProductsService: GeoLocationsProductsService
 	)
 	{}
 	
@@ -27,9 +20,9 @@ export class GeoLocationResolver
 	async getGeoLocationProducts(
 			_,
 			{ geoLocation }: { geoLocation: GeoLocation }
-	)
+	): Promise<ProductInfo[]>
 	{
-		return this.geoLocationsProductsService
+		return this._geoLocationsProductsService
 		           .get(geoLocation)
 		           .pipe(first())
 		           .toPromise();
@@ -43,15 +36,10 @@ export class GeoLocationResolver
 				options,
 				pagingOptions = {},
 				searchText
-			}: {
-				geoLocation;
-				options?: IGetGeoLocationProductsOptions;
-				pagingOptions;
-				searchText?: string;
-			}
-	)
+			}: IGeoLocationProductsInput
+	): Promise<ProductInfo[]>
 	{
-		return this.geoLocationsProductsService.geoLocationProductsByPaging(
+		return this._geoLocationsProductsService.geoLocationProductsByPaging(
 				geoLocation,
 				pagingOptions,
 				options,
@@ -66,14 +54,10 @@ export class GeoLocationResolver
 				geoLocation,
 				options,
 				searchText
-			}: {
-				geoLocation: IGeoLocation;
-				options?: IGetGeoLocationProductsOptions;
-				searchText?: string;
-			}
-	)
+			}: ICountOfGeoLocationProducts
+	): Promise<number>
 	{
-		return this.geoLocationsProductsService.getCountOfGeoLocationProducts(
+		return this._geoLocationsProductsService.getCountOfGeoLocationProducts(
 				geoLocation,
 				options,
 				searchText
