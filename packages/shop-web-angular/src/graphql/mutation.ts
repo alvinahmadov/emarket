@@ -6,13 +6,15 @@ export namespace GQLMutation
 	{
 		export const Login = gql`
 			mutation CustomerLogin(
-				$email: String!,
-				$password: String!
+				$authInfo: String!,
+				$password: String!,
+				$expiresIn: Any
 			)
 			{
 				customerLogin(
-					email: $email,
-					password: $password
+					authInfo: $authInfo,
+					password: $password,
+					expiresIn: $expiresIn
 				)
 				{
 					user
