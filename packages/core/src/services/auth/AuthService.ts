@@ -115,7 +115,8 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 	
 	public async login(
 			findObj: any,
-			password: string
+			password: string,
+			expiresIn?: string | number
 	): Promise<{ entity: T; token: string } | null>
 	{
 		try
@@ -137,7 +138,7 @@ export class AuthService<T extends IAuthable> extends EntityService<T>
 					{ id: entity.id, role: this.role },
 					env.JWT_SECRET,
 					{
-						expiresIn: env.JWT_EXPIRES
+						expiresIn: expiresIn ?? env.JWT_EXPIRES,
 					}
 			);
 			delete entity.hash;
