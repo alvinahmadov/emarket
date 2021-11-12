@@ -1,5 +1,5 @@
-import Customer         from '../entities/Customer';
 import { CreateObject } from '@pyro/db/db-create-object';
+import Customer         from '../entities/Customer';
 
 export interface AddableRegistrationInfo
 {
