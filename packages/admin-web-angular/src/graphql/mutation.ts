@@ -6,13 +6,15 @@ export namespace GQLMutation
 	{
 		export const Login = gql`
 			mutation AdminLogin(
-				$email: String!,
-				$password: String!
+				$authInfo: String!,
+				$password: String!,
+				$expiresIn: Any
 			)
 			{
 				adminLogin(
-					email: $email,
-					password: $password
+					authInfo: $authInfo,
+					password: $password,
+					expiresIn: $expiresIn
 				)
 				{
 					token
@@ -22,6 +24,8 @@ export namespace GQLMutation
 						email
 						username
 						avatar
+						firstName
+						lastName
 					}
 				}
 			}
