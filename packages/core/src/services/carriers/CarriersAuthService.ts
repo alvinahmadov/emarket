@@ -38,11 +38,17 @@ export class CarriersAuthService extends DBService<Carrier>
 	
 	@asyncListener()
 	async login(
-			username: string,
-			password: string
+			authInfo: string,
+			password: string,
+			expiresIn?: string | number
 	): Promise<ICarrierLoginResponse | null>
 	{
-		const res = await this.authService.login({ username }, password);
+		const res = await this.authService.login({
+			                                         $or: [
+				                                         { email: authInfo },
+				                                         { username: authInfo }
+			                                         ]
+		                                         }, password, expiresIn);
 		
 		if(!res)
 		{
