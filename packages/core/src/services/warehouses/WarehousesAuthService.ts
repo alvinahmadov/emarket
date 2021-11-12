@@ -66,11 +66,13 @@ export class WarehousesAuthService extends DBService<Warehouse>
 	 * @memberof WarehousesAuthService
 	 * @param {string} username
 	 * @param {string} password
+	 * @param {string | number} expiresIn Token's lifetime
 	 */
 	@asyncListener()
 	async login(
 			username: string,
-			password: string
+			password: string,
+			expiresIn?: string | number
 	): Promise<IWarehouseLoginResponse | null>
 	{
 		try
@@ -78,11 +80,12 @@ export class WarehousesAuthService extends DBService<Warehouse>
 			this.log.info(
 					{
 						username,
-						password
+						password,
+						expiresIn
 					},
-					'.login(username, password) called'
+					'.login(username, password, expiresIn) called'
 			);
-			const res = await this.authService.login({ username }, password);
+			const res = await this.authService.login({ username }, password, expiresIn);
 			
 			if(!res || res.entity.isDeleted)
 			{
