@@ -19,7 +19,7 @@ export class AdminResolver
 	
 	@Query('admin')
 	@UseGuards(GqlAdminGuard)
-	async getAdmin(_, { id }: { id: string }): Promise<Admin>
+	public async getAdmin(_, { id }: { id: string }): Promise<Admin>
 	{
 		return this._adminsService
 		           .get(id)
@@ -29,19 +29,19 @@ export class AdminResolver
 	
 	@Query('adminByEmail')
 	@UseGuards(GqlAdminGuard)
-	async getByEmail(_, { email }: { email: string }): Promise<Admin>
+	public async getByEmail(_, { email }: { email: string }): Promise<Admin>
 	{
 		return this._adminsService.getByEmail(email);
 	}
 	
 	@Query('adminSearch')
-	async findAdmin(_, { findInput }: { findInput?: IAdminFindInput }): Promise<Admin | null>
+	public async findAdmin(_, { findInput }: { findInput?: IAdminFindInput }): Promise<Admin | null>
 	{
 		return this._adminsService.findAdmin(findInput);
 	}
 	
 	@Mutation()
-	async registerAdmin(
+	public async registerAdmin(
 			_,
 			{ registerInput }: { registerInput: IAdminRegistrationInput }
 	): Promise<Admin>
@@ -50,7 +50,7 @@ export class AdminResolver
 	}
 	
 	@Mutation()
-	async adminLogin(
+	public async adminLogin(
 			_,
 			{ email, password }: { email: string; password: string }
 	): Promise<IAdminLoginResponse>
@@ -59,7 +59,7 @@ export class AdminResolver
 	}
 	
 	@Query()
-	async adminAuthenticated(_, __, context: any): Promise<boolean>
+	public async adminAuthenticated(_, __, context: any): Promise<boolean>
 	{
 		return this._adminsService.isAuthenticated(
 				ExtractJwt.fromAuthHeaderAsBearerToken()(context.req)
@@ -68,7 +68,7 @@ export class AdminResolver
 	
 	@Mutation()
 	@UseGuards(GqlAdminGuard)
-	async updateAdmin(
+	public async updateAdmin(
 			_,
 			{ id, updateInput }: { id: string; updateInput }
 	): Promise<Admin>
@@ -79,7 +79,7 @@ export class AdminResolver
 	
 	@Mutation()
 	@UseGuards(GqlAdminGuard)
-	async updateAdminPassword(
+	public async updateAdminPassword(
 			_,
 			{
 				id,
