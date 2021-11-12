@@ -5,6 +5,21 @@ import Customer                  from '../entities/Customer';
 import GeoLocation               from '../entities/GeoLocation';
 import Device                    from '../entities/Device';
 
+export interface ICustomerIdInput
+{
+	id: Customer['id'];
+}
+
+export interface ICustomerEmailInput extends ICustomerIdInput
+{
+	email: string;
+}
+
+export interface ICustomerUpdateInput extends ICustomerIdInput
+{
+	updateObject: ICustomerUpdateObject;
+}
+
 interface ICustomerRouter
 {
 	get(id: Customer['id']): Observable<Customer | null>;
