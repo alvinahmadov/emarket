@@ -3,6 +3,7 @@ import { inject, injectable }              from 'inversify';
 import { Observable }                      from 'rxjs';
 import { first, map, switchMap }           from 'rxjs/operators';
 import { Repository }                      from 'typeorm';
+import _                                   from 'lodash';
 import {
 	asyncListener,
 	observableListener,
@@ -147,9 +148,16 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter, ISe
 	}
 	
 	@asyncListener()
-	async findAdmin(adminFindInput: IAdminFindInput): Promise<Admin | null>
+	async findAdmin(adminFindInput?: IAdminFindInput): Promise<Admin | null>
 	{
-		return this.findOne(adminFindInput ?? {});
+		const findInput = _.assign(
+				adminFindInput
+				? { ...adminFindInput }
+				: {},
+				{ isDeleted: { $eq: false } }
+		)
+		
+		return this.findOne(findInput);
 	}
 	
 	@asyncListener()
