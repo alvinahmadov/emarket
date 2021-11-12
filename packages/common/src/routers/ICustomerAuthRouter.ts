@@ -25,8 +25,9 @@ export interface ICustomerRegistrationInfoInput extends ICustomerIdInput
 
 export interface ICustomerLoginInput
 {
-	email: string;
-	password: string
+	authInfo: string;
+	password: string,
+	expiresIn?: string | number;
 }
 
 interface IPasswordUpdateInput
