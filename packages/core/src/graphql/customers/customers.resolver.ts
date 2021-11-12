@@ -3,30 +3,77 @@ import {
 	Query,
 	ResolveField,
 	Resolver
-}                               from '@nestjs/graphql';
-import { UseGuards }            from '@nestjs/common';
-import { Types }                from 'mongoose';
-import { first }                from 'rxjs/operators';
+}                                from '@nestjs/graphql';
+import { UseGuards }             from '@nestjs/common';
+import { Types }                 from 'mongoose';
+import { first }                 from 'rxjs/operators';
 import ICustomer, {
 	IResponseGenerateCustomers,
 	ICustomerUpdateObject,
 	ICustomerFindInput
-}                               from '@modules/server.common/interfaces/ICustomer';
-import IPagingOptions           from '@modules/server.common/interfaces/IPagingOptions';
-import Customer                 from '@modules/server.common/entities/Customer';
+}                                from '@modules/server.common/interfaces/ICustomer';
+import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
+import { ICustomerOrderMetrics } from '@modules/server.common/interfaces/ICustomerOrder';
+import Device                    from '@modules/server.common/entities/Device';
+import Customer                  from '@modules/server.common/entities/Customer';
 import {
 	AddableRegistrationInfo,
-	ICustomerRegistrationInput
-}                               from '@modules/server.common/routers/ICustomerAuthRouter';
-import { DevicesService }       from '../../services/devices';
+	ICustomerRegistrationInput,
+	ICustomerLoginResponse
+}                                from '@modules/server.common/routers/ICustomerAuthRouter';
+import { DevicesService }        from '../../services/devices';
 import {
 	CustomersOrdersService,
 	CustomersService
-}                               from '../../services/customers';
-import { CustomersAuthService } from '../../services/customers/CustomersAuthService';
-import { OrdersService }        from '../../services/orders';
-import { FakeUsersService }     from '../../services/fake-data';
-import { FakeDataGuard }        from '../../auth/guards/fake-data.guard';
+}                                from '../../services/customers';
+import { CustomersAuthService }  from '../../services/customers/CustomersAuthService';
+import { OrdersService }         from '../../services/orders';
+import { FakeUsersService }      from '../../services/fake-data';
+import { FakeDataGuard }         from '../../auth/guards/fake-data.guard';
+
+export interface ICustomerIdInput
+{
+	id: Customer['id']
+}
+
+export interface ICustomerEmailInput extends ICustomerIdInput
+{
+	email: string;
+}
+
+export interface ICustomerUpdateInput extends ICustomerIdInput
+{
+	updateObject: ICustomerUpdateObject;
+}
+
+export interface ICustomerLoginInput
+{
+	email: string;
+	password: string
+}
+
+export interface ICustomerGenerateInput
+{
+	defaultLng: number;
+	defaultLat: number,
+	qty?: number
+}
+
+interface IPasswordUpdateInput
+{
+	current: string;
+	new: string
+}
+
+export interface ICustomerPasswordUpdateInput extends ICustomerIdInput
+{
+	password: IPasswordUpdateInput;
+}
+
+export interface ICustomerRegistrationInfoInput extends ICustomerIdInput
+{
+	registrationInfo: AddableRegistrationInfo
+}
 
 @Resolver('Customer')
 export class CustomerResolver
@@ -41,19 +88,19 @@ export class CustomerResolver
 	{}
 	
 	@Query()
-	async isCustomerEmailExists(_, { email }: { email: string }): Promise<boolean>
+	public async isCustomerEmailExists(_, { email }: Omit<ICustomerEmailInput, 'id'>): Promise<boolean>
 	{
 		return this._customersService.isUserEmailExists(email);
 	}
 	
 	@Query()
-	async getSocial(_, { socialId }: { socialId: string })
+	public async getSocial(_, { socialId }: { socialId: string }): Promise<Customer>
 	{
 		return this._customersService.getSocial(socialId);
 	}
 	
 	@Query('isCustomerExists')
-	async customerExists(_, { conditions }): Promise<boolean>
+	public async customerExists(_, { conditions }): Promise<boolean>
 	{
 		const userId = conditions.exceptCustomerId;
 		const memberKey = conditions.memberKey;
@@ -69,19 +116,19 @@ export class CustomerResolver
 	}
 	
 	@Query('customer')
-	async getCustomer(_, { id })
+	public async getCustomer(_, { id }: ICustomerIdInput): Promise<Customer | null>
 	{
 		return this._customersService.get(id).pipe(first()).toPromise();
 	}
 	
 	@Query('customers')
-	async getCustomers(_, { pagingOptions = {} }): Promise<Customer[]>
+	public async getCustomers(_, { pagingOptions = {} }): Promise<Customer[]>
 	{
 		return this.searchCustomers(_, { pagingOptions });
 	}
 	
 	@Query('findCustomers')
-	async searchCustomers(
+	public async searchCustomers(
 			_,
 			{ findInput, pagingOptions = {} }:
 					{ findInput?: ICustomerFindInput, pagingOptions?: IPagingOptions }
@@ -104,18 +151,18 @@ export class CustomerResolver
 	}
 	
 	@Query('getOrders')
-	async getOrders(_, { userId: customerId })
+	public async getOrders(_, { id }: ICustomerIdInput)
 	{
-		await this._customersService.throwIfNotExists(customerId);
+		await this._customersService.throwIfNotExists(id);
 		
 		return await this._customersOrdersService
-		                 .get(customerId)
+		                 .get(id)
 		                 .pipe(first())
 		                 .toPromise();
 	}
 	
 	@Query()
-	async getCountOfCustomers()
+	public async getCountOfCustomers(): Promise<number>
 	{
 		return this._customersService.Model
 		           .find({ isDeleted: { $eq: false } })
@@ -124,7 +171,7 @@ export class CustomerResolver
 	}
 	
 	@Query()
-	async getCustomerMetrics(_, { id }: { id: string })
+	public async getCustomerMetrics(_, { id }: ICustomerIdInput): Promise<ICustomerOrderMetrics>
 	{
 		return this._customersOrdersService
 		           .getCustomerMetrics(id);
@@ -132,9 +179,9 @@ export class CustomerResolver
 	
 	@Query()
 	@UseGuards(FakeDataGuard)
-	async generateCustomers(
+	public async generateCustomers(
 			_,
-			{ qty, defaultLng, defaultLat }: { qty?: number, defaultLng: number; defaultLat: number }
+			{ defaultLng, defaultLat, qty = 1000 }: ICustomerGenerateInput
 	): Promise<IResponseGenerateCustomers>
 	{
 		let success = true;
@@ -167,59 +214,50 @@ export class CustomerResolver
 	}
 	
 	@Mutation()
-	async updateCustomer(
-			_,
-			{ id, updateObject }: { id: string; updateObject: ICustomerUpdateObject }
-	)
+	public async updateCustomer(_, { id, updateObject }: ICustomerUpdateInput): Promise<Customer>
 	{
 		return this._customersService.updateCustomer(id, updateObject);
 	}
 	
 	@Mutation()
-	async updateCustomerEmail(
-			_,
-			{ userId, email }: { userId: string; email: string }
-	)
+	public async updateCustomerEmail(_, { id, email }: ICustomerEmailInput): Promise<Customer>
 	{
-		return this._customersService.updateEmail(userId, email);
+		return this._customersService.updateEmail(id, email);
 	}
 	
 	@Mutation()
-	async registerCustomer(
+	public async registerCustomer(
 			_,
 			{ registerInput }: { registerInput: ICustomerRegistrationInput }
-	)
+	): Promise<Customer>
 	{
 		return this._customersAuthService.register(registerInput);
 	}
 	
 	@Mutation()
-	async customerLogin(
-			_,
-			{ email, password }: { email: string; password: string }
-	)
+	public async customerLogin(_, { email, password }: ICustomerLoginInput): Promise<ICustomerLoginResponse>
 	{
 		return this._customersAuthService.login(email, password);
 	}
 	
 	@Mutation()
-	async removeCustomersByIds(obj, { ids }: { ids: string[] })
+	public async removeCustomersByIds(_, { ids }: { ids: string[] }): Promise<void>
 	{
-		const users = await this._customersService
-		                        .find({
-			                              _id:       { $in: ids },
-			                              isDeleted: { $eq: false }
-		                              });
+		const customers = await this._customersService
+		                            .find({
+			                                  _id:       { $in: ids },
+			                                  isDeleted: { $eq: false }
+		                                  });
 		
-		const usersIds = users.map((u) => u.id);
+		const customersIds = customers.map((u) => u.id);
 		
-		return this._customersService.removeMultipleByIds(usersIds);
+		return this._customersService.removeMultipleByIds(customersIds);
 	}
 	
 	@ResolveField('devices')
-	async getDevices(_user: ICustomer)
+	public async getDevices(_customer: ICustomer): Promise<Device[]>
 	{
-		const customer = new Customer(_user);
+		const customer = new Customer(_customer);
 		let customerDevices = await this._devicesService
 		                                .getMultipleDevices(customer.devicesIds);
 		
@@ -229,37 +267,28 @@ export class CustomerResolver
 	}
 	
 	@Mutation()
-	async updateCustomerPassword(
-			_,
-			{
-				id,
-				password
-			}: { id: Customer['id']; password: { current: string; new: string } }
-	)
+	public async updateCustomerPassword(_, { id, password }: ICustomerPasswordUpdateInput): Promise<void>
 	{
 		return this._customersAuthService.updatePassword(id, password);
 	}
 	
 	@Mutation()
-	async addCustomerRegistrationInfo(
+	public async addCustomerRegistrationInfo(
 			_,
-			{
-				id,
-				registrationInfo
-			}: { id: Customer['id']; registrationInfo: AddableRegistrationInfo }
-	)
+			{ id, registrationInfo }: ICustomerRegistrationInfoInput
+	): Promise<void>
 	{
 		return this._customersAuthService.addRegistrationInfo(id, registrationInfo);
 	}
 	
 	@Mutation()
-	async banCustomer(_, { id }: { id: Customer['id'] })
+	public async banCustomer(_, { id }: ICustomerIdInput): Promise<Customer>
 	{
 		return this._customersService.banUser(id);
 	}
 	
 	@Mutation()
-	async unbanCustomer(_, { id }: { id: Customer['id'] })
+	public async unbanCustomer(_, { id }: ICustomerIdInput): Promise<Customer>
 	{
 		return this._customersService.unbanUser(id);
 	}
