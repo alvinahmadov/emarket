@@ -108,19 +108,19 @@ export class AdminsService extends DBService<Admin> implements IAdminRouter, ISe
 	
 	@asyncListener()
 	async login(
-			email: string,
-			password: string
+			authInfo: string,
+			password: string,
+			expiresIn?: string | number
 	): Promise<IAdminLoginResponse | null>
 	{
-		let res = null;
-		const admin = await this.getByEmail(email);
+		let res = await this.authService.login({
+			                                       $or: [
+				                                       { email: authInfo },
+				                                       { username: authInfo }
+			                                       ]
+		                                       }, password, expiresIn);
 		
-		if(admin)
-		{
-			res = await this.authService.login({ email }, password);
-		}
-		
-		if(!res)
+		if(!res || res.entity.isDeleted)
 		{
 			return null;
 		}
