@@ -60,6 +60,10 @@ export const environment: Environment = {
   
 	AUTH_LOGO:          '${env.AUTH_LOGO}',
 	NO_INTERNET_LOGO:   '${env.NO_INTERNET_LOGO}',
+	
+	CARRIER_ICON:   '${env.CARRIER_ICON}',
+	CUSTOMER_ICON:  '${env.CUSTOMER_ICON}',
+	STORE_ICON:     '${env.STORE_ICON}',
 
 	DELIVERY_TIME_MIN:  ${env.DELIVERY_TIME_MIN},
 	DELIVERY_TIME_MAX:  ${env.DELIVERY_TIME_MAX},
@@ -133,6 +137,10 @@ export const environment: Environment = {
   
 	AUTH_LOGO:          '${env.AUTH_LOGO}',
 	NO_INTERNET_LOGO:   '${env.NO_INTERNET_LOGO}',
+	
+	CARRIER_ICON:   '${env.CARRIER_ICON}',
+	CUSTOMER_ICON:  '${env.CUSTOMER_ICON}',
+	STORE_ICON:     '${env.STORE_ICON}',
 
 	DELIVERY_TIME_MIN:  ${env.DELIVERY_TIME_MIN},
 	DELIVERY_TIME_MAX:  ${env.DELIVERY_TIME_MAX},
