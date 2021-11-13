@@ -1,10 +1,10 @@
 import { Observable }                                 from 'rxjs';
 import { cards }                                      from 'stripe';
 import { ICustomerFindObject, ICustomerUpdateObject } from '../interfaces/ICustomer';
+import IPagingOptions                                 from '../interfaces/IPagingOptions';
 import Customer                                       from '../entities/Customer';
 import GeoLocation                                    from '../entities/GeoLocation';
 import Device                                         from '../entities/Device';
-import IPagingOptions                                 from "interfaces/IPagingOptions";
 
 export interface ICustomerIdInput
 {
