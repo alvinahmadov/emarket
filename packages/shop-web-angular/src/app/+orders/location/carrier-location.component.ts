@@ -10,6 +10,12 @@ declare var google: any;
 const directionsDisplay = new google.maps.DirectionsRenderer();
 const directionsService = new google.maps.DirectionsService();
 
+type TCarrierLocationData = {
+	carrier: Carrier;
+	store: Warehouse;
+	customerOrder: CustomerOrder
+}
+
 @Component({
 	           selector: 'ea-carrier-location',
 	           styleUrls: ['./carrier-location.component.scss'],
@@ -30,8 +36,7 @@ export class CarrierLocationComponent implements OnInit
 	
 	constructor(
 			private dialogRef: MatDialogRef<CarrierLocationComponent>,
-			@Inject(MAT_DIALOG_DATA)
-					data
+			@Inject(MAT_DIALOG_DATA) data: TCarrierLocationData
 	)
 	{
 		this.carrier = data.carrier;
