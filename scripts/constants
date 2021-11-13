@@ -1,0 +1,87 @@
+#!/bin/bash
+
+export PROJECT_ROOT_DIR="/home/alvin/WebstormProjects"
+export PROJECT_NAME="emarket"
+export NODEJS_VERSION="v14.18.1"
+export PROJECT_GIT="https://gitlab.com/alvinahmadov2/$PROJECT_NAME"
+
+# Directories
+export PROJECT_DIR="$PROJECT_ROOT_DIR/$PROJECT_NAME"
+export CORE_PACKAGE_DIR="$PROJECT_DIR/packages/core"
+export COMMON_PACKAGE_DIR="$PROJECT_DIR/packages/common"
+export COMMON_ANG_PACKAGE_DIR="$PROJECT_DIR/packages/common-angular"
+export ADMIN_PACKAGE_DIR="$PROJECT_DIR/packages/admin-web-angular"
+export MERCHANT_PACKAGE_DIR="$PROJECT_DIR/packages/merchant-tablet-ionic"
+export SHOP_PACKAGE_DIR="$PROJECT_ROOT_DIR/$PROJECT_NAME/packages/shop-web-angular"
+export NGINX_SERVE_DIR="/usr/share/nginx/html"
+export NVM_ROOT_DIR="$HOME/.nvm"
+export NVM_INSTALL_SCRIPT="https://raw.githubusercontent.com/creationix/nvm/master/install.sh"
+
+export MODULES=(
+  "$CORE_PACKAGE_DIR"
+  "$COMMON_PACKAGE_DIR"
+  "$COMMON_ANG_PACKAGE_DIR"
+  "$ADMIN_PACKAGE_DIR"
+  "$MERCHANT_PACKAGE_DIR"
+  "$SHOP_PACKAGE_DIR"
+)
+
+export DPKG_PACKAGES=(
+  "g++"
+  "gcc"
+  "autoconf"
+  "automake"
+  "make"
+  "nasm"
+  "python2.7"
+  "git"
+  "nginx"
+  "curl"
+  "mongodb"
+)
+
+export NPM_PACKAGES=(
+  "pm2@latest"
+  "yarn@latest"
+  "node-gyp@latest"
+)
+
+export TEMP_FOLDERS=(
+  "build"
+  "dist"
+  "tmp"
+  "www"
+)
+
+# Output formatting
+BLACK=$(tput setaf 0)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+LIME_YELLOW=$(tput setaf 190)
+POWDER_BLUE=$(tput setaf 153)
+BLUE=$(tput setaf 4)
+MAGENTA=$(tput setaf 5)
+CYAN=$(tput setaf 6)
+WHITE=$(tput setaf 7)
+BRIGHT=$(tput bold)
+NORMAL=$(tput sgr0)
+BLINK=$(tput blink)
+REVERSE=$(tput smso)
+UNDERLINE=$(tput smul)
+
+export BLACK
+export RED
+export GREEN
+export YELLOW
+export LIME_YELLOW
+export POWDER_BLUE
+export BLUE
+export MAGENTA
+export CYAN
+export WHITE
+export BRIGHT
+export NORMAL
+export BLINK
+export REVERSE
+export UNDERLINE
