@@ -25,6 +25,10 @@ export type Env = Readonly<{
 	AUTH_LOGO: string;
 	NO_INTERNET_LOGO: string;
 	
+	CARRIER_ICON: string;
+	CUSTOMER_ICON: string;
+	STORE_ICON: string;
+	
 	DELIVERY_TIME_MIN: number;
 	DELIVERY_TIME_MAX: number;
 	
@@ -72,6 +76,10 @@ export const env: Env = cleanEnv(
 			
 			AUTH_LOGO:        str({ default: 'assets/img/logo.svg' }),
 			NO_INTERNET_LOGO: str({ default: 'assets/img/logo.svg' }),
+			
+			CARRIER_ICON:  str({ default: 'http://maps.google.com/mapfiles/kml/pal4/icon54.png' }),
+			CUSTOMER_ICON: str({ default: 'http://maps.google.com/mapfiles/kml/pal3/icon48.png' }),
+			STORE_ICON:    str({ default: 'http://maps.google.com/mapfiles/kml/pal3/icon21.png' }),
 			
 			DELIVERY_TIME_MIN: num({ default: 30 }),
 			DELIVERY_TIME_MAX: num({ default: 60 }),
