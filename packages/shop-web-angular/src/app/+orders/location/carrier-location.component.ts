@@ -1,15 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild, Inject } from '@angular/core';
-import { Subject }                                         from 'rxjs';
-//import 'style-loader!leaflet/dist/leaflet.css';
-import { ActivatedRoute }                                  from '@angular/router';
-import { CarrierRouter }                                   from '@modules/client.common.angular2/routers/carrier-router.service';
-import { first }                                           from 'rxjs/operators';
-import { CarrierOrdersRouter }                             from '@modules/client.common.angular2/routers/carrier-orders-router.service';
-import { ICarrierOrdersRouterGetOptions }                  from '@modules/server.common/routers/ICarrierOrdersRouter';
-import { environment }                                     from 'environments/environment';
-import { CarriersService }                                 from '@app/@core/data/carriers.service';
-import GeoLocation                                         from '@modules/server.common/entities/GeoLocation';
-import { MAT_DIALOG_DATA, MatDialogRef }                   from '@angular/material/dialog';
+// import 'style-loader!leaflet/dist/leaflet.css';
+import { Component, OnInit, ViewChild, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef }        from '@angular/material/dialog';
+import Carrier                                  from '@modules/server.common/entities/Carrier';
+import CustomerOrder                            from '@modules/server.common/entities/CustomerOrder';
+import Warehouse                                from '@modules/server.common/entities/Warehouse';
+import { environment }                          from 'environments/environment';
 
 declare var google: any;
 const directionsDisplay = new google.maps.DirectionsRenderer();
@@ -18,20 +13,20 @@ const directionsService = new google.maps.DirectionsService();
 @Component({
 	           selector: 'ea-carrier-location',
 	           styleUrls: ['./carrier-location.component.scss'],
-	           templateUrl: './carrier-location.component.html',
+	           template: `
+		                     <div #gmap class="googleMap"></div>`,
            })
 export class CarrierLocationComponent implements OnInit
 {
 	@ViewChild('gmap', { static: true })
-	gmapElement: any;
-	map: google.maps.Map;
-	marker: any;
-	userMarker: any;
-	warehouseMarker: any;
-	carrierLoc: any;
-	storeLoc: any;
-	userOrder: any;
-	private ngDestroy$ = new Subject();
+	public gmapElement: any;
+	public map: google.maps.Map;
+	public marker: any;
+	public customerMarker: any;
+	public warehouseMarker: any;
+	public carrier: Carrier;
+	public store: Warehouse;
+	public customerOrder: CustomerOrder;
 	
 	constructor(
 			private dialogRef: MatDialogRef<CarrierLocationComponent>,
@@ -39,57 +34,56 @@ export class CarrierLocationComponent implements OnInit
 					data
 	)
 	{
-		this.carrierLoc = data.carrier;
-		this.storeLoc = data.merchant;
-		this.userOrder = data.userOrder;
+		this.carrier = data.carrier;
+		this.store = data.store;
+		this.customerOrder = data.customerOrder;
 	}
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.showMap();
 		this.showIconsOnMap();
 	}
 	
-	showIconsOnMap()
+	public showIconsOnMap()
 	{
 		const newCoordinates = new google.maps.LatLng(
-				this.carrierLoc.geoLocation.coordinates.lat,
-				this.carrierLoc.geoLocation.coordinates.lng
+				this.carrier.geoLocation.coordinates.lat,
+				this.carrier.geoLocation.coordinates.lng
 		);
 		
-		const warehouseIcon =
-				'http://maps.google.com/mapfiles/kml/pal3/icon21.png';
-		const userIcon = 'http://maps.google.com/mapfiles/kml/pal3/icon48.png';
+		const warehouseIcon = environment.STORE_ICON;
+		const customerIcon = environment.CUSTOMER_ICON;
 		
-		this.userMarker = this.addMarker(
+		this.customerMarker = this.addMarker(
 				new google.maps.LatLng(
-						this.userOrder.geoLocation.coordinates.lat,
-						this.userOrder.geoLocation.coordinates.lng
+						this.customerOrder.geoLocation.coordinates.lat,
+						this.customerOrder.geoLocation.coordinates.lng
 				),
 				this.map,
-				userIcon
+				customerIcon
 		);
 		
 		this.warehouseMarker = this.addMarker(
 				new google.maps.LatLng(
-						this.storeLoc.geoLocation.coordinates.lat,
-						this.storeLoc.geoLocation.coordinates.lng
+						this.store.geoLocation.coordinates.lat,
+						this.store.geoLocation.coordinates.lng
 				),
 				this.map,
 				warehouseIcon
 		);
 		const start = new google.maps.LatLng(
-				this.userOrder.geoLocation.coordinates.lat,
-				this.userOrder.geoLocation.coordinates.lng
+				this.customerOrder.geoLocation.coordinates.lat,
+				this.customerOrder.geoLocation.coordinates.lng
 		);
 		const end = new google.maps.LatLng(
-				this.storeLoc.geoLocation.coordinates.lat,
-				this.storeLoc.geoLocation.coordinates.lng
+				this.store.geoLocation.coordinates.lat,
+				this.store.geoLocation.coordinates.lng
 		);
 		const request = {
-			origin: start,
+			origin:      start,
 			destination: end,
-			travelMode: 'DRIVING',
+			travelMode:  'DRIVING',
 		};
 		
 		directionsService.route(request, function(res, stat)
@@ -106,19 +100,19 @@ export class CarrierLocationComponent implements OnInit
 		directionsDisplay.setMap(this.map);
 		
 		const warehouseInfoContent = `
-									<h3>  ${this.storeLoc.name}</h3>
+									<h3>  ${this.store.name}</h3>
 									<ul>
 										<li>
 											<i style='margin-right:5px;' class="ion-md-mail"></i>
-											${this.storeLoc.contactEmail}
+											${this.store.contactEmail}
 										</li>
 										<li>
 											<i style='margin-right:5px;' class="ion-md-phone"></i><i class="ion-md-call"></i>
-											${this.storeLoc.contactPhone}
+											${this.store.contactPhone}
 										</li>
 										<li>
 											<i style='margin-right:5px;' class="ion-md-locate"></i>
-											${this.storeLoc.geoLocation.streetAddress}
+											${this.store.geoLocation.streetAddress}
 										</li>
 									</ul>
 									`;
@@ -133,16 +127,15 @@ export class CarrierLocationComponent implements OnInit
 		});
 		
 		this.map.setCenter(newCoordinates);
-		const carierIcon =
-				'http://maps.google.com/mapfiles/kml/pal4/icon54.png';
+		const carrierIcon = environment.CARRIER_ICON;
 		
-		this.marker = this.addMarker(newCoordinates, this.map, carierIcon);
+		this.marker = this.addMarker(newCoordinates, this.map, carrierIcon);
 		const carrierInfoContent = `
-					<h3>  ${this.carrierLoc.fullName}</h3>
+					<h3>  ${this.carrier.fullName}</h3>
 					<ul>
-						<li>${this.carrierLoc.username}</li>
-						<li><i style='margin-right:5px;' class="ion-md-call"></i>${this.carrierLoc.phone}</li>
-						<li><i style='margin-right:5px;' class="ion-md-locate"></i>${this.carrierLoc.geoLocation.streetAddress}</li>
+						<li>${this.carrier.username}</li>
+						<li><i style='margin-right:5px;' class="ion-md-call"></i>${this.carrier.phone}</li>
+						<li><i style='margin-right:5px;' class="ion-md-locate"></i>${this.carrier.geoLocation.streetAddress}</li>
 					</ul>
 					`;
 		
@@ -156,24 +149,27 @@ export class CarrierLocationComponent implements OnInit
 		});
 	}
 	
-	revertMap()
+	public revertMap()
 	{
 		this.map.setZoom(15);
 		this.warehouseMarker.setMap(null);
-		this.userMarker.setMap(null);
+		this.customerMarker.setMap(null);
 	}
 	
-	showMap()
+	public showMap()
 	{
 		const mapProp = {
-			center: new google.maps.LatLng(42.642941, 23.334149),
-			zoom: 15,
+			center:    new google.maps.LatLng(
+					environment.DEFAULT_LATITUDE,
+					environment.DEFAULT_LONGITUDE
+			),
+			zoom:      15,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
 		};
 		this.map = new google.maps.Map(this.gmapElement.nativeElement, mapProp);
 	}
 	
-	addMarker(position, map, icon)
+	public addMarker(position, map, icon)
 	{
 		return new google.maps.Marker({
 			                              position,
