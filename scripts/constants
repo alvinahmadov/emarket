@@ -1,6 +1,16 @@
 #!/bin/bash
 
-export PROJECT_ROOT_DIR="/home/alvin/WebstormProjects"
+username=$(users)
+export PRODUCTION_DIR="/home";
+export DEVELOPMENT_DIR="/home/alvin/WebstormProjects";
+
+if [ "$username" != "alvin" ]; then
+    PROJECT_ROOT_DIR="$PRODUCTION_DIR"
+else
+	PROJECT_ROOT_DIR="$DEVELOPMENT_DIR"
+fi
+
+export PROJECT_ROOT_DIR
 export PROJECT_NAME="emarket"
 export NODEJS_VERSION="v14.18.1"
 export PROJECT_GIT="https://gitlab.com/alvinahmadov2/$PROJECT_NAME"
