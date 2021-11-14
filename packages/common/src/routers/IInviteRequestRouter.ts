@@ -1,6 +1,25 @@
 import { Observable }   from 'rxjs';
+import { CreateObject } from '../@pyro/db/db-create-object';
+import Invite           from '../entities/Invite';
 import InviteRequest    from '../entities/InviteRequest';
-import { CreateObject } from '@pyro/db/db-create-object';
+
+export interface IInviteRequesGenerateInput
+{
+	qty?: number;
+	defaultLng: number;
+	defaultLat: number;
+}
+
+export interface IInviteRequestIdInput
+{
+	id: string;
+}
+
+export interface INotifyAboutInput
+{
+	invite: Invite;
+	devicesIds: string[];
+}
 
 interface IInviteRequestRouter
 {
