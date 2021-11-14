@@ -192,12 +192,17 @@ export class InvitesService extends ApolloService
 		const countryName = getCountryName(locale, countryId);
 		const geocoder = new google.maps.Geocoder();
 		
+		let address = streetAddress ?? ""
+		              + house ? ` ${house}` : ""
+		                                      + city ? `, ${city}` : "";
+		address = address.trim();
+		
 		return new Promise(
 				(resolve) =>
 				{
 					geocoder.geocode(
 							{
-								address:               `${streetAddress} ${house}, ${city}`,
+								address:               address,
 								componentRestrictions: {
 									country: countryName,
 								},
