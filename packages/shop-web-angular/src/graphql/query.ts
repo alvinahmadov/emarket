@@ -1171,7 +1171,7 @@ export namespace GQLQuery
 			
 			export namespace Comment
 			{
-				export const GetComment = gql`
+				export const GetById = gql`
 					query GetComment(
 						$storeId: String!
 						$storeProductId: String!
@@ -1200,7 +1200,7 @@ export namespace GQLQuery
 					}
 				`;
 				
-				export const GetComments = gql`
+				export const GetMultiple = gql`
 					query GetComments(
 						$storeId: String!
 						$storeProductId: String!
