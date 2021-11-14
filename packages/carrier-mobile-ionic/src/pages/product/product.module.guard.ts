@@ -1,19 +1,19 @@
 import { Injectable }             from '@angular/core';
 import { CanLoad, Route, Router } from '@angular/router';
-import { Store }                  from '../../services/store.service';
+import { StorageService }         from '../../services/storage.service';
 
 @Injectable()
 export class ProductModuleGuard implements CanLoad
 {
 	constructor(
-			private readonly store: Store,
+			private readonly storageService: StorageService,
 			private readonly router: Router
 	)
 	{}
 	
-	async canLoad(route: Route)
+	public async canLoad(route: Route)
 	{
-		if(!this.store.orderId)
+		if(!this.storageService.orderId)
 		{
 			this.router.navigateByUrl('/main/home');
 			return false;
