@@ -1,31 +1,28 @@
 import {
 	Component,
-	Output,
-	EventEmitter,
 	OnInit,
-	OnDestroy,
+	OnDestroy
 }                                    from '@angular/core';
-import { ViewCell }                  from 'ng2-smart-table';
-import { WarehouseProductsRouter }   from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { ToasterService }            from 'angular2-toaster';
-import { ProductLocalesService }     from '@modules/client.common.angular2/locale/product-locales.service';
-import { ILocaleMember }             from '@modules/server.common/interfaces/ILocale';
 import { NgbModal }                  from '@ng-bootstrap/ng-bootstrap';
-import { ConfimationModalComponent } from '@app/@shared/confirmation-modal/confirmation-modal.component';
-import { OrderRouter }               from '@modules/client.common.angular2/routers/order-router.service';
-import { root }                      from 'rxjs/internal/util/root';
-import { takeUntil }                 from 'rxjs/operators';
+import { ViewCell }                  from 'ng2-smart-table';
+import { ToasterService }            from 'angular2-toaster';
 import { Subject }                   from 'rxjs';
+import { takeUntil }                 from 'rxjs/operators';
+import { ILocaleMember }             from '@modules/server.common/interfaces/ILocale';
+import { WarehouseProductsRouter }   from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { ProductLocalesService }     from '@modules/client.common.angular2/locale/product-locales.service';
+import { OrderRouter }               from '@modules/client.common.angular2/routers/order-router.service';
+import { ConfimationModalComponent } from '@app/@shared/confirmation-modal/confirmation-modal.component';
 
 @Component({
-	           styleUrls: ['store-order-product-amount.component.scss'],
+	           styleUrls:   ['store-order-product-amount.component.scss'],
 	           templateUrl: 'store-order-product-amount.component.html',
            })
 export class StoreOrderProductAmountComponent
 		implements ViewCell, OnInit, OnDestroy
 {
-	value: any;
-	rowData: any;
+	public value: any;
+	public rowData: any;
 	public storeID: string;
 	public productID: string;
 	public productTitle: string;
@@ -47,7 +44,7 @@ export class StoreOrderProductAmountComponent
 	)
 	{}
 	
-	ngOnInit()
+	public ngOnInit()
 	{
 		this.productID = this.rowData.product.id;
 		this.storeID = this.rowData.storeId;
@@ -64,25 +61,31 @@ export class StoreOrderProductAmountComponent
 		this.productObj = [
 			{
 				productId: this.productID,
-				count: 1,
+				count:     1,
 			},
 		];
 	}
 	
-	async addProduct()
+	public ngOnDestroy(): void
+	{
+		this.ngDestroy$.next();
+		this.ngDestroy$.complete();
+	}
+	
+	public async addProduct()
 	{
 		if(this.availableProducts > 0)
 		{
 			const activeModal = this.modalService.open(
 					ConfimationModalComponent,
 					{
-						size: 'sm',
+						size:      'sm',
 						container: 'nb-layout',
-						backdrop: 'static',
+						backdrop:  'static',
 					}
 			);
 			const modalComponent: ConfimationModalComponent =
-					activeModal.componentInstance;
+					      activeModal.componentInstance;
 			
 			modalComponent.mainText = 'ARE_YOU_SURE_YOU_WANT_TO_INCREASE';
 			
@@ -90,7 +93,7 @@ export class StoreOrderProductAmountComponent
 			
 			await modalComponent.confirmEvent
 			                    .pipe(takeUntil(modalComponent.ngDestroy$))
-			                    .subscribe((dataEvent) =>
+			                    .subscribe(() =>
 			                               {
 				                               // if (this.availableProducts > 0) {
 				                               this.orderRouter
@@ -99,7 +102,7 @@ export class StoreOrderProductAmountComponent
 						                                   this.productObj,
 						                                   this.orderWarehouseId
 				                                   )
-				                                   .then((r) =>
+				                                   .then(() =>
 				                                         {
 					                                         this.toasterService.pop(
 							                                         `info`,
@@ -108,7 +111,7 @@ export class StoreOrderProductAmountComponent
 				                                         })
 				                                   .catch((err) =>
 				                                          {
-					                                          this.toasterService.pop(`error`, `Error!`);
+					                                          this.toasterService.pop(`error`, `Error!`, err['message']);
 				                                          });
 				                               // } else {
 				                               // 	this.toasterService.pop(
@@ -129,27 +132,27 @@ export class StoreOrderProductAmountComponent
 		this.loading = false;
 	}
 	
-	async removeProduct()
+	public async removeProduct()
 	{
 		if(this.productAmount >= 1)
 		{
 			const activeModal = this.modalService.open(
 					ConfimationModalComponent,
 					{
-						size: 'sm',
+						size:      'sm',
 						container: 'nb-layout',
-						backdrop: 'static',
+						backdrop:  'static',
 					}
 			);
 			const modalComponent: ConfimationModalComponent =
-					activeModal.componentInstance;
+					      activeModal.componentInstance;
 			
 			modalComponent.mainText = 'ARE_YOU_SURE_YOU_WANT_TO_DECREASE';
 			this.loading = true;
 			
 			await modalComponent.confirmEvent
 			                    .pipe(takeUntil(modalComponent.ngDestroy$))
-			                    .subscribe((dataEvent) =>
+			                    .subscribe(() =>
 			                               {
 				                               this.orderRouter
 				                                   .decreaseOrderProducts(
@@ -157,14 +160,14 @@ export class StoreOrderProductAmountComponent
 						                                   this.productObj,
 						                                   this.orderWarehouseId
 				                                   )
-				                                   .then((r) =>
+				                                   .then(() =>
 				                                         {
 					                                         this.toasterService.pop(
 							                                         `info`,
 							                                         `Decreased amount of the order's product!`
 					                                         );
 				                                         })
-				                                   .catch((err) =>
+				                                   .catch(() =>
 				                                          {
 					                                          this.toasterService.pop(
 							                                          `error`,
@@ -183,12 +186,6 @@ export class StoreOrderProductAmountComponent
 			);
 		}
 		this.loading = false;
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.ngDestroy$.next();
-		this.ngDestroy$.complete();
 	}
 	
 	protected localeTranslate(member: ILocaleMember[])
