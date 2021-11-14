@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import Order          from '../entities/Order';
 import IGeoLocation   from '../interfaces/IGeoLocation';
 
-export interface IGeoLocationOrdersRouterGetOptions
+export interface IGeoLocationOrdersRouterOptions
 {
 	populateWarehouse?: boolean;
 	populateCarrier?: boolean;
@@ -12,7 +12,7 @@ interface IGeoLocationOrdersRouter
 {
 	get(
 			geoLocation: IGeoLocation,
-			options?: IGeoLocationOrdersRouterGetOptions
+			options?: IGeoLocationOrdersRouterOptions
 	): Observable<Order[]>;
 }
 
