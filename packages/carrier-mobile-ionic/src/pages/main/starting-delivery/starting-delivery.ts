@@ -1,18 +1,18 @@
 import { Component, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
-import { MapComponent }                                   from '../common/map/map.component';
+import { Router }                                         from '@angular/router';
+import { Geolocation }                                    from '@ionic-native/geolocation/ngx';
+import { Subject }                                        from 'rxjs';
+import { takeUntil }                                      from 'rxjs/operators';
 import { OrderRouter }                                    from '@modules/client.common.angular2/routers/order-router.service';
 import IOrder                                             from '@modules/server.common/interfaces/IOrder';
-import { Router }                                         from '@angular/router';
-import { first, takeUntil }                               from 'rxjs/operators';
-import { GeoLocationService }                             from 'services/geo-location.service';
-import GeoLocation                                        from '@modules/server.common/entities/GeoLocation';
-import { Geolocation }                                    from '@ionic-native/geolocation/ngx';
 import IGeoLocation                                       from '@modules/server.common/interfaces/IGeoLocation';
-import Utils                                              from '@modules/server.common/utils';
-import { CarrierOrdersRouter }                            from '@modules/client.common.angular2/routers/carrier-orders-router.service';
-import { Store }                                          from 'services/store.service';
 import OrderCarrierStatus                                 from '@modules/server.common/enums/OrderCarrierStatus';
-import { Subject }                                        from 'rxjs';
+import GeoLocation                                        from '@modules/server.common/entities/GeoLocation';
+import { GeoUtils }                                       from '@modules/server.common/utilities';
+import { CarrierOrdersRouter }                            from '@modules/client.common.angular2/routers/carrier-orders-router.service';
+import { GeoLocationService }                             from 'services/geo-location.service';
+import { StorageService }                                 from 'services/storage.service';
+import { MapComponent }                                   from '../common/map/map.component';
 
 @Component({
 	           selector:    'page-starting-delivery',
@@ -21,39 +21,45 @@ import { Subject }                                        from 'rxjs';
 export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 {
 	@ViewChild('map')
-	carrierMap: MapComponent;
+	public carrierMap: MapComponent;
 	
-	selectedOrder: IOrder;
-	carrierUserDistance: string;
-	disabledButtons: boolean = true;
+	public selectedOrder: IOrder;
+	public carrierUserDistance: string;
+	public disabledButtons: boolean = true;
 	
 	private destroy$ = new Subject<void>();
 	
 	constructor(
+			private router: Router,
 			private orderRouter: OrderRouter,
 			private carrierOrdersRouter: CarrierOrdersRouter,
 			private geoLocationService: GeoLocationService,
 			private geolocation: Geolocation,
-			private router: Router,
-			private store: Store
+			private storageService: StorageService
 	)
 	{}
 	
-	ngAfterViewInit(): void
+	public ngAfterViewInit(): void
 	{
 		this.loadData();
 	}
 	
-	ionViewWillEnter()
+	public ngOnDestroy(): void
+	{
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
+	
+	public ionViewWillEnter()
 	{
 		this.loadData();
 	}
 	
-	async startDelivery()
+	public async startDelivery()
 	{
 		this.disabledButtons = true;
 		await this.carrierOrdersRouter.updateStatus(
-				this.store.carrierId,
+				this.storageService.carrierId,
 				OrderCarrierStatus.CarrierStartDelivery
 		);
 		
@@ -63,21 +69,15 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 		this.disabledButtons = false;
 	}
 	
-	returnProduct()
+	public returnProduct()
 	{
 		this.disabledButtons = true;
-		this.store.returnProductFrom = 'startingDelivery';
+		this.storageService.returnProductFrom = 'startingDelivery';
 		
 		this.router.navigateByUrl('/product/return', {
 			skipLocationChange: false,
 		});
 		this.disabledButtons = false;
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 	
 	private loadData()
@@ -88,7 +88,7 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 		    .subscribe(async(order) =>
 		               {
 			               this.selectedOrder = order;
-			               this.store.selectedOrder = order;
+			               this.storageService.selectedOrder = order;
 			
 			               const position = this.geoLocationService.defaultLocation()
 			                                ? this.geoLocationService.defaultLocation()
@@ -110,9 +110,9 @@ export class StartingDeliveryPage implements AfterViewInit, OnDestroy
 					               position.coords.longitude
 			               );
 			
-			               const userGeo = this.selectedOrder.user['geoLocation'];
+			               const userGeo = this.selectedOrder.customer.geoLocation;
 			
-			               this.carrierUserDistance = Utils.getDistance(
+			               this.carrierUserDistance = GeoUtils.getDistance(
 					               userGeo as GeoLocation,
 					               dbGeoInput as GeoLocation
 			               ).toFixed(2);
