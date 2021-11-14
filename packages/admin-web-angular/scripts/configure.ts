@@ -43,6 +43,9 @@ export const environment: Environment = {
   
   TALKJS_APP_ID: '${env.TALKJS_APP_ID}',
 
+  JWT_EXPIRES_MAX: '${env.JWT_EXPIRES_MAX}',
+  JWT_EXPIRES_MIN: '${env.JWT_EXPIRES_MIN}',
+
   DEFAULT_LATITUDE: ${env.DEFAULT_LATITUDE},
   DEFAULT_LONGITUDE: ${env.DEFAULT_LONGITUDE},
 

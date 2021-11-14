@@ -17,6 +17,9 @@ export type Env = Readonly<{
 	
 	TALKJS_APP_ID: string;
 	
+	JWT_EXPIRES_MAX: string;
+	JWT_EXPIRES_MIN: string;
+	
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
 	
@@ -73,6 +76,9 @@ export const env: Env = cleanEnv(
 			YANDEX_MAPS_API_KEY: str({ default: '' }),
 			
 			TALKJS_APP_ID: str({ default: '' }),
+			
+			JWT_EXPIRES_MAX: str({ default: '14d' }),
+			JWT_EXPIRES_MIN: str({ default: '2d' }),
 			
 			DEFAULT_LATITUDE:  num({ default: 37.642036 }),
 			DEFAULT_LONGITUDE: num({ default: 55.708215 }),

@@ -12,6 +12,9 @@ export interface Environment
 	
 	TALKJS_APP_ID: string;
 	
+	JWT_EXPIRES_MAX: string;
+	JWT_EXPIRES_MIN: string;
+	
 	DEFAULT_LATITUDE: number;
 	DEFAULT_LONGITUDE: number;
 	
