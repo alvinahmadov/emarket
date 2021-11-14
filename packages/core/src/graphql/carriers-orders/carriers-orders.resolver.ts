@@ -1,9 +1,9 @@
 import { Query, Resolver }                from '@nestjs/graphql';
-import { CarriersOrdersService }          from '../../services/carriers';
+import IOrder                             from '@modules/server.common/interfaces/IOrder';
 import { ICarrierOrdersRouterGetOptions } from '@modules/server.common/routers/ICarrierOrdersRouter';
 import Order                              from '@modules/server.common/entities/Order';
-import IOrder                             from '@modules/server.common/interfaces/IOrder';
-import { GeoLocationOrdersOptions }       from 'services/geo-locations';
+import { IGeoLocationOrdersOptions }      from '../../services/geo-locations';
+import { CarriersOrdersService }          from '../../services/carriers';
 
 @Resolver('CarriersOrders')
 export class CarriersOrdersResolver
@@ -43,7 +43,7 @@ export class CarriersOrdersResolver
 			{
 				carrierId,
 				options
-			}: { carrierId: string; options: GeoLocationOrdersOptions }
+			}: { carrierId: string; options: IGeoLocationOrdersOptions }
 	): Promise<Order[]>
 	{
 		return this._carriersOrdersService.getCarrierOrdersHistory(
