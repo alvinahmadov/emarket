@@ -1,24 +1,7 @@
 import Logger                                            from 'bunyan';
 import _                                                 from 'lodash';
 import { inject, injectable }                            from 'inversify';
-import { asyncListener, observableListener, routerName } from '@pyro/io';
-import { ExistenceEventType }                            from '@pyro/db-server';
-import IOrder                                            from '@modules/server.common/interfaces/IOrder';
-import OrderCarrierStatus                                from '@modules/server.common/enums/OrderCarrierStatus';
-import Carrier                                           from '@modules/server.common/entities/Carrier';
-import Order                                             from '@modules/server.common/entities/Order';
-import ICarrierOrdersRouter                              from '@modules/server.common/routers/ICarrierOrdersRouter';
-import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
-import CarriersService                                   from './CarriersService';
-import { ProductsService }                               from '../products';
-import { OrdersService }                                 from '../orders';
-import { createLogger }                                  from '../../helpers/Log';
-import { WarehousesOrdersService }                       from '../warehouses';
-import IService                                          from '../IService';
-import {
-	GeoLocationsOrdersService,
-	GeoLocationOrdersOptions
-}                                                        from '../geo-locations';
+import { throwError, of, Observable }                    from 'rxjs';
 import {
 	concat,
 	distinctUntilChanged,
@@ -29,8 +12,25 @@ import {
 	share,
 	switchMap
 }                                                        from 'rxjs/operators';
-import { throwError, of, Observable }                    from 'rxjs';
+import { asyncListener, observableListener, routerName } from '@pyro/io';
+import { ExistenceEventType }                            from '@pyro/db-server';
+import IOrder                                            from '@modules/server.common/interfaces/IOrder';
+import ICarrierOrdersRouter                              from '@modules/server.common/routers/ICarrierOrdersRouter';
+import OrderCarrierStatus                                from '@modules/server.common/enums/OrderCarrierStatus';
 import OrderWarehouseStatus                              from '@modules/server.common/enums/OrderWarehouseStatus';
+import Carrier                                           from '@modules/server.common/entities/Carrier';
+import Order                                             from '@modules/server.common/entities/Order';
+import GeoUtils                                          from '@modules/server.common/utilities/geolocation';
+import CarriersService                                   from './CarriersService';
+import { ProductsService }                               from '../products';
+import { OrdersService }                                 from '../orders';
+import { WarehousesOrdersService }                       from '../warehouses';
+import IService                                          from '../IService';
+import { createLogger }                                  from '../../helpers/Log';
+import {
+	GeoLocationsOrdersService,
+	IGeoLocationOrdersOptions
+}                                                        from '../geo-locations';
 
 @injectable()
 @routerName('carrier-orders')
@@ -43,7 +43,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	 * @static
 	 * @memberof CarriersOrdersService
 	 */
-	static CarrierTrackingDistance = 50000;
+	public static CarrierTrackingDistance = 50000;
 	
 	protected log: Logger = createLogger({
 		                                     name: 'carriersOrdersService'
@@ -64,7 +64,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	{}
 	
 	@asyncListener()
-	async selectedForDelivery(
+	public async selectedForDelivery(
 			carrierId: string,
 			orderIds: string[],
 			carrierCompetition?: boolean
@@ -105,7 +105,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async getCount(carrierId: string): Promise<number>
+	public async getCount(carrierId: string): Promise<number>
 	{
 		await this.carriersService.throwIfNotExists(carrierId);
 		
@@ -118,7 +118,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async skipOrders(carrierId: string, ordersIds: string[]): Promise<Carrier>
+	public async skipOrders(carrierId: string, ordersIds: string[]): Promise<Carrier>
 	{
 		await this.carriersService.throwIfNotExists(carrierId);
 		
@@ -132,7 +132,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async updateStatus(
+	public async updateStatus(
 			carrierId: string,
 			status: OrderCarrierStatus
 	): Promise<Carrier>
@@ -211,7 +211,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async cancelDelivery(
+	public async cancelDelivery(
 			carrierId: string,
 			orderIds: string[]
 	): Promise<Carrier>
@@ -241,7 +241,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@observableListener()
-	getAvailable(
+	public getAvailable(
 			carrierId: string,
 			options: { populateWarehouse: boolean } = {
 				populateWarehouse: false
@@ -277,7 +277,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@observableListener()
-	get(
+	public get(
 			carrierId: string,
 			options: {
 				populateWarehouse: boolean;
@@ -332,7 +332,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async getCarrierOrders(
+	public async getCarrierOrders(
 			carrierId: string,
 			options: {
 				populateWarehouse: boolean;
@@ -378,7 +378,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async getCarrierCurrentOrder(carrierId: string): Promise<Order>
+	public async getCarrierCurrentOrder(carrierId: string): Promise<Order>
 	{
 		await this.carriersService.throwIfNotExists(carrierId);
 		
@@ -392,7 +392,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async getCountOfCarrierOrdersHistory(carrierId: string): Promise<number>
+	public async getCountOfCarrierOrdersHistory(carrierId: string): Promise<number>
 	{
 		await this.carriersService.throwIfNotExists(carrierId);
 		return this.ordersService.Model.find({ carrier: carrierId })
@@ -401,9 +401,9 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	}
 	
 	@asyncListener()
-	async getCarrierOrdersHistory(
+	public async getCarrierOrdersHistory(
 			carrierId: string,
-			options: GeoLocationOrdersOptions
+			options: IGeoLocationOrdersOptions
 	): Promise<Order[]>
 	{
 		await this.carriersService.throwIfNotExists(carrierId);
