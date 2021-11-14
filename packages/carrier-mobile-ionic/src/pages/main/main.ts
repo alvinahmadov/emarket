@@ -1,16 +1,16 @@
 import { Component, OnDestroy, OnInit, } from '@angular/core';
-
-import { Subject }            from 'rxjs';
-import { takeUntil }          from 'rxjs/operators';
-import { Platform }           from '@ionic/angular';
-import { Geolocation }        from '@ionic-native/geolocation/ngx';
-import IOrder                 from '@modules/server.common/interfaces/IOrder';
-import CarrierStatus          from '@modules/server.common/enums/CarrierStatus';
-import GeoLocation            from '@modules/server.common/entities/GeoLocation';
-import { CommonUtils }        from '@modules/server.common/utilities';
-import { CarrierRouter }      from '@modules/client.common.angular2/routers/carrier-router.service';
-import { Store }              from '../../services/store.service';
-import { GeoLocationService } from '../../services/geo-location.service';
+import { Platform }                      from '@ionic/angular';
+import { Geolocation }                   from '@ionic-native/geolocation/ngx';
+import { Subject }                       from 'rxjs';
+import { takeUntil }                     from 'rxjs/operators';
+import IOrder                            from '@modules/server.common/interfaces/IOrder';
+import CarrierStatus                     from '@modules/server.common/enums/CarrierStatus';
+import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
+import { CommonUtils }                   from '@modules/server.common/utilities';
+import { CarrierRouter }                 from '@modules/client.common.angular2/routers/carrier-router.service';
+import { StorageService }                from '../../services/storage.service';
+import { GeoLocationService }            from '../../services/geo-location.service';
+import { environment }                   from '../../environments/environment';
 
 @Component({
 	           selector:    'page-main',
@@ -21,9 +21,7 @@ export class MainPage implements OnInit, OnDestroy
 {
 	public selectedOrder: IOrder;
 	public isTakenFromAnotherCarrier: boolean = false;
-	private watch: any;
 	private isOnline: boolean;
-	private isMapRendered: boolean;
 	private destroy$ = new Subject<void>();
 	
 	constructor(
@@ -31,7 +29,7 @@ export class MainPage implements OnInit, OnDestroy
 			private carrierRouter: CarrierRouter,
 			private geolocation: Geolocation,
 			private geoLocationService: GeoLocationService,
-			private store: Store
+			private storageService: StorageService
 	)
 	{}
 	
@@ -56,10 +54,10 @@ export class MainPage implements OnInit, OnDestroy
 	{
 		setInterval(() =>
 		            {
-			            if(this.isOnline)
+			            if(this.isOnline && this.storageService.carrierId)
 			            {
 				            const carrier$ = this.carrierRouter
-				                                 .get(this.store.carrierId)
+				                                 .get(this.storageService.carrierId)
 				                                 .pipe(takeUntil(this.destroy$))
 				                                 .subscribe(async(carrier) =>
 				                                            {
@@ -110,18 +108,19 @@ export class MainPage implements OnInit, OnDestroy
 											                                                                                      : '',
 											                                                                          loc:        {
 												                                                                          type:        'Point',
-												                                                                          coordinates: {
-													                                                                          lat: currentLat,
-													                                                                          lng: currentLong
-												                                                                          },
+												                                                                          coordinates: [
+													                                                                          currentLong,
+													                                                                          currentLat
+												                                                                          ],
 											                                                                          },
 										                                                                          })
 								                                                          )
 								                                                          .then(() =>
 								                                                                {
-									                                                                console.log(
-											                                                                'User location updated.'
-									                                                                );
+									                                                                if(!environment.production)
+									                                                                {
+										                                                                console.debug('Customer location updated.');
+									                                                                }
 									                                                                carrier$.unsubscribe();
 								                                                                });
 							                                                      }
@@ -132,10 +131,10 @@ export class MainPage implements OnInit, OnDestroy
 						                                                      })
 						                                                .catch((error) =>
 						                                                       {
-							                                                       console.log(
-									                                                       'Error getting location',
-									                                                       error
-							                                                       );
+							                                                       console.error({
+								                                                                     message: 'Error getting location',
+								                                                                     error
+							                                                                     });
 							                                                       carrier$.unsubscribe();
 						                                                       });
 					                                            }
@@ -146,12 +145,13 @@ export class MainPage implements OnInit, OnDestroy
 	
 	public watchOrderStatus()
 	{
-		this.store.selectedOrder$
+		this.storageService.selectedOrder$
 		    .pipe(takeUntil(this.destroy$))
 		    .subscribe((o) =>
 		               {
-			               this.isTakenFromAnotherCarrier =
-					               !!o && !!o.carrier && o.carrier !== this.store.carrierId;
+			               this.isTakenFromAnotherCarrier = !!o &&
+			                                                !!o.carrier &&
+			                                                o.carrier !== this.storageService.carrierId;
 			               this.selectedOrder = o;
 		               });
 	}
