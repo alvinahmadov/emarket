@@ -1,14 +1,12 @@
 <div *ngIf="selectedOrder?.isCancelled" class="money-amount-container">
 	<div class="money-amount">
-		<!-- TODO add translate -->
-		The customer cancel order
+		{{ 'HOME_VIEW.CUSTOMER_CANCELLED_ORDER' | translate }}
 	</div>
 </div>
 
 <div *ngIf="isTakenFromAnotherCarrier" class="money-amount-container">
 	<div class="money-amount">
-		<!-- TODO add translate -->
-		Another Carrier took the order first !
+		{{ 'HOME_VIEW.ANOTHER_CARRIER_TOOK' | translate }}
 	</div>
 </div>
 
@@ -38,9 +36,9 @@
 						<h3 class="description">
 							{{selectedProductTitles[i]}}
 						</h3>
-						<span class="description"
-						>#{{selectedOrder?.orderNumber}}</span
-						>
+						<span class="description">
+							#{{selectedOrder?.orderNumber}}
+						</span>
 					</ion-text>
 				</div>
 			</ion-slide>
