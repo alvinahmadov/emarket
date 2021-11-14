@@ -60,8 +60,9 @@ interface ICustomerAuthRouter
 	register(input: ICustomerRegistrationInput): Promise<Customer>;
 	
 	login(
-			username: string,
-			password: string
+			authInfo: string,
+			password: string,
+			expiresIn?: string | number
 	): Promise<ICustomerLoginResponse | null>;
 	
 	addRegistrationInfo(
