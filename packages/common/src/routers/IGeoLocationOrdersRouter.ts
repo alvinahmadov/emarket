@@ -1,12 +1,18 @@
 import { Observable }                      from 'rxjs';
 import Order                               from '../entities/Order';
 import IGeoLocation                        from '../interfaces/IGeoLocation';
-import { IGeoLocationOrdersPagingOptions } from "@ever-platform/core/build/src/services/geo-locations";
 
 export interface IGeoLocationOrdersRouterOptions
 {
 	populateWarehouse?: boolean;
 	populateCarrier?: boolean;
+}
+
+export interface IGeoLocationOrdersPagingOptions
+{
+	sort?: string;
+	limit?: number;
+	skip?: number;
 }
 
 interface IGeoLocationOrdersSearchRecord
@@ -37,13 +43,6 @@ export interface IGeoLocationWorkOrderInput
 export interface IGeoLocationWorkOrdersInput extends IGeoLocationWorkOrderInput
 {
 	searchObj: IGeoLocationWorkOrderSearchInput;
-}
-
-export interface IGeoLocationOrdersPagingOptions
-{
-	sort?: string;
-	limit?: number;
-	skip?: number;
 }
 
 
