@@ -56,9 +56,12 @@ export class HeaderComponent implements OnInit, OnDestroy, AfterViewChecked
 					    if(admin)
 						    this.chatsService
 						        .createCurrentSession(admin)
-						        .then(session => this.session = session);
-					    
-					    this.chatsService.handleUnreadEvents(this.session);
+						        .then(session =>
+						              {
+							              this.session = session
+							              if(this.session)
+								              this.chatsService.handleUnreadEvents(this.session);
+						              });
 				    }
 		    );
 	}
