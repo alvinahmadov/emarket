@@ -1,19 +1,19 @@
 import { Injectable }             from '@angular/core';
 import { Router, CanLoad, Route } from '@angular/router';
-import { Store }                  from 'services/store.service';
+import { StorageService }         from 'services/storage.service';
 
 @Injectable()
 export class PagesModuleGuard implements CanLoad
 {
 	constructor(
 			private readonly router: Router,
-			private readonly store: Store
+			private readonly storageService: StorageService
 	)
 	{}
 	
-	async canLoad(route: Route)
+	public async canLoad(route: Route)
 	{
-		const showInformationPage = this.store.showInformationPage;
+		const showInformationPage = this.storageService.showInformationPage;
 		
 		if(showInformationPage)
 		{
