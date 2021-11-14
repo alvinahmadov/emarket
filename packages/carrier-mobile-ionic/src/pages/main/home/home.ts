@@ -1,19 +1,16 @@
 import { Component, ViewChild }     from '@angular/core';
-import { CarrierRouter }            from '@modules/client.common.angular2/routers/carrier-router.service';
-import ICarrier                     from '@modules/server.common/interfaces/ICarrier';
-import CarrierStatus                from '@modules/server.common/enums/CarrierStatus';
-import _                            from 'lodash';
-import { LocalNotifications }       from '@ionic-native/local-notifications/ngx';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/take';
-import { Store }                    from '../../../services/store.service';
-import { GeoLocationOrdersService } from '../../../services/geo-location-order.service';
-import IGeoLocation                 from '@modules/server.common/interfaces/IGeoLocation';
-import { Geolocation }              from '@ionic-native/geolocation/ngx';
-import { GeoLocationService }       from '../../../services/geo-location.service';
-import { MapComponent }             from '../common/map/map.component';
 import { Router }                   from '@angular/router';
+import { LocalNotifications }       from '@ionic-native/local-notifications/ngx';
+import { Subscription }             from 'rxjs'
+import ICarrier                     from '@modules/server.common/interfaces/ICarrier';
+import IGeoLocation                 from '@modules/server.common/interfaces/IGeoLocation';
+import CarrierStatus                from '@modules/server.common/enums/CarrierStatus';
+import { Geolocation }              from '@ionic-native/geolocation/ngx';
+import { CarrierRouter }            from '@modules/client.common.angular2/routers/carrier-router.service';
+import { GeoLocationOrdersService } from 'services/geo-location-order.service';
+import { GeoLocationService }       from 'services/geo-location.service';
+import { StorageService }           from 'services/storage.service';
+import { MapComponent }             from '../common/map/map.component';
 
 declare var google: any;
 
@@ -24,19 +21,19 @@ declare var google: any;
 export class HomePage
 {
 	@ViewChild('map')
-	carrierMap: MapComponent;
+	public carrierMap: MapComponent;
 	
-	carrier: ICarrier;
-	isWorking: boolean;
-	carrier$;
-	order$;
-	marker;
-	map: any;
+	public carrier: ICarrier;
+	public isWorking: boolean;
+	public carrier$: Subscription;
+	public order$: Subscription;
+	public marker: any;
+	public map: any;
 	
 	constructor(
 			private carrierRouter: CarrierRouter,
 			private localNotifications: LocalNotifications,
-			private store: Store,
+			private storageService: StorageService,
 			private geoLocationOrdersService: GeoLocationOrdersService,
 			private geolocation: Geolocation,
 			private geoLocationService: GeoLocationService,
@@ -44,42 +41,41 @@ export class HomePage
 	)
 	{}
 	
-	ionViewWillEnter()
+	public ionViewWillEnter()
 	{
-		localStorage.removeItem('returnProductFrom');
-		localStorage.removeItem('driveToWarehouseFrom');
-		
+		this.storageService.returnProductFrom = null;
+		this.storageService.driveToWarehouseFrom = null;
 		this.loadData();
 	}
 	
-	ionViewWillLeave()
+	public ionViewWillLeave()
 	{
 		this.unsubscribeAll();
 	}
 	
-	async startWorking()
+	public async startWorking()
 	{
 		const res = await this.carrierRouter.updateStatus(
-				this.store.carrierId,
+				this.storageService.carrierId,
 				CarrierStatus.Online
 		);
 		
 		this.isWorking = res.status === CarrierStatus.Online;
 	}
 	
-	async stopWorking()
+	public async stopWorking()
 	{
 		const res = await this.carrierRouter.updateStatus(
-				this.store.carrierId,
+				this.storageService.carrierId,
 				CarrierStatus.Offline
 		);
 		
 		this.isWorking = res.status === CarrierStatus.Online;
-		localStorage.removeItem('orderId');
-		this.store.selectedOrder = null;
+		this.storageService.orderId = null
+		this.storageService.selectedOrder = null;
 	}
 	
-	notification()
+	public notification()
 	{
 		this.localNotifications.schedule({
 			                                 id:      1,
@@ -94,8 +90,7 @@ export class HomePage
 	private async loadData()
 	{
 		this.carrier$ = this.carrierRouter
-		                    .get(this.store.carrierId)
-		
+		                    .get(this.storageService.carrierId)
 		                    .subscribe(async(carrier) =>
 		                               {
 			                               this.isWorking = carrier.status === CarrierStatus.Online;
@@ -141,16 +136,16 @@ export class HomePage
 				
 				                                                 .subscribe(async(order) =>
 				                                                            {
-					                                                            if(order || this.store.orderId)
+					                                                            if(order || this.storageService.orderId)
 					                                                            {
 						                                                            if(this.marker)
 						                                                            {
 							                                                            this.marker.setMap(null);
 						                                                            }
 						                                                            this.notification();
-						                                                            if(!this.store.orderId)
+						                                                            if(!this.storageService.orderId)
 						                                                            {
-							                                                            this.store.orderId = order.id;
+							                                                            this.storageService.orderId = order.id;
 						                                                            }
 						
 						                                                            this.unsubscribeAll();
@@ -161,39 +156,6 @@ export class HomePage
 						                                                            );
 					                                                            }
 				                                                            });
-				
-				                               // Old code here get all avaiable orders near carrier
-				                               // this.order$ = this.geoLocationOrdersRouter
-				                               // 	.get(carrier.geoLocation as GeoLocation)
-				                               // 	.map((orders) => {
-				                               // 		return _.find(orders, (order) => {
-				                               // 			return (
-				                               // 				order.warehouseStatus >=
-				                               // 					OrderWarehouseStatus.PackagingFinished &&
-				                               // 				order.status ===
-				                               // 					OrderStatus.WarehousePreparation &&
-				                               // 				!_.includes(
-				                               // 					carrier.skippedOrderIds,
-				                               // 					order.id
-				                               // 				)
-				                               // 			);
-				                               // 		});
-				                               // 	})
-				                               // 	.filter((availableOrder) => availableOrder != null)
-				                               // 	.take(1)
-				                               // 	.subscribe((availableOrder) => {
-				                               // 		if (this.marker) {
-				                               // 			this.marker.setMap(null);
-				                               // 		}
-				                               // 		this.notification();
-				                               // 		localStorage.setItem(
-				                               // 			'orderId',
-				                               // 			availableOrder.id
-				                               // 		);
-				                               // 		this.navCtrl.push('drive-to-warehouse', {
-				                               // 			map: this.navParams.get('map')
-				                               // 		});
-				                               // 	});
 			                               }
 			
 			                               this.carrierMap.setCenter(
