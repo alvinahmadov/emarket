@@ -4,6 +4,7 @@ import Country                        from '@modules/server.common/enums/Country
 import IEnterByCode                   from '@modules/server.common/interfaces/IEnterByCode';
 import Invite                         from '@modules/server.common/entities/Invite';
 import { ICustomerRegistrationInput } from '@modules/server.common/routers/ICustomerAuthRouter';
+import FakeDataUtils                  from '@modules/server.common/utilities/fake-data';
 import { environment }                from 'environments/environment';
 
 @Injectable()
@@ -13,6 +14,7 @@ export default class FakeDataUsers
 	{
 		const firstName = faker.name.firstName();
 		const lastName = faker.name.lastName();
+		const avatar = FakeDataUtils.getFakeImg(300, 300, 12, `${firstName} ${lastName}`);
 		
 		return {
 			user:     {
@@ -21,7 +23,7 @@ export default class FakeDataUsers
 				firstName:   firstName,
 				lastName:    lastName,
 				phone:       faker.phone.phoneNumber(),
-				avatar:      faker.image.avatar(),
+				avatar:      avatar,
 				apartment:   faker.random.number(199).toString(),
 				geoLocation: {
 					countryId:     faker.random.number(200) as Country,
@@ -39,6 +41,7 @@ export default class FakeDataUsers
 					},
 				},
 				isBanned:    Math.random() < 0.01,
+				role: Math.random() < 0.01 ? "customer" : "merchant"
 			},
 			password: '123456',
 		};
