@@ -324,7 +324,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 		}
 		const loadData = async(customers: Customer[]) =>
 		{
-			const customerIds = customers.map((customer) => customer?.id);
+			const customerIds = customers.map((customer) => customer.id);
 			
 			const customersOrders = await this._ordersService
 			                                  .getCustomersOrdersCountInfo(customerIds);
@@ -386,7 +386,7 @@ export class CustomersComponent implements AfterViewInit, OnDestroy
 			                                    limit: perPage,
 		                                    })
 		                      .pipe(takeUntil(this.ngDestroy$))
-		                      .subscribe(async(customers: Customer[]) => await loadData(customers));
+		                      .subscribe(async(customers: Customer[]) => await loadData(customers.filter(cs => cs != null)));
 	}
 	
 	private _applyTranslationOnSmartTable(): void
