@@ -10,6 +10,8 @@ import {
 import ICustomer, { ICustomerCreateObject } from '../interfaces/ICustomer';
 import Role                                 from '../enums/Role';
 
+export const avatar = "https://res.cloudinary.com/alvindre/image/upload/v1636330324/placeholders/avatar.jpg";
+
 /**
  * Customer who make orders
  *
@@ -67,7 +69,7 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 	 * @type {string}
 	 * @memberof User
 	 */
-	@Schema({ type: String, required: false })
+	@Schema({ type: String, required: false, default: avatar })
 	@Column()
 	avatar: string;
 	
@@ -114,7 +116,7 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 	 * @type {string}
 	 * @memberof User
 	 */
-	@Schema(String)
+	@Schema({ type: String, required: false, default: "" })
 	@Column()
 	apartment: string;
 	
@@ -187,8 +189,6 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 		if(customer && customer.geoLocation)
 		{
 			this.geoLocation = new GeoLocation(customer.geoLocation);
-			if(customer.apartment == undefined)
-				customer.apartment = "";
 		}
 	}
 	
@@ -219,9 +219,21 @@ class Customer extends DBObject<ICustomer, ICustomerCreateObject> implements ICu
 	 */
 	get fullAddress(): string
 	{
+		const city = this.geoLocation?.city
+		             ? `${this.geoLocation.city}, `
+		             : "";
+		const streetAddress = this.geoLocation?.streetAddress
+		                      ? `${this.geoLocation.streetAddress} `
+		                      : "";
+		const apartment = this.apartment
+		                  ? `${this.apartment}/`
+		                  : "";
+		const house = this.geoLocation?.house
+		              ? this.geoLocation.house
+		              : "";
+		
 		return (
-				`${this.geoLocation.city}, ${this.geoLocation.streetAddress} ` +
-				`${this.apartment}/${this.geoLocation.house}`
+				`${city}${streetAddress}${apartment}${house}`
 		);
 	}
 }
