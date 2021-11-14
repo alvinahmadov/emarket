@@ -1,13 +1,13 @@
-import pm2, { StartOptions }     from 'pm2';
-import { CommonUtils as Common } from '@modules/server.common/utilities';
-import { env }                   from './env';
+import pm2, { StartOptions } from 'pm2';
+import { splitHostAndPort }  from './utils';
+import { env }               from './env';
 
 const mode = env.isProd ? 'production' : 'development';
 
 const MACHINE_NAME = process.env.KEYMETRICS_MACHINE_NAME;
 const PRIVATE_KEY = process.env.KEYMETRICS_SECRET_KEY;
 const PUBLIC_KEY = process.env.KEYMETRICS_PUBLIC_KEY;
-const [HOST, PORT] = Common.getHostAndPort(env.SERVICES_ENDPOINT)
+const [HOST, PORT] = splitHostAndPort(env.SERVICES_ENDPOINT);
 const APPNAME = process.env.PM2_APP_NAME || 'EMarket';
 const isProd = env.isProd;
 const instances = env.WEB_CONCURRENCY;
