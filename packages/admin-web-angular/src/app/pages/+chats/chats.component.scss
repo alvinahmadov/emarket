@@ -15,3 +15,8 @@
 .Inbox.center-stage {
     max-width: 100%!important;
 }
+.chat {
+    height: calc(100% - 75px);
+    top: auto;
+    bottom: auto;
+}
