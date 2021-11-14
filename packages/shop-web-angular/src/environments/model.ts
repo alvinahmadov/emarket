@@ -11,6 +11,9 @@ export interface Environment
 	GQL_ENDPOINT: string;
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	AUTH_LOGO: string;
+	CARRIER_ICON: string;
+	CUSTOMER_ICON: string;
+	STORE_ICON: string;
 	JWT_EXPIRES_MAX: string;
 	JWT_EXPIRES_MIN: string;
 	SETTINGS_APP_TYPE?: string;
