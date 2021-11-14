@@ -16,7 +16,8 @@ import IGeoLocation                                 from '@modules/server.common
 import IGeoLocationOrdersRouter,
 {
 	IGeoLocationOrdersRouterOptions,
-	IGeoLocationOrdersSearchObject
+	IGeoLocationOrdersSearchObject,
+	IGeoLocationOrdersPagingOptions
 }                                                   from '@modules/server.common/routers/IGeoLocationOrdersRouter';
 import OrderWarehouseStatus                         from '@modules/server.common/enums/OrderWarehouseStatus';
 import OrderCarrierStatus                           from '@modules/server.common/enums/OrderCarrierStatus';
@@ -24,7 +25,6 @@ import Order                                        from '@modules/server.common
 import Warehouse                                    from '@modules/server.common/entities/Warehouse';
 import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
 import { GeoLocationsWarehousesService }            from './GeoLocationsWarehousesService';
-import { IGeoLocationOrdersPagingOptions }          from './GeoLocationOrdersOptions';
 import {
 	WarehousesProductsService,
 	WarehousesOrdersService,
