@@ -45,7 +45,22 @@
       "BUY_FOR": "Buy for",
       "DETAILS": "Details",
       "DELIVERY_FROM": "Delivery from",
-      "TAKEOUT_FROM": "Takeout from"
+      "TAKEOUT_FROM": "Takeout from",
+      "DESCRIPTION": "Description",
+      "TOTAL_RATING": "Total rating",
+      "TOTAL_VIEWS": "Total views",
+      "RATE": "Rate",
+      "CATEGORIES": "Categories",
+      "PRICE": "Price",
+      "DISCOUNT": "Discount",
+      "RATING": {
+        "BAD": "Not satisfied",
+        "NORMAL": "Normal",
+        "GOOD": "Satisfied",
+        "BEST": "Very satisfied",
+        "PRETTY": "Best",
+        "REGISTRATION_NEEDED": "Registration needed to rate!"
+      }
     }
   },
   "LOG_IN_VIEW": {
@@ -53,6 +68,7 @@
     "ENTER_BY_ADDRESS": "Enter by Address",
     "REGISTER": "Sign Up",
     "LOGIN": "Sign In",
+    "REMEMBER_ME": "Remember me",
     "SIGN_UP_WITH_AN_APP_INVITATION": "Sign up with an app invitation",
     "WE_WILL_SEND_YOU_A_MESSAGE": "We'll send you a message as soon as we start running at your address:",
     "THANKS_FOR_REGISTERING": "Thanks for registering!",
@@ -83,11 +99,12 @@
   },
   "ORDER_VIEW": {
 	  "CANCEL": "Cancel",
-	  "CANCEL_ORDER": "In just 5-10 minutes you will be eating this delicious meal! By canceling it you will miss a great and tasty food, and we will likely have to throw it",
+	  "CANCEL_ORDER": "Are you sure you want to cancel the order?",
 	  "PAY": "Or pay with cash",
 	  "PAY_NOW": "Pay Now",
 	  "PRODUCTS": "Products",
 	  "ORDERS": "Orders",
+	  "NOTES": "Notes",
 	  "ORDER_ID": "order ID:",
 	  "NO_ORDERS": "There are no orders",
 	  "SHOW_CARRIER_ON_MAP": "Show carrier on map",
