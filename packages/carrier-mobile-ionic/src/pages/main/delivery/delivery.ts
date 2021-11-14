@@ -1,18 +1,18 @@
 import { Component, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
-import IOrder                                             from '@modules/server.common/interfaces/IOrder';
-import { OrderRouter }                                    from '@modules/client.common.angular2/routers/order-router.service';
-import OrderCarrierStatus                                 from '@modules/server.common/enums/OrderCarrierStatus';
-import { Mixpanel }                                       from '@ionic-native/mixpanel/ngx';
-import Utils                                              from '@modules/server.common/utils';
-import { Geolocation }                                    from '@ionic-native/geolocation/ngx';
-import IGeoLocation                                       from '@modules/server.common/interfaces/IGeoLocation';
-import GeoLocation                                        from '@modules/server.common/entities/GeoLocation';
-import { GeoLocationService }                             from '../../../services/geo-location.service';
-import { MapComponent }                                   from '../common/map/map.component';
 import { Router }                                         from '@angular/router';
-import { Store }                                          from 'services/store.service';
-import { takeUntil }                                      from 'rxjs/operators';
+import { Mixpanel }                                       from '@ionic-native/mixpanel/ngx';
+import { Geolocation }                                    from '@ionic-native/geolocation/ngx';
 import { Subject }                                        from 'rxjs';
+import { takeUntil }                                      from 'rxjs/operators';
+import IGeoLocation                                       from '@modules/server.common/interfaces/IGeoLocation';
+import IOrder                                             from '@modules/server.common/interfaces/IOrder';
+import OrderCarrierStatus                                 from '@modules/server.common/enums/OrderCarrierStatus';
+import GeoLocation                                        from '@modules/server.common/entities/GeoLocation';
+import { GeoUtils }                                       from '@modules/server.common/utilities';
+import { OrderRouter }                                    from '@modules/client.common.angular2/routers/order-router.service';
+import { MapComponent }                                   from '../common/map/map.component';
+import { StorageService }                                 from '../../../services/storage.service';
+import { GeoLocationService }                             from '../../../services/geo-location.service';
 
 declare var google: any;
 
@@ -23,11 +23,11 @@ declare var google: any;
 export class DeliveryPage implements AfterViewInit, OnDestroy
 {
 	@ViewChild('map')
-	carrierMap: MapComponent;
+	public carrierMap: MapComponent;
 	
-	selectedOrder: IOrder;
-	carrierUserDistance: string;
-	disabledButtons: boolean = true;
+	public selectedOrder: IOrder;
+	public carrierUserDistance: string;
+	public disabledButtons: boolean = true;
 	
 	private destroy$ = new Subject<void>();
 	
@@ -37,21 +37,32 @@ export class DeliveryPage implements AfterViewInit, OnDestroy
 			private geoLocationService: GeoLocationService,
 			private geolocation: Geolocation,
 			private router: Router,
-			private store: Store
+			private storageService: StorageService
 	)
 	{}
 	
-	get fullAddress()
+	public ngAfterViewInit(): void
 	{
-		return this.selectedOrder.user.fullAddress;
+		this.loadData();
 	}
 	
-	async delivered()
+	public ngOnDestroy(): void
+	{
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
+	
+	public get fullAddress(): string
+	{
+		return this.selectedOrder.customer.fullAddress;
+	}
+	
+	public async delivered()
 	{
 		this.disabledButtons = true;
 		if(this.selectedOrder)
 		{
-			this.router.navigateByUrl('/main/home', {
+			await this.router.navigateByUrl('/main/home', {
 				skipLocationChange: false,
 			});
 			
@@ -62,7 +73,7 @@ export class DeliveryPage implements AfterViewInit, OnDestroy
 					OrderCarrierStatus.DeliveryCompleted
 			);
 			
-			this.mixpanel.track('Order Delivered');
+			await this.mixpanel.track('Order Delivered');
 		}
 		else
 		{
@@ -71,45 +82,34 @@ export class DeliveryPage implements AfterViewInit, OnDestroy
 		this.disabledButtons = false;
 	}
 	
-	cancel()
+	public cancel()
 	{
 		this.disabledButtons = true;
-		this.store.driveToWarehouseFrom = 'delivery';
+		this.storageService.driveToWarehouseFrom = 'delivery';
 		this.router.navigateByUrl('/main/drive-to-warehouse', {
 			skipLocationChange: false,
 		});
 	}
 	
-	ngAfterViewInit(): void
-	{
-		this.loadData();
-	}
+	public ionViewWillEnter() {}
 	
-	ionViewWillEnter() {}
-	
-	ionViewWillLeave() {}
-	
-	ngOnDestroy(): void
-	{
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
+	public ionViewWillLeave() {}
 	
 	private unselectOrder()
 	{
-		localStorage.removeItem('orderId');
-		this.store.selectedOrder = null;
+		this.storageService.orderId = null
+		this.storageService.selectedOrder = null;
 	}
 	
 	private loadData()
 	{
 		this.orderRouter
-		    .get(localStorage.getItem('orderId'), { populateWarehouse: true })
+		    .get(this.storageService.orderId, { populateWarehouse: true })
 		    .pipe(takeUntil(this.destroy$))
 		    .subscribe(async(order) =>
 		               {
 			               this.selectedOrder = order;
-			               this.store.selectedOrder = order;
+			               this.storageService.selectedOrder = order;
 			               // const carrier = await this.carrierRouter
 			               // 	.get(order.carrierId)
 			               // 	.pipe(first())
@@ -119,7 +119,7 @@ export class DeliveryPage implements AfterViewInit, OnDestroy
 			                                ? this.geoLocationService.defaultLocation()
 			                                : await this.geolocation.getCurrentPosition();
 			
-			               // MongoDb store coordinates lng => lat
+			               // MongoDb storageService coordinates lng => lat
 			               const dbGeoInput = {
 				               loc: {
 					               type:        'Point',
@@ -134,9 +134,9 @@ export class DeliveryPage implements AfterViewInit, OnDestroy
 					               position.coords.latitude,
 					               position.coords.longitude
 			               );
-			               const userGeo = order.user['geoLocation'];
+			               const userGeo = order.customer.geoLocation;
 			
-			               this.carrierUserDistance = Utils.getDistance(
+			               this.carrierUserDistance = GeoUtils.getDistance(
 					               userGeo,
 					               dbGeoInput as GeoLocation
 			               ).toFixed(2);
