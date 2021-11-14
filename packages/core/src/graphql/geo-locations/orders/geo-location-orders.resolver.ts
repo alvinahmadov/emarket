@@ -1,10 +1,10 @@
 import { Resolver, Query }           from '@nestjs/graphql';
-import Order                         from '@modules/server.common/entities/Order';
-import { GeoLocationsOrdersService } from '../../../services/geo-locations/GeoLocationsOrdersService';
 import {
 	IGeoLocationWorkOrderInput,
 	IGeoLocationWorkOrdersInput
-}                                    from '../../../services/geo-locations/GeoLocationOrdersOptions';
+}                                    from '@modules/server.common/routers/IGeoLocationOrdersRouter';
+import Order                         from '@modules/server.common/entities/Order';
+import { GeoLocationsOrdersService } from '../../../services/geo-locations/GeoLocationsOrdersService';
 
 @Resolver('GeoLocationOrders')
 export class GeoLocationOrdersResolver
@@ -60,7 +60,7 @@ export class GeoLocationOrdersResolver
 				geoLocation,
 				skippedOrderIds,
 				searchObj
-			}: Omit<IGeoLocationWorkOrdersInput, 'options'>
+			}: Omit<IGeoLocationWorkOrderInput, 'options'>
 	): Promise<number>
 	{
 		return this.geoLocationsOrdersService.getCountOfOrdersForWork(
