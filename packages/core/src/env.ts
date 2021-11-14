@@ -2,9 +2,13 @@ import { cleanEnv, num, url, str, ValidatorSpec, bool } from 'envalid';
 
 export type Environments = 'production' | 'development' | 'test';
 
-export type Env = Readonly<{
+export interface Environment
+{
+	// Development environment
 	isDev: boolean;
+	// Testing environment
 	isTest: boolean;
+	// Production environment
 	isProd: boolean;
 	
 	NODE_ENV: Environments;
@@ -12,25 +16,47 @@ export type Env = Readonly<{
 	WEB_CONCURRENCY: number;
 	WEB_MEMORY: number;
 	
+	// Time zone
 	TIME_ZONE: string;
+	
+	// Set origin restrictions for backend
+	// disabled on development mode or maybe in
+	// production mode too
+	ENABLE_ORIGIN_RESTRICTION: boolean;
+	// Origin which allowed to send requests to
+	// backend service. In .env file separated with comma
 	ALLOWED_ORIGINS: string;
 	
 	CONNECTION_TIMEOUT: number;
 	
+	// Endpoint for https connection
+	// in server
 	HTTPS_SERVICES_ENDPOINT: string;
+	// Endpoint for http connection
+	// in server
 	SERVICES_ENDPOINT: string;
+	// GraphQL server endpoint
 	GQL_ENDPOINT: string;
+	// GraphQL server subscription endpoint
 	GQL_SUBSCRIPTIONS_ENDPOINT: string;
 	
+	// Path to the ssl certificaton on the
+	// server
 	HTTPS_CERT_PATH: string;
+	// Path to the ssl certificaton key on
+	// the server
 	HTTPS_KEY_PATH: string;
 	
+	// Path to the logging and temporary
+	// files
 	LOGS_PATH: string;
 	
+	// Uri to the database connection
 	DB_URI: string;
 	DB_POOL_SIZE: number;
 	DB_CONNECT_TIMEOUT: number;
 	
+	// Private stripe API secret key
 	STRIPE_SECRET_KEY: string;
 	
 	YOOMONEY_SHOP_ID: string;
@@ -51,6 +77,7 @@ export type Env = Readonly<{
 	KEYMETRICS_SECRET_KEY: string;
 	KEYMETRICS_PUBLIC_KEY: string;
 	
+	// Social settings for signin/signup
 	GOOGLE_APP_ID: string;
 	GOOGLE_APP_SECRET: string;
 	GOOGLE_APP_CALLBACK: string;
@@ -67,67 +94,136 @@ export type Env = Readonly<{
 	VKONTAKTE_APP_SECRET: string;
 	VKONTAKTE_APP_CALLBACK: string;
 	
+	// API key for currency converter
+	CURRENCY_CONVERTER_API_KEY: string;
+	// Url to the currency converter
+	// API endpoint
+	CURRENCY_CONVERTER_URL: string;
+	
+	// Languages that supported by the service,
+	// separated by comma in .env file
 	AVAILABLE_LOCALES: string;
 	
+	// Secret key for jwt token authentication.
+	// Maybe any sequence of any characters
 	JWT_SECRET: string;
+	// Period of time while token is valid
 	JWT_EXPIRES: string;
 	
+	// Admin setting for password hash generation
 	ADMIN_PASSWORD_BCRYPT_SALT_ROUNDS: number;
+	// Merchant setting for password hash generation
 	WAREHOUSE_PASSWORD_BCRYPT_SALT_ROUNDS: number;
+	// Carrier setting for password hash generation
 	CARRIER_PASSWORD_BCRYPT_SALT_ROUNDS: number;
+	// Customer/Shop setting for password hash generation
 	USER_PASSWORD_BCRYPT_SALT_ROUNDS: number;
 	
+	// Maximum distance that store/warehouse may be shown
+	// or found.
 	STORE_MAX_TRACKING_DISTANCE: number;
 	
+	// Enable/disable after-registration email/device
+	// validation
 	SETTING_INVITES_ENABLED?: boolean;
+	// App requires for every customer to be registered
+	// Automatically temporarily enabled  when user
+	// adds product to orders/wish list.<br>
+	// <b>NOTE</b>: Not recommended to enable
 	SETTINGS_REGISTRATIONS_REQUIRED_ON_START?: boolean;
+	// Allow admin user to reset password
 	ADMIN_PASSWORD_RESET?: boolean;
+	// From admin panel allows to generate
+	// various random and/or hardcoded entities.<br>
+	// <b>NOTE</b>: For development only
 	FAKE_DATA_GENERATOR?: boolean;
 	
+	// Default admin generation email
+	// for service
+	// <b>NOTE</b>: In any mode
 	DEFAULT_ADMIN_MAIL: string;
+	// Default admin generation password
+	// for service
+	// <b>NOTE</b>: Recommended to update
+	// password after default admin
+	// generation.
+	// Used in any mode.
 	DEFAULT_ADMIN_PASSWORD: string;
 	
+	// Enable default coordinates. <br>
+	// <b>NOTE</b>: Can be enabled only
+	// in development mode.
 	DEFAULT_COORDINATES: boolean;
+	// Default geolocation coordinates latitude.
 	DEFAULT_LATITUDE: number;
+	// Default geolocation coordinates longitude.
 	DEFAULT_LONGITUDE: number;
 	
+	// Enable registering customer by predefined
+	// code constant.
+	// <b>NOTE</b>: For development only.
 	FAKE_INVITE_CODE: number;
 	
+	// Generate default merchant
+	// <b>NOTE</b>: For development only.
 	FAKE_MERCHANT_NAME: string;
+	// Generate default merchant
+	// <b>NOTE</b>: For development only.
 	FAKE_MERCHANT_PASSWORD: string;
+	// Generate default merchant
+	// <b>NOTE</b>: For development only.
 	FAKE_MERCHANT_EMAIL: string;
 	
 	ARCGIS_CLIENT_ID: string;
 	ARCGIS_CLIENT_SECRET: string;
+	
+	// API key for ipstack to detect
+	// geolocation of the customer by
+	// his/her IP address
 	IP_STACK_API_KEY?: string;
 	
+	// See: https://talkjs.com/
+	
+	// TalkJS app id setting to
+	// connect to chatting service
 	TALKJS_APP_ID: string;
+	// TalkJS app name setting to
+	// connect to chatting service
 	TALKJS_APP_NAME: string;
+	// TalkJS app secret for backend-only
+	// setting to connect to chatting
+	// service.
 	TALKJS_SECRET_KEY: string;
 	
+	// Level of log messages on core module
 	LOG_LEVEL?: string;
 	
+	// Apollo
 	APOLLO_KEY?: string;
 	APOLLO_GRAPH_ID?: string;
 	APOLLO_GRAPH_VARIANT?: string;
 	APOLLO_SCHEMA_REPORTING: boolean;
 	
+	// Enable/disable https/http
+	SSL_ON: boolean;
 	MAX_SOCKETS?: number;
-}>;
+}
 
-export const env: Env = cleanEnv(
+export const env: Readonly<Environment> = cleanEnv(
 		process.env,
 		{
 			NODE_ENV: str({
 				              choices: ['production', 'development', 'test'],
 				              default: 'development'
-			              }) as ValidatorSpec<Env['NODE_ENV']>,
+			              }) as ValidatorSpec<Readonly<Environment>['NODE_ENV']>,
 			
 			WEB_CONCURRENCY: num({ default: 1 }),
 			WEB_MEMORY:      num({ default: 2048 }),
 			
-			TIME_ZONE:       str({ default: 'Europe/Moscow' }),
-			ALLOWED_ORIGINS: str({ default: '*' }),
+			TIME_ZONE: str({ default: 'Europe/Moscow' }),
+			
+			ENABLE_ORIGIN_RESTRICTION: bool({ default: false }),
+			ALLOWED_ORIGINS:           str({ default: '*' }),
 			
 			CONNECTION_TIMEOUT: num({ default: 30 }),
 			
@@ -180,6 +276,9 @@ export const env: Env = cleanEnv(
 			VKONTAKTE_APP_ID:       str({ default: '' }),
 			VKONTAKTE_APP_SECRET:   str({ default: '' }),
 			VKONTAKTE_APP_CALLBACK: str({ default: '/auth/facebook' }),
+			
+			CURRENCY_CONVERTER_API_KEY: str({ default: '' }),
+			CURRENCY_CONVERTER_URL:     str({ default: 'https://free.currconv.com/api/v7' }),
 			
 			AVAILABLE_LOCALES: str({ default: '' }),
 			
@@ -262,6 +361,7 @@ export const env: Env = cleanEnv(
 			
 			APOLLO_SCHEMA_REPORTING: bool({ default: false }),
 			
+			SSL_ON:      bool({ default: false }),
 			MAX_SOCKETS: num({ default: Infinity })
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../../.env' }
