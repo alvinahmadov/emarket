@@ -19,14 +19,18 @@
 					#mode="ngModel"
 					[(ngModel)]="configModel.mode"
 					class="form-control"
+					id="mode"
 					name="mode"
 					required
 			>
 				<option disabled hidden selected value="">{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.CHOOSE_PAYPAL_MODE'
 							| translate
-					}}</option>
-				<option *ngFor="let type of payPalTypes" value="{{ type }}">
+					}}
+				</option>
+				<option *ngFor="let type of types"
+				        value="{{ type }}"
+				>
 					{{ type }}
 				</option>
 			</select>
@@ -43,6 +47,7 @@
 					#currency="ngModel"
 					[(ngModel)]="configModel.currency"
 					class="form-control"
+					id="currency"
 					name="currency"
 					required
 			>
@@ -51,9 +56,11 @@
 							| translate
 					}}</option>
 				<option
-						*ngFor="let code of currenciesCodes"
-						value="{{ code }}"
-				>{{ code }}</option
+						*ngFor="let currency of currencies"
+						value="{{ currency.code }}"
+				>
+					{{ currency.name }} ({{ currency.sign }})
+				</option
 				>
 			</select>
 			<small
@@ -138,7 +145,7 @@
 				}"
 					class="form-control"
 					id="secretKey"
-					name="secret-key"
+					name="secretKey"
 					nbInput
 					placeholder="{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.PAYPAL.SECRET_KEY'

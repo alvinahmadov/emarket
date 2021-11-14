@@ -1,41 +1,42 @@
-// noinspection DuplicatedCode
-
 import { Component, Input, ViewChild } from '@angular/core';
+import { NgForm }                      from '@angular/forms';
 import PaymentGateways, {
 	paymentGatewaysToString,
 	paymentGatewaysLogo,
 }                                      from '@modules/server.common/enums/PaymentGateways';
-import { Country }                     from '@modules/server.common/entities';
-import { NgForm }                      from '@angular/forms';
+import Country                         from '@modules/server.common/enums/Country';
 import IPaymentGatewayCreateObject     from '@modules/server.common/interfaces/IPaymentGateway';
+import Currency                        from '@modules/server.common/entities/Currency';
 
 @Component({
-	           selector: 'ea-bitpay-gateway',
+	           selector:    'ea-bitpay-gateway',
 	           templateUrl: './bitpay-gateway.component.html',
            })
 export class BitpayGatewayComponent
 {
 	@ViewChild('bitpayConfigForm', { static: true })
-	bitpayConfigForm: NgForm;
-	
-	isBitpayEnabled: boolean;
-	name = paymentGatewaysToString(PaymentGateways.Bitpay);
-	logo = paymentGatewaysLogo(PaymentGateways.Bitpay);
+	public bitpayConfigForm: NgForm;
 	
 	@Input()
-	currenciesCodes: string[] = [];
+	public currencies: Currency[] = [];
 	@Input()
-	warehouseCountry: Country;
 	
-	configModel = {
-		currency: '',
-		mode: '',
+	public warehouseCountry: Country;
+	public isBitpayEnabled: boolean;
+	public name = paymentGatewaysToString(PaymentGateways.Bitpay);
+	
+	public logo = paymentGatewaysLogo(PaymentGateways.Bitpay);
+	
+	// TODO: Check
+	public configModel = {
+		currency:       '',
+		mode:           '',
 		publishableKey: '',
-		secretKey: '',
-		description: '',
+		secretKey:      '',
+		description:    '',
 	};
 	
-	bitpayTypes = ['sandbox', 'live'];
+	public types = ['sandbox', 'live'];
 	
 	public get isFormValid(): boolean
 	{
@@ -60,7 +61,7 @@ export class BitpayGatewayComponent
 		}
 		
 		return {
-			paymentGateway: PaymentGateways.Bitpay,
+			paymentGateway:  PaymentGateways.Bitpay,
 			configureObject: this.configModel,
 		};
 	}
