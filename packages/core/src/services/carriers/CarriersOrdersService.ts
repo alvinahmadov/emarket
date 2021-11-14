@@ -16,6 +16,7 @@ import { asyncListener, observableListener, routerName } from '@pyro/io';
 import { ExistenceEventType }                            from '@pyro/db-server';
 import IOrder                                            from '@modules/server.common/interfaces/IOrder';
 import ICarrierOrdersRouter                              from '@modules/server.common/routers/ICarrierOrdersRouter';
+import { IGeoLocationOrdersPagingOptions }               from '@modules/server.common/routers/IGeoLocationOrdersRouter';
 import OrderCarrierStatus                                from '@modules/server.common/enums/OrderCarrierStatus';
 import OrderWarehouseStatus                              from '@modules/server.common/enums/OrderWarehouseStatus';
 import Carrier                                           from '@modules/server.common/entities/Carrier';
@@ -28,8 +29,7 @@ import { WarehousesOrdersService }                       from '../warehouses';
 import IService                                          from '../IService';
 import { createLogger }                                  from '../../helpers/Log';
 import {
-	GeoLocationsOrdersService,
-	IGeoLocationOrdersPagingOptions
+	GeoLocationsOrdersService
 }                                                        from '../geo-locations';
 
 @injectable()
