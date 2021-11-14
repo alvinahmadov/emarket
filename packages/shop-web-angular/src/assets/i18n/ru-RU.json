@@ -43,20 +43,23 @@
 		"LOADING_MORE_DATA": "Загрузка дополнительных данных ...",
 		"PRODUCT_DETAILS_VIEW": {
 			"BUY_FOR": "Заказать",
-			"DETAILS": "Детали",
+			"DESCRIPTION": "Коротко о товаре",
+			"DETAILS": "Детальное описание",
 			"TOTAL_RATING": "Обшая оценка",
 			"TOTAL_VIEWS": "Обшие просмотры",
+			"RATE": "Оценить",
 			"CATEGORIES": "Категории",
 			"DELIVERY_FROM": "Доставка из",
 			"TAKEOUT_FROM": "Вынос из",
 			"PRICE": "Цена",
 			"DISCOUNT": "Скидка",
 			"RATING": {
-				"BAD": "Плохо",
+				"BAD": "Не доволен",
 				"NORMAL": "Нормально",
-				"GOOD": "Хорошо",
-				"BEST": "Отлично",
-				"PRETTY": "Прекрасно"
+				"GOOD": "Доволен",
+				"BEST": "Очень доволен",
+				"PRETTY": "Лучший",
+				"REGISTRATION_NEEDED": "Для оценки необходимо зарегистрироваться!"
 			}
 		}
 	},
@@ -86,6 +89,7 @@
 		"ENTER_BY_ADDRESS": "Введите адрес",
 		"ENTER_PASSWORD": "Введите пароль",
 		"ENTER_EMAIL_OR_USERNAME": "Введите имя/почту",
+		"REMEMBER_ME": "Запомнить меня",
 		"REGISTER": "Регистрация",
 		"LOGIN": "Войти",
 		"SIGN_UP_WITH_AN_APP_INVITATION": "Зарегистрируйтесь с приглашением на приложение",
@@ -127,6 +131,7 @@
 		"PAY_NOW": "Заплатить сейчас",
 		"PRODUCTS": "Продукты",
 		"ORDERS": "Заказы",
+		"NOTES": "Заметки",
 		"ORDER_ID": "Номер заказа:",
 		"NO_ORDERS": "Заказы отсутствуют",
 		"SHOW_CARRIER_ON_MAP": "Показать перевозчика на карте",
