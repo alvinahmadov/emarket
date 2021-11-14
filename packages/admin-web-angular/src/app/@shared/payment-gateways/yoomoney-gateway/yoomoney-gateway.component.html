@@ -7,12 +7,60 @@
 	</div>
 </div>
 
-<form #yooConfigForm="ngForm" [hidden]="!isYooEnabled">
+<form #yooConfigForm="ngForm"
+      [hidden]="!isYooEnabled">
+	
+<!-- ShopId	-->
+	<div class="row m-0">
+		<div class="form-group col-md-6">
+			<label for="shopId">
+				{{
+				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.YOOKASSA.SHOP_ID_TEXT'
+						| translate
+				}}
+			</label>
+			<input
+					#shopId="ngModel"
+					[(ngModel)]="configModel.payButtontext"
+					[ngClass]="{
+					'input-danger':
+						shopId.invalid &&
+						(shopId.dirty || shopId.touched),
+					'input-success':
+						shopId.valid &&
+						(shopId.dirty || shopId.touched)
+				}"
+					class="form-control"
+					id="shopId"
+					name="shopId"
+					nbInput
+					placeholder="{{
+					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.YOOKASSA.SHOP_ID'
+				}}"
+					required
+					type="text"
+			/>
+			<small
+					*ngIf="
+					payButtontext.invalid &&
+					(payButtontext.dirty || payButtontext.touched)
+				"
+					class="text-danger"
+			>
+				<span *ngIf="payButtontext.errors.required">
+					{{
+					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PAY_BUTTON_TEXT_IS_REQUIRED'
+							| translate
+					}}
+				</span>
+			</small>
+		</div>
+	</div>
 	<div class="row m-0">
 		<div class="form-group col-md-6">
 			<label for="payButtontext">
 				{{
-				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PAY_BUTTON_TEXT'
+				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.YOOKASSA.PAY_BUTTON_TEXT'
 						| translate
 				}}
 			</label>
@@ -29,7 +77,7 @@
 				}"
 					class="form-control"
 					id="payButtontext"
-					name="pay-button-text"
+					name="payButtontext"
 					nbInput
 					placeholder="{{
 					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PAY_BUTTON_TEXT'
@@ -57,7 +105,7 @@
 		<div class="form-group col-md-6">
 			<label for="currency">
 				{{
-				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.CURRENCY'
+				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.YOOKASSA.CURRENCY'
 						| translate
 				}}
 			</label>
@@ -65,6 +113,7 @@
 					#currency="ngModel"
 					[(ngModel)]="configModel.currency"
 					class="form-control"
+					id="currency"
 					name="currency"
 					required
 			>
@@ -75,10 +124,10 @@
 					}}</option
 				>
 				<option
-						*ngFor="let code of currenciesCodes"
-						value="{{ code }}"
-				>{{ code }}</option
-				>
+						*ngFor="let currency of currencies"
+						value="{{ currency.code }}"
+				>{{currency.name}} ({{currency.sign}})
+				</option>
 			</select>
 			<small
 					*ngIf="currency.invalid && (currency.dirty || currency.touched)"
@@ -94,85 +143,11 @@
 		</div>
 	</div>
 	
-	<div class="row mt-0 mr-0 ml-0 form-group">
-		<div class="col-md-12">
-			<label for="logo">
-				{{
-				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.CURRENCY_TEXT_IS_REQUIRED'
-						| translate
-				}}
-			</label>
-			<e-cu-file-uploader
-					#fileUploader
-					(uploadedImgUrl)="configModel.companyBrandLogo = $event"
-					[customClass]="
-					fileUploader.shownInput.dirty ||
-					fileUploader.shownInput.touched ||
-					configModel.companyBrandLogo !== ''
-						? invalidUrl || configModel.companyBrandLogo === ''
-							? 'form-control-danger'
-							: 'form-control-success'
-						: ''
-				"
-					[fileUrl]="configModel.companyBrandLogo"
-					[placeholder]="COMPANY_BRAND_LOGO"
-			></e-cu-file-uploader>
-			
-			<small
-					*ngIf="
-					fileUploader.shownInput.dirty ||
-					fileUploader.shownInput.touched
-				"
-					class="text-danger"
-			>
-				<span *ngIf="configModel.companyBrandLogo === ''">
-					{{
-					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.COMPANY_BRAND_LOGO_IS_REQUIRED'
-							| translate
-					}}
-				</span>
-				
-				<span *ngIf="invalidUrl && configModel.companyBrandLogo !== ''">
-					{{
-					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.INVALID_LOGO_URL'
-							| translate
-					}}
-				</span>
-			</small>
-		</div>
-		
-		<div
-				[hidden]="configModel.companyBrandLogo === '' || invalidUrl"
-				class="col-md-8 preview-img-container"
-		>
-			<div class="col-sm-10">
-				<div class="row preview-img">
-					<img
-							(error)="invalidUrl = true"
-							(load)="invalidUrl = false"
-							alt="Invalid logo"
-							class="img-rounded"
-							src="{{ configModel.companyBrandLogo }}"
-					/>
-					<div (click)="deleteImg()" class="remove-icon">
-						<span
-								class="ion-md-remove-circle text-danger pl-2"
-								title="{{
-								'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.REMOVE'
-									| translate
-							}}"
-						></span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	
 	<div class="row m-0">
 		<div class="form-group col-md-12">
 			<label for="publishableKey">
 				{{
-				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PUBLISHABLE_KEY'
+				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.YOOKASSA.PUBLISHABLE_KEY'
 						| translate
 				}}
 			</label>
@@ -189,10 +164,10 @@
 				}"
 					class="form-control"
 					id="publishableKey"
-					name="publishable-key"
+					name="publishableKey"
 					nbInput
 					placeholder="{{
-					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.PUBLISHABLE_KEY'
+					'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.YOOKASSA.PUBLISHABLE_KEY'
 						| translate
 				}}"
 					required
@@ -212,20 +187,6 @@
 					}}
 				</span>
 			</small>
-		</div>
-	</div>
-	
-	<div class="row m-0">
-		<div class="form-group col-md-8">
-			<nb-checkbox
-					[(ngModel)]="configModel.allowRememberMe"
-					name="remember-me"
-			>
-				{{
-				'FAKE_DATA.SETUP_MERCHANTS.PAYMENTS.STRIPE.ALLOW_REMEMBER_ME'
-						| translate
-				}}
-			</nb-checkbox>
 		</div>
 	</div>
 </form>
