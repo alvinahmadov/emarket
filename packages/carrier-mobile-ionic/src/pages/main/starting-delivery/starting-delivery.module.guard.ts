@@ -1,23 +1,23 @@
 import { Injectable }             from '@angular/core';
 import { CanLoad, Route, Router } from '@angular/router';
-import { Store }                  from 'services/store.service';
-import { OrderRouter }            from '@modules/client.common.angular2/routers/order-router.service';
 import { first }                  from 'rxjs/operators';
 import OrderCarrierStatus         from '@modules/server.common/enums/OrderCarrierStatus';
+import { OrderRouter }            from '@modules/client.common.angular2/routers/order-router.service';
+import { StorageService }         from 'services/storage.service';
 
 @Injectable()
 export class StartingDeliveryModuleGuard implements CanLoad
 {
 	constructor(
-			private readonly store: Store,
 			private readonly router: Router,
-			private readonly orderRouter: OrderRouter
+			private readonly orderRouter: OrderRouter,
+			private readonly storageService: StorageService
 	)
 	{}
 	
-	async canLoad(route: Route)
+	public async canLoad(route: Route)
 	{
-		const orderId = await this.store.orderId;
+		const orderId = this.storageService.orderId;
 		if(!orderId)
 		{
 			this.router.navigateByUrl('/main/home');
