@@ -2,6 +2,19 @@ import { Observable } from 'rxjs';
 import IGeoLocation   from '../interfaces/IGeoLocation';
 import ProductInfo    from '../entities/ProductInfo';
 
+export interface IPagingSortInput
+{
+	field: string;
+	sortBy: string;
+}
+
+export interface IGeoLocationProductsPagingOptions
+{
+	sort?: IPagingSortInput
+	limit?: number
+	skip?: number
+}
+
 export interface IGeoLocationProductsOptions
 {
 	isDeliveryRequired?: boolean;
@@ -15,9 +28,9 @@ export interface IGeoLocationProductsOptions
 
 export interface IGeoLocationProductsInput
 {
-	geoLocation;
+	geoLocation: IGeoLocation;
 	options?: IGeoLocationProductsOptions;
-	pagingOptions;
+	pagingOptions?: IGeoLocationProductsPagingOptions;
 	searchText?: string;
 }
 
