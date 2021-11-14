@@ -39,6 +39,14 @@ export interface IGeoLocationWorkOrdersInput extends IGeoLocationWorkOrderInput
 	searchObj: IGeoLocationWorkOrderSearchInput;
 }
 
+export interface IGeoLocationOrdersPagingOptions
+{
+	sort?: string;
+	limit?: number;
+	skip?: number;
+}
+
+
 interface IGeoLocationOrdersRouter
 {
 	get(
