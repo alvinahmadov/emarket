@@ -27,9 +27,9 @@ type Query {
 
     notifyAboutLaunch(devicesIds: [String!]!, invite: InviteInput): Void
 
-    generate1000InviteRequests(defaultLng: Float!, defaultLat: Float!): Void
-
     getCountOfInvitesRequests(invited: Boolean): Int!
+
+    generateInviteRequests(qty: Int, defaultLng: Float!, defaultLat: Float!): Void
 }
 
 input InviteInput {
