@@ -1,22 +1,20 @@
 <div *ngIf="selectedOrder?.isCancelled" class="money-amount-container">
 	<div class="money-amount">
-		<!-- TODO add translate -->
-		The customer cancel order
+		{{ 'RETURN_PRODUCT_VIEW.CANCEL_ORDER' | translate }}
 	</div>
 </div>
 
 <div class="carrier-view">
 	<img
 			class="product-image"
-			src="{{ (selectedOrder?.products)[0].product.images[0].url }}"
+			src="{{ (products)[0].product.images[0].url }}"
+			alt=""
 	/>
 	<div class="bottom-container">
 		<div class="info">
-			<span class="left-info"
-			>{{
-				localeTranslate((selectedOrder?.products)[0]?.product?.title)
-				}}</span
-			>
+			<span class="left-info">
+				{{ localeTranslate((products)[0]?.product?.title) }}
+			</span>
 			<span class="right-text">#{{ selectedOrder?.orderNumber }}</span>
 		</div>
 		<div class="buttons">
