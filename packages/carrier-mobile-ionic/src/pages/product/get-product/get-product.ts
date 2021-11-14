@@ -1,33 +1,33 @@
 import { Component, OnDestroy }  from '@angular/core';
 import ICarrier                  from '@modules/server.common/interfaces/ICarrier';
 import IOrder                    from '@modules/server.common/interfaces/IOrder';
-import { OrderRouter }           from '@modules/client.common.angular2/routers/order-router.service';
-import { CarrierRouter }         from '@modules/client.common.angular2/routers/carrier-router.service';
-import OrderCarrierStatus        from '@modules/server.common/enums/OrderCarrierStatus';
-import { CarrierOrdersRouter }   from '@modules/client.common.angular2/routers/carrier-orders-router.service';
 import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale';
+import OrderCarrierStatus        from '@modules/server.common/enums/OrderCarrierStatus';
+import { CarrierRouter }         from '@modules/client.common.angular2/routers/carrier-router.service';
+import { CarrierOrdersRouter }   from '@modules/client.common.angular2/routers/carrier-orders-router.service';
+import { OrderRouter }           from '@modules/client.common.angular2/routers/order-router.service';
 import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
-import { Store }                 from '../../../services/store.service';
 import { first, takeUntil }      from 'rxjs/operators';
 import { Subject }               from 'rxjs';
 import { NavController }         from '@ionic/angular';
+import { StorageService }        from 'services/storage.service';
 import { environment }           from 'environments/environment';
 
 @Component({
 	           selector:    'page-get-product',
-	           templateUrl: 'get-product.html',
 	           styleUrls:   ['./get-product.scss'],
+	           templateUrl: 'get-product.html',
            })
 export class GetProductPage implements OnDestroy
 {
-	carrier: ICarrier;
-	selectedOrder: IOrder;
-	disabledButtons: boolean = true;
-	selectedProductImages: any;
-	selectedProductTitles: any;
-	orderCarrierCompetition: boolean;
-	isTakenFromAnotherCarrier: boolean = false;
-	private productsLocale: string;
+	public carrier: ICarrier;
+	public selectedOrder: IOrder;
+	public disabledButtons: boolean = true;
+	public selectedProductImages: string[];
+	public selectedProductTitles: string[];
+	public orderCarrierCompetition: boolean;
+	public isTakenFromAnotherCarrier: boolean = false;
+	public productsLocale: string;
 	private destroy$ = new Subject<void>();
 	
 	constructor(
@@ -35,20 +35,31 @@ export class GetProductPage implements OnDestroy
 			private carrierRouter: CarrierRouter,
 			private carrierOrdersRouter: CarrierOrdersRouter,
 			private _translateProductLocales: ProductLocalesService,
-			private store: Store,
+			private storageService: StorageService,
 			private navCtrl: NavController
 	)
 	{
 		this.productsLocale =
-				this.store.language || environment.DEFAULT_LANGUAGE;
+				this.storageService.language || environment.DEFAULT_LANGUAGE;
 	}
 	
-	ionViewWillEnter()
+	public ngOnDestroy(): void
+	{
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
+	
+	public ionViewWillEnter()
 	{
 		this.loadData();
 	}
 	
-	async gotProduct()
+	public get carrierId(): string
+	{
+		return this.carrier ? this.carrier._id.toString() : '';
+	}
+	
+	public async gotProduct()
 	{
 		this.disabledButtons = true;
 		if(this.carrier && this.selectedOrder)
@@ -58,7 +69,7 @@ export class GetProductPage implements OnDestroy
 					OrderCarrierStatus.CarrierPickedUpOrder
 			);
 			
-			this.navCtrl.navigateRoot('/main/starting-delivery');
+			await this.navCtrl.navigateRoot('/main/starting-delivery');
 		}
 		else
 		{
@@ -68,7 +79,7 @@ export class GetProductPage implements OnDestroy
 		this.disabledButtons = false;
 	}
 	
-	async gotProductWithCarrierCompetition()
+	public async gotProductWithCarrierCompetition()
 	{
 		this.disabledButtons = true;
 		if(this.carrier && this.selectedOrder)
@@ -79,7 +90,7 @@ export class GetProductPage implements OnDestroy
 					this.orderCarrierCompetition
 			);
 			
-			this.navCtrl.navigateRoot('/main/starting-delivery');
+			await this.navCtrl.navigateRoot('/main/starting-delivery');
 		}
 		else
 		{
@@ -89,7 +100,7 @@ export class GetProductPage implements OnDestroy
 		this.disabledButtons = false;
 	}
 	
-	async cancelWork()
+	public async cancelWork()
 	{
 		this.disabledButtons = true;
 		if(this.carrier && this.selectedOrder)
@@ -108,33 +119,27 @@ export class GetProductPage implements OnDestroy
 		this.disabledButtons = false;
 	}
 	
-	localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._translateProductLocales.getTranslate(member);
 	}
 	
-	unselectOrder()
+	public unselectOrder()
 	{
-		this.store.selectedOrder = null;
-		localStorage.removeItem('orderId');
+		this.storageService.selectedOrder = null;
+		this.storageService.orderId = null;
 		
 		this.navCtrl.navigateRoot('/main/home');
-	}
-	
-	ngOnDestroy(): void
-	{
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 	
 	private async loadData()
 	{
 		this.carrier = await this.carrierRouter
-		                         .get(this.store.carrierId)
+		                         .get(this.storageService.carrierId)
 		                         .pipe(first())
 		                         .toPromise();
 		await this.orderRouter
-		          .get(this.store.orderId, {
+		          .get(this.storageService.orderId, {
 			          populateWarehouse: true,
 		          })
 		          .pipe(takeUntil(this.destroy$))
@@ -152,30 +157,38 @@ export class GetProductPage implements OnDestroy
 					                      : OrderCarrierStatus.NoCarrier);
 			
 			                     this.selectedOrder = o;
-			                     this.store.selectedOrder = o;
+			                     this.storageService.selectedOrder = o;
 			                     this.disabledButtons = false;
-			                     const imageUrls = [];
-			                     const titles = [];
-			                     this.selectedOrder.products.forEach((x) =>
-			                                                         {
-				                                                         x.product.images.forEach((x) =>
-				                                                                                  {
-					                                                                                  if(x.locale.match(this.productsLocale))
-					                                                                                  {
-						                                                                                  imageUrls.push(x.url);
-					                                                                                  }
-				                                                                                  });
-			                                                         });
-			                     this.selectedOrder.products.forEach((x) =>
-			                                                         {
-				                                                         x.product.title.forEach((x) =>
-				                                                                                 {
-					                                                                                 if(x.locale.match(this.productsLocale))
-					                                                                                 {
-						                                                                                 titles.push(x.value);
-					                                                                                 }
-				                                                                                 });
-			                                                         });
+			                     const imageUrls: string[] = [];
+			                     const titles: string[] = [];
+			                     this.selectedOrder.products.forEach(
+					                     (x) =>
+					                     {
+						                     x.product.images.forEach(
+								                     (x) =>
+								                     {
+									                     if(x.locale.match(this.productsLocale))
+									                     {
+										                     imageUrls.push(x.url);
+									                     }
+								                     }
+						                     );
+					                     }
+			                     );
+			                     this.selectedOrder.products.forEach(
+					                     (x) =>
+					                     {
+						                     x.product.title.forEach(
+								                     (x) =>
+								                     {
+									                     if(x.locale.match(this.productsLocale))
+									                     {
+										                     titles.push(x.value);
+									                     }
+								                     }
+						                     );
+					                     }
+			                     );
 			
 			                     this.selectedProductImages = imageUrls;
 			                     this.selectedProductTitles = titles;
