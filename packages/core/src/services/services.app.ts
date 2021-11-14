@@ -46,6 +46,7 @@ import { CustomersAuthService }                     from './customers/CustomersA
 import { WarehousesAuthService, WarehousesService } from './warehouses';
 import { createLogger }                             from '../helpers/Log';
 import { ConfigService }                            from '../config/config.service';
+import { getCurrencyRates, convertCurrency }        from '../utils';
 import { env }                                      from '../env';
 
 // local IPs
@@ -573,14 +574,18 @@ export class ServicesApp
 		                    });
 		
 		// Get location (lat, long) by IP address
-		// TODO: put into separate service
 		this.expressApp.get('/getLocationByIP',
 		                    (req, res) =>
 		                    {
 			                    const ipStackKey = env.IP_STACK_API_KEY;
 			                    if(ipStackKey)
 			                    {
-				                    const clientIp = req['clientIp'];
+				                    let clientIp: string = req['clientIp'] || null;
+				
+				                    if(!clientIp)
+				                    {
+					                    clientIp = req.headers['x-forwarded-for'][0] || req.socket['remoteAddress'];
+				                    }
 				
 				                    if(!INTERNAL_IPS.includes(clientIp))
 				                    {
@@ -606,6 +611,53 @@ export class ServicesApp
 				                    res.status(500).end();
 			                    }
 		                    });
+		
+		this.expressApp.get('/currency_rates', (req, res) =>
+		{
+			try
+			{
+				const fromCurrencyCode = req.query['from'] as string;
+				const toCurrencyCode = req.query['to'] as string;
+				const makeKey = () => `${fromCurrencyCode}_${toCurrencyCode}`;
+				
+				getCurrencyRates(fromCurrencyCode, toCurrencyCode)
+						.then(response =>
+						      {
+							      if(response)
+								      if(response.query.count > 0)
+									      res.json(response.results[makeKey()]);
+						      });
+			} catch(e)
+			{
+				this.log.error(e)
+				res.status(400).end();
+			}
+		});
+		
+		this.expressApp.get('/convert_currency', (req, res) =>
+		{
+			try
+			{
+				const fromCurrency = req.query['from'] as string;
+				const toCurrency = req.query['to'] as string;
+				if("amount" in req.query)
+				{
+					const amount = parseFloat((<string>req.query['amount']));
+					convertCurrency(fromCurrency, toCurrency, amount)
+							.then(c => res.json({ amount: c }));
+				}
+				else
+				{
+					res.json({ amount: -1 });
+					res.status(406).end();
+				}
+			} catch(e)
+			{
+				this.log.error(e)
+				res.status(400).end();
+			}
+		});
+		
 		this._setupAuthRoutes();
 		this._setupStaticRoutes();
 		
@@ -747,9 +799,36 @@ export class ServicesApp
 	
 	private async _startSocketIO()
 	{
-		const so: any = socketIO;
-		const ioHttps = so(this.httpsServer);
-		const ioHttp = so(this.httpServer);
+		const origins = env.ALLOWED_ORIGINS.split(',');
+		const methods: string = "GET,POST,PUT,PATCH,DELETE";
+		
+		const corsOptions: socketIO.ServerOptions = {
+			allowRequest: (req: http.IncomingMessage, cb: (err: any, success: boolean) => void) =>
+			              {
+				              const origin = req.headers.host;
+				              const result = env.ENABLE_ORIGIN_RESTRICTION
+				                             ? origins.filter(o => o.includes(origin)).length > 0
+				                             : true;
+				              const errMessage = `Error: Origin ${origin} not found in allowed origins`;
+				              cb(result ? null : errMessage, result);
+			              },
+			handlePreflightRequest:
+			              (req: http.IncomingMessage, res: http.ServerResponse) =>
+			              {
+				              res.writeHead(200, {
+					              "Access-Control-Allow-Origin":      env.ENABLE_ORIGIN_RESTRICTION
+					                                                  ? origins.join(',') : "*",
+					              "Access-Control-Allow-Methods":     methods,
+					              "Access-Control-Allow-Headers":     'true',
+					              "Access-Control-Allow-Credentials": 'true'
+				              });
+				              res.end();
+			              },
+			pingInterval: 10000
+		};
+		
+		const ioHttps = socketIO(this.httpsServer, corsOptions);
+		const ioHttp = socketIO(this.httpServer, corsOptions);
 		
 		await this.routersManager.startListening(ioHttps);
 		await this.routersManager.startListening(ioHttp);
