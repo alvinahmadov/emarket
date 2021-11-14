@@ -19,14 +19,12 @@
 <ion-content class="carrier-view" scroll="false">
 	<div *ngIf="selectedOrder?.isCancelled" class="money-amount-container">
 		<div class="money-amount">
-			<!-- TODO add translate -->
-			The customer cancel order
+			{{ 'HOME_VIEW.CUSTOMER_CANCELLED_ORDER' | translate }}
 		</div>
 	</div>
 	<div *ngIf="isTakenFromAnotherCarrier" class="money-amount-container">
 		<div class="money-amount">
-			<!-- TODO add translate -->
-			Another Carrier took the order first !
+			{{ 'HOME_VIEW.ANOTHER_CARRIER_TOOK' | translate }}
 		</div>
 	</div>
 	<ion-router-outlet></ion-router-outlet>
