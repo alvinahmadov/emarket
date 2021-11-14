@@ -11,16 +11,16 @@ const directionsService = new google.maps.DirectionsService();
 export class MapComponent implements OnInit
 {
 	@ViewChild('map', { static: true })
-	mapElement: ElementRef;
+	public mapElement: ElementRef;
 	
-	map: google.maps.Map;
+	public map: google.maps.Map;
 	
-	ngOnInit(): void
+	public ngOnInit(): void
 	{
 		this.showMap();
 	}
 	
-	showMap()
+	public showMap()
 	{
 		const option = {
 			zoom: 17,
@@ -29,7 +29,7 @@ export class MapComponent implements OnInit
 		this.map = new google.maps.Map(this.mapElement.nativeElement, option);
 	}
 	
-	setCenter(position)
+	public setCenter(position)
 	{
 		if(this.map)
 		{
@@ -37,7 +37,7 @@ export class MapComponent implements OnInit
 		}
 	}
 	
-	addMarker(position)
+	public addMarker(position)
 	{
 		if(this.map)
 		{
@@ -49,7 +49,7 @@ export class MapComponent implements OnInit
 		}
 	}
 	
-	drawRoute(origin, destination)
+	public drawRoute(origin, destination)
 	{
 		if(this.map)
 		{
