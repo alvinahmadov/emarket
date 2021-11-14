@@ -1,28 +1,28 @@
 import { Injectable }             from '@angular/core';
 import { CanLoad, Route, Router } from '@angular/router';
-import { Store }                  from 'services/store.service';
+import { StorageService }         from 'services/storage.service';
 
 @Injectable()
 export class DeliveryModuleGuard implements CanLoad
 {
 	constructor(
-			private readonly store: Store,
+			private readonly storage: StorageService,
 			private readonly router: Router
 	)
 	{}
 	
 	async canLoad(route: Route)
 	{
-		const orderId = await this.store.orderId;
+		const orderId = this.storage.orderId;
 		if(!orderId)
 		{
-			this.router.navigateByUrl('/main/home');
+			await this.router.navigateByUrl('/main/home');
 			return false;
 		}
-		const driveToWarehouseFrom = await this.store.driveToWarehouseFrom;
+		const driveToWarehouseFrom = this.storage.driveToWarehouseFrom;
 		if(driveToWarehouseFrom === 'delivery')
 		{
-			this.router.navigateByUrl('/main/drive-to-warehouse');
+			await this.router.navigateByUrl('/main/drive-to-warehouse');
 			return false;
 		}
 		return true;
