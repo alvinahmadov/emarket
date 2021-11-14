@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import IGeoLocation   from '../interfaces/IGeoLocation';
 import ProductInfo    from '../entities/ProductInfo';
 
-interface IGetGeoLocationProductsOptions
+export interface IGeoLocationProductsOptions
 {
 	isDeliveryRequired?: boolean;
 	isTakeaway?: boolean;
@@ -16,7 +16,7 @@ interface IGetGeoLocationProductsOptions
 export interface IGeoLocationProductsInput
 {
 	geoLocation;
-	options?: IGetGeoLocationProductsOptions;
+	options?: IGeoLocationProductsOptions;
 	pagingOptions;
 	searchText?: string;
 }
@@ -24,7 +24,7 @@ export interface IGeoLocationProductsInput
 export interface ICountOfGeoLocationProducts
 {
 	geoLocation: IGeoLocation;
-	options?: IGetGeoLocationProductsOptions;
+	options?: IGeoLocationProductsOptions;
 	searchText?: string;
 }
 
