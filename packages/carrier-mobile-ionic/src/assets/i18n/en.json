@@ -41,7 +41,9 @@
 		"WORKING": "Working",
 		"NOT_WORKING": "Not Working",
 		"START_WORKING": "Start Working",
-		"STOP_WORKING": "Stop Working"
+		"STOP_WORKING": "Stop Working",
+		"CUSTOMER_CANCELLED_ORDER": "The customer cancelled order",
+		"ANOTHER_CARRIER_TOOK": "Another carrier took the order first!"
 	},
 	"STARTING_DELIVERY_VIEW": {
 		"START": "Start",

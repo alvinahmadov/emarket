@@ -41,7 +41,9 @@
 		"WORKING": "За работой",
 		"NOT_WORKING": "Не работает",
 		"START_WORKING": "Начать работать",
-		"STOP_WORKING": "Прекрати работать"
+		"STOP_WORKING": "Прекрати работать",
+		"CUSTOMER_CANCELLED_ORDER": "Клиент отменил заказ",
+		"ANOTHER_CARRIER_TOOK": "Другой курьер взял исполнение заказа первым!"
 	},
 	"STARTING_DELIVERY_VIEW": {
 		"START": "Начало",
