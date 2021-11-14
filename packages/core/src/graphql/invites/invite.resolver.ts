@@ -27,19 +27,6 @@ export class InviteResolver
 	
 	@Query()
 	@UseGuards(FakeDataGuard)
-	public async generate1000InvitesConnectedToInviteRequests(
-			_,
-			{ defaultLng, defaultLat }: { defaultLng: number; defaultLat: number }
-	): Promise<void>
-	{
-		return this.generateInvitesConnectedToInviteRequests(
-				_,
-				{ defaultLat, defaultLng }
-		);
-	}
-	
-	@Query()
-	@UseGuards(FakeDataGuard)
 	public async generateInvitesConnectedToInviteRequests(
 			_,
 			{ qty, defaultLng, defaultLat }: { qty?: number, defaultLng: number; defaultLat: number }
