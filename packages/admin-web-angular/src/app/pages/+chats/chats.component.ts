@@ -58,7 +58,7 @@ export class ChatsComponent implements OnInit, AfterViewInit, OnDestroy
 		    .pipe(
 				    rxops.filter((e) => e instanceof NavigationStart)
 		    )
-		    .subscribe((e: NavigationStart) =>
+		    .subscribe(() =>
 		               {
 			               const navigation = this._router.getCurrentNavigation();
 			               if(navigation.extras.state)
@@ -89,6 +89,12 @@ export class ChatsComponent implements OnInit, AfterViewInit, OnDestroy
 		                             });
 	}
 	
+	public ngOnDestroy(): void
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
 	private async initialize(admin: Admin)
 	{
 		if(admin)
@@ -114,10 +120,5 @@ export class ChatsComponent implements OnInit, AfterViewInit, OnDestroy
 					this.inboxContainer
 			);
 		}
-	}
-	
-	public ngOnDestroy(): void
-	{
-		this._ngDestroy$.unsubscribe();
 	}
 }
