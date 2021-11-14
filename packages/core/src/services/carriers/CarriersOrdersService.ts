@@ -29,7 +29,7 @@ import IService                                          from '../IService';
 import { createLogger }                                  from '../../helpers/Log';
 import {
 	GeoLocationsOrdersService,
-	IGeoLocationOrdersOptions
+	IGeoLocationOrdersPagingOptions
 }                                                        from '../geo-locations';
 
 @injectable()
@@ -403,7 +403,7 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 	@asyncListener()
 	public async getCarrierOrdersHistory(
 			carrierId: string,
-			options: IGeoLocationOrdersOptions
+			pagingOptions: IGeoLocationOrdersPagingOptions
 	): Promise<Order[]>
 	{
 		await this.carriersService.throwIfNotExists(carrierId);
@@ -413,12 +413,13 @@ export class CarriersOrdersService implements ICarrierOrdersRouter, IService
 		                                                     })
 		                           .sort({
 			                                 _createdAt:
-					                                 options.sort && options.sort.toLowerCase().includes('desc')
+					                                 pagingOptions.sort &&
+					                                 pagingOptions.sort.toLowerCase().includes('desc')
 					                                 ? 'desc'
 					                                 : 'asc'
 		                                 })
-		                           .skip(options.skip || 0)
-		                           .limit(options.limit || 1)
+		                           .skip(pagingOptions.skip || 0)
+		                           .limit(pagingOptions.limit || 1)
 		                           .lean()
 		                           .exec();
 		
