@@ -68,10 +68,10 @@ export class PayPalGatewayComponent
 	public setValue(data)
 	{
 		this.isPayPalEnabled = true;
-		this.configModel.currency = data['paypalCurrency'] || '';
-		this.configModel.mode = data['paypalMode'] || '';
-		this.configModel.publishableKey = data['paypalPublishableKey'] || '';
-		this.configModel.secretKey = data['paypalSecretKey'] || '';
-		this.configModel.description = data['paypalDescription'] || '';
+		this.configModel.currency = data['currency'] || '';
+		this.configModel.mode = data['mode'] || '';
+		this.configModel.publishableKey = data['publishableKey'] || '';
+		this.configModel.secretKey = data['secretKey'] || '';
+		this.configModel.description = data['description'] || '';
 	}
 }
