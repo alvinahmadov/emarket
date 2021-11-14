@@ -34,7 +34,7 @@ export class OrderResolver
 	{}
 	
 	@Query()
-	async generateActiveAndAvailableOrdersPerCarrier()
+	public async generateActiveAndAvailableOrdersPerCarrier(): Promise<void>
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
@@ -69,7 +69,7 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async generatePastOrdersPerCarrier()
+	public async generatePastOrdersPerCarrier(): Promise<void>
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
@@ -125,7 +125,7 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async addTakenOrders(_context, { carrierIds }: { carrierIds: string[] })
+	public async addTakenOrders(_context, { carrierIds }: { carrierIds: string[] }): Promise<void>
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
@@ -199,7 +199,7 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async addOrdersToTake()
+	public async addOrdersToTake(): Promise<void>
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
@@ -264,14 +264,14 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async generateRandomOrdersCurrentStore(
+	public async generateRandomOrdersCurrentStore(
 			_context,
 			{
 				storeId,
 				storeCreatedAt,
 				ordersLimit
 			}: { storeId: string; storeCreatedAt: Date; ordersLimit: number }
-	)
+	): Promise<{error: boolean, message?: string}>
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
@@ -325,13 +325,13 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async generateOrdersByCustomerId(
+	public async generateOrdersByCustomerId(
 			_context,
 			{
 				numberOfOrders,
 				customerId
 			}: { numberOfOrders: number; customerId: string }
-	)
+	): Promise<void>
 	{
 		const commonOptionsFlag = { isDeleted: { $eq: false } };
 		
@@ -432,13 +432,13 @@ export class OrderResolver
 	}
 	
 	@Query()
-	getOrdersChartTotalOrders()
+	public getOrdersChartTotalOrders()
 	{
 		return this._ordersService.getOrdersChartTotalOrders();
 	}
 	
 	@Query()
-	async getCompletedOrdersInfo(_context, { storeId }: { storeId: string })
+	public async getCompletedOrdersInfo(_context, { storeId }: { storeId: string })
 	{
 		const orders = await this._ordersService.getDashboardCompletedOrders(
 				storeId
@@ -451,25 +451,25 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async getDashboardCompletedOrders()
+	public async getDashboardCompletedOrders()
 	{
 		return this._ordersService.getDashboardCompletedOrders();
 	}
 	
 	@Query()
-	async getDashboardCompletedOrdersToday()
+	public async getDashboardCompletedOrdersToday()
 	{
 		return this._ordersService.getDashboardCompletedOrdersToday();
 	}
 	
 	@Query('order')
-	async getOrder(_context, { id }: { id: string }): Promise<Order>
+	public async getOrder(_context, { id }: { id: string }): Promise<Order>
 	{
 		return this._ordersService.get(id).pipe(first()).toPromise();
 	}
 	
 	@Query('orders')
-	async getOrders(_context, { findInput }): Promise<Order[]>
+	public async getOrders(_context, { findInput }): Promise<Order[]>
 	{
 		return this._ordersService.find({
 			                                ...findInput,
@@ -478,13 +478,13 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async getOrderedUsersInfo(_context, { storeId }: { storeId: string })
+	public async getOrderedUsersInfo(_context, { storeId }: { storeId: string })
 	{
 		return this._ordersService.getOrderedUsersInfo(storeId);
 	}
 	
 	@Query()
-	async getUsersOrdersCountInfo(
+	public async getUsersOrdersCountInfo(
 			_context,
 			{ usersIds }: { usersIds: string[] }
 	): Promise<OrderInfo[]>
@@ -523,7 +523,7 @@ export class OrderResolver
 	}
 	
 	@Query()
-	async getMerchantsOrdersCountInfo(
+	public async getMerchantsOrdersCountInfo(
 			_context,
 			{ merchantsIds }: { merchantsIds: string[] }
 	)
@@ -556,7 +556,7 @@ export class OrderResolver
 	}
 	
 	@Mutation()
-	async updateOrderCarrierStatus(
+	public async updateOrderCarrierStatus(
 			_context,
 			{
 				orderId,
@@ -574,7 +574,7 @@ export class OrderResolver
 	}
 	
 	@Mutation()
-	async updateOrderWarehouseStatus(
+	public async updateOrderWarehouseStatus(
 			_context,
 			{
 				orderId,
@@ -592,7 +592,7 @@ export class OrderResolver
 	}
 	
 	@Mutation()
-	async payOrderWithStripe(
+	public async payOrderWithStripe(
 			_context,
 			{
 				orderId,
@@ -607,7 +607,7 @@ export class OrderResolver
 	}
 	
 	@ResolveField('carrier')
-	async getCarrier(_order: IOrder): Promise<Carrier>
+	public async getCarrier(_order: IOrder): Promise<Carrier>
 	{
 		const order = new Order(_order);
 		
@@ -620,7 +620,7 @@ export class OrderResolver
 	}
 	
 	@ResolveField('warehouse')
-	async getWarehouse(_order: IOrder): Promise<Warehouse>
+	public async getWarehouse(_order: IOrder): Promise<Warehouse>
 	{
 		const order = new Order(_order);
 		
