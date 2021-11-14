@@ -4,7 +4,7 @@ import _                         from 'lodash';
 import { Observable }            from 'rxjs';
 import { Injectable }            from '@angular/core';
 import IGeoLocationOrdersRouter, {
-	IGeoLocationOrdersRouterGetOptions,
+	IGeoLocationOrdersRouterOptions
 }                                from '@modules/server.common/routers/IGeoLocationOrdersRouter';
 import IOrder                    from '@modules/server.common/interfaces/IOrder';
 import Order                     from '@modules/server.common/entities/Order';
@@ -22,7 +22,7 @@ export class GeoLocationOrdersRouter implements IGeoLocationOrdersRouter
 	
 	get(
 			geoLocation: GeoLocation,
-			options: IGeoLocationOrdersRouterGetOptions = {}
+			options: IGeoLocationOrdersRouterOptions = {}
 	): Observable<Order[]>
 	{
 		return this.router
