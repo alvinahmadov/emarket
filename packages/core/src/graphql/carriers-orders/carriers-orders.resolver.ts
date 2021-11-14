@@ -2,7 +2,7 @@ import { Query, Resolver }                 from '@nestjs/graphql';
 import IOrder                              from '@modules/server.common/interfaces/IOrder';
 import { ICarrierOrdersRouterGetOptions }  from '@modules/server.common/routers/ICarrierOrdersRouter';
 import Order                               from '@modules/server.common/entities/Order';
-import { IGeoLocationOrdersPagingOptions } from '../../services/geo-locations';
+import { IGeoLocationOrdersPagingOptions } from '@modules/server.common/routers/IGeoLocationOrdersRouter';
 import { CarriersOrdersService }           from '../../services/carriers';
 
 @Resolver('CarriersOrders')
