@@ -16,13 +16,13 @@ export class DeliveryModuleGuard implements CanLoad
 		const orderId = this.storage.orderId;
 		if(!orderId)
 		{
-			await this.router.navigateByUrl('/main/home');
+			this.router.navigateByUrl('/main/home');
 			return false;
 		}
 		const driveToWarehouseFrom = this.storage.driveToWarehouseFrom;
 		if(driveToWarehouseFrom === 'delivery')
 		{
-			await this.router.navigateByUrl('/main/drive-to-warehouse');
+			this.router.navigateByUrl('/main/drive-to-warehouse');
 			return false;
 		}
 		return true;
