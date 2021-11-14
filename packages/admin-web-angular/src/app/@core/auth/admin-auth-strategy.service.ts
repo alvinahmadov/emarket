@@ -10,11 +10,13 @@ import CommonUtils                      from '@modules/server.common/utilities/c
 import { ApolloResult }                 from '@modules/client.common.angular2/services/apollo.service';
 import { StorageService }               from '@app/@core/data/store.service';
 import { GQLQuery, GQLMutation }        from 'graphql/definitions';
+import { environment }                  from 'environments/environment';
 
 interface IAdminLoginInfo
 {
-	admin: Admin
-	token: string
+	admin: Admin;
+	token: string;
+	expiresIn?: string;
 }
 
 interface IAdminRegisterDto
@@ -28,7 +30,7 @@ interface IAdminRegisterDto
 
 interface IAuthOptions
 {
-	email: string;
+	authInfo: string;
 	password: string;
 	rememberMe?: boolean | null;
 }
@@ -114,15 +116,16 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	
 	public authenticate(args: IAuthOptions): Observable<NbAuthResult>
 	{
-		const { email, password } = args;
+		const { authInfo, password } = args;
 		const rememberMe = !!args.rememberMe;
+		const expiresIn = rememberMe ? environment.JWT_EXPIRES_MAX : environment.JWT_EXPIRES_MIN;
 		
 		return this.apollo
 		           .mutate<{
 			           adminLogin: IAdminLoginInfo
 		           }>({
 			              mutation:    GQLMutation.Admin.Login,
-			              variables:   { email, password },
+			              variables:   { authInfo, password, expiresIn },
 			              errorPolicy: 'all',
 		              })
 		           .pipe(
@@ -153,9 +156,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 							           }
 							
 							           this.storageService.adminId = data.adminLogin.admin.id;
-							
-							           if(rememberMe)
-								           this.storageService.token = data.adminLogin.token;
+							           this.storageService.token = data.adminLogin.token;
 							
 							           return new NbAuthResult(
 									           isSuccessful,
@@ -184,7 +185,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	
 	public register(args: IAdminRegisterDto): Observable<NbAuthResult>
 	{
-		const { email, fullName, password, confirmPassword, terms } = args;
+		const { email, fullName, password, confirmPassword } = args;
 		
 		if(password !== confirmPassword)
 		{
