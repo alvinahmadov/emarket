@@ -1,8 +1,8 @@
 import { Component, OnDestroy }  from '@angular/core';
 import Order                     from '@modules/server.common/entities/Order';
 import { Subject }               from 'rxjs';
-import { CarriersOrdersService } from '../../services/carriers-orders.service';
-import { Store }                 from '../../services/store.service';
+import { CarriersOrdersService } from 'services/carriers-orders.service';
+import { StorageService }        from 'services/storage.service';
 import { Platform }              from '@ionic/angular';
 
 @Component({
@@ -12,34 +12,31 @@ import { Platform }              from '@ionic/angular';
            })
 export class DeliveriesPage implements OnDestroy
 {
-	currentCompletedOrders: Order[];
+	public currentCompletedOrders: Order[];
 	
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(
 			private readonly _carriersOrdersService: CarriersOrdersService,
-			private readonly store: Store,
+			private readonly storageService: StorageService,
 			public platform: Platform
 	)
 	{
-		console.warn('DeliveriesPage loaded');
-		
 		this._getAllCompletedOrders();
 	}
 	
 	private get _carrierId()
 	{
-		return this.store.carrierId;
+		return this.storageService.carrierId;
 	}
 	
-	ionViewCanEnter()
+	public ionViewCanEnter()
 	{
-		return this.store.carrierId !== null && !this.store.showInformationPage;
+		return this.storageService.carrierId !== null && !this.storageService.showInformationPage;
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
-		console.warn('DeliveriesPage leave');
 		this._ngDestroy$.next();
 		this._ngDestroy$.complete();
 	}
@@ -53,7 +50,5 @@ export class DeliveriesPage implements OnDestroy
 					completion:        'all',
 				}
 		);
-		
-		console.warn('Orders - ' + this.currentCompletedOrders.length);
 	}
 }
