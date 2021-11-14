@@ -77,6 +77,8 @@ export type Env = Readonly<{
 	CARRIER_PASSWORD_BCRYPT_SALT_ROUNDS: number;
 	USER_PASSWORD_BCRYPT_SALT_ROUNDS: number;
 	
+	STORE_MAX_TRACKING_DISTANCE: number;
+	
 	SETTING_INVITES_ENABLED?: boolean;
 	SETTINGS_REGISTRATIONS_REQUIRED_ON_START?: boolean;
 	ADMIN_PASSWORD_RESET?: boolean;
@@ -211,6 +213,8 @@ export const env: Env = cleanEnv(
 				                                               'https://security.stackexchange.com/questions/17207/recommended-of-rounds-for-bcrypt',
 				                                      default: 10
 			                                      }),
+			
+			STORE_MAX_TRACKING_DISTANCE: num({ default: Number.MAX_SAFE_INTEGER }),
 			
 			SETTING_INVITES_ENABLED:                  bool({ default: false }),
 			SETTINGS_REGISTRATIONS_REQUIRED_ON_START: bool({ default: false }),
