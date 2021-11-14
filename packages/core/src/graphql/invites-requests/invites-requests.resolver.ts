@@ -2,7 +2,12 @@ import { UseGuards }                  from '@nestjs/common';
 import { Resolver, Query, Mutation }  from '@nestjs/graphql';
 import { first }                      from 'rxjs/operators';
 import { IInviteRequestCreateObject } from '@modules/server.common/interfaces/IInviteRequest';
-import Invite                         from '@modules/server.common/entities/Invite';
+import IPagingOptions                 from '@modules/server.common/interfaces/IPagingOptions';
+import {
+	IInviteRequesGenerateInput,
+	IInviteRequestIdInput,
+	INotifyAboutInput
+}                                     from '@modules/server.common/routers/IInviteRequestRouter';
 import InviteRequest                  from '@modules/server.common/entities/InviteRequest';
 import { FakeDataGuard }              from '../../auth/guards/fake-data.guard';
 import { InvitesRequestsService }     from '../../services/invites';
@@ -19,7 +24,7 @@ export class InviteRequestResolver
 	@UseGuards(FakeDataGuard)
 	public async generateInviteRequests(
 			_,
-			{ qty = 1000, defaultLng, defaultLat }: { qty?: number; defaultLng: number; defaultLat: number; }
+			{ qty = 1000, defaultLng, defaultLat }: IInviteRequesGenerateInput
 	): Promise<void>
 	{
 		await this._invitesRequestsService.generateInviteRequests(
@@ -30,7 +35,7 @@ export class InviteRequestResolver
 	}
 	
 	@Query('inviteRequest')
-	public async getInviteRequest(_, { id }: { id: string }): Promise<InviteRequest>
+	public async getInviteRequest(_, { id }: IInviteRequestIdInput): Promise<InviteRequest>
 	{
 		return this._invitesRequestsService.get(id).pipe(first()).toPromise();
 	}
@@ -41,10 +46,7 @@ export class InviteRequestResolver
 			{
 				devicesIds,
 				invite
-			}: {
-				invite: Invite;
-				devicesIds: string[];
-			}
+			}: INotifyAboutInput
 	): Promise<void>
 	{
 		return this._invitesRequestsService.notifyAboutLaunch(
@@ -54,7 +56,11 @@ export class InviteRequestResolver
 	}
 	
 	@Query('invitesRequests')
-	public async getInvitesRequests(_, { findInput, invited, pagingOptions = {} }): Promise<InviteRequest[]>
+	public async getInvitesRequests(
+			_,
+			{ findInput, invited, pagingOptions = {} }:
+					{ findInput: any, invited: boolean, pagingOptions: IPagingOptions }
+	): Promise<InviteRequest[]>
 	{
 		if(!pagingOptions || (pagingOptions && !pagingOptions['sort']))
 		{
