@@ -1,9 +1,15 @@
-import { Component }   from '@angular/core';
-import { first }       from 'rxjs/operators';
-import { AuthService } from '../../services/auth.service';
-import { Store }       from '../../services/store.service';
-import { environment } from '../../environments/environment';
-import { Router }      from '@angular/router';
+import { Component }      from '@angular/core';
+import { Router }         from '@angular/router';
+import { first }          from 'rxjs/operators';
+import { AuthService }    from '../../services/auth.service';
+import { StorageService } from '../../services/storage.service';
+import { environment }    from '../../environments/environment';
+
+interface UserAuthDto
+{
+	username: string;
+	password: string;
+}
 
 @Component({
 	           selector:    'page-login',
@@ -12,23 +18,26 @@ import { Router }      from '@angular/router';
            })
 export class LoginPage
 {
-	user;
-	loginLogo: string;
+	public user: UserAuthDto;
+	public loginLogo: string;
 	
 	constructor(
 			private authService: AuthService,
-			private store: Store,
+			private storageService: StorageService,
 			private router: Router
 	)
 	{
-		this.user = {
-			username: environment.DEFAULT_LOGIN_USERNAME,
-			password: environment.DEFAULT_LOGIN_PASSWORD,
-		};
+		if(!environment.production)
+		{
+			this.user = {
+				username: environment.DEFAULT_LOGIN_USERNAME,
+				password: environment.DEFAULT_LOGIN_PASSWORD,
+			};
+		}
 		this.loginLogo = environment.LOGIN_LOGO;
 	}
 	
-	async login()
+	public async login()
 	{
 		const res = await this.authService
 		                      .login(this.user.username, this.user.password)
@@ -41,10 +50,8 @@ export class LoginPage
 			return;
 		}
 		
-		console.log(`Carrier logged in with id ${res.carrier.id}`);
-		
-		this.store.carrierId = res.carrier.id;
-		this.store.token = res.token;
+		this.storageService.carrierId = res.carrier.id;
+		this.storageService.token = res.token;
 		
 		this.router.navigateByUrl('main', { skipLocationChange: false });
 	}
