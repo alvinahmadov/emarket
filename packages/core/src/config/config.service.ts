@@ -1,7 +1,11 @@
-import { injectable }             from 'inversify';
-import { routerName }             from '@pyro/io';
-import { env, Environments, Env } from '../env';
-import IService                   from '../services/IService';
+import { injectable } from 'inversify';
+import { routerName } from '@pyro/io';
+import {
+	env,
+	Environments,
+	Environment
+}                     from '../env';
+import IService       from '../services/IService';
 
 @injectable()
 @routerName('config')
@@ -10,7 +14,7 @@ export class ConfigService implements IService
 	/**
 	 * Get All Env settings
 	 */
-	get Env(): Env
+	get Env(): Readonly<Environment>
 	{
 		return env;
 	}
