@@ -1,37 +1,38 @@
 import { inject, injectable }                       from 'inversify';
-import { OrdersService }                            from '../orders';
-import Warehouse                                    from '@modules/server.common/entities/Warehouse';
-import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
 import _                                            from 'lodash';
+import { ObjectId }                                 from 'bson';
 import Logger                                       from 'bunyan';
-import Order                                        from '@modules/server.common/entities/Order';
-import { createLogger }                             from '../../helpers/Log';
-import { GeoLocationsWarehousesService }            from './GeoLocationsWarehousesService';
 import Bluebird                                     from 'bluebird';
-import {
-	WarehousesProductsService,
-	WarehousesOrdersService,
-	WarehousesService
-}                                                   from '../warehouses';
+import { of, from, Observable }                     from 'rxjs';
+import { concat, exhaustMap, filter, first, share } from 'rxjs/operators';
 import {
 	observableListener,
 	routerName,
 	serialization,
 	asyncListener
 }                                                   from '@pyro/io';
-import IGeoLocationOrdersRouter                     from '@modules/server.common/routers/IGeoLocationOrdersRouter';
-import IGeoLocation                                 from '@modules/server.common/interfaces/IGeoLocation';
-import IService                                     from '../IService';
 import { ExistenceEventType }                       from '@pyro/db-server';
-import { concat, exhaustMap, filter, first, share } from 'rxjs/operators';
-import { of }                                       from 'rxjs/observable/of';
-import { from }                                     from 'rxjs/observable/from';
+import IGeoLocation                                 from '@modules/server.common/interfaces/IGeoLocation';
+import IGeoLocationOrdersRouter,
+{
+	IGeoLocationOrdersRouterOptions,
+	IGeoLocationOrdersSearchObject
+}                                                   from '@modules/server.common/routers/IGeoLocationOrdersRouter';
 import OrderWarehouseStatus                         from '@modules/server.common/enums/OrderWarehouseStatus';
 import OrderCarrierStatus                           from '@modules/server.common/enums/OrderCarrierStatus';
-import { GeoLocationOrdersOptions }                 from './GeoLocationOrdersOptions';
-import { ObjectId }                                 from 'bson';
-
-/// Don't change import order. There's a strange bug in inversify, that throws circular dependency error
+import Order                                        from '@modules/server.common/entities/Order';
+import Warehouse                                    from '@modules/server.common/entities/Warehouse';
+import GeoLocation                                  from '@modules/server.common/entities/GeoLocation';
+import { GeoLocationsWarehousesService }            from './GeoLocationsWarehousesService';
+import { IGeoLocationOrdersPagingOptions }          from './GeoLocationOrdersOptions';
+import {
+	WarehousesProductsService,
+	WarehousesOrdersService,
+	WarehousesService
+}                                                   from '../warehouses';
+import { OrdersService }                            from '../orders';
+import IService                                     from '../IService';
+import { createLogger }                             from '../../helpers/Log';
 
 @injectable()
 @routerName('geo-location-orders')
@@ -57,14 +58,14 @@ export class GeoLocationsOrdersService
 	{}
 	
 	@observableListener()
-	get(
+	public get(
 			@serialization(
 					(geoLocationParam: IGeoLocation) =>
 							new GeoLocation(geoLocationParam)
 			)
 					geoLocation: GeoLocation,
-			options: { populateWarehouse?: boolean; populateCarrier?: boolean } = {}
-	)
+			options: IGeoLocationOrdersRouterOptions = {}
+	): Observable<Order[]>
 	{
 		return of(null).pipe(
 				concat(
@@ -120,10 +121,10 @@ export class GeoLocationsOrdersService
 	}
 	
 	@asyncListener()
-	async getCountOfOrdersForWork(
+	public async getCountOfOrdersForWork(
 			geoLocation: IGeoLocation,
 			skippedOrderIds: string[] = [],
-			searchObj?: { byRegex: Array<{ key: string; value: string }> }
+			searchObj?: IGeoLocationOrdersSearchObject
 	): Promise<number>
 	{
 		const merchants = await this.geoLocationsWarehousesService.getStores(
@@ -138,89 +139,87 @@ export class GeoLocationsOrdersService
 		
 		if(searchObj && searchObj.byRegex.length > 0)
 		{
-			searchByRegex = searchObj.byRegex.map((s) =>
-			                                      {
-				                                      return { [s.key]: { $regex: s.value, $options: 'i' } };
-			                                      });
+			searchByRegex = searchObj.byRegex.map(
+					(s) => ({ [s.key]: { $regex: s.value, $options: 'i' } })
+			);
 		}
 		
-		const count = await this.ordersService.Model.aggregate([
-			                                                       {
-				                                                       $lookup: {
-					                                                       from: 'warehouses',
-					                                                       let: {
-						                                                       wh: '$warehouse'
-					                                                       },
-					                                                       pipeline: [
-						                                                       {
-							                                                       $match: {
-								                                                       $expr: {
-									                                                       $eq: [
-										                                                       {
-											                                                       $toString: '$_id'
-										                                                       },
-										                                                       '$$wh'
-									                                                       ]
-								                                                       }
-							                                                       }
-						                                                       },
-						                                                       {
-							                                                       $project: {
-								                                                       carrierCompetition: {
-									                                                       $cond: {
-										                                                       if: {
-											                                                       $eq: [
-												                                                       '$carrierCompetition',
-												                                                       true
-											                                                       ]
-										                                                       },
-										                                                       then:
-										                                                       OrderCarrierStatus.CarrierSelectedOrder,
-										                                                       else: OrderCarrierStatus.NoCarrier
-									                                                       }
-								                                                       }
-							                                                       }
-						                                                       }
-					                                                       ],
-					                                                       as: 'fromWH'
-				                                                       }
-			                                                       },
-			                                                       {
-				                                                       $unwind: {
-					                                                       path: '$fromWH'
-				                                                       }
-			                                                       },
-			                                                       {
-				                                                       $match: _.assign(
-						                                                       {
-							                                                       warehouse: { $in: merchantsIds },
-							                                                       warehouseStatus: {
-								                                                       $eq: OrderWarehouseStatus.PackagingFinished
-							                                                       },
-							                                                       $expr: {
-								                                                       $lte: [
-									                                                       '$carrierStatus',
-									                                                       '$fromWH.carrierCompetition'
-								                                                       ]
-							                                                       },
-							                                                       _id: { $nin: skippedOrderIds }
-						                                                       },
-						                                                       ...searchByRegex
-				                                                       )
-			                                                       }
-		                                                       ]);
+		const count = await this.ordersService.Model.aggregate(
+				[
+					{
+						$lookup: {
+							from:     'warehouses',
+							let:      {
+								wh: '$warehouse'
+							},
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$eq: [
+												{
+													$toString: '$_id'
+												},
+												'$$wh'
+											]
+										}
+									}
+								},
+								{
+									$project: {
+										carrierCompetition: {
+											$cond: {
+												if:   {
+													$eq: [
+														'$carrierCompetition',
+														true
+													]
+												},
+												then:
+												      OrderCarrierStatus.CarrierSelectedOrder,
+												else: OrderCarrierStatus.NoCarrier
+											}
+										}
+									}
+								}
+							],
+							as:       'fromWH'
+						}
+					},
+					{
+						$unwind: {
+							path: '$fromWH'
+						}
+					},
+					{
+						$match: _.assign(
+								{
+									warehouse:       { $in: merchantsIds },
+									warehouseStatus: {
+										$eq: OrderWarehouseStatus.PackagingFinished
+									},
+									$expr:           {
+										$lte: [
+											'$carrierStatus',
+											'$fromWH.carrierCompetition'
+										]
+									},
+									_id:             { $nin: skippedOrderIds }
+								},
+								...searchByRegex
+						)
+					}
+				]
+		);
 		return count.length;
 	}
 	
 	@asyncListener()
-	async getOrdersForWork(
+	public async getOrdersForWork(
 			geoLocation: IGeoLocation,
 			skippedOrderIds: string[] = [],
-			options: GeoLocationOrdersOptions,
-			searchObj?: {
-				isCancelled?: boolean;
-				byRegex?: Array<{ key: string; value: string }>;
-			}
+			pagingOptions: IGeoLocationOrdersPagingOptions,
+			searchObj?: IGeoLocationOrdersSearchObject
 	): Promise<Order[]>
 	{
 		const merchants = await this.geoLocationsWarehousesService.getStores(
@@ -253,86 +252,88 @@ export class GeoLocationsOrdersService
 			}
 		}
 		
-		const orders = await this.ordersService.Model.aggregate([
-			                                                        {
-				                                                        $lookup: {
-					                                                        from: 'warehouses',
-					                                                        let: {
-						                                                        wh: '$warehouse'
-					                                                        },
-					                                                        pipeline: [
-						                                                        {
-							                                                        $match: {
-								                                                        $expr: {
-									                                                        $eq: [
-										                                                        {
-											                                                        $toString: '$_id'
-										                                                        },
-										                                                        '$$wh'
-									                                                        ]
-								                                                        }
-							                                                        }
-						                                                        },
-						                                                        {
-							                                                        $project: {
-								                                                        carrierCompetition: {
-									                                                        $cond: {
-										                                                        if: {
-											                                                        $eq: [
-												                                                        '$carrierCompetition',
-												                                                        true
-											                                                        ]
-										                                                        },
-										                                                        then:
-										                                                        OrderCarrierStatus.CarrierSelectedOrder,
-										                                                        else: OrderCarrierStatus.NoCarrier
-									                                                        }
-								                                                        }
-							                                                        }
-						                                                        }
-					                                                        ],
-					                                                        as: 'fromWH'
-				                                                        }
-			                                                        },
-			                                                        {
-				                                                        $unwind: {
-					                                                        path: '$fromWH'
-				                                                        }
-			                                                        },
-			                                                        {
-				                                                        $match: _.assign(
-						                                                        {
-							                                                        warehouse: { $in: merchantsIds },
-							                                                        warehouseStatus: {
-								                                                        $eq: OrderWarehouseStatus.PackagingFinished
-							                                                        },
-							                                                        $expr: {
-								                                                        $lte: [
-									                                                        '$carrierStatus',
-									                                                        '$fromWH.carrierCompetition'
-								                                                        ]
-							                                                        },
-							                                                        _id: {
-								                                                        $nin: skippedOrderIds.map((id) => new ObjectId(id))
-							                                                        }
-						                                                        },
-						                                                        ...searchByRegex
-				                                                        )
-			                                                        },
-			                                                        {
-				                                                        $sort: {
-					                                                        _createdAt:
-							                                                        options.sort &&
-							                                                        options.sort.toLowerCase()
-							                                                               .includes('desc')
-							                                                        ? -1
-							                                                        : 1
-				                                                        }
-			                                                        }
-		                                                        ])
+		const orders = await this.ordersService.Model.aggregate(
+				                         [
+					                         {
+						                         $lookup: {
+							                         from:     'warehouses',
+							                         let:      {
+								                         wh: '$warehouse'
+							                         },
+							                         pipeline: [
+								                         {
+									                         $match: {
+										                         $expr: {
+											                         $eq: [
+												                         {
+													                         $toString: '$_id'
+												                         },
+												                         '$$wh'
+											                         ]
+										                         }
+									                         }
+								                         },
+								                         {
+									                         $project: {
+										                         carrierCompetition: {
+											                         $cond: {
+												                         if:   {
+													                         $eq: [
+														                         '$carrierCompetition',
+														                         true
+													                         ]
+												                         },
+												                         then:
+												                               OrderCarrierStatus.CarrierSelectedOrder,
+												                         else: OrderCarrierStatus.NoCarrier
+											                         }
+										                         }
+									                         }
+								                         }
+							                         ],
+							                         as:       'fromWH'
+						                         }
+					                         },
+					                         {
+						                         $unwind: {
+							                         path: '$fromWH'
+						                         }
+					                         },
+					                         {
+						                         $match: _.assign(
+								                         {
+									                         warehouse:       { $in: merchantsIds },
+									                         warehouseStatus: {
+										                         $eq: OrderWarehouseStatus.PackagingFinished
+									                         },
+									                         $expr:           {
+										                         $lte: [
+											                         '$carrierStatus',
+											                         '$fromWH.carrierCompetition'
+										                         ]
+									                         },
+									                         _id:             {
+										                         $nin: skippedOrderIds.map((id) => new ObjectId(id))
+									                         }
+								                         },
+								                         ...searchByRegex
+						                         )
+					                         },
+					                         {
+						                         $sort: {
+							                         _createdAt:
+									                         pagingOptions.sort &&
+									                         pagingOptions.sort.toLowerCase()
+									                                      .includes('desc')
+									                         ? -1
+									                         : 1
+						                         }
+					                         }
+				                         ]
+		                         )
 		                         .allowDiskUse(true)
-		                         .skip(options.skip || 0)
-		                         .limit(options.limit || 1)
+		                         .skip(pagingOptions.skip || 0)
+		                         .limit(pagingOptions.limit || 1)
 		                         .exec();
 		
 		return orders
@@ -352,7 +353,7 @@ export class GeoLocationsOrdersService
 	 */
 	private async _get(
 			geoLocation: GeoLocation,
-			options: { populateWarehouse?: boolean; populateCarrier?: boolean } = {}
+			options: IGeoLocationOrdersRouterOptions = {}
 	): Promise<Order[]>
 	{
 		// First we look up warehouses which can contain interesting orders because they are close enough to given
