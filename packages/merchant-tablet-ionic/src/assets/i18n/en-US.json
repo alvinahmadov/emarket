@@ -254,6 +254,7 @@
 			"PAYBUTTON_TEXT": "Pay Button text",
 			"PAYBUTTON_TEXT_IS_REQUIRED": "Pay Button text is required",
 			"AVAILABLE_PAYMENT_GATEWAYS": "Available Payment Gateways",
+			"SELECTED_PAYMENT_GATEWAYS": "Выбранные способы оплаты",
 			"STRIPE": {
 				"PUBLISHABLE_KEY": "Publishable key",
 				"PUBLISHABLE_KEY_IS_REQUIRED": "Publishable key is required",
@@ -291,7 +292,10 @@
 		"AUTHORIZE": "Authorization",
 		"USER_NAME": "Username",
 		"USER_PASSWORD": "Password",
-		"REMEMBER_ME": "Remember me"
+		"REMEMBER_ME": "Remember me",
+		"USER_NOT_FOUND": "Merchant not found!",
+		"LOGIN_SUCCESS": "Login successfull",
+		"LOGIN_FAIL": "Login failed"
 	},
 	"REGISTER_VIEW": {
 		"REGISTER": "Sign Up",
@@ -316,6 +320,11 @@
 	"WAREHOUSE_VIEW": {
 		"RELEVANT": "Relevant",
 		"ALL": "All",
+		"ALL_PRODUCTS": "All products",
+		"ALL_ORDERS": "All orders",
+		"SHOW_TOPS": "Show top",
+		"HIDE_TOPS": "Hide top",
+		"SCAN": "Scan.",
 		"LOADING_MORE_DATA": "Loading more data...",
 		"ORDERS": "Orders",
 		"SWITCH_ORDERS": "Switch Orders",
@@ -357,6 +366,7 @@
 			"CREATE_NEW_PRODUCT_TYPE": "Create a new product type",
 			"TITLE": "Title",
 			"DESCRIPTION": "Description",
+			"DETAILS": "Details",
 			"CATEGORIES": "Categories",
 			"PRICE": "Price",
 			"COUNT": "Count",
@@ -376,7 +386,11 @@
 			"OPTIONAL": "optional",
 			"TAKEAWAY": "Takeaway",
 			"DELIVERY": "Delivery",
-			"PRODUCT_AVAILABILITY": "Product availability"
+			"PRODUCT_AVAILABILITY": "Product availability",
+			"ERRORS": {
+				"MAX_CHAR": "No max value",
+				"DESCRIPTION_ERROR": "Description required"
+			}
 		},
 		"NEW_ORDER_VIEW": {
 			"NEW_MANUAL_ORDER": "New Manual Order",
@@ -432,6 +446,7 @@
 		"CLICK_TO_EDIT_PICTURES": "Click to Edit Pictures",
 		"TITLE": "Title",
 		"DESCRIPTION": "Description",
+		"DETAILS": "Details",
 		"CATEGORIES": "Categories",
 		"PRICE": "Price",
 		"COUNT": "Count",
@@ -442,11 +457,11 @@
 		"CANCEL": "Cancel",
 		"UPDATE": "Update",
 		"ENGLISH": "English",
-		"HEBREW": "Hebrew",
 		"RUSSIAN": "Russian",
-		"BULGARIAN": "Bulgarian",
-		"SPANISH": "Spanish",
-		"OPTIONAL": "optional"
+		"OPTIONAL": "optional",
+		"ERRORS": {
+			"MAX_CHAR": "No max value"
+		}
 	},
 	"ORDER_CANCELED_COMPONENT": {
 		"CANCELED": "Canceled",

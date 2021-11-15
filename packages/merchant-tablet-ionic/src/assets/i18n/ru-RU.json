@@ -64,8 +64,8 @@
 			"CUSTOMER_ORDERS": "Заказы клиентов",
 			"ALL_ORDERS": "Все заказы",
 			"TOTAL_ORDERS_SUM": "Общая сумма заказов",
-			"COMPLETED": "Завършен",
-			"PAID": "Оплаченный"
+			"COMPLETED": "Завершен",
+			"PAID": "Оплачен"
 		}
 	},
 	"FILE_UPLOADER": {
@@ -255,6 +255,7 @@
 			"PAYBUTTON_TEXT": "Текст кнопки оплаты",
 			"PAYBUTTON_TEXT_IS_REQUIRED": "Требуется текст кнопки оплаты",
 			"AVAILABLE_PAYMENT_GATEWAYS": "Доступные способы оплаты",
+			"SELECTED_PAYMENT_GATEWAYS": "Выбранные способы оплаты",
 			"STRIPE": {
 				"PUBLISHABLE_KEY": "Публикуемый ключ",
 				"PUBLISHABLE_KEY_IS_REQUIRED": "Требуется публикуемый ключ",
@@ -292,7 +293,10 @@
 		"AUTHORIZE": "Авторизация",
 		"USER_NAME": "Имя пользователя",
 		"USER_PASSWORD": "Пароль",
-		"REMEMBER_ME": "Помни меня"
+		"REMEMBER_ME": "Помни меня",
+		"USER_NOT_FOUND": "Пользователь не найден!",
+		"LOGIN_SUCCESS": "Успешная авторизация",
+		"LOGIN_FAIL": "Авторизация провалена"
 	},
 	"REGISTER_VIEW": {
 		"REGISTER": "Регистрация",
@@ -316,7 +320,12 @@
 	},
 	"WAREHOUSE_VIEW": {
 		"RELEVANT": "Соответствующий",
-		"ALL": "Все",
+		"ALL": "Все товары",
+		"ALL_PRODUCTS": "Все товары",
+		"ALL_ORDERS": "Все заказы",
+		"SHOW_TOPS": "Показать лучшие",
+		"HIDE_TOPS": "Скрыть лучшие",
+		"SCAN": "Скан.",
 		"LOADING_MORE_DATA": "Загрузка дополнительных данных ...",
 		"ORDERS": "Заказы",
 		"SWITCH_ORDERS": "Переключение заказов",
@@ -357,7 +366,8 @@
 			"NEW_PRODUCT_TYPE": "Новый тип товара",
 			"CREATE_NEW_PRODUCT_TYPE": "Создать новый тип товара",
 			"TITLE": "Название товара",
-			"DESCRIPTION": "Описание",
+			"DESCRIPTION": "Краткое описание",
+			"DETAILS": "Детальное описание",
 			"CATEGORIES": "Категории",
 			"PRICE": "Цена",
 			"COUNT": "Количество",
@@ -371,13 +381,15 @@
 			"CANCEL": "Отмена",
 			"CREATE": "Создайте",
 			"ENGLISH": "Английский",
-			"HEBREW": "Иврит",
 			"RUSSIAN": "Русский",
-			"BULGARIAN": "Болгарский",
 			"OPTIONAL": "необязательный",
 			"TAKEAWAY": "Навынос",
 			"DELIVERY": "Доставка",
-			"PRODUCT_AVAILABILITY": "Доступность товара"
+			"PRODUCT_AVAILABILITY": "Доступность товара",
+			"ERRORS": {
+				"MAX_CHAR": "Количество символов не должен превышать макс.",
+				"DESCRIPTION_ERROR": "Описание обязательно"
+			}
 		},
 		"NEW_ORDER_VIEW": {
 			"NEW_MANUAL_ORDER": "Новый ручной заказ",
@@ -432,7 +444,8 @@
 		"UPDATE_AN_EXISTING_PRODUCT": "Обновление существующего товара",
 		"CLICK_TO_EDIT_PICTURES": "Нажмите, чтобы редактировать фотографии",
 		"TITLE": "Заглавие",
-		"DESCRIPTION": "Описание",
+		"DESCRIPTION": "Краткое описание",
+		"DETAILS": "Детальное описание",
 		"CATEGORIES": "Категории",
 		"PRICE": "Цена",
 		"COUNT": "Количество",
@@ -443,10 +456,10 @@
 		"CANCEL": "Отмена",
 		"UPDATE": "Обновить",
 		"ENGLISH": "Английский",
-		"HEBREW": "Иврит",
 		"RUSSIAN": "Русский",
-		"BULGARIAN": "Болгарский",
-		"SPANISH": "Испанский"
+		"ERRORS": {
+			"MAX_CHAR": "Количество символов не должен превышать макс."
+		}
 	},
 	"ORDER_CANCELED_COMPONENT": {
 		"CANCELED": "отменен",
