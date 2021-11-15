@@ -505,7 +505,7 @@ export class OrdersService extends DBService<Order>
 	@asyncListener()
 	async decreaseOrderProducts(
 			orderId: Order['id'],
-			products: IProductCountInfo[], // TODO: specify correct Type
+			products: IProductCountInfo[],
 			warehouseId: Warehouse['id']
 	): Promise<Order>
 	{
