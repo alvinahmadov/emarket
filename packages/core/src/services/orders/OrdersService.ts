@@ -27,6 +27,12 @@ import { env }                                           from '../../env';
 import { createLogger }                                  from '../../helpers/Log';
 import Stripe = require('stripe');
 
+export interface IProductCountInfo
+{
+	productId: string;
+	count: number;
+}
+
 @injectable()
 @routerName('order')
 export class OrdersService extends DBService<Order>
@@ -418,7 +424,7 @@ export class OrdersService extends DBService<Order>
 	@asyncListener()
 	async addProducts(
 			orderId: Order['id'],
-			products,
+			products: IProductCountInfo[],
 			warehouseId: Warehouse['id']
 	): Promise<Order>
 	{
@@ -442,27 +448,14 @@ export class OrdersService extends DBService<Order>
 				if(newProduct)
 				{
 					product.count += newProduct.count;
-					
-					await this.warehousesProductsService.decreaseCount(
-							warehouseId,
-							newProduct.productId, // what product availability should be decreased
-							newProduct.count // how many to remove
-					);
-					
-					await this.warehousesProductsService.increaseSoldCount(
-							warehouseId,
-							newProduct.productId,
-							newProduct.count
-					);
+					await this._changeCount(warehouseId, newProduct, true);
 				}
 			}
 		}
-		
+		// noinspection DuplicatedCode
 		products = products.filter(
-				(p: { [x: string]: string }) =>
-						!oldProductsIds.includes(p['productId'])
+				(p: IProductCountInfo) => !oldProductsIds.includes(p.productId)
 		);
-		
 		const warehouse = (await this.warehousesService
 		                             .get(warehouseId, true)
 		                             .pipe(first())
@@ -472,19 +465,19 @@ export class OrdersService extends DBService<Order>
 		
 		const newOrderProducts = _.map(
 				products,
-				(args): IOrderProductCreateObject =>
+				(info): IOrderProductCreateObject =>
 				{
-					const wProduct = warehouseProducts[args.productId];
+					const wProduct = warehouseProducts[info.productId];
 					
 					if(!wProduct)
 					{
 						throw new Error(
-								`WarehouseOrdersService got call to create(userId, orderProducts) - But there is no product with the id ${args.productId}!`
+								`WarehouseOrdersService got call to create(userId, orderProducts) - But there is no product with the id ${info.productId}!`
 						);
 					}
 					
 					return {
-						count:           args.count,
+						count:           info.count,
 						price:           wProduct.price,
 						initialPrice:    wProduct.initialPrice,
 						deliveryTimeMin: wProduct.deliveryTimeMin,
@@ -501,17 +494,7 @@ export class OrdersService extends DBService<Order>
 		
 		for(const product of products)
 		{
-			await this.warehousesProductsService.decreaseCount(
-					warehouseId,
-					product.productId,
-					product.count
-			);
-			
-			await this.warehousesProductsService.increaseSoldCount(
-					warehouseId,
-					product.productId,
-					product.count
-			);
+			await this._changeCount(warehouseId, product, true);
 		}
 		
 		return this.update(orderId, {
@@ -522,7 +505,7 @@ export class OrdersService extends DBService<Order>
 	@asyncListener()
 	async decreaseOrderProducts(
 			orderId: Order['id'],
-			products: any, // TODO: specify correct Type
+			products: IProductCountInfo[], // TODO: specify correct Type
 			warehouseId: Warehouse['id']
 	): Promise<Order>
 	{
@@ -541,7 +524,7 @@ export class OrdersService extends DBService<Order>
 			if(newProductsIds.includes(product.product.id))
 			{
 				const newProduct = products.find(
-						(p: { productId: string }) =>
+						(p: IProductCountInfo) =>
 								p.productId === product.product.id
 				);
 				
@@ -574,11 +557,10 @@ export class OrdersService extends DBService<Order>
 			}
 		}
 		
+		// noinspection DuplicatedCode
 		products = products.filter(
-				(p: { [x: string]: string }) =>
-						!oldProductsIds.includes(p['productId'])
-		);
-		
+				(p: IProductCountInfo) => !oldProductsIds.includes(p.productId)
+		)
 		const warehouse = (await this.warehousesService
 		                             .get(warehouseId, true)
 		                             .pipe(first())
@@ -653,22 +635,16 @@ export class OrdersService extends DBService<Order>
 		);
 		
 		// revert order sold count
-		await (<any>Bluebird).map(removedProducts, async(orderProduct) =>
-		{
-			const productId = orderProduct.product.id;
-			
-			await this.warehousesProductsService.decreaseSoldCount(
-					order.warehouseId,
-					productId,
-					orderProduct.count
-			);
-			
-			await this.warehousesProductsService.increaseCount(
-					order.warehouseId,
-					productId,
-					orderProduct.count
-			);
-		});
+		await (<any>Bluebird).map(
+				removedProducts,
+				async(orderProduct: OrderProduct) =>
+				{
+					const productInfo = {
+						productId: orderProduct.product.id,
+						count:     orderProduct.count
+					}
+					await this._changeCount(order.warehouseId, productInfo, false);
+				});
 		
 		return this.update(orderId, {
 			products: newProducts
@@ -756,7 +732,12 @@ export class OrdersService extends DBService<Order>
 	}
 	
 	@asyncListener()
-	async getOrdersChartTotalOrders(): Promise<any>
+	async getOrdersChartTotalOrders(): Promise<{
+		totalPrice: number;
+		isCompleted: boolean;
+		isCancelled: boolean,
+		_createdAt: Date | string
+	}[]>
 	{
 		const ordersRaw = await this.Model.find({
 			                                        isDeleted: { $eq: false }
@@ -784,9 +765,7 @@ export class OrdersService extends DBService<Order>
 			};
 		});
 		
-		const ordersRes = orders.filter((o) => o.isCompleted);
-		
-		return ordersRes;
+		return orders.filter((o) => o.isCompleted);
 	}
 	
 	@asyncListener()
@@ -960,6 +939,39 @@ export class OrdersService extends DBService<Order>
 		                 .populate('carrier customer')
 		                 .lean()
 		                 .exec();
+	}
+	
+	private async _changeCount(warehouseId: string, product: IProductCountInfo, isSelling: boolean)
+	{
+		if(isSelling)
+		{
+			await this.warehousesProductsService.decreaseCount(
+					warehouseId,
+					product.productId,
+					product.count
+			);
+			
+			await this.warehousesProductsService.increaseSoldCount(
+					warehouseId,
+					product.productId,
+					product.count
+			);
+		}
+		else
+		{
+			await this.warehousesProductsService.increaseCount(
+					warehouseId,
+					product.productId,
+					product.count
+			);
+			
+			await this.warehousesProductsService.decreaseSoldCount(
+					warehouseId,
+					product.productId,
+					product.count
+			);
+		}
+		
 	}
 	
 	private static _getOrderTotalPrice(order: Order): number
