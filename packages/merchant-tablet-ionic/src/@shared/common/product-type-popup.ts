@@ -5,7 +5,7 @@ import { IProductImage }                     from '@modules/server.common/interf
 import Warehouse                             from '@modules/server.common/entities/Warehouse';
 import { WarehouseRouter }                   from '@modules/client.common.angular2/routers/warehouse-router.service';
 import { StorageService }                    from 'services/storage.service';
-import { environment }                       from "environment";
+import { environment }                       from 'environments/environment';
 
 class ProductTypePopup
 {
