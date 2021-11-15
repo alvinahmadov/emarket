@@ -20,8 +20,7 @@ import { createLogger }                                                 from '..
 export class GeoLocationsWarehousesService
 		implements IGeoLocationWarehousesRouter, IService
 {
-	// TODO: this should be something dynamic and stored in DB (per Warehouse?)
-	public static TrackingDistance: number = 50000;
+	public static TrackingDistance: number = Number.MAX_SAFE_INTEGER;
 	protected log: Logger = createLogger({
 		                                     name: 'geoLocationsWarehousesService'
 	                                     });
@@ -46,8 +45,7 @@ export class GeoLocationsWarehousesService
 	{
 		const options = {
 			fullProducts: _options != null && _options.fullProducts != null,
-			activeOnly:
-			              _options != null && _options.activeOnly != null
+			activeOnly:   _options != null && _options.activeOnly != null
 			              ? _options.activeOnly
 			              : false
 		};
@@ -129,9 +127,8 @@ export class GeoLocationsWarehousesService
 						    )
 				),
 				exhaustMap(() =>
-						           this._get(
+						           this._factory(
 								           geoLocation,
-								           GeoLocationsWarehousesService.TrackingDistance,
 								           options
 						           )
 				),
@@ -151,57 +148,7 @@ export class GeoLocationsWarehousesService
 			}
 	): Promise<IWarehouse[]>
 	{
-		const merchantsIds = options.merchantsIds;
-		
-		let findObjOpts = _.assign({},
-		                           options.activeOnly ? { isActive: true } : {},
-		                           options.inStoreMode ? { inStoreMode: true } : {},
-		                           merchantsIds && merchantsIds.length > 0
-		                           ? {
-					                           _id: { $in: merchantsIds }
-				                           }
-		                           : {}
-		);
-		
-		let warehouses: IWarehouse[];
-		
-		const searchWarehouses = async(findObject?: object): Promise<any> =>
-		{
-			if(!findObject)
-				findObject = {};
-			
-			return this.warehousesService
-			           .Model
-			           .find(_.assign(findObject, findObjOpts))
-			           .populate(options.fullProducts ? 'products.product' : '')
-			           .lean()
-			           .exec();
-		}
-		
-		if(geoLocation.countryId)
-		{
-			warehouses = await searchWarehouses({ 'geoLocation.countryId': geoLocation.countryId });
-		}
-		else if(geoLocation.loc && geoLocation.loc.coordinates.length > 0)
-		{
-			warehouses = await searchWarehouses({
-				                                    'geoLocation.loc': {
-					                                    $near: {
-						                                    $geometry: {
-							                                    type:        'Point',
-							                                    coordinates: geoLocation.loc.coordinates
-						                                    },
-						                                    // $maxDistance: maxDistance
-					                                    }
-				                                    }
-			                                    });
-		}
-		else
-		{
-			warehouses = await searchWarehouses();
-		}
-		
-		return warehouses;
+		return this._get(geoLocation as GeoLocation, options);
 	}
 	
 	/**
@@ -209,64 +156,54 @@ export class GeoLocationsWarehousesService
 	 *
 	 * @private
 	 * @param {GeoLocation} geoLocation
-	 * @param {number} maxDistance
 	 * @param {{ fullProducts: boolean; activeOnly: boolean }} options
 	 * @returns {Promise<Warehouse[]>}
 	 * @memberof GeoLocationsWarehousesService
 	 */
 	private async _get(
 			geoLocation: GeoLocation,
-			maxDistance: number,
-			options: { fullProducts: boolean; activeOnly: boolean }
+			options: {
+				fullProducts: boolean;
+				activeOnly: boolean;
+				merchantsIds?: string[];
+				inStoreMode?: boolean;
+			}
 	): Promise<Warehouse[]>
 	{
-		// TODO: first filter by City / Country and only then look up by coordinates
-		let warehouses: IWarehouse[] = await this._getByCountryIdOrLocation(
-				geoLocation,
-				maxDistance,
-				options
+		const merchantsIds = options?.merchantsIds;
+		let findObjOpts = _.assign({},
+		                           options?.activeOnly ? { isActive: true } : {},
+		                           options?.inStoreMode ? { inStoreMode: true } : {},
+		                           merchantsIds && merchantsIds.length > 0
+		                           ? {
+					                           _id: { $in: merchantsIds }
+				                           }
+		                           : {}
 		);
 		
-		return warehouses.map((warehouse) => new Warehouse(warehouse));
+		return await this.warehousesService
+		                 .Model
+		                 .find(_.assign(
+				                 {
+					                 'geoLocation.loc': {
+						                 $near: {
+							                 $geometry:    {
+								                 type:        'Point',
+								                 coordinates: geoLocation.loc.coordinates
+							                 },
+							                 $maxDistance: GeoLocationsWarehousesService.TrackingDistance
+						                 }
+					                 }
+				                 }, findObjOpts
+		                 ))
+		                 .populate(options.fullProducts ? 'products.product' : '')
+		                 .lean()
+		                 .exec();
 	}
 	
-	private async _getByCountryIdOrLocation(geoLocation: GeoLocation, maxDistance: number, options: any)
+	private async _factory(geoLocation: GeoLocation, options: any)
 	{
-		let warehouses: IWarehouse[] = this.warehousesService
-		                                   .Model
-		                                   .find({ 'geoLocation.countryId': geoLocation.countryId })
-		                                   .populate(options.fullProducts ? 'products.product' : '')
-		                                   .lean()
-		                                   .exec();
-		
-		if(!warehouses || !warehouses.length)
-		{
-			warehouses = (await this.warehousesService
-			                        .Model
-			                        .find(_.assign(
-					                              {
-						                              'geoLocation.loc': {
-							                              $near: {
-								                              $geometry: {
-									                              type:        'Point',
-									                              coordinates: geoLocation.loc.coordinates
-								                              },
-								
-								                              // TODO: set distance PER warehouse?
-								                              // It's hard to make this work however, as seems this should be constant value...
-								                              // however we may want to check MongoDB docs!
-								                              // $maxDistance: maxDistance
-							                              }
-						                              }
-					                              },
-					                              options.activeOnly ? { isActive: true } : {}
-			                              )
-			                        )
-			                        .populate(options.fullProducts ? 'products.product' : '')
-			                        .lean()
-			                        .exec()) as IWarehouse[];
-		}
-		
-		return warehouses;
+		let warehouses = await this._get(geoLocation, options);
+		return warehouses.map((warehouse) => new Warehouse(warehouse));
 	}
 }
