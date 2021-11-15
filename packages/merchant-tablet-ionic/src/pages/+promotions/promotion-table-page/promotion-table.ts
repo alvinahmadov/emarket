@@ -70,6 +70,7 @@ export class PromotionTable implements OnInit, OnDestroy
 		const modal = await this.modalCtrl.create({
 			                                          component:      PromotionMutation,
 			                                          componentProps: { promotion: event.data.promotion },
+			                                          cssClass:       "promotion-mutation-modal"
 		                                          });
 		
 		await modal.present();
