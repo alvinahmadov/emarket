@@ -4,28 +4,42 @@ import {
 	EventEmitter,
 	Output,
 	Input,
-}                                 from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-
-import { UserAuthRouter }                   from '@modules/client.common.angular2/routers/user-auth-router.service';
+}                                           from '@angular/core';
+import { FormBuilder, FormGroup }           from '@angular/forms';
+import { ModalController, ToastController } from '@ionic/angular';
+import { IGeoLocationCreateObject }         from '@modules/server.common/interfaces/IGeoLocation';
+import Customer                             from '@modules/server.common/entities/Customer';
+import CommonUtils                          from '@modules/server.common/utilities/common';
+import { CustomerAuthRouter }               from '@modules/client.common.angular2/routers/customer-auth-router.service';
+import { CustomerRouter }                   from '@modules/client.common.angular2/routers/customer-router.service';
 import { BasicInfoFormComponent }           from '../forms/basic-info/basic-info-form.component';
 import { LocationFormComponent }            from '../forms/location/location-form.component';
-import { ModalController, ToastController } from '@ionic/angular';
-import User                                 from '@modules/server.common/entities/User';
-import { UserRouter }                       from '@modules/client.common.angular2/routers/user-router.service';
-import CommonUtils                          from '@modules/server.common/utilities/common';
+
+type TUserUpdateData = {
+	geoLocation: IGeoLocationCreateObject;
+	apartment: string;
+	username: string;
+	firstName?: string;
+	lastName?: string;
+	email: string;
+	avatar?: string;
+}
+
+type TUserRegistrationInput = {
+	user: TUserUpdateData
+}
 
 @Component({
-	           selector: 'user-mutation',
+	           selector:    'user-mutation',
+	           styleUrls:   ['./user-mutation.component.scss'],
 	           templateUrl: './user-mutation.component.html',
-	           styleUrls: ['./user-mutation.component.scss'],
            })
 export class UserMutationComponent
 {
 	readonly form: FormGroup = this._formBuilder.group({
 		                                                   basicInfo: BasicInfoFormComponent.buildForm(this._formBuilder),
 		                                                   apartment: LocationFormComponent.buildApartmentForm(this._formBuilder),
-		                                                   location: LocationFormComponent.buildForm(this._formBuilder),
+		                                                   location:  LocationFormComponent.buildForm(this._formBuilder),
 	                                                   });
 	
 	readonly basicInfo = this.form.get('basicInfo') as FormGroup;
@@ -39,7 +53,7 @@ export class UserMutationComponent
 	locationForm: LocationFormComponent;
 	
 	@Input()
-	user: User;
+	customer: Customer;
 	
 	@Output()
 	customerIdEmitter = new EventEmitter<string>();
@@ -57,10 +71,10 @@ export class UserMutationComponent
 	isNextStepAvailable: boolean = false;
 	
 	constructor(
-			private readonly _userAuthRouter: UserAuthRouter,
+			private readonly _userAuthRouter: CustomerAuthRouter,
 			private readonly _formBuilder: FormBuilder,
 			private readonly modalController: ModalController,
-			private readonly userRouter: UserRouter,
+			private readonly customerRouter: CustomerRouter,
 			private readonly toastController: ToastController
 	)
 	{}
@@ -94,15 +108,15 @@ export class UserMutationComponent
 	
 	async createCustomer()
 	{
-		let userId: string;
+		let customerId: string;
 		let message: string;
 		try
 		{
-			const userRegistrationInput = {
+			const userRegistrationInput: TUserRegistrationInput = {
 				user: {
 					...this.basicInfoForm.getValue(),
 					geoLocation: this.locationForm.getValue(),
-					apartment: this.locationForm.getApartment(),
+					apartment:   this.locationForm.getApartment(),
 				},
 			};
 			
@@ -116,19 +130,15 @@ export class UserMutationComponent
 			// the array of coordinates is in reverse order, instead of 'Lat' => 'Lng' the orders is 'Lng' => 'Lat'
 			userRegistrationInput.user.geoLocation.loc.coordinates.reverse();
 			
-			const user = await this._userAuthRouter.register(
+			const customer = await this._userAuthRouter.register(
 					userRegistrationInput
 			);
 			
-			userId = user.id;
+			customerId = customer.id;
 			
-			this.broadcastCustomerId(user.id);
-			const firstName = user.firstName;
-			const lastName = user.lastName;
+			this.broadcastCustomerId(customer.id);
 			
-			message = `Customer ${firstName ? firstName + ' ' : ''} ${
-					lastName ? lastName + ' ' : ''
-			}(${user.id}) Created`;
+			message = `Customer ${customer.fullName}[${customer.username}](${customer.id}) Created`;
 		} catch(err)
 		{
 			message = `Error in creating customer: '${err.message}'!`;
@@ -137,7 +147,7 @@ export class UserMutationComponent
 			await this.presentToast(message);
 			if(this.visible)
 			{
-				await this.modalController.dismiss(userId);
+				await this.modalController.dismiss(customerId);
 			}
 		}
 	}
@@ -145,7 +155,6 @@ export class UserMutationComponent
 	async saveCustomer()
 	{
 		const geoLocation = this.locationForm.getValue();
-		geoLocation.loc.coordinates.reverse();
 		
 		let updateUpdateData = {
 			...this.basicInfoForm.getValue(),
@@ -158,7 +167,7 @@ export class UserMutationComponent
 			updateUpdateData = this.getDefaultImage(updateUpdateData);
 		}
 		
-		await this.userRouter.updateUser(this.user.id, updateUpdateData);
+		await this.customerRouter.updateCustomer(this.customer.id, updateUpdateData);
 		await this.modalController.dismiss();
 	}
 	
@@ -176,21 +185,21 @@ export class UserMutationComponent
 		toast.present();
 	}
 	
-	private getDefaultImage(user)
+	protected getDefaultImage(customer: TUserUpdateData)
 	{
-		if(user && !user.image)
+		if(customer && !customer.avatar)
 		{
-			const firstNameLetter = user.firstName
-			                        ? user.firstName.charAt(0).toUpperCase()
+			const firstNameLetter = customer.firstName
+			                        ? customer.firstName.charAt(0).toUpperCase()
 			                        : '';
 			
-			const lastNameLetter = user.lastName
-			                       ? user.lastName.charAt(0).toUpperCase()
+			const lastNameLetter = customer.lastName
+			                       ? customer.lastName.charAt(0).toUpperCase()
 			                       : '';
 			
 			if(firstNameLetter || lastNameLetter)
 			{
-				user.image = CommonUtils.getDummyImage(
+				customer.avatar = CommonUtils.getDummyImage(
 						300,
 						300,
 						firstNameLetter + lastNameLetter
@@ -198,14 +207,14 @@ export class UserMutationComponent
 			}
 			else
 			{
-				const firstCityLetter = user.geoLocation.city
-				                            .charAt(0)
-				                            .toUpperCase();
+				const firstCityLetter = customer.geoLocation.city
+				                                .charAt(0)
+				                                .toUpperCase();
 				
-				user.image = CommonUtils.getDummyImage(300, 300, firstCityLetter);
+				customer.avatar = CommonUtils.getDummyImage(300, 300, firstCityLetter);
 			}
 		}
 		
-		return user;
+		return customer;
 	}
 }
