@@ -1,17 +1,17 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { TranslateService }                               from '@ngx-translate/core';
 import { LocalDataSource }                                from 'ng2-smart-table';
-import { takeUntil }                                      from 'rxjs/operators';
 import { Subject, forkJoin, Observable }                  from 'rxjs';
+import { takeUntil }                                      from 'rxjs/operators';
 import Customer                                           from '@modules/server.common/entities/Customer';
+import { CustomersService }                               from 'services/customers.service';
 import { AddressComponent }                               from './address.component';
-import { CustomersService }                               from '../../services/customers.service';
 
 @Component({
-	           selector: 'select-add-customer',
+	           selector:  'select-add-customer',
 	           styleUrls: ['./select-add-customer.component.scss'],
-	           template: `
-		           <span class="select-add-customer-component">
+	           template:  `
+		                      <span class="select-add-customer-component">
 			           <div class="customers-table" *ngIf="isSelectedFromExisting">
 				           <ng2-smart-table
 						           class="smart-table"
@@ -30,7 +30,7 @@ import { CustomersService }                               from '../../services/c
 				           ></user-mutation>
 			           </div>
 		           </span>
-	           `,
+	                      `,
            })
 export class SelectAddCustomerComponent implements OnInit
 {
@@ -91,27 +91,29 @@ export class SelectAddCustomerComponent implements OnInit
 		
 		forkJoin(
 				this._translateService.get('Id'),
+				getTranslate('USERNAME'),
 				getTranslate('FULL_NAME'),
 				getTranslate('EMAIL'),
 				getTranslate('PHONE'),
 				getTranslate('ADDRESS')
 		)
 				.pipe(takeUntil(this.ngDestroy$))
-				.subscribe(([id, fullName, email, phone, address]) =>
+				.subscribe(([username, fullName, email, phone, address]) =>
 				           {
 					           this.settingsSmartTable = {
 						           actions: false,
 						           filters: false,
-						           pager: {
+						           pager:   {
 							           perPage: 3,
 						           },
 						           columns: {
-							           name: { title: fullName },
-							           email: { title: email },
-							           phone: { title: phone },
-							           address: {
-								           title: address,
-								           type: 'custom',
+							           username: { title: username },
+							           name:     { title: fullName },
+							           email:    { title: email },
+							           phone:    { title: phone },
+							           address:  {
+								           title:           address,
+								           type:            'custom',
 								           renderComponent: AddressComponent,
 							           },
 						           },
@@ -124,9 +126,9 @@ export class SelectAddCustomerComponent implements OnInit
 		this._customersService
 		    .getCustomers()
 		    .pipe(takeUntil(this._ngDestroy$))
-		    .subscribe((users: Customer[]) =>
+		    .subscribe((customers: Customer[]) =>
 		               {
-			               const formattedData = this._formatDataSmartTable(users);
+			               const formattedData = this._formatDataSmartTable(customers);
 			               this.sourceSmartTable.load(formattedData);
 		               });
 	}
@@ -136,12 +138,12 @@ export class SelectAddCustomerComponent implements OnInit
 		return customers.map((customer: Customer) =>
 		                     {
 			                     return {
-				                     id: customer.id,
+				                     id:       customer.id,
 				                     username: customer.username,
 				                     fullname: `${customer.fullName || this._noInfoSign}`,
-				                     email: customer.email || this._noInfoSign,
-				                     phone: customer.phone || this._noInfoSign,
-				                     address: customer.fullAddress || this._noInfoSign,
+				                     email:    customer.email || this._noInfoSign,
+				                     phone:    customer.phone || this._noInfoSign,
+				                     address:  customer.fullAddress || this._noInfoSign,
 				                     customer: customer,
 			                     };
 		                     });
