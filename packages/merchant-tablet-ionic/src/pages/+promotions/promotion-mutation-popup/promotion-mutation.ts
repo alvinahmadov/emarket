@@ -82,7 +82,7 @@ export class PromotionMutation implements OnDestroy
 			    .create(promotionUserInput)
 			    .pipe(first())
 			    .subscribe(
-					    (data) =>
+					    () =>
 					    {
 						    this.presentToast('Акция создана успешно!');
 					    },
@@ -105,7 +105,7 @@ export class PromotionMutation implements OnDestroy
 			    .update(this.promotion._id.toString(), promotionUserInput)
 			    .pipe(first())
 			    .subscribe(
-					    (data) =>
+					    () =>
 					    {
 						    this.presentToast('Акция обновлена успешно!');
 					    },
