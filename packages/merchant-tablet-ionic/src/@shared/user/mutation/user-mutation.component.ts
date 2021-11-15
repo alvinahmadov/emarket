@@ -47,28 +47,28 @@ export class UserMutationComponent
 	readonly location = this.form.get('location') as FormGroup;
 	
 	@ViewChild('basicInfoForm')
-	basicInfoForm: BasicInfoFormComponent;
+	public basicInfoForm: BasicInfoFormComponent;
 	
 	@ViewChild('locationForm')
-	locationForm: LocationFormComponent;
+	public locationForm: LocationFormComponent;
 	
 	@Input()
-	customer: Customer;
+	public customer: Customer;
 	
 	@Output()
-	customerIdEmitter = new EventEmitter<string>();
+	public customerIdEmitter = new EventEmitter<string>();
 	
 	@Input()
-	visible: boolean = true;
+	public visible: boolean = true;
 	
 	@Output()
-	updateVisible = new EventEmitter<boolean>();
+	public updateVisible = new EventEmitter<boolean>();
 	
-	mapCoordinatesEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
+	public mapCoordinatesEmitter = new EventEmitter<google.maps.LatLng | google.maps.LatLngLiteral>();
 	
-	mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
+	public mapGeometryEmitter = new EventEmitter<google.maps.places.PlaceGeometry | google.maps.GeocoderGeometry>();
 	
-	isNextStepAvailable: boolean = false;
+	public isNextStepAvailable: boolean = false;
 	
 	constructor(
 			private readonly _userAuthRouter: CustomerAuthRouter,
@@ -79,14 +79,14 @@ export class UserMutationComponent
 	)
 	{}
 	
-	onCoordinatesChanges(
+	public onCoordinatesChanges(
 			coords: google.maps.LatLng | google.maps.LatLngLiteral
 	)
 	{
 		this.mapCoordinatesEmitter.emit(coords);
 	}
 	
-	onGeometrySend(
+	public onGeometrySend(
 			geometry:
 					| google.maps.places.PlaceGeometry
 					| google.maps.GeocoderGeometry
@@ -95,18 +95,18 @@ export class UserMutationComponent
 		this.mapGeometryEmitter.emit(geometry);
 	}
 	
-	broadcastCustomerId(customerId: string)
+	public broadcastCustomerId(customerId: string)
 	{
 		this.customerIdEmitter.emit(customerId);
 	}
 	
-	changeState(): void
+	public changeState(): void
 	{
 		this.visible = false;
 		this.updateVisible.emit(this.visible);
 	}
 	
-	async createCustomer()
+	public async createCustomer()
 	{
 		let customerId: string;
 		let message: string;
@@ -152,7 +152,7 @@ export class UserMutationComponent
 		}
 	}
 	
-	async saveCustomer()
+	public async saveCustomer()
 	{
 		const geoLocation = this.locationForm.getValue();
 		
@@ -171,7 +171,7 @@ export class UserMutationComponent
 		await this.modalController.dismiss();
 	}
 	
-	cancelModal()
+	public cancelModal()
 	{
 		this.modalController.dismiss();
 	}
