@@ -1,31 +1,31 @@
-import { inject, injectable }             from 'inversify';
-import Logger                             from 'bunyan';
-import _                                  from 'lodash';
-import { map }                            from 'rxjs/operators';
+import { inject, injectable }            from 'inversify';
+import Logger                            from 'bunyan';
+import _                                 from 'lodash';
+import { map }                           from 'rxjs/operators';
 import {
 	observableListener,
 	routerName,
 	serialization,
 	asyncListener
-}                                         from '@pyro/io';
-import IGeoLocation                       from '@modules/server.common/interfaces/IGeoLocation';
+}                                        from '@pyro/io';
+import IGeoLocation                      from '@modules/server.common/interfaces/IGeoLocation';
 import {
 	IProductTitle,
 	IProductDescription,
 	IProductDetails
-}                                         from '@modules/server.common/interfaces/IProduct';
-import IWarehouseProduct                  from '@modules/server.common/interfaces/IWarehouseProduct';
-import IGeoLocationProductsRouter         from '@modules/server.common/routers/IGeoLocationProductsRouter';
-import Warehouse                          from '@modules/server.common/entities/Warehouse';
-import GeoLocation                        from '@modules/server.common/entities/GeoLocation';
-import ProductInfo                        from '@modules/server.common/entities/ProductInfo';
-import WarehouseProduct                   from '@modules/server.common/entities/WarehouseProduct';
-import GeoUtils                           from '@modules/server.common/utilities/geolocation';
-import { IGetGeoLocationProductsOptions } from 'graphql/geo-locations/geo-location.resolver';
-import { WarehousesService }              from '../../services/warehouses';
-import { GeoLocationsWarehousesService }  from '../../services/geo-locations/GeoLocationsWarehousesService';
-import IService                           from '../../services/IService';
-import { createLogger }                   from '../../helpers/Log';
+}                                        from '@modules/server.common/interfaces/IProduct';
+import IWarehouseProduct                 from '@modules/server.common/interfaces/IWarehouseProduct';
+import IGeoLocationProductsRouter,
+{ IGeoLocationProductsOptions }          from '@modules/server.common/routers/IGeoLocationProductsRouter';
+import Warehouse                         from '@modules/server.common/entities/Warehouse';
+import GeoLocation                       from '@modules/server.common/entities/GeoLocation';
+import ProductInfo                       from '@modules/server.common/entities/ProductInfo';
+import WarehouseProduct                  from '@modules/server.common/entities/WarehouseProduct';
+import GeoUtils                          from '@modules/server.common/utilities/geolocation';
+import { WarehousesService }             from '../../services/warehouses';
+import { GeoLocationsWarehousesService } from '../../services/geo-locations/GeoLocationsWarehousesService';
+import IService                          from '../../services/IService';
+import { createLogger }                  from '../../helpers/Log';
 
 @injectable()
 @routerName('geo-location-products')
@@ -48,7 +48,7 @@ export class GeoLocationsProductsService
 	get(
 			@serialization((g: IGeoLocation) => new GeoLocation(g))
 					geoLocation: GeoLocation,
-			options?: IGetGeoLocationProductsOptions
+			options?: IGeoLocationProductsOptions
 	)
 	{
 		return this.geoLocationsWarehousesService
@@ -67,7 +67,7 @@ export class GeoLocationsProductsService
 	@asyncListener()
 	async getCountOfGeoLocationProducts(
 			geoLocation: IGeoLocation,
-			options?: IGetGeoLocationProductsOptions,
+			options?: IGeoLocationProductsOptions,
 			searchText?: string
 	): Promise<number>
 	{
@@ -77,15 +77,15 @@ export class GeoLocationsProductsService
 			                         ?? GeoLocationsWarehousesService.TrackingDistance;
 			
 			const warehouses = await this.geoLocationsWarehousesService
-			                            .getStores(
-					                            geoLocation,
-					                            distance,
-					                            {
-						                            fullProducts: true,
-						                            activeOnly:   true,
-						                            merchantsIds: options ? options.merchantIds : null
-					                            }
-			                            );
+			                             .getStores(
+					                             geoLocation,
+					                             distance,
+					                             {
+						                             fullProducts: true,
+						                             activeOnly:   true,
+						                             merchantsIds: options ? options.merchantIds : null
+					                             }
+			                             );
 			const productsIds: Array<string[]> = warehouses.map(
 					(m) =>
 					{
@@ -126,7 +126,7 @@ export class GeoLocationsProductsService
 			@serialization((g: IGeoLocation) => new GeoLocation(g))
 					geoLocation: GeoLocation,
 			pagingOptions,
-			options?: IGetGeoLocationProductsOptions,
+			options?: IGeoLocationProductsOptions,
 			searchText?: string
 	): Promise<ProductInfo[]>
 	{
@@ -146,14 +146,13 @@ export class GeoLocationsProductsService
 				options,
 				searchText
 		);
-		
 		return products.slice(pagingOptions.skip).slice(0, pagingOptions.limit);
 	}
 	
 	private _getProductsFromWarehouses(
 			geoLocation: GeoLocation,
 			warehouses: Warehouse[],
-			options?: IGetGeoLocationProductsOptions,
+			options?: IGeoLocationProductsOptions,
 			searchText?: string
 	): ProductInfo[]
 	{
