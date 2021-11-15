@@ -164,7 +164,7 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 	@asyncListener()
 	async getInvitesRequests(
 			findInput: any,
-			invited: any,
+			invited: boolean,
 			pagingOptions: IPagingOptions
 	): Promise<any>
 	{
@@ -229,13 +229,13 @@ export class InvitesRequestsService extends DBService<InviteRequest>
 		}
 	}
 	
-	async generate1000InviteRequests(defaultLng: number, defaultLat: number)
+	async generateInviteRequests(defaultLng: number, defaultLat: number, qty: number = 1000)
 	{
 		const invitesRequestsToCreate: IInviteRequestCreateObject[] = [];
 		
 		let inviteRequestsCount = 1;
 		
-		while(inviteRequestsCount <= 1000)
+		while(inviteRequestsCount <= qty)
 		{
 			const houseNumber = `${inviteRequestsCount}`;
 			
