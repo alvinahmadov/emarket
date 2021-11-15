@@ -9,6 +9,19 @@
         </ion-row>
 
         <ion-row>
+	        <ion-col>
+		        <ion-item>
+			        <ion-label class="labels" position="floating"
+			        >{{
+				        'WAREHOUSE_VIEW.NEW_ORDER_VIEW.USERNAME'
+						        | translate
+				        }}
+			        </ion-label>
+			        <ion-input type="text" formControlName="username">
+			        </ion-input>
+		        </ion-item>
+	        </ion-col>
+	        
             <ion-col>
                 <ion-item>
                     <ion-label class="labels" position="floating"
@@ -68,16 +81,16 @@
             <ion-col id="common">
                 <e-cu-file-uploader
                         [buttonFullSpace]="true"
-                        [name]="firstName?.value"
-                        [fileUrl]="image?.value"
-                        (uploadedImgUrl)="image.setValue($event)"
+                        [name]="username?.value"
+                        [fileUrl]="avatar?.value"
+                        (uploadedImgUrl)="avatar.setValue($event)"
                 ></e-cu-file-uploader>
-                <ion-row class="form-group" *ngIf="image.value">
+                <ion-row class="form-group" *ngIf="avatar?.value">
                     <div class="col-12">
                         <div class="row preview-img">
                             <div>
                                 <img
-                                        src="{{ image.value }}"
+                                        src="{{ avatar?.value }}"
                                         alt="Invalid image"
                                         class="img-rounded"
                                 />
