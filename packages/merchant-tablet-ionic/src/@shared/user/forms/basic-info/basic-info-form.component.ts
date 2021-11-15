@@ -1,111 +1,119 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subject }                             from 'rxjs';
+import { debounceTime, takeUntil }             from 'rxjs/operators';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import {
 	FormBuilder,
 	FormGroup,
 	Validators,
 	FormControl,
 	AbstractControl,
-}                                                         from '@angular/forms';
+}                                              from '@angular/forms';
+import { AlertController }                     from '@ionic/angular';
+import Customer                                from '@modules/server.common/entities/Customer';
+import { ICustomerCreateObject }               from '@modules/server.common/interfaces/ICustomer';
+import { CustomersService }                    from 'services/customers.service';
+import { FormHelpers }                         from '../../../forms/helpers';
 
-import { Subject }                 from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
-
-import User                  from '@modules/server.common/entities/User';
-import { IUserCreateObject } from '@modules/server.common/interfaces/IUser';
-import { UsersService }      from '../../../../services/users.service';
-import { FormHelpers }       from '../../../forms/helpers';
-import { AlertController }   from '@ionic/angular';
-
-export type CustomerBasicInfo = Pick<IUserCreateObject,
-		'firstName' | 'lastName' | 'email' | 'image'>;
+export type CustomerBasicInfo = Pick<ICustomerCreateObject,
+		'username' | 'firstName' | 'lastName' | 'email' | 'avatar'>;
 
 @Component({
-	           selector: 'basic-info-form',
-	           styleUrls: ['./basic-info-form.component.scss'],
+	           selector:    'basic-info-form',
+	           styleUrls:   ['./basic-info-form.component.scss'],
 	           templateUrl: 'basic-info-form.component.html',
            })
 export class BasicInfoFormComponent implements OnInit, OnDestroy
 {
 	@Input()
-	readonly form: FormGroup;
+	public readonly form: FormGroup;
 	@Input()
-	userData: User;
+	public customerData: Customer = null;
 	
 	private _ngDestroy$ = new Subject<void>();
-	private static _users: User[] = [];
-	private static _user: User;
+	private static _customers: Customer[] = [];
+	private static _customer: Customer;
 	
 	constructor(
-			private readonly _usersService: UsersService,
+			private readonly _customersService: CustomersService,
 			public alertController: AlertController
 	)
 	{}
 	
-	get firstName()
+	public ngOnInit()
+	{
+		BasicInfoFormComponent.initialize(
+				this._customersService,
+				this._ngDestroy$,
+				this.customerData
+		);
+		this._loadData();
+	}
+	
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public get username()
+	{
+		return this.form.get('username');
+	}
+	
+	public get firstName()
 	{
 		return this.form.get('firstName');
 	}
 	
-	get lastName()
+	public get lastName()
 	{
 		return this.form.get('lastName');
 	}
 	
-	get email()
+	public get email()
 	{
 		return this.form.get('email');
 	}
 	
-	get image()
+	public get avatar()
 	{
-		return this.form.get('image');
+		return this.form.get('avatar');
 	}
 	
-	ngOnInit()
+	public deleteImg()
 	{
-		BasicInfoFormComponent.initialize(
-				this._usersService,
-				this._ngDestroy$,
-				this.userData
-		);
-		this.loadData();
+		this.avatar.setValue('');
 	}
 	
-	deleteImg()
-	{
-		this.image.setValue('');
-	}
-	
-	static initialize(
-			usersService: UsersService,
+	public static initialize(
+			customersService: CustomersService,
 			ngDestroy: Subject<void>,
-			userData?: User
+			userData?: Customer
 	)
 	{
-		usersService
-				.getUsers()
+		customersService
+				.getCustomers()
 				.pipe(takeUntil(ngDestroy))
-				.subscribe((usersResult) =>
-				           {
-					           this._users = usersResult;
-				           });
+				.subscribe((customers) => this._customers = customers);
 		
-		this._user = userData;
+		userData = this._customers[0]
+		this._customer = userData;
 	}
 	
-	static buildForm(formBuilder: FormBuilder): FormGroup
+	public static buildForm(formBuilder: FormBuilder): FormGroup
 	{
 		const emailSearch$ = new Subject();
 		let isSearchRdy = false;
 		
 		return formBuilder.group({
+			                         username:  ['', Validators.required],
 			                         firstName: [''],
-			                         lastName: [''],
-			                         email: [
+			                         lastName:  [''],
+			                         email:     [
 				                         '',
 				                         [
 					                         (control: AbstractControl) =>
-							                         control.value ? Validators.email(control) : null,
+							                         control?.value ? Validators.email(control) : null,
 				                         ],
 				                         async(ctrlEmail: FormControl) =>
 				                         {
@@ -115,13 +123,13 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 						                         emailSearch$.pipe(debounceTime(500)).subscribe(() =>
 						                                                                        {
 							                                                                        //
-							                                                                        const hasExistedEmail = this._users.some(
-									                                                                        (u) => u.email === ctrlEmail.value
+							                                                                        const hasExistedEmail = this._customers.some(
+									                                                                        (u) => u.email === ctrlEmail?.value
 							                                                                        );
 							                                                                        if(
 									                                                                        hasExistedEmail &&
-									                                                                        this._user &&
-									                                                                        this._user.email !== ctrlEmail.value
+									                                                                        this._customer &&
+									                                                                        this._customer.email !== ctrlEmail?.value
 							                                                                        )
 							                                                                        {
 								                                                                        ctrlEmail.setErrors({ emailTaken: true });
@@ -133,63 +141,59 @@ export class BasicInfoFormComponent implements OnInit, OnDestroy
 					
 					                         if(
 							                         isSearchRdy &&
-							                         ctrlEmail.value &&
-							                         ctrlEmail.value.length > 0
+							                         ctrlEmail?.value &&
+							                         ctrlEmail?.value.length > 0
 					                         )
 					                         {
 						                         emailSearch$.next();
 					                         }
 				                         },
 			                         ],
-			                         image: [''],
+			                         image:     [''],
 		                         });
 	}
 	
-	getValue(): CustomerBasicInfo
+	public getValue(): CustomerBasicInfo
 	{
 		const basicInfo = this.form.getRawValue() as {
+			username: string;
 			firstName: string;
 			lastName: string;
 			email: string;
-			image: string;
+			avatar: string;
 		};
 		
 		return {
+			username:  basicInfo.username,
 			firstName: basicInfo.firstName,
-			lastName: basicInfo.lastName,
-			...(basicInfo.email ? { email: basicInfo.email } : {}),
-			image: basicInfo.image,
+			lastName:  basicInfo.lastName,
+			email:     basicInfo.email,
+			avatar:    basicInfo.avatar,
 		};
 	}
 	
-	setValue<T extends CustomerBasicInfo>(basicInfo: T)
+	public setValue<T extends CustomerBasicInfo>(basicInfo: T)
 	{
 		FormHelpers.deepMark(this.form, 'dirty');
 		
 		this.form.setValue({
+			                   username:  basicInfo.username,
 			                   firstName: basicInfo.firstName ? basicInfo.firstName : '',
-			                   lastName: basicInfo.lastName ? basicInfo.lastName : '',
-			                   email: basicInfo.email ? basicInfo.email : '',
-			                   image: basicInfo.image ? basicInfo.image : '',
+			                   lastName:  basicInfo.lastName ? basicInfo.lastName : '',
+			                   email:     basicInfo.email ? basicInfo.email : '',
+			                   avatar:    basicInfo.avatar ? basicInfo.avatar : '',
 		                   });
 	}
 	
-	ngOnDestroy()
+	private _loadData()
 	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-	}
-	
-	private loadData()
-	{
-		const userData = this.userData;
-		
-		if(userData)
+		if(this.customerData)
 		{
-			this.firstName.setValue(userData.firstName);
-			this.lastName.setValue(userData.lastName);
-			this.email.setValue(userData.email);
-			this.image.setValue(userData.image);
+			this.username.setValue(this.customerData?.username);
+			this.firstName.setValue(this.customerData?.firstName);
+			this.lastName.setValue(this.customerData?.lastName);
+			this.email.setValue(this.customerData?.email);
+			this.avatar.setValue(this.customerData?.avatar);
 		}
 	}
 }
