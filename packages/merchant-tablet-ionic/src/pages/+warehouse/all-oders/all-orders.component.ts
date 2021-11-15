@@ -21,7 +21,7 @@ import { OrderState }             from '../warehouse';
 export class AllOrdersComponent implements OnInit, OnDestroy, OnChanges
 {
 	@Input()
-	public getWarehouseStatus: () => void;
+	public getWarehouseStatus: () => string;
 	
 	@Input()
 	public onUpdateWarehouseStatus: any;
