@@ -40,7 +40,7 @@ export class GeoLocationResolver
 	): Promise<ProductInfo[]>
 	{
 		return this._geoLocationsProductsService.geoLocationProductsByPaging(
-				geoLocation,
+				geoLocation as GeoLocation,
 				pagingOptions,
 				options,
 				searchText
