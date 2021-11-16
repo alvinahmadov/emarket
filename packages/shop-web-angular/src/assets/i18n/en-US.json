@@ -100,8 +100,10 @@
   "ORDER_VIEW": {
 	  "CANCEL": "Cancel",
 	  "CANCEL_ORDER": "Are you sure you want to cancel the order?",
-	  "PAY": "Or pay with cash",
+	  "PAY": "Pay",
+	  "PAY_CASH": "Pay with cash",
 	  "PAY_NOW": "Pay Now",
+	  "TOTAL": "Total",
 	  "PRODUCTS": "Products",
 	  "ORDERS": "Orders",
 	  "NOTES": "Notes",
