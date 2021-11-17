@@ -103,9 +103,9 @@ export class CommentsResolver
 	
 	@Mutation()
 	@UseGuards(AuthGuard('jwt'))
-	public async deleteCommentsByIds(_, deleteInput: ICommentDeleteInput): Promise<Comment[]>
+	public async deleteCommentsByIds(_, deleteInput: ICommentDeleteInput): Promise<boolean>
 	{
-		return await this._commentsService.delete(
+		return this._commentsService.delete(
 				deleteInput.storeId,
 				deleteInput.storeProductId,
 				deleteInput.commentIds
