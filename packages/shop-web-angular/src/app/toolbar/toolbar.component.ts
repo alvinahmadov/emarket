@@ -105,6 +105,11 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 		this.initGoogleAutocompleteApi();
 	}
 	
+	public get isBrowser(): boolean
+	{
+		return this.storage.isBrowser;
+	}
+	
 	public async toggleGetProductsType()
 	{
 		this.isDeliveryRequired = !this.isDeliveryRequired;
