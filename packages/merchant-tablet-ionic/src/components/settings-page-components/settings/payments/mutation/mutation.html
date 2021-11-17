@@ -26,6 +26,24 @@
                 (configureObject)="updateConfigureObject($event)"
                 [(isValid)]="isValid"
         ></e-cu-paypal-gateway>
+
+        <e-cu-yoomoney-gateway
+                *ngIf="paymentGateway === paymentGateways.YooMoney"
+                [currencies]="currencies"
+                [data]="configureObject"
+                [defaultCurrency]="defaultCurrency"
+                (configureObject)="updateConfigureObject($event)"
+                [(isValid)]="isValid"
+        ></e-cu-yoomoney-gateway>
+
+        <e-cu-bitpay-gateway
+                *ngIf="paymentGateway === paymentGateways.Bitpay"
+                [currencies]="currencies"
+                [data]="configureObject"
+                [defaultCurrency]="defaultCurrency"
+                (configureObject)="updateConfigureObject($event)"
+                [(isValid)]="isValid"
+        ></e-cu-bitpay-gateway>
     </div>
 
     <div class="button-bar padding-top">
