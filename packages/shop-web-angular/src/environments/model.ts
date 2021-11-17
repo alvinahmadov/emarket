@@ -6,6 +6,7 @@ export interface Environment
 	ENV_PROVIDERS: any;
 	HOST: string;
 	PORT: number;
+	TIME_ZONE: string;
 	HTTP_SERVICES_ENDPOINT: string;
 	HTTPS_SERVICES_ENDPOINT: string;
 	GQL_ENDPOINT: string;
