@@ -8,9 +8,6 @@
 	display: inline-flex;
 	align-items: center;
 	
-	padding-right: 20%;
-	padding-left: 20%;
-	
 	.product-image {
 		height: 100%;
 		width: 100%;
@@ -24,6 +21,11 @@
 			left: 0;
 			align-content: center;
 			align-items: center;
+			
+			img {
+				max-height: 600px!important;
+				min-height: 600px!important;
+			}
 		}
 		
 		.bottom-images {
