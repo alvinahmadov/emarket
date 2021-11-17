@@ -6,7 +6,7 @@ import { ILocaleMember }                       from '@modules/server.common/inte
 import Product                                 from '@modules/server.common/entities/Product';
 import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
 import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
-import { ProductLocalesService }               from "@modules/client.common.angular2/locale/product-locales.service";
+import { ProductLocalesService }               from '@modules/client.common.angular2/locale/product-locales.service';
 import { CreateProductTypePopupPage }          from '../create-product-type-popup/create-product-type-popup';
 import { EditProductTypePopupPage }            from '../edit-product-type-popup/edit-product-type-popup';
 
