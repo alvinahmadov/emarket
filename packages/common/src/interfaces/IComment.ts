@@ -1,4 +1,8 @@
-import { DBCreateObject, DBRawObject, PyroObjectId } from '@pyro/db';
+import {
+	PyroObjectId,
+	DBCreateObject,
+	DBRawObject
+} from '@pyro/db';
 
 export interface ICommentCreateObject extends DBCreateObject
 {
@@ -26,6 +30,25 @@ export interface ICommentCreateObject extends DBCreateObject
 	replyTo?: string;
 }
 
+export interface ICommentUpdateObject extends DBCreateObject
+{
+	userId?: string;
+	
+	productId?: string;
+	
+	message?: string;
+	
+	replyTo?: string;
+	
+	likes?: number;
+	
+	dislikes?: number;
+	
+	likesBy?: string[];
+	
+	dislikesBy?: string[];
+}
+
 interface IComment extends ICommentCreateObject, DBRawObject
 {
 	_id: PyroObjectId;
@@ -39,6 +62,12 @@ interface IComment extends ICommentCreateObject, DBRawObject
 	 * Number of dislikes of comment
 	 * */
 	dislikes?: number;
+	
+	likesBy?: string[];
+	
+	dislikesBy?: string[];
+	
+	deleteRequested?: boolean;
 }
 
 export default IComment;
