@@ -3,12 +3,12 @@ import {
 	ElementRef,
 	EventEmitter,
 	Input,
+	Output,
+	ViewChild,
 	OnInit,
 	AfterViewInit,
 	OnChanges,
-	OnDestroy,
-	Output,
-	ViewChild
+	OnDestroy
 }                                               from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ReplaySubject, Subject }               from 'rxjs';
@@ -28,7 +28,10 @@ import InviteRequest                            from '@modules/server.common/ent
 import { GeoLocationRouter }                    from '@modules/client.common.angular2/routers/geo-location-router.service';
 import { InviteRequestRouter }                  from '@modules/client.common.angular2/routers/invite-request-router.service';
 import { StorageService }                       from 'app/services/storage';
-import { PasswordValidator }                    from 'app/shared/validators/password-validator';
+import {
+	VALIDATORS_PROD,
+	VALIDATORS_DEV
+}                                               from 'app/shared/validators/password-validator';
 import { environment }                          from 'environments/environment';
 
 const defaultLng = environment.DEFAULT_LONGITUDE || 0;
@@ -79,23 +82,7 @@ export class LocationFormComponent
 			{
 				username:      [defaults.username, Validators.required],
 				email:         [defaults.email, Validators.required],
-				password:      [
-					defaults.password,
-					//TODO: Uncomment below validators in production mode
-					Validators.compose(
-							[
-								// 1. Password Field is Required
-								Validators.required,
-								// 2. Has a minimum length of characters
-								Validators.minLength(5),
-								// 3. check whether the entered password has a number
-								PasswordValidator.patternValidator(/\d/, { hasNumber: true }),
-								// 4. check whether the entered password has upper case letter
-								// PasswordValidator.patternValidator(/[A-Z]/, { hasCapitalCase: true }),
-								// 5. check whether the entered password has a lower-case letter
-								// PasswordValidator.patternValidator(/[a-z]/, { hasSmallCase: true }),
-							])
-				],
+				password:      [defaults.password, isProd ? VALIDATORS_PROD : VALIDATORS_DEV],
 				house:         [defaults.house, Validators.required],
 				apartament:    [defaults.apartament],
 				countryId:     [defaults.countryId, Validators.required],
@@ -126,7 +113,6 @@ export class LocationFormComponent
 	private lng: number;
 	private lastUsedAddressText: string;
 	private deviceInfo: DeviceInfo;
-	private readonly langCode: string;
 	
 	constructor(
 			private readonly fb: FormBuilder,
@@ -136,8 +122,7 @@ export class LocationFormComponent
 			private storageService: StorageService
 	)
 	{
-		this.langCode = this.storageService.languageCode ?? 'ru-RU';
-		this.countries = countriesIdsToNamesArrayFn(this.langCode);
+		this.countries = countriesIdsToNamesArrayFn(this.storageService.locale ?? 'ru-RU');
 	}
 	
 	public get isApartmentValid()
