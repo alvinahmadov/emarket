@@ -109,6 +109,18 @@ export type TCountryData = {
 	name: TCountryName;
 }
 
+export interface IGeoLocationDBResponse
+{
+	country_code: string;
+	country_name: string;
+	IPv4: string;
+	latitude: number;
+	longitude: number;
+	city?: string;
+	postal?: string;
+	state?: string;
+}
+
 export const COUNTRIES = ${getCountries()};
 
 export function getCountryName(locale: string, country: null): null;
@@ -182,6 +194,24 @@ export type TCurrencyData = {
 	code: string;
 	sign?: string;
 	order?: TCurrencySignOrder;
+}
+
+export interface ICurrencyConverterResult
+{
+	id: string,
+	val: number,
+	to: string,
+	fr: string,
+}
+
+export interface ICurrencyConverterResponse
+{
+	query: {
+		count: number
+	},
+	results: {
+		[key: string]: ICurrencyConverterResult
+	}
 }
 
 const EUROZONE: string[] = [
