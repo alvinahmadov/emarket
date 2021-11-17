@@ -37,6 +37,8 @@ export const environment: Environment = {
   production:               ${isProd},
 
   LOG_LEVEL:                "${env.LOG_LEVEL}",
+  
+  TIME_ZONE:                "${env.TIME_ZONE}",
 
   DEFAULT_LANGUAGE:         "${env.DEFAULT_LANGUAGE}",
   AVAILABLE_LOCALES:        "${env.AVAILABLE_LOCALES}",
@@ -53,7 +55,6 @@ export const environment: Environment = {
   COMPANY_LINKEDIN_LINK:    "${env.COMPANY_LINKEDIN_LINK}",
   
   CURRENCY_SYMBOL:          "${env.CURRENCY_SYMBOL}",
-  TIME_ZONE:                "${env.TIME_ZONE}",
   
   TALKJS_APP_ID:            "${env.TALKJS_APP_ID}",
   
@@ -96,6 +97,8 @@ export const environment: Environment = {
   production:               ${isProd},
 
   LOG_LEVEL:                "${env.LOG_LEVEL}",
+  
+  TIME_ZONE:                "${env.TIME_ZONE}",
 
   DEFAULT_LANGUAGE:         "${env.DEFAULT_LANGUAGE}",
   AVAILABLE_LOCALES:        "${env.AVAILABLE_LOCALES}",
@@ -112,7 +115,6 @@ export const environment: Environment = {
   COMPANY_LINKEDIN_LINK:    "${env.COMPANY_LINKEDIN_LINK}",
   
   CURRENCY_SYMBOL:          "${env.CURRENCY_SYMBOL}",
-  TIME_ZONE:                "${env.TIME_ZONE}",
 
   TALKJS_APP_ID:            "${env.TALKJS_APP_ID}",
   
