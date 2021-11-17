@@ -64,7 +64,7 @@ export const env: Env = cleanEnv(
 			production: bool({ default: false }),
 			
 			TIME_ZONE:       str({ default: 'Europe/Moscow' }),
-			DATETIME_FORMAT: str({ default: 'dd/MM/yyyy HH:mm' }),
+			DATETIME_FORMAT: str({ default: 'longDate' }),
 			
 			HTTP_SERVICES_ENDPOINT:     str({ default: 'http://localhost:5500' }),
 			HTTPS_SERVICES_ENDPOINT:    str({ default: 'https://localhost:5501' }),
