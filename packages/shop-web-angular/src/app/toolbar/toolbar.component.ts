@@ -5,7 +5,7 @@ import {
 	Inject,
 	OnInit,
 	AfterViewInit,
-    Input
+	Input
 }                                 from '@angular/core';
 import { DOCUMENT }               from '@angular/common';
 import { MatDialog }              from '@angular/material/dialog';
@@ -65,9 +65,9 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 	{
 		this.isDeliveryRequired =
 				this.storage.deliveryType === DeliveryType.Delivery;
-		if(this.storage.languageCode)
+		if(this.storage.locale)
 		{
-			this.selectedLang = this.storage.languageCode;
+			this.selectedLang = this.storage.locale;
 			this.translateService.use(this.selectedLang);
 		}
 		this.loadAddress();
@@ -173,11 +173,11 @@ export class ToolbarComponent implements OnInit, AfterViewInit
 	public switchLanguage(language: string)
 	{
 		this.translateService.use(language);
-		this.storage.languageCode = language;
+		this.storage.locale = language;
 		
 		const langAbbreviation = language.substr(0, 2);
 		
-		if(language.startsWith('he') || language.startsWith('ar'))
+		if(langAbbreviation === 'he' || langAbbreviation === 'ar')
 		{
 			this.dir = 'rtl';
 		}
