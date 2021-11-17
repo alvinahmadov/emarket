@@ -73,7 +73,6 @@ export class CommentsRouter implements ICommentsRouter
 	{
 		return this.router
 		           .run<boolean>('delete', storeId, storeProductId, commentIds);
-		
 	}
 	
 	public async increaseLikes(
