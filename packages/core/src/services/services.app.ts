@@ -584,8 +584,24 @@ export class ServicesApp
 				
 				                    if(!clientIp)
 				                    {
-					                    clientIp = req.headers['x-forwarded-for'][0] || req.socket['remoteAddress'];
+					                    if(
+							                    'x-forwarded-for' in req.headers &&
+							                    req.headers['x-forwarded-for'].length > 0
+					                    )
+					                    {
+						                    clientIp = req.headers['x-forwarded-for'][0]
+					                    }
+					                    else
+					                    {
+						                    clientIp = req.socket['remoteAddress'];
+					                    }
 				                    }
+				
+				                    this.log.debug({
+					                                   clientIp,
+					                                   remoteAddress:  req.socket['remoteAddress'],
+					                                   requestHeaders: req.headers
+				                                   })
 				
 				                    if(!INTERNAL_IPS.includes(clientIp))
 				                    {
