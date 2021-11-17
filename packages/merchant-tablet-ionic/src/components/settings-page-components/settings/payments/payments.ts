@@ -69,7 +69,7 @@ export class SettingsPaymentsComponent implements OnInit
 		return paymentGatewaysLogo(ePaymentGateways);
 	}
 	
-	public async showMutation(ePaymentGateways: PaymentGateways)
+	public async showMutation(ePaymentGateways: any)
 	{
 		const foundPaymentGateway = this.currentWarehouse.paymentGateways.find(
 				(pg: PaymentGateway) => pg.paymentGateway === ePaymentGateways
