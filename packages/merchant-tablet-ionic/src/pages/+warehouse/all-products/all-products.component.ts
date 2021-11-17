@@ -1,18 +1,18 @@
 import {
 	Component, Input,
 	OnInit, OnDestroy
-}                                     from '@angular/core';
-import { ModalOptions }               from '@ionic/core';
-import { ModalController }            from '@ionic/angular';
-import { Subscription }               from 'rxjs';
-import { NgxMasonryOptions }          from 'ngx-masonry';
-import Product                        from '@modules/server.common/entities/Product';
-import WarehouseProduct               from '@modules/server.common/entities/WarehouseProduct';
-import { ILocaleMember }              from '@modules/server.common/interfaces/ILocale';
-import { ProductLocalesService }      from '@modules/client.common.angular2/locale/product-locales.service';
-import { CreateProductTypePopupPage } from 'pages/+warehouse/create-product-type-popup/create-product-type-popup';
-import { EditProductTypePopupPage }   from 'pages/+warehouse/edit-product-type-popup/edit-product-type-popup';
-import { WarehouseProductsService }   from 'services/warehouse-products.service';
+}                                           from '@angular/core';
+import { ModalOptions }                     from '@ionic/core';
+import { ModalController, AlertController } from '@ionic/angular';
+import { Subscription }                     from 'rxjs';
+import { NgxMasonryOptions }                from 'ngx-masonry';
+import Product                              from '@modules/server.common/entities/Product';
+import WarehouseProduct                     from '@modules/server.common/entities/WarehouseProduct';
+import { ILocaleMember }                    from '@modules/server.common/interfaces/ILocale';
+import { ProductLocalesService }            from '@modules/client.common.angular2/locale/product-locales.service';
+import { CreateProductTypePopupPage }       from 'pages/+warehouse/create-product-type-popup/create-product-type-popup';
+import { EditProductTypePopupPage }         from 'pages/+warehouse/edit-product-type-popup/edit-product-type-popup';
+import { WarehouseProductsService }         from 'services/warehouse-products.service';
 
 @Component({
 	           selector:    'merchant-all-products',
@@ -54,6 +54,7 @@ export class AllProductsComponent implements OnInit, OnDestroy
 	constructor(
 			private warehouseProductsService: WarehouseProductsService,
 			private translateProductLocales: ProductLocalesService,
+			public alertController: AlertController,
 			private modalCtrl: ModalController,
 	)
 	{}
@@ -121,31 +122,47 @@ export class AllProductsComponent implements OnInit, OnDestroy
 		                                });
 	}
 	
-	public addProduct(productId: string): void
+	public addProduct(warehouseProduct: WarehouseProduct): void
 	{
+		
 		this.warehouseProductsService.increaseCount(
-				    this.warehouseId,
-				    productId,
-				    1
-		    );
+				this.warehouseId,
+				warehouseProduct.productId,
+				1
+		);
 	}
 	
-	public removeProduct(productId: string): void
+	public removeProduct(warehouseProduct: WarehouseProduct): void
 	{
 		this.warehouseProductsService.decreaseCount(
-				    this.warehouseId,
-				    productId,
-				    1
-		    );
+				this.warehouseId,
+				(warehouseProduct.productId),
+				1
+		);
 	}
 	
-	public deleteProduct(productId: string): void
+	public deleteProduct(warehouseProduct: WarehouseProduct): void
 	{
-		const productIds: string[] = [productId]
-		this.warehouseProductsService.remove(
-				    this.warehouseId,
-				    productIds
-		    );
+		const product = warehouseProduct.product as Product;
+		const productTitle = this.localeTranslate(product.title);
+		
+		this.presentAlert(
+				"Удалить?",
+				`Товар ${productTitle}`,
+				"Уверены, что хотите удалить товар?"
+		).then(
+				result =>
+				{
+					if(result.role === 'ok')
+					{
+						const productIds: string[] = [warehouseProduct.productId]
+						this.warehouseProductsService.remove(
+								this.warehouseId,
+								productIds
+						);
+					}
+				}
+		)
 	}
 	
 	public localeTranslate(member: ILocaleMember[]): string
@@ -186,5 +203,32 @@ export class AllProductsComponent implements OnInit, OnDestroy
 		this.modalCtrl.create(modalOptions).then(
 				(modal) => modal.present()
 		);
+	}
+	
+	async presentAlert(
+			header: string    = "Confirm!",
+			subHeader: string = "Subtitle",
+			message: string   = "Message <strong>text</strong>!!!"
+	)
+	{
+		const alert = await this.alertController.create({
+			                                                cssClass: 'my-custom-class',
+			                                                header,
+			                                                message,
+			                                                buttons:  [
+				                                                {
+					                                                text:     'Отменить',
+					                                                role:     'cancel',
+					                                                cssClass: 'secondary'
+				                                                },
+				                                                {
+					                                                text: 'Ok',
+					                                                role: 'ok'
+				                                                }
+			                                                ]
+		                                                });
+		
+		await alert.present();
+		return alert.onDidDismiss();
 	}
 }
