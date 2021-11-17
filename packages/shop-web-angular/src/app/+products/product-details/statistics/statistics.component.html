@@ -2,12 +2,15 @@
 	<tbody>
 	<tr>
 		<th scope="row">
-			<strong>
-				{{'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.TOTAL_RATING' | translate }}:
-			</strong>
+			<button mat-flat-button disableRipple class="route-button-inactive">
+				<strong>
+					{{'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.TOTAL_RATING' | translate }}:
+				</strong>
+			</button>
 		</th>
 		<td>
-			<es-rating fillStar
+			<es-rating #total
+			           fillStar
 			           ratingType="total"
 			           [customerId]="customerId"
 			           [warehouseId]="warehouseId"
@@ -18,9 +21,11 @@
 	</tr>
 	<tr>
 		<th scope="row">
-			<strong>
-				{{'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.RATE' | translate }}:
-			</strong>
+			<button mat-flat-button disableRipple class="route-button-inactive">
+				<strong>
+					{{'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.RATE' | translate }}:
+				</strong>
+			</button>
 		</th>
 		<td>
 			<es-rating fillStar
@@ -28,15 +33,18 @@
 			           [customerId]="customerId"
 			           [warehouseId]="warehouseId"
 			           [warehouseProduct]="warehouseProduct"
+			           (rateChanged)="total.calcRate()"
 			>
 			</es-rating>
 		</td>
 	</tr>
 	<tr>
 		<th scope="row">
-			<strong>
-				{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.TOTAL_VIEWS' | translate }}:
-			</strong>
+			<button mat-flat-button disableRipple class="route-button-inactive">
+				<strong>
+					{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.TOTAL_VIEWS' | translate }}:
+				</strong>
+			</button>
 		</th>
 		<td>
 					<span>
@@ -46,9 +54,26 @@
 	</tr>
 	<tr>
 		<th scope="row">
-			<strong>
-				{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.PRICE' | translate }}:
-			</strong>
+			<button mat-stroked-button
+			        (click)="openComments()">
+				<strong>
+					{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.COMMENTS' | translate }}:
+				</strong>
+			</button>
+		</th>
+		<td>
+			<span>
+				{{ commentsCount }}
+			</span>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">
+			<button mat-flat-button disableRipple class="route-button-inactive">
+				<strong>
+					{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.PRICE' | translate }}:
+				</strong>
+			</button>
 		</th>
 		<td>
 			<span>
@@ -62,9 +87,11 @@
 	</tr>
 	<tr *ngIf="hasDiscount">
 		<th scope="row">
-			<strong>
-				{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.DISCOUNT' | translate }}:
-			</strong>
+			<button mat-flat-button disableRipple class="route-button-inactive">
+				<strong>
+					{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.DISCOUNT' | translate }}:
+				</strong>
+			</button>
 		</th>
 		<td>
 			<span class="discount right">
@@ -75,9 +102,11 @@
 	</tr>
 	<tr *ngIf="warehouseProduct?.product?.categories.length > 0">
 		<th scope="row">
-			<strong>
-				{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.CATEGORIES' | translate }}:
-			</strong>
+			<button mat-flat-button disableRipple class="route-button-inactive">
+				<strong>
+					{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.CATEGORIES' | translate }}:
+				</strong>
+			</button>
 		</th>
 		<td>
 			<ul>
