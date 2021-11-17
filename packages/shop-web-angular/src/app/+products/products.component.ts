@@ -255,7 +255,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 		}
 		else
 		{
-			const locale = this.storageService.languageCode.split('-')[0];
+			const locale = this.storageService.locale.split('-')[0];
 			this.productsCount = await this.productsService
 			                               .getCountOfProducts(
 					                               {
