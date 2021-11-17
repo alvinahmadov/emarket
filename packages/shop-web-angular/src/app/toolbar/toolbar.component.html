@@ -1,5 +1,5 @@
 <mat-toolbar class="toolbar" color="primary">
-	<div [fxShow]="false" [fxHide.gt-sm]="false">
+	<div *ngIf="!isBrowser">
 		<button mat-icon-button
 		        (click)="sidenav.toggle()">
 			<mat-icon>menu</mat-icon>
@@ -7,7 +7,7 @@
 	</div>
 	<div class="menu-brand-separator"></div>
 	
-	<span fxShow="true" fxHide.lt-md="false" class="nav">
+	<span *ngIf="isBrowser" fxShow="true" fxHide.lt-md="false" class="nav">
 		<button
 				[routerLinkActive]="'active-option'"
 				[routerLink]="['/products']"
@@ -73,7 +73,7 @@
 				></path>
 			</svg>
 		</button>
-		<mat-form-field class="language-bar" appearance="legacy">
+		<mat-form-field *ngIf="isBrowser" class="language-bar" appearance="legacy">
 			<mat-icon>language</mat-icon>
 			<mat-select [(value)]="selectedLang">
 				<mat-option
@@ -86,9 +86,12 @@
 			</mat-select>
 		</mat-form-field>
 	</section>
-	<span class="nav">
-	        <a [routerLink]="['/settings']" class="nav-option" mat-button>
-	            <ever-icon class="nav-icon" type="settings"></ever-icon>
-	        </a>
-		</span>
+	
+	<span *ngIf="isBrowser" class="nav">
+		<a [routerLink]="['/settings']"
+		   [routerLinkActive]="'active-option'"
+		   class="nav-option" mat-button>
+			<mat-icon class="nav-icon">account_circle</mat-icon>
+		</a>
+	</span>
 </mat-toolbar>
