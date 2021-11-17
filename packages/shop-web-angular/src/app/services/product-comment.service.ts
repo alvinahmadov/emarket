@@ -3,7 +3,10 @@ import { Apollo }                from 'apollo-angular';
 import { Observable }            from 'rxjs';
 import { map, share }            from 'rxjs/operators';
 import IComment,
-{ ICommentCreateObject }         from '@modules/server.common/interfaces/IComment';
+{
+	ICommentCreateObject,
+	ICommentUpdateObject
+}                                from '@modules/server.common/interfaces/IComment';
 import IPagingOptions            from '@modules/server.common/interfaces/IPagingOptions';
 import Comment                   from '@modules/server.common/entities/Comment';
 import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
@@ -31,11 +34,10 @@ export class ProductCommentService extends ApolloService
 		           .query<{
 			           comment: Comment
 		           }>({
-			              query:     GQLQuery.Store.Product.Comment.GetComment,
+			              query:     GQLQuery.Store.Product.Comment.GetById,
 			              variables: { storeId, storeProductId, commentId }
 		              })
-		           .pipe(map((result) => <Comment>
-				           this.factory(result, Comment)));
+		           .pipe(map((result) => <Comment> this.get(result)));
 		
 	}
 	
@@ -49,8 +51,7 @@ export class ProductCommentService extends ApolloService
 		           .watchQuery<{
 			           comments: Comment[]
 		           }>({
-			              query:     GQLQuery.Store.Product
-					                         .Comment.GetComments,
+			              query:     GQLQuery.Store.Product.Comment.GetMultiple,
 			              variables: { storeId, storeProductId, pagingOptions }
 		              })
 		           .valueChanges
@@ -95,23 +96,63 @@ export class ProductCommentService extends ApolloService
 		           .toPromise();
 	}
 	
-	public saveComment(
+	public updateComment(
 			storeId: string,
 			storeProductId: string,
 			commentId: string,
-			comment: any
+			comment: ICommentUpdateObject
 	): Observable<Comment>
 	{
 		return this.apollo
 		           .mutate<{
 			           comment: Comment
 		           }>({
-			              mutation:  GQLMutation.Store.Product.Comment.Save,
+			              mutation:  GQLMutation.Store.Product.Comment.Update,
 			              variables: { storeId, storeProductId, commentId, comment }
 		              })
 		           .pipe(map((result) =>
 				                     <Comment>this.factory(result, Comment))
 		           );
+	}
+	
+	public increaseLikes(
+			storeId: string,
+			storeProductId: string,
+			userId: string,
+			commentId: string
+	)
+	{
+		return this.apollo
+		           .mutate<{
+			           comment: Comment
+		           }>({
+			              mutation:  GQLMutation.Store.Product.Comment.IncreaseLikes,
+			              variables: { storeId, storeProductId, userId, commentId }
+		              })
+		           .pipe(
+				           map((result) => <Comment>this.factory(result, Comment))
+		           )
+		           .toPromise();
+	}
+	
+	public increaseDislikes(
+			storeId: string,
+			storeProductId: string,
+			userId: string,
+			commentId: string
+	)
+	{
+		return this.apollo
+		           .mutate<{
+			           comment: Comment
+		           }>({
+			              mutation:  GQLMutation.Store.Product.Comment.IncreaseDislikes,
+			              variables: { storeId, storeProductId, userId, commentId }
+		              })
+		           .pipe(
+				           map((result) => <Comment>this.factory(result, Comment))
+		           )
+		           .toPromise();
 	}
 	
 	public deleteCommentsByIds(
