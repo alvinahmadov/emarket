@@ -39,6 +39,7 @@ $fade-amount: 1;
 			width: 100%;
 		}
 		
+		//noinspection SassScssResolvedByNameOnly
 		.product-mini-bar {
 			font-size: 17px;
 			background-color: $brand;
@@ -73,30 +74,25 @@ $fade-amount: 1;
 		}
 		
 		.edit-button {
-			margin-top: 0;
 			border-radius: 0;
-			margin-left: 10px;
+			margin: 0;
 			min-width: 20px;
 			min-height: 20px;
 			font-size: 16px;
 			line-height: 0;
 			border-color: transparent;
+			background-color: inherit;
+			width: 100%;
+			padding: 10px 0;
+			color: white;
 		}
 		
 		.edit-button.float-left {
 			background-color: fade-out($primary, $fade-amount);
-			color: white;
-			margin: 0;
-			width: 100%;
-			padding: 10px 0;
 		}
 		
 		.edit-button.float-right {
 			background-color: fade-out($danger, $fade-amount);
-			color: white;
-			margin: 0;
-			width: 100%;
-			padding: 10px 0;
 		}
 		
 		.edit-button.float-left:hover {
