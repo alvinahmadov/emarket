@@ -15,6 +15,18 @@
 	justify-content: center;
 }
 
+.product-title {
+	margin: 5px auto 10px;
+	font-family: Roboto, sans-serif;
+	font-size: 36px;
+	font-weight: 500;
+	color: rgba(0, 0, 2, 0.8);
+}
+
+mat-card-header.product-title {
+	display: block!important;
+}
+
 .product-details {
 	position: relative;
 	z-index: 15;
@@ -22,7 +34,6 @@
 	width: 100%;
 	padding: 2% 0 0 0;
 	margin: 0;
-	display: flex;
 	align-items: stretch;
 	justify-content: space-around;
 	/*display: flex;*/
@@ -38,7 +49,39 @@
 	
 	.product-details-container {
 		height: 100%;
+		display: block;
+		align-items: center;
+		align-content: center;
+		
+		.button-section {
+			display: table;
+			
+			.button-row {
+				display: table-cell;
+				width: 490px;
+			}
+			.button-row .mat-button-base {
+				margin: 8px 8px 8px 0;
+			}
+			
+			.button-flex-container {
+				display: flex;
+				justify-content: space-between;
+				flex-wrap: wrap;
+			}
+			.button-container {
+				display: flex;
+				justify-content: center;
+				width: 120px;
+			}
+		}
+	}
+	
+	.product-statistics-container {
+		height: 100%;
 		display: flex;
+		padding-right: 2rem!important;
+		padding-left: 2rem!important;
 		align-items: center;
 		align-content: center;
 		
@@ -54,18 +97,6 @@
 			overflow: auto;
 			scroll-behavior: smooth;
 		}
-	}
-	
-	.back-button {
-		position: absolute;
-		top: 35px;
-		left: 35px;
-	}
-	
-	.back-button svg {
-		position: relative;
-		width: 28px;
-		height: 28px;
 	}
 	
 	.product-details-content {
@@ -100,20 +131,6 @@
 	.product {
 		margin-top: 0;
 		margin-bottom: 0;
-	}
-	
-	.product .title {
-		margin-top: 5px;
-		margin-bottom: 10px;
-		
-		font-family: Roboto, sans-serif;
-		font-size: 36px;
-		font-weight: 500;
-		color: rgba(0, 0, 2, 0.8);
-	}
-	
-	.product .rating {
-	
 	}
 	
 	.product .description {
