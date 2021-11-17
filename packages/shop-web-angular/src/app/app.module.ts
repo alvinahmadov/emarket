@@ -1,5 +1,7 @@
 import '../styles/styles.scss';
-import { APP_INITIALIZER, NgModule }            from '@angular/core';
+import { APP_INITIALIZER, NgModule, LOCALE_ID } from '@angular/core';
+import { registerLocaleData }                   from '@angular/common';
+import localeRu                                 from '@angular/common/locales/ru';
 import { HttpClient, HttpClientModule }         from '@angular/common/http';
 import { FormsModule }                          from '@angular/forms';
 import { ExtendedModule, FlexLayoutModule }     from '@angular/flex-layout';
@@ -42,6 +44,7 @@ import { ServerSettings }                       from './services/server-settings
 import { StorageService }                       from './services/storage';
 import { AdminsService }                        from './services/admins.service';
 import { CustomersService }                     from './services/customer.service';
+import { CurrenciesService }                    from './services/currencies.service';
 import { LocationPopupModalModule }             from './shared/location-popup/location-popup.module';
 import { AuthGuard }                            from './authentication/auth.guard';
 import { AuthModuleGuard }                      from './+auth/auth.module.guard';
@@ -51,6 +54,8 @@ import { MaintenanceModuleGuard }               from './+maintenance-info/mainte
 import { GraphQLModule }                        from '../graphql/apollo.config';
 import { IconsModule }                          from '../modules/icons';
 import { MatBoldInputModule, MatSearchModule, } from '../modules/material-extensions';
+
+registerLocaleData(localeRu);
 
 export function HttpLoaderWebFactory(http: HttpClient)
 {
@@ -111,6 +116,7 @@ const APP_PROVIDERS = [
 	SidenavService,
 	AdminsService,
 	CustomersService,
+	CurrenciesService,
 	ServerSettings,
 	InfiniteScrollModule,
 	{
@@ -172,6 +178,7 @@ const APP_PROVIDERS = [
 	          ],
 	          providers:    [
 		          environment.ENV_PROVIDERS,
+		          { provide: LOCALE_ID, useValue: 'ru-RU' },
 		          APP_PROVIDERS,
 		          AuthModuleGuard,
 		          ProductsModuleGuard,
