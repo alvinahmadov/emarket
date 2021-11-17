@@ -279,7 +279,7 @@ type Mutation {
 	createProduct(product: ProductCreateInput!): Product!
 	createProductsCategory(createInput: ProductsCategoriesCreateInput): ProductsCategory!
 	createPromotion(createInput: PromotionInput): Promotion
-	customerLogin(email: String!, password: String!): CustomerLoginInfo
+	customerLogin(authInfo: String!, expiresIn: Any, password: String!): CustomerLoginInfo
 	decreaseWarehouseProductCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	decreaseWarehouseProductSoldCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
 	decreaseWarehouseProductViewsCount(count: Int!, storeId: String!, storeProductId: String!): WarehouseProduct!
@@ -308,7 +308,7 @@ type Mutation {
 	removeProductsCategoriesByIds(ids: [String!]!): Remove
 	removePromotion(id: String!): Void
 	removePromotionsByIds(ids: [String!]!): Remove
-	removeWarehouseProducts(storeId: String!, storeProductIds: [String!]!): Boolean
+	removeWarehouseProducts(storeId: String!, storeProductIds: [String!]!): [WarehouseProduct!]
 	removeWarehousesByIds(ids: [String!]!): Void
 	saveProduct(product: ProductSaveInput!): Product!
 	unbanCustomer(id: String!): Customer
@@ -480,10 +480,10 @@ type Query {
 	device(id: String): Device
 	devices(findInput: DeviceFindInput): [Device!]!
 	findCustomers(findInput: CustomerFindInput, pagingOptions: PagingOptionsInput): [Customer]!
-	generate1000InviteRequests(defaultLat: Float!, defaultLng: Float!): Void
-	generate1000InvitesConnectedToInviteRequests(defaultLat: Float!, defaultLng: Float!): Void
 	generateActiveAndAvailableOrdersPerCarrier: Void
 	generateCustomers(defaultLat: Float!, defaultLng: Float!, qty: Int!): ResponseGenerateCustomers
+	generateInviteRequests(defaultLat: Float!, defaultLng: Float!, qty: Int): Void
+	generateInvitesConnectedToInviteRequests(defaultLat: Float!, defaultLng: Float!, qty: Int): Void
 	generateOrdersByCustomerId(customerId: String!, numberOfOrders: Int!): Void
 	generatePastOrdersPerCarrier: Void
 	generateRandomOrdersCurrentStore(ordersLimit: Int!, storeCreatedAt: Date!, storeId: String!): GenerateOrdersResponse!
@@ -526,7 +526,7 @@ type Query {
 	getNextOrderNumber(storeId: String!): Int!
 	getOrderForWork(geoLocation: GeoLocationFindInput!, options: GeoLocationOrdersOptions, searchObj: SearchOrdersForWork, skippedOrderIds: [String!]!): Order
 	getOrderedUsersInfo(storeId: String!): [OrderedUserInfo!]!
-	getOrders(customerId: String!): [Order!]!
+	getOrders(id: String!): [Order!]!
 	getOrdersChartTotalOrders: [OrderChartPanel!]!
 	getOrdersForWork(geoLocation: GeoLocationFindInput!, options: GeoLocationOrdersOptions, searchObj: SearchOrdersForWork, skippedOrderIds: [String!]!): [Order]!
 	getOrdersInDelivery(storeId: String!): [Order]!
@@ -627,10 +627,6 @@ type Warehouse {
 	useOnlyRestrictedCarriersForDelivery: Boolean
 	usedCarriersIds: [String!]
 	username: String!
-}
-
-type WarehouseAuthInfo {
-	warehouse: Warehouse!
 }
 
 type WarehouseLoginInfo {
