@@ -4,6 +4,8 @@ import * as path from 'path';
 export type Env = Readonly<{
 	production: boolean;
 	
+	TIME_ZONE: string;
+	
 	DEFAULT_LANGUAGE: string;
 	AVAILABLE_LOCALES: string;
 	
@@ -22,7 +24,6 @@ export type Env = Readonly<{
 	COMPANY_LINKEDIN_LINK: string;
 	
 	CURRENCY_SYMBOL: string;
-	TIME_ZONE: string;
 	
 	TALKJS_APP_ID: string;
 	
@@ -39,6 +40,8 @@ export const env: Env = cleanEnv(
 				               default: 'error'
 			               }),
 			
+			TIME_ZONE: str({ default: 'Europe/Moscow' }),
+			
 			DEFAULT_LANGUAGE:  str({ default: 'ru-RU' }),
 			AVAILABLE_LOCALES: str({ default: 'en-US|ru-RU' }),
 			
@@ -54,8 +57,6 @@ export const env: Env = cleanEnv(
 			COMPANY_LINKEDIN_LINK:  str({ default: 'https://www.linkedin.com' }),
 			
 			CURRENCY_SYMBOL: str({ default: '₽' }),
-			
-			TIME_ZONE: str({ default: 'Europe/Moscow' }),
 			
 			TALKJS_APP_ID: str({ default: '' }),
 			
