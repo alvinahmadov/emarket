@@ -1,6 +1,6 @@
 import { Subject }                 from 'rxjs';
 import { first }                   from 'rxjs/operators';
-import { Component }               from '@angular/core';
+import { Component, OnInit }       from '@angular/core';
 import { ModalController }         from '@ionic/angular';
 import IPaymentGatewayCreateObject from '@modules/server.common/interfaces/IPaymentGateway';
 import Currency                    from '@modules/server.common/entities/Currency';
@@ -14,7 +14,7 @@ import { CurrenciesService }       from 'services/currencies.service';
 	           templateUrl: 'mutation.html',
 	           styleUrls:   ['mutation.scss'],
            })
-export class PaymentMutationComponent
+export class PaymentMutationComponent implements OnInit
 {
 	public defaultCompanyBrandLogo: string;
 	public defaultCurrency: string;
@@ -29,6 +29,9 @@ export class PaymentMutationComponent
 			public modalController: ModalController,
 			private currenciesService: CurrenciesService
 	)
+	{}
+	
+	public ngOnInit(): void
 	{
 		this.loadCurrencies();
 	}
@@ -50,16 +53,11 @@ export class PaymentMutationComponent
 		this.newConfigureObject.next(e);
 	}
 	
-	private async loadCurrencies()
+	private loadCurrencies()
 	{
-		const res = await this.currenciesService
-		                      .getCurrencies()
-		                      .pipe(first())
-		                      .toPromise();
-		
-		if(res)
-		{
-			this.currencies = res.map((r) => r);
-		}
+		this.currenciesService
+		    .getCurrencies()
+		    .pipe(first())
+		    .subscribe(c => this.currencies = c);
 	}
 }
