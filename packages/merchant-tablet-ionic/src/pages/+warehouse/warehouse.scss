@@ -45,7 +45,7 @@
   }
 
   ion-row.warehouse-view {
-    padding: 0px;
+    padding: 0;
   }
 
   div.scroll-content {
@@ -87,7 +87,11 @@
   }
 
   .button-bar-right-container {
-    width: 530px !important;
+    width: 100%;
+    max-width: 800px !important;
+    left: 0!important;
+    margin-top: auto;
+    margin-bottom: auto;
   }
 }
 
