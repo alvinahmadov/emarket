@@ -33,15 +33,18 @@ const envFileContentDev = `// NOTE: Auto-generated file
 
 import { ApplicationRef, NgModuleRef } from '@angular/core';
 import { enableDebugTools } from '@angular/platform-browser';
-import { Environment } from './model';
+import { EnvironmentModel } from './model';
 
 Error.stackTraceLimit = Infinity;
 
 // tslint:disable-next-line:no-var-requires
 require('zone.js/dist/long-stack-trace-zone');
 
-export const environment: Environment = {
+export const environment: EnvironmentModel = {
 	production: ${isProd},
+	
+	TIME_ZONE:          '${env.TIME_ZONE}',
+	DATETIME_FORMAT:    '${env.DATETIME_FORMAT}',
 
 	HTTP_SERVICES_ENDPOINT:     '${env.HTTP_SERVICES_ENDPOINT}',
 	HTTPS_SERVICES_ENDPOINT:    '${env.HTTPS_SERVICES_ENDPOINT}',
@@ -113,12 +116,15 @@ const envFileContentProd = `// NOTE: Auto-generated file
 
 import { enableProdMode, NgModuleRef } from '@angular/core';
 import { disableDebugTools } from '@angular/platform-browser';
-import { Environment } from './model';
+import { EnvironmentModel } from './model';
 
 enableProdMode();
 
-export const environment: Environment = {
+export const environment: EnvironmentModel = {
 	production: ${isProd},
+	
+	TIME_ZONE:          '${env.TIME_ZONE}',
+	DATETIME_FORMAT:    '${env.DATETIME_FORMAT}',
 
 	HTTP_SERVICES_ENDPOINT:     '${env.HTTP_SERVICES_ENDPOINT}',
 	HTTPS_SERVICES_ENDPOINT:    '${env.HTTPS_SERVICES_ENDPOINT}',
