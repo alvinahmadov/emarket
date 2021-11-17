@@ -30,40 +30,36 @@
 							<p>
 								{{comment.message}}
 							</p>
-							<div class="row text-right">
+							<div class="row btn-group" role="group">
 								<div>
-									<button mat-flat-button
-									        disableRipple
-									        class="primary"
-									        (click)="onLike(comment.id)">
-										<mat-icon class="bg-transparent">thumb_up</mat-icon>
-									</button>
+									<a mat-flat-button
+									   class="like-btn"
+									        (click)="onLike(comment)">
+										<mat-icon>thumb_up</mat-icon>
+									</a>
 									<span *ngIf="comment.likes > 0"
 									      style="color: rgba(14,114,255,0.56)">
 										+{{comment.likes}}
 									</span>
 								</div>
 								<div>
-									<button mat-flat-button
-									        disableRipple
-									        class="warn"
-									        style="background-color: transparent"
-									        (click)="onDisLike(comment.id)">
-										<mat-icon class="bg-transparent">thumb_down</mat-icon>
-									</button>
+									<a mat-flat-button
+									   class="dislike-btn"
+									   (click)="onDisLike(comment)">
+										<mat-icon>thumb_down</mat-icon>
+									</a>
 									<span *ngIf="comment.dislikes > 0"
 									      style="color: rgba(255,0,0,0.46)">
 										-{{comment.dislikes}}
 									</span>
 								</div>
 								<div>
-									<button mat-flat-button
-									        disableRipple
-									        class="danger"
-									        *ngIf="isByMe(comment)"
-									        (click)="onDeleteComment(comment.id)">
-										<mat-icon class="bg-transparent">delete</mat-icon>
-									</button>
+									<a mat-flat-button
+									   class="delete-btn"
+									   *ngIf="isByMe(comment)"
+									   (click)="onDeleteComment(comment)">
+										<mat-icon>delete</mat-icon>
+									</a>
 								</div>
 							</div>
 						</div>
