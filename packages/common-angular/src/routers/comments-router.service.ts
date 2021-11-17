@@ -17,7 +17,7 @@ export class CommentsRouter implements ICommentsRouter
 	
 	constructor(routerFactory: RouterFactory)
 	{
-		this.router = routerFactory.create('comment');
+		this.router = routerFactory.create('comments');
 	}
 	
 	public get(
