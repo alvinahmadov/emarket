@@ -65,7 +65,8 @@
 		            [color]="styleVariables.brandLighted"
 		            focusedColor="#f1f1f1">
 		</mat-search>
-		<button mat-button
+		<button *ngIf="isBrowser"
+		        mat-button
 		        (click)="isLocationBarVisible = !isLocationBarVisible">
 			<svg mat-icon-button viewBox="0 0 24 24">
 				<path fill="#FFF"
@@ -88,7 +89,7 @@
 	</section>
 	
 	<span *ngIf="isBrowser" class="nav">
-		<a [routerLink]="['/settings']"
+		<a [routerLink]="['/profile']"
 		   [routerLinkActive]="'active-option'"
 		   class="nav-option" mat-button>
 			<mat-icon class="nav-icon">account_circle</mat-icon>
