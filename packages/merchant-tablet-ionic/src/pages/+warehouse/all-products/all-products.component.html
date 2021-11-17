@@ -65,7 +65,7 @@
 					<div class="product-edit-bar">
 						<a
 								class="edit-button button float-left"
-								(click)="addProduct(warehouseProduct.product.id)"
+								(click)="addProduct(warehouseProduct)"
 						>
 							<ion-icon
 									ios="add-outline"
@@ -74,7 +74,7 @@
 						</a>
 						<a
 								class="edit-button button float-right"
-								(click)="removeProduct(warehouseProduct.product.id)"
+								(click)="removeProduct(warehouseProduct)"
 						>
 							<ion-icon
 									ios="remove-outline"
@@ -85,7 +85,7 @@
 					<div class="product-edit-bar">
 						<a
 								class="edit-button button"
-								(click)="deleteProduct(warehouseProduct.product.id)"
+								(click)="deleteProduct(warehouseProduct)"
 						>
 							<ion-icon
 									ios="trash-outline"
