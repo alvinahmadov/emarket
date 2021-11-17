@@ -7,6 +7,8 @@ type Comment
 	message: String!
 	likes: Int
 	dislikes: Int
+	likesBy: [String]
+	dislikesBy: [String]
 	replyTo: String
 	_createdAt: Date
 	_updatedAt: Date
@@ -17,7 +19,7 @@ type Query {
 		storeId: String!,
 		storeProductId: String!,
 		commentId: String!
-	): Comment
+	): Comment!
 
 	comments(
 		storeId: String!,
@@ -29,20 +31,25 @@ type Query {
 }
 
 input CommentCreateInput {
-	productId: String!
 	userId: String!
+	productId: String!
 	message: String!
 	replyTo: String
 }
 
 input CommentSaveInput
 {
+	id: String
+	_id: String
 	userId: String
 	productId: String
 	message: String
 	likes: Int
 	dislikes: Int
+	likesBy: [String]
+	dislikesBy: [String]
 	replyTo: String
+	_createdAt: Date
 	_updatedAt: Date
 }
 
@@ -60,9 +67,23 @@ type Mutation {
 		comment: CommentSaveInput!
 	): Comment!
 
+	increaseCommentLikes(
+		storeId: String!
+		storeProductId: String!,
+		userId: String!,
+		commentId: String!,
+	): Comment
+
+	increaseCommentDislikes(
+		storeId: String!
+		storeProductId: String!,
+		userId: String!,
+		commentId: String!,
+	): Comment
+
 	deleteCommentsByIds(
 		storeId: String!,
 		storeProductId: String!,
 		commentIds: [String!]!
-	): [Comment]
+	): Boolean!
 }
