@@ -13,7 +13,7 @@
 
 <ng-template #sideBar>
 	<mat-sidenav-container color="primary"
-	                       [hasBackdrop]="false"
+	                       [hasBackdrop]="true"
 	                       (backdropClick)="sidenav.close()"
 	>
 		<mat-sidenav #sidenav
@@ -53,7 +53,7 @@
 					</a>
 				</mat-list-item>
 				<mat-list-item class="sidenav-item">
-					<a [routerLink]="['/settings']"
+					<a [routerLink]="['/profile']"
 					   [routerLinkActive]="'active-option'"
 					   (click)="sidenav.close()"
 					   class="nav-option nav-link">
@@ -64,9 +64,7 @@
 			</mat-list>
 		</mat-sidenav>
 		<mat-sidenav-content class="sidenav-content">
-			<div [ngClass]="{ 'toolbar-enabled': !isToolbarDisabled }"
-			     (click)="sidenav.close()"
-			     class="app-content">
+			<div class="app-content">
 				<router-outlet class="container-fluid"></router-outlet>
 				<div #chatpopupContainer></div>
 			</div>
