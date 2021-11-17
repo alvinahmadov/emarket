@@ -132,7 +132,7 @@ export class CommentsService
 			
 			if(commentCountBefore != commentCountAfter)
 			{
-				this.logger.debug(`Successfully added comments for product (${storeProductId}) of store (${storeId})`);
+				this.logger.info(`Successfully added comments for product (${storeProductId}) of store (${storeId})`);
 			}
 			
 			return this._commentsFactory(updatedProduct.comments);
