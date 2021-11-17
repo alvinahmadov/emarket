@@ -25,12 +25,6 @@ export class AllProductsComponent implements OnInit, OnDestroy
 	public warehouseId: string;
 	
 	@Input()
-	public addProduct: (string) => void;
-	
-	@Input()
-	public removeProduct: (string) => void;
-	
-	@Input()
 	public getWarehouseProductImageUrl: (p: Product) => string;
 	
 	@Input()
@@ -42,9 +36,9 @@ export class AllProductsComponent implements OnInit, OnDestroy
 	
 	public masonryOptions: NgxMasonryOptions = {
 		itemSelector:       '.masonry-item',
-		columnWidth:        1234,
+		columnWidth:        234,
 		transitionDuration: '0.2s',
-		gutter:             100,
+		gutter:             10,
 		resize:             true,
 		initLayout:         true,
 		fitWidth:           true,
@@ -125,6 +119,33 @@ export class AllProductsComponent implements OnInit, OnDestroy
 			
 			                                this.page = page;
 		                                });
+	}
+	
+	public addProduct(productId: string): void
+	{
+		this.warehouseProductsService.increaseCount(
+				    this.warehouseId,
+				    productId,
+				    1
+		    );
+	}
+	
+	public removeProduct(productId: string): void
+	{
+		this.warehouseProductsService.decreaseCount(
+				    this.warehouseId,
+				    productId,
+				    1
+		    );
+	}
+	
+	public deleteProduct(productId: string): void
+	{
+		const productIds: string[] = [productId]
+		this.warehouseProductsService.remove(
+				    this.warehouseId,
+				    productIds
+		    );
 	}
 	
 	public localeTranslate(member: ILocaleMember[]): string
