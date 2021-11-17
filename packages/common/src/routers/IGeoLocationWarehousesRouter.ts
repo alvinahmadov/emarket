@@ -16,6 +16,13 @@ export interface IGeoLocationWarehousesOptions
 	fullProducts?: boolean;
 }
 
+export interface IGeoLocationWarehousesFilterOptions
+		extends IGeoLocationWarehousesOptions,
+		        IGeoLocationWarehousesRouterGetOptions
+{
+	merchantsIds?: string[];
+}
+
 export interface INearStoresInput
 {
 	geoLocation: IGeoLocation,
