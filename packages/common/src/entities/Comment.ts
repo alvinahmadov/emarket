@@ -79,6 +79,10 @@ class Comment extends DBObject<IComment, ICommentCreateObject>
 	@Column()
 	replyTo?: string;
 	
+	@Types.Boolean(false)
+	@Column()
+	deleteRequested?: boolean;
+	
 	constructor(comment: IComment)
 	{
 		super(comment);
