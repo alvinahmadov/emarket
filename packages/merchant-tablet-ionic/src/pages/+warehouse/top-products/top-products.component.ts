@@ -6,6 +6,7 @@ import { ILocaleMember }                       from '@modules/server.common/inte
 import Product                                 from '@modules/server.common/entities/Product';
 import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
 import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { ProductLocalesService }               from "@modules/client.common.angular2/locale/product-locales.service";
 import { CreateProductTypePopupPage }          from '../create-product-type-popup/create-product-type-popup';
 import { EditProductTypePopupPage }            from '../edit-product-type-popup/edit-product-type-popup';
 
@@ -28,9 +29,6 @@ export class TopProductsComponent implements OnInit, OnDestroy
 	@Input()
 	public truncateTitle: (title: string) => string;
 	
-	@Input()
-	public localeTranslate: (member: ILocaleMember[]) => string;
-	
 	public topProducts$: Subscription;
 	public topProducts: WarehouseProduct[] = [];
 	
@@ -38,6 +36,7 @@ export class TopProductsComponent implements OnInit, OnDestroy
 	
 	constructor(
 			private warehouseProductsRouter: WarehouseProductsRouter,
+			private translateProductLocales: ProductLocalesService,
 			public modalController: ModalController
 	)
 	{}
@@ -96,5 +95,13 @@ export class TopProductsComponent implements OnInit, OnDestroy
 		};
 		
 		this.modalController.create(modalOptions).then(modal => modal.present);
+	}
+	
+	public localeTranslate(member: ILocaleMember[]): string
+	{
+		if(member !== undefined)
+		{
+			return this.translateProductLocales.getTranslate(member);
+		}
 	}
 }
