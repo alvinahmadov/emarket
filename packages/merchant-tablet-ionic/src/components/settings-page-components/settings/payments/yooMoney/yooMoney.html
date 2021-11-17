@@ -1,0 +1,116 @@
+<form class="payments-mutation-popup-form yooMoney-gateway" [formGroup]="form">
+	<ion-grid>
+		<ion-row class="yooMoney-selects">
+			<ion-col>
+				<ion-item>
+					<ion-label class="labels" position="floating">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.MODE' | translate }}
+					</ion-label>
+					<ion-select
+							formControlName="mode"
+							[cancelText]="'Cancel'"
+							[okText]="'OK'"
+							[placeholder]="'Choose mode'"
+					>
+						<ion-select-option
+								*ngFor="let type of payPalTypes"
+								value="{{ type }}"
+						>{{ type }}
+						</ion-select-option>
+					</ion-select>
+				</ion-item>
+			</ion-col>
+			<ion-col>
+				<ion-item>
+					<ion-label class="labels" position="floating">
+						{{ 'SETTINGS_VIEW.PAYMENTS.CURRENCY' | translate }}
+					</ion-label>
+					<ion-select
+							formControlName="currency"
+							[cancelText]="'Cancel'"
+							[okText]="'OK'"
+					>
+						<ion-select-option
+								*ngFor="let currency of currencies"
+								value="{{ currency.code }}"
+						>
+							{{ getCurrencySign(currency) }}
+						</ion-select-option>
+					</ion-select>
+				</ion-item>
+			</ion-col>
+		</ion-row>
+		<ion-row>
+			<ion-col>
+				<ion-item>
+					<ion-label class="labels" position="floating">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.PUBLISHABLE_KEY' | translate }}
+					</ion-label>
+					<ion-input
+							type="text"
+							formControlName="publishableKey"
+					></ion-input>
+				</ion-item>
+				<div
+						*ngIf="
+						publishableKey.invalid &&
+						(publishableKey.dirty || publishableKey.touched)
+					"
+						class="validation-errors"
+				>
+					<span *ngIf="publishableKey.errors.required">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.PUBLISHABLE_KEY_IS_REQUIRED' | translate }}
+					</span>
+				</div>
+			</ion-col>
+		</ion-row>
+		<ion-row>
+			<ion-col>
+				<ion-item>
+					<ion-label class="labels" position="floating">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.SECRET_KEY' | translate }}
+					</ion-label>
+					<ion-input
+							type="text"
+							formControlName="secretKey"
+					></ion-input>
+				</ion-item>
+				<div
+						*ngIf="
+						secretKey.invalid &&
+						(secretKey.dirty || secretKey.touched)
+					"
+						class="validation-errors"
+				>
+					<span *ngIf="secretKey.errors.required">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.SECRET_KEY_IS_REQUIRED' | translate }}
+					</span>
+				</div>
+			</ion-col>
+		</ion-row>
+		<ion-row>
+			<ion-col>
+				<ion-item>
+					<ion-label class="labels" position="floating">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.PAYMENT_DESCRIPTION' | translate }}
+					</ion-label>
+					<ion-input
+							type="text"
+							formControlName="description"
+					></ion-input>
+				</ion-item>
+				<div
+						*ngIf="
+						description.invalid &&
+						(description.dirty || description.touched)
+					"
+						class="validation-errors"
+				>
+					<span *ngIf="description.errors.required">
+						{{ 'SETTINGS_VIEW.PAYMENTS.PAYPAL.PAYMENT_DESCRIPTION_IS_REQUIRED' | translate }}
+					</span>
+				</div>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
+</form>
