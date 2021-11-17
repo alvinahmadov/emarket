@@ -9,20 +9,24 @@ import { NgSelectModule }                   from '@ng-select/ng-select';
 import { PaymentMutationComponent }         from './payments/mutation/mutation';
 import { ConfirmDeletePopupModule }         from 'components/confirm-delete-popup/confirm-delete-popup.module';
 import { StripeGatewayComponent }           from './payments/stripe/stripe';
+import { PayPalGatewayComponent }           from './payments/payPal/payPal';
+import { YooMoneyGatewayComponent }         from './payments/yooMoney/yooMoney';
+import { BitpayGatewayComponent }           from './payments/bitpay/bitpay';
 import { FileUploaderModule }               from 'components/file-uploader/file-uploader.module';
 import { CurrenciesService }                from 'services/currencies.service';
-import { PayPalGatewayComponent }           from './payments/payPal/payPal';
 
 @NgModule({
-	          declarations: [
+	          declarations:    [
 		          SettingsComponent,
 		          SettingsPaymentsComponent,
 		          PaymentMutationComponent,
 		          StripeGatewayComponent,
 		          PayPalGatewayComponent,
+		          YooMoneyGatewayComponent,
+		          BitpayGatewayComponent
 	          ],
 	          entryComponents: [PaymentMutationComponent],
-	          imports: [
+	          imports:         [
 		          CommonModule,
 		          TranslateModule.forChild(),
 		          IonicModule,
@@ -32,7 +36,7 @@ import { PayPalGatewayComponent }           from './payments/payPal/payPal';
 		          ConfirmDeletePopupModule,
 		          FileUploaderModule,
 	          ],
-	          exports: [SettingsComponent],
-	          providers: [CurrenciesService],
+	          exports:         [SettingsComponent],
+	          providers:       [CurrenciesService],
           })
 export class MerchantSettingsComponentModule {}
