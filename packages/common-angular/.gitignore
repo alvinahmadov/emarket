@@ -10,3 +10,4 @@ node_modules
 build
 dist
 src/environments/*.ts
+!src/environments/model.ts
