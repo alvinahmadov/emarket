@@ -13,7 +13,7 @@ export const routes: Routes = [
 		component: ProductDetailsComponent,
 	},
 	{
-		path:      'comments/:warehouseId/:productId',
+		path:      'comments/:warehouseId/:warehouseProductId',
 		component: ProductCommentComponent,
 	}
 ];
