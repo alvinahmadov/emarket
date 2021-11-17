@@ -6,6 +6,8 @@ import Warehouse               from '@modules/server.common/entities/Warehouse';
 import { WarehouseRouter }     from '@modules/client.common.angular2/routers/warehouse-router.service';
 import { WarehouseAuthRouter } from '@modules/client.common.angular2/routers/warehouse-auth-router.service';
 
+export type TWarehouseView = "products" | "orders" | string;
+
 @Injectable()
 export class StorageService
 {
@@ -134,6 +136,25 @@ export class StorageService
 	public set serverConnection(val: string)
 	{
 		localStorage.setItem('serverConnection', val);
+	}
+	public get topShown(): boolean
+	{
+		return localStorage.getItem('_showTop') === '1';
+	}
+	
+	public set topShown(value: boolean)
+	{
+		localStorage.setItem('_showTop', `${+value}`);
+	}
+	
+	public get warehouseView(): TWarehouseView
+	{
+		return localStorage.getItem('_wview') ?? "orders";
+	}
+	
+	public set warehouseView(value: TWarehouseView)
+	{
+		localStorage.setItem('_wview', value);
 	}
 	
 	public async isLogged()
