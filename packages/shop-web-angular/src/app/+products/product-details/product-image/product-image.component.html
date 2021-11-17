@@ -12,32 +12,16 @@
 		<div *ngIf="hasBottomImages"
 		     class="bottom-images"
 		>
-			<button
-					(click)="dragScroll.moveLeft()"
-					class="drag-button left"
-			>
-				<i class="material-icons">
-					keyboard_arrow_left
-				</i>
-			</button>
-			<drag-scroll #dragScroll class="image-slide">
+			<drag-scroll class="image-slide">
 				<img class="scroll-image"
 				     *ngFor="let image of productImages; index as i"
 				     drag-scroll-item
 				     alt="{{ image.value }}"
 				     src="{{ image.url }}"
 				     [ngClass]="{'selected': activeImageIndex == i}"
-				     (click)="selectImage(topImage, image, i)"
+				     (mouseover)="selectImage(topImage, image, i)"
 				/>
 			</drag-scroll>
-			<button
-					(click)="dragScroll.moveRight()"
-					class="drag-button right"
-			>
-				<i class="material-icons">
-					keyboard_arrow_right
-				</i>
-			</button>
 		</div>
 	</div>
 </div>
