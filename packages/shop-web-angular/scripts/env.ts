@@ -4,8 +4,12 @@
 
 import { cleanEnv, num, str, bool } from 'envalid';
 
-export type Env = Readonly<{
+export interface Environment
+{
 	production: boolean;
+	
+	TIME_ZONE: string;
+	DATETIME_FORMAT: string;
 	
 	HTTP_SERVICES_ENDPOINT: string;
 	HTTPS_SERVICES_ENDPOINT: string;
@@ -45,17 +49,22 @@ export type Env = Readonly<{
 	SETTINGS_APP_TYPE?: string;
 	SETTINGS_MAINTENANCE_API_URL?: string;
 	
-	WEB_CONCURRENCY: number;
-	WEB_MEMORY: number;
+	WEB_CONCURRENCY?: number;
+	WEB_MEMORY?: number;
 	
 	HOST: string;
 	PORT: number;
-}>;
+}
+
+export type Env = Readonly<Environment>;
 
 export const env: Env = cleanEnv(
 		process.env,
 		{
 			production: bool({ default: false }),
+			
+			TIME_ZONE:       str({ default: 'Europe/Moscow' }),
+			DATETIME_FORMAT: str({ default: 'dd/MM/yyyy hh:mm' }),
 			
 			HTTP_SERVICES_ENDPOINT:     str({ default: 'http://localhost:5500' }),
 			HTTPS_SERVICES_ENDPOINT:    str({ default: 'https://localhost:5501' }),
