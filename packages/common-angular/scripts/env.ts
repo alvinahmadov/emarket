@@ -22,6 +22,7 @@ export type Env = Readonly<{
 	COMPANY_LINKEDIN_LINK: string;
 	
 	CURRENCY_SYMBOL: string;
+	TIME_ZONE: string;
 	
 	TALKJS_APP_ID: string;
 	
@@ -53,6 +54,8 @@ export const env: Env = cleanEnv(
 			COMPANY_LINKEDIN_LINK:  str({ default: 'https://www.linkedin.com' }),
 			
 			CURRENCY_SYMBOL: str({ default: '₽' }),
+			
+			TIME_ZONE: str({ default: 'Europe/Moscow' }),
 			
 			TALKJS_APP_ID: str({ default: '' }),
 			
