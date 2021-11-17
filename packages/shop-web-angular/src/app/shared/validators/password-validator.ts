@@ -1,6 +1,7 @@
 import {
 	AbstractControl,
 	ValidationErrors,
+	Validators,
 	ValidatorFn
 } from '@angular/forms';
 
@@ -38,3 +39,27 @@ export class PasswordValidator
 		}
 	}
 }
+
+export const VALIDATORS_PROD = Validators.compose(
+		[
+			// 1. Password Field is Required
+			Validators.required,
+			// 2. Has a minimum length of characters
+			Validators.minLength(5),
+			// 3. check whether the entered password has a number
+			PasswordValidator.patternValidator(/\d/, { hasNumber: true }),
+			// 4. check whether the entered password has upper case letter
+			PasswordValidator.patternValidator(/[A-Z]/, { hasCapitalCase: true }),
+			// 5. check whether the entered password has a lower-case letter
+			PasswordValidator.patternValidator(/[a-z]/, { hasSmallCase: true }),
+		]
+);
+
+export const VALIDATORS_DEV = Validators.compose(
+		[
+			// 1. Password Field is Required
+			Validators.required,
+			// 2. Has a minimum length of characters
+			Validators.minLength(5),
+		]
+);
