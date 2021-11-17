@@ -53,6 +53,7 @@ export const environment: Environment = {
   COMPANY_LINKEDIN_LINK:    "${env.COMPANY_LINKEDIN_LINK}",
   
   CURRENCY_SYMBOL:          "${env.CURRENCY_SYMBOL}",
+  TIME_ZONE:                "${env.TIME_ZONE}",
   
   TALKJS_APP_ID:            "${env.TALKJS_APP_ID}",
   
@@ -111,6 +112,7 @@ export const environment: Environment = {
   COMPANY_LINKEDIN_LINK:    "${env.COMPANY_LINKEDIN_LINK}",
   
   CURRENCY_SYMBOL:          "${env.CURRENCY_SYMBOL}",
+  TIME_ZONE:                "${env.TIME_ZONE}",
 
   TALKJS_APP_ID:            "${env.TALKJS_APP_ID}",
   
