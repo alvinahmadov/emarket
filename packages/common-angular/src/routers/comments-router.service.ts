@@ -1,8 +1,7 @@
 import { Injectable }            from '@angular/core';
 import _                         from 'lodash';
 import { Observable }            from 'rxjs';
-import { map }                   from 'rxjs/operators';
-import { UpdateObject }          from '@pyro/db/db-update-object';
+import { map, share }            from 'rxjs/operators';
 import IComment, {
 	ICommentCreateObject
 }                                from '@modules/server.common/interfaces/IComment';
@@ -34,21 +33,24 @@ export class CommentsRouter implements ICommentsRouter
 		           );
 	}
 	
-	public async getComments(
+	public getComments(
 			storeId: string,
 			storeProductId: string,
 			pagingOptions: IPagingOptions
-	): Promise<Comment[]>
+	): Observable<Comment[]>
 	{
-		const comments = await this.router
-		                           .run<IComment[]>(
-				                           'getComments',
-				                           storeId,
-				                           storeProductId,
-				                           pagingOptions
-		                           );
+		return this.router
+		           .runAndObserve<IComment[]>(
+				           'getComments',
+				           storeId,
+				           storeProductId,
+				           pagingOptions
+		           )
+		           .pipe(
+				           map(comments => _.map(comments, (comment) => this._factory(comment))),
+				           share()
+		           );
 		
-		return _.map(comments, (comment) => this._factory(comment));
 	}
 	
 	public async add(
@@ -67,38 +69,70 @@ export class CommentsRouter implements ICommentsRouter
 			storeId: string,
 			storeProductId: string,
 			commentIds: string[]
-	): Promise<Comment[]>
+	): Promise<boolean>
 	{
-		const comments = await this.router
-		                           .run<IComment[]>('delete', storeId, storeProductId, commentIds);
+		return this.router
+		           .run<boolean>('delete', storeId, storeProductId, commentIds);
 		
-		return _.map(comments, c => this._factory(c));
 	}
 	
-	public async save(
+	public async increaseLikes(
 			storeId: string,
 			storeProductId: string,
-			commentId: string,
-			updatedComment: IComment
+			userId: string,
+			commentId: string
 	): Promise<Comment>
 	{
-		const comment = await this.router
-		                          .run<IComment>(
-				                          'save',
-				                          storeId,
-				                          storeProductId,
-				                          commentId,
-				                          updatedComment
-		                          );
+		const comment = await this.router.run<IComment>(
+				'increaseLikes',
+				storeId,
+				storeProductId,
+				userId,
+				commentId
+		);
 		
 		return this._factory(comment);
+	}
+	
+	public async increaseDislikes(
+			storeId: string,
+			storeProductId: string,
+			userId: string,
+			commentId: string
+	): Promise<Comment>
+	{
+		const comment = await this.router.run<IComment>(
+				'increaseDislikes',
+				storeId,
+				storeProductId,
+				userId,
+				commentId
+		);
+		
+		return this._factory(comment);
+	}
+	
+	public async replyTo(
+			storeId: string,
+			storeProductId: string,
+			replyCommentId: string,
+			comment: ICommentCreateObject
+	): Promise<void>
+	{
+		await this.router.run<IComment>(
+				'replyTo',
+				storeId,
+				storeProductId,
+				replyCommentId,
+				comment
+		);
 	}
 	
 	public async update(
 			storeId: string,
 			storeProductId: string,
 			commentId: string,
-			updateObject: UpdateObject<Comment>
+			updateObject: IComment
 	): Promise<Comment>
 	{
 		const comment = await this.router
