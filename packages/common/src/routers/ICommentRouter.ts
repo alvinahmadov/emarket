@@ -1,9 +1,45 @@
-import { Observable }           from 'rxjs';
-import { UpdateObject }         from '../@pyro/db/db-update-object';
-import { ICommentCreateObject } from '../interfaces/IComment';
-import IPagingOptions           from '../interfaces/IPagingOptions';
-import Comment                  from '../entities/Comment';
-import { CreateObject } from '@pyro/db/db-create-object';
+import { Observable }                                 from 'rxjs';
+import { UpdateObject }                               from '../@pyro/db/db-update-object';
+import { ICommentCreateObject, ICommentUpdateObject } from '../interfaces/IComment';
+import IPagingOptions                                 from '../interfaces/IPagingOptions';
+import Comment                                        from '../entities/Comment';
+import { CreateObject }                               from '@pyro/db/db-create-object';
+
+export interface ICommentInput
+{
+	storeId: string;
+	storeProductId: string;
+}
+
+export interface ICommentsRetrieveInput extends ICommentInput
+{
+	pagingOptions?: IPagingOptions
+}
+
+export interface ICommentRetrieveInput extends ICommentInput
+{
+	commentId: string
+}
+
+export interface ICommentCreateInput extends ICommentInput
+{
+	comment: ICommentCreateObject
+}
+
+export interface ICommentUpdateInput extends ICommentRetrieveInput
+{
+	comment: ICommentUpdateObject
+}
+
+export interface ICommentDeleteInput extends ICommentInput
+{
+	commentIds: string[];
+}
+
+export interface ICommentRateInput extends ICommentRetrieveInput
+{
+	userId: string;
+}
 
 interface ICommentsRouter
 {
@@ -17,7 +53,7 @@ interface ICommentsRouter
 			storeId: string,
 			storeProductId: string,
 			pagingOptions: IPagingOptions
-	): Promise<Comment[]>;
+	): Observable<Comment[]>;
 	
 	add(
 			storeId: string,
@@ -57,7 +93,7 @@ interface ICommentsRouter
 			storeId: string,
 			storeProductId: string,
 			commentIds: string[]
-	): Promise<Comment[]>;
+	): Promise<boolean>;
 	
 }
 
