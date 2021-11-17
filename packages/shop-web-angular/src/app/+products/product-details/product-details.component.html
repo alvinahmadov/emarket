@@ -66,12 +66,6 @@
 									>
 										{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.BUY_FOR' | translate }}
 									</button>
-									
-									<button (click)="openComments()"
-									        color="primary"
-									        mat-raised-button>
-										Перейти к комментариям
-									</button>
 								</div>
 							</section>
 							<div class="delivery-address">
@@ -97,7 +91,10 @@
 					<div class="col-sm-5 product-statistics-container">
 						<div class="statistics">
 							<es-statistics [warehouseProduct]="warehouseProduct"
-							               [warehouseId]="warehouseId">
+							               [warehouseId]="warehouseId"
+							               [productId]="productId"
+							               [productTitle]="localeTranslate(warehouseProduct.product.title)"
+							>
 							</es-statistics>
 						</div>
 					</div>
@@ -108,7 +105,7 @@
 </div>
 
 <ng-template #spinner>
-	<div class="wait-spinner d-flex justify-content-center">
+	<div class="wait-spinner d-flex justify-content-center overflow-hidden">
 		<mat-progress-spinner
 				color="primary"
 				mode="indeterminate">
