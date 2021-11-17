@@ -59,7 +59,7 @@
 				*ngIf="
 				currentWarehouse.isPaymentEnabled &&
 				showPaymentsGateways &&
-				myPaymentsGateways.length
+				storePaymentsGateways.length
 			"
 				class="selected-payment-gateways col-6"
 		>
@@ -69,7 +69,7 @@
 				</div>
 			</ion-label>
 			<ion-list class="pt-2">
-				<ion-item *ngFor="let pg of myPaymentsGateways">
+				<ion-item *ngFor="let pg of storePaymentsGateways">
 					<ion-avatar slot="start">
 						<img src="{{ getPaymentLogo(pg) }}" alt="{{ getPaymentName(pg) }}"/>
 					</ion-avatar>
