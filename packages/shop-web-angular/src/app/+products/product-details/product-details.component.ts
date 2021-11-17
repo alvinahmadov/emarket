@@ -1,22 +1,27 @@
-import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router }                    from '@angular/router';
-import { Subject }                                   from 'rxjs';
-import { animate, style, transition, trigger }       from '@angular/animations';
-import { takeUntil, first }                          from 'rxjs/operators';
-import { WarehouseRouter }                           from '@modules/client.common.angular2/routers/warehouse-router.service';
-import { WarehouseOrdersRouter }                     from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import IWarehouse                                    from '@modules/server.common/interfaces/IWarehouse';
-import { OrderRouter }                               from '@modules/client.common.angular2/routers/order-router.service';
-import { ProductLocalesService }                     from '@modules/client.common.angular2/locale/product-locales.service';
-import { ILocaleMember }                             from '@modules/server.common/interfaces/ILocale';
-import { Store }                                     from 'app/services/store';
-import RegistrationSystem                            from '@modules/server.common/enums/RegistrationSystem';
-import WarehouseProduct                              from '@modules/server.common/entities/WarehouseProduct';
-import DeliveryType                                  from '@modules/server.common/enums/DeliveryType';
-import { TranslateService }                          from '@ngx-translate/core';
-import { environment }                               from 'environments/environment';
-import Product                                       from '@modules/server.common/entities/Product';
-import { IProductImage }                             from '@modules/server.common/interfaces/IProduct';
+import {
+	Component, HostBinding,
+	OnDestroy, OnInit, AfterViewInit
+}                                              from '@angular/core';
+import { ActivatedRoute, Router }              from '@angular/router';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { TranslateService }                    from '@ngx-translate/core';
+import { Subject }                             from 'rxjs';
+import { takeUntil, first }                    from 'rxjs/operators';
+import { ILocaleMember }                       from '@modules/server.common/interfaces/ILocale';
+import { IProductImage }                       from '@modules/server.common/interfaces/IProduct';
+import IWarehouse                              from '@modules/server.common/interfaces/IWarehouse';
+import DeliveryType                            from '@modules/server.common/enums/DeliveryType';
+import RegistrationSystem                      from '@modules/server.common/enums/RegistrationSystem';
+import Product                                 from '@modules/server.common/entities/Product';
+import Warehouse                               from '@modules/server.common/entities/Warehouse';
+import WarehouseProduct                        from '@modules/server.common/entities/WarehouseProduct';
+import { ProductLocalesService }               from '@modules/client.common.angular2/locale/product-locales.service';
+import { OrderRouter }                         from '@modules/client.common.angular2/routers/order-router.service';
+import { WarehouseRouter }                     from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { WarehouseOrdersRouter }               from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { WarehouseProductsRouter }             from '@modules/client.common.angular2/routers/warehouse-products-router.service';
+import { environment }                         from 'environments/environment';
+import { StorageService }                      from 'app/services/storage';
 
 const defaultDeliveryTimeMin = environment.DELIVERY_TIME_MIN;
 const defaultDeliveryTimeMax = environment.DELIVERY_TIME_MAX;
@@ -28,9 +33,9 @@ interface RouteParams
 }
 
 @Component({
-	           selector: 'product-details',
-	           styleUrls: ['./product-details.component.scss'],
-	           animations: [
+	           selector:    'product-details',
+	           styleUrls:   ['./product-details.component.scss'],
+	           animations:  [
 		           trigger('enterAnimation', [
 			           transition(':enter', [
 				           style({ opacity: 0 }),
@@ -44,21 +49,28 @@ interface RouteParams
 	           ],
 	           templateUrl: './product-details.component.html',
            })
-export class ProductDetailsComponent implements OnInit, OnDestroy
+export class ProductDetailsComponent implements OnInit, AfterViewInit, OnDestroy
 {
 	@HostBinding('@enterAnimation')
-	enterAnimation: any;
+	public enterAnimation: any;
 	
-	productId: string;
-	warehouseId: string;
+	public readonly PREFIX: string = "PRODUCTS_VIEW.";
+	public readonly READY_FOR: string = "READYFOR"
+	public readonly MINUTES: string = "MINUTES";
 	
-	warehouse: IWarehouse;
-	warehouseProduct: WarehouseProduct;
+	public productId: string;
+	public warehouseId: string;
 	
-	images: IProductImage[];
+	public warehouse: IWarehouse;
+	public warehouseProduct: WarehouseProduct;
 	
-	private ngUnsubscribe: Subject<void> = new Subject<void>();
-	private isTakeaway: boolean;
+	public images: IProductImage[];
+	
+	public isTakeaway: boolean;
+	
+	public warehouseLoaded: boolean = false;
+	
+	private _ngDestroy$: Subject<void> = new Subject<void>();
 	private minutesText: string;
 	private readyForText: string;
 	
@@ -66,75 +78,88 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 			private readonly route: ActivatedRoute,
 			private readonly router: Router,
 			private readonly warehouseRouter: WarehouseRouter,
+			private readonly warehouseProductsRouter: WarehouseProductsRouter,
 			private readonly warehouseOrdersRouter: WarehouseOrdersRouter,
 			private readonly orderRouter: OrderRouter,
 			private readonly _productLocalesService: ProductLocalesService,
-			private readonly store: Store,
+			public readonly storage: StorageService,
 			private translateService: TranslateService
 	)
 	{
-		this.isTakeaway = this.store.deliveryType === DeliveryType.Takeaway;
+		this.isTakeaway = this.storage.deliveryType === DeliveryType.Takeaway;
 		this.route.params
-		    .pipe(takeUntil(this.ngUnsubscribe))
+		    .pipe(takeUntil(this._ngDestroy$))
 		    .subscribe((params: RouteParams) => this.onParams(params));
 	}
 	
-	ngOnInit()
+	public ngOnInit()
+	{}
+	
+	public ngAfterViewInit(): void
 	{
-		this.getMinutesText().catch(console.error);
-		;
-		this.getReadyForText().catch(console.error);
-		;
+		this.getMinutesText();
+		this.getReadyForText();
 		this.warehouseRouter
 		    .get(this.warehouseId, true)
-		    .subscribe((w) =>
+		    .pipe(
+				    takeUntil(this._ngDestroy$),
+				    first()
+		    )
+		    .subscribe((warehouse: Warehouse) =>
 		               {
-			               this.warehouseProduct = w.products.filter(
+			               this.warehouseProduct = warehouse.products.filter(
 					               (res) => res.product['id'] === this.productId
 			               )[0];
-			               this.warehouse = w;
+			               this.warehouse = warehouse;
+			
+			               // if(!this.storage.getSeen(this.productId))
+			               // {
+			               //     this.warehouseProductsRouter
+			               //         .increaseViewsCount(this.warehouseId, this.productId, 1);
+			               //     this.storage.setSeen(this.productId, true);
+			               // }
+			               this.warehouseLoaded = true;
 			               this.loadImages();
 		               });
 	}
 	
-	ngOnDestroy()
+	public ngOnDestroy()
 	{
-		this.ngUnsubscribe.next();
-		this.ngUnsubscribe.complete();
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
 	}
 	
-	async createOrder(): Promise<void>
+	public async createOrder(): Promise<void>
 	{
 		if(
-				!this.store.userId &&
-				this.store.registrationSystem === RegistrationSystem.Disabled
+				!this.storage.customerId &&
+				this.storage.registrationSystem === RegistrationSystem.Disabled
 		)
 		{
-			this.store.registrationSystem = RegistrationSystem.Once;
-			this.store.buyProduct = this.warehouseProduct.id;
-			this.store.merchantId = this.warehouseId;
-			this.router.navigate(['/login']).catch(console.error);
-			;
+			this.storage.registrationSystem = RegistrationSystem.Once;
+			this.storage.buyProductId = this.warehouseProduct.id;
+			this.storage.merchantId = this.warehouseId;
+			this.router.navigate(['/auth'])
+			    .catch(err => console.error(err));
 		}
 		else
 		{
-			const userId = this.store.userId;
+			const customerId = this.storage.customerId;
 			
 			const order = await this.warehouseOrdersRouter.createByProductType(
-					userId,
+					customerId,
 					this.warehouseId,
 					this.productId,
-					this.store.deliveryType
+					this.storage.deliveryType
 			);
 			
 			await this.orderRouter.confirm(order.id);
 			
-			this.router.navigate(['/orders']).catch(console.error);
-			;
+			await this.router.navigate(['/orders']);
 		}
 	}
 	
-	getDeliveryTime()
+	public getDeliveryTime(): string
 	{
 		if(this.warehouseProduct != null)
 		{
@@ -205,9 +230,17 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 		}
 	}
 	
-	protected localeTranslate(member: ILocaleMember[]): string
+	public localeTranslate(member: ILocaleMember[]): string
 	{
 		return this._productLocalesService.getTranslate(member);
+	}
+	
+	public selectImage(
+			topImage: HTMLImageElement,
+			image: IProductImage
+	)
+	{
+		topImage.src = image.url;
 	}
 	
 	private onParams(params: RouteParams): void
@@ -216,20 +249,26 @@ export class ProductDetailsComponent implements OnInit, OnDestroy
 		this.warehouseId = params.warehouseId;
 	}
 	
-	private async getMinutesText()
+	private getMinutesText()
 	{
-		this.minutesText = await this.translateService
-		                             .get('PRODUCTS_VIEW.MINUTES')
-		                             .pipe(first())
-		                             .toPromise();
+		this.translateService
+		    .get(this.PREFIX + this.MINUTES)
+		    .pipe(
+				    takeUntil(this._ngDestroy$),
+				    first()
+		    )
+		    .subscribe(text => this.minutesText = text);
 	}
 	
-	private async getReadyForText()
+	private getReadyForText()
 	{
-		this.readyForText = await this.translateService
-		                              .get('PRODUCTS_VIEW.READYFOR')
-		                              .pipe(first())
-		                              .toPromise();
+		this.translateService
+		    .get(this.PREFIX + this.READY_FOR)
+		    .pipe(
+				    takeUntil(this._ngDestroy$),
+				    first()
+		    )
+		    .subscribe(text => this.readyForText = text);
 	}
 	
 	private loadImages()
