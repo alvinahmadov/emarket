@@ -1,29 +1,35 @@
-<div *ngIf="warehouseProduct; else spinner"
-     class=""
->
+<div *ngIf="warehouseProduct; else spinner">
 	<section class="brand-dark">
 		<mat-card class="product-details">
+			<mat-card-header>
+				<mat-card-title class="d-inline-flex">
+					<button
+							[routerLink]="['/products']"
+							class="back-button ml-3"
+							mat-icon-button
+					>
+						<svg viewBox="0 0 24 24">
+							<path
+									d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
+									fill="#000000"
+									fill-opacity="0.54"
+							/>
+						</svg>
+					</button>
+					<h1 class="product-title ml-3 text-left text-capitalize">
+						{{ localeTranslate(warehouseProduct?.product?.title) }}
+					</h1>
+				</mat-card-title>
+			</mat-card-header>
 			<mat-card-content>
-				<div class="row m-0">
-					<div class="col-6 p-0 product-details-container">
-						<button
-								[routerLink]="['/products']"
-								class="back-button"
-								mat-icon-button
-						>
-							<svg viewBox="0 0 24 24">
-								<path
-										d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
-										fill="#000000"
-										fill-opacity="0.54"
-								/>
-							</svg>
-						</button>
+				<div class="row">
+					<es-product-image [productImages]="images">
+					</es-product-image>
+				</div>
+				<div class="row">
+					<div class="col-sm-7 product-details-container">
 						<div class="product-details-content">
 							<div class="product">
-								<h1 class="title">
-									{{ localeTranslate(warehouseProduct?.product?.title) }}
-								</h1>
 								<a [routerLink]="['warehouses/' + warehouse?._id.toString()]"
 								   class="warehouse">
 									<warehouse-logo
@@ -36,29 +42,38 @@
 									</h2>
 								</a>
 								
+								<h3>
+									{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.DESCRIPTION' | translate }}
+								</h3>
 								<h2 class="description">
 									{{ localeTranslate(warehouseProduct?.product?.description) }}
 								</h2>
 								
+								<h5>
+									{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.DETAILS' | translate }}
+								</h5>
 								<h3 class="details">
 									{{ localeTranslate(warehouseProduct?.product?.details) }}
 								</h3>
 							</div>
 							
-							<div class="statistics">
-								<es-statistics [warehouseProduct]="warehouseProduct"
-								               [warehouseId]="warehouseId">
-								</es-statistics>
-							</div>
-							
-							<button (click)="createOrder()"
-							        class="purchase-button"
-							        color="accent"
-							        mat-raised-button
-							>
-								{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.BUY_FOR' | translate }}
-							</button>
-							
+							<section class="button-section">
+								<div class="button-row">
+									<button (click)="createOrder()"
+									        class="purchase-button"
+									        color="primary"
+									        mat-raised-button
+									>
+										{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.BUY_FOR' | translate }}
+									</button>
+									
+									<button (click)="openComments()"
+									        color="primary"
+									        mat-raised-button>
+										Перейти к комментариям
+									</button>
+								</div>
+							</section>
 							<div class="delivery-address">
 								<mat-icon *ngIf="!isTakeaway">directions_bike</mat-icon>
 								<mat-icon *ngIf="isTakeaway">flash_on</mat-icon>
@@ -79,20 +94,16 @@
 						
 						</div>
 					</div>
-					<div class="col-6 p-0">
-						<es-product-image [productImages]="images">
-						</es-product-image>
+					<div class="col-sm-5 product-statistics-container">
+						<div class="statistics">
+							<es-statistics [warehouseProduct]="warehouseProduct"
+							               [warehouseId]="warehouseId">
+							</es-statistics>
+						</div>
 					</div>
 				</div>
 			</mat-card-content>
 		</mat-card>
-	</section>
-	<section>
-		<!--		<es-product-comment [warehouseProductId]="warehouseProduct?.id"-->
-		<!--		                    [warehouseId]="warehouseId"-->
-		<!--		                    [customerId]="storage.customerId"-->
-		<!--		>-->
-		<!--		</es-product-comment>-->
 	</section>
 </div>
 
