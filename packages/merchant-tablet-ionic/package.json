@@ -25,7 +25,7 @@
     "server:dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=2048 yarn run config:dev && yarn run webpack-dev-server --config config/webpack.config.js --open --progress --profile --watch --content-base src/",
     "build": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=1024 yarn run config:dev && yarn ng:dev build && yarn tsc",
     "build:dev": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=2048 yarn rimraf dist www && yarn run config:dev && yarn ng:dev build && yarn tsc",
-    "build:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 yarn run config:prod && yarn run ng:prod build --prod --aot=false --build-optimizer=false && yarn tsc",
+    "build:prod": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 yarn rimraf dist www && yarn run config:prod && yarn run ng:prod build --prod --aot=false --build-optimizer=false && yarn tsc",
     "test": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 yarn run config:dev && yarn ng:dev test",
     "lint": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 yarn run config:dev && yarn ng:dev lint",
     "e2e": "cross-env NODE_ENV=development NODE_OPTIONS=--max_old_space_size=4096 yarn run config:dev && yarn ng:dev e2e",
