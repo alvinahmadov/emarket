@@ -23,7 +23,6 @@ import { GeoLocationProductsService } from 'app/services/geo-location-products';
 import { ProductsService }            from 'app/services/products.service';
 import { WarehouseProductsService }   from 'app/services/warehouse-products.service';
 import { StorageService }             from 'app/services/storage';
-import { environment }                from 'environments/environment';
 import { CarouselViewComponent }      from './views/carousel/carousel-view.component';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -162,9 +161,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 	{
 		let geoLocationForProducts: GeoLocation;
 		
-		const isProductionEnv = environment.production;
-		
-		if(this.storageService.customerId && isProductionEnv)
+		if(this.storageService.customerId)
 		{
 			const customer = await this.customerRouter
 			                           .get(this.storageService.customerId)
@@ -180,7 +177,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 				geoLocationForProducts = await this.geoLocationService.getCurrentGeoLocation();
 			} catch(error)
 			{
-				console.warn(error);
+				console.error({error});
 			}
 		}
 		
