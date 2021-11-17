@@ -1,11 +1,11 @@
 import { Injectable }     from '@angular/core';
 import { first }          from 'rxjs/operators';
+import browser            from 'browser-detect';
 import { CustomerRouter } from '@modules/client.common.angular2/routers/customer-router.service';
 
 export interface Statistics
 {
-	__rtg: number;
-	__hsn: boolean;
+	__hsn: Map<string, number>;
 }
 
 export const storageKeys = {
@@ -15,7 +15,7 @@ export const storageKeys = {
 	},
 	stats:                {
 		name:  "_stcs",
-		value: { __hsn: 0, __rtg: 0 }
+		value: new Map<string, number>()
 	},
 	locale:               {
 		name:  "_locale",
@@ -69,6 +69,10 @@ export const storageKeys = {
 		name:  "productViewType",
 		value: ""
 	},
+	isBrowser: {
+		name: "isBrowser",
+		value: true
+	},
 	serverConnection:     {
 		name:  "serverConnection",
 		value: ""
@@ -85,7 +89,11 @@ export const storageKeys = {
             })
 export class StorageService
 {
-	constructor(private readonly customerRouter: CustomerRouter) {}
+	constructor(private readonly customerRouter: CustomerRouter)
+	{
+		const isBrowser = !browser().mobile;
+		localStorage.setItem(storageKeys.isBrowser.name, isBrowser.toString());
+	}
 	
 	public get customerId(): string | null
 	{
@@ -101,29 +109,6 @@ export class StorageService
 		else
 		{
 			localStorage.setItem(storageKeys.customerId.name, id);
-		}
-	}
-	
-	public get hasSeen(): boolean
-	{
-		if(this.stats)
-		{
-			return this.stats.__hsn;
-		}
-		return false;
-	}
-	
-	public set hasSeen(value: boolean)
-	{
-		if(this.stats)
-		{
-			let stats = this.stats;
-			stats.__hsn = value;
-			this.stats = stats;
-		}
-		else
-		{
-			this.stats = { __hsn: false, __rtg: 0 };
 		}
 	}
 	
@@ -294,6 +279,11 @@ export class StorageService
 		localStorage.setItem(storageKeys.serverConnection.name, val);
 	}
 	
+	public get isBrowser(): boolean
+	{
+		return Boolean(localStorage.getItem(storageKeys.isBrowser.name));
+	}
+	
 	public set isLocationSearchBarVisible(value: boolean | null)
 	{
 		if(value === null || value == false)
@@ -329,8 +319,6 @@ export class StorageService
 				console.error(error.message);
 			}
 		}
-		
-		console.warn(`Customer with id '${customerId}' does not exists!"`);
 		return false;
 	}
 	
@@ -344,9 +332,30 @@ export class StorageService
 		localStorage.clear();
 	}
 	
+	public getSeen(productId: string): boolean
+	{
+		if(this.stats)
+		{
+			return this.stats.__hsn.get(productId) == 1;
+		}
+		return false;
+	}
+	
+	public setSeen(productId: string, value: boolean)
+	{
+		if(this.stats == null || this.stats?.__hsn == null)
+		{
+			this.stats = { __hsn: new Map<string, number>() };
+		}
+		
+		let stats = this.stats;
+		stats.__hsn.set(productId, +value);
+		this.stats = stats;
+	}
+	
 	protected get stats(): Statistics
 	{
-		const stats = localStorage.getItem(storageKeys.stats.name);
+		const stats = sessionStorage.getItem(storageKeys.stats.name);
 		
 		if(stats)
 			return <Statistics>JSON.parse(stats);
@@ -362,7 +371,8 @@ export class StorageService
 		}
 		else
 		{
-			localStorage.setItem(storageKeys.stats.name, JSON.stringify({ __hsn: 0, __rtg: 0 }));
+			const stats: Statistics = { __hsn: new Map<string, number>() };
+			localStorage.setItem(storageKeys.stats.name, JSON.stringify(stats));
 		}
 	}
 }
