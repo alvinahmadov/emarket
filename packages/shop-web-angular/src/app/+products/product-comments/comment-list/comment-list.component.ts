@@ -1,10 +1,10 @@
 import {
-	Component, Input,
+	Component,
+	Input,
 	OnDestroy,
 	AfterViewInit
 }                                from '@angular/core';
-import { Subscription, Subject } from 'rxjs';
-import { takeUntil }             from 'rxjs/operators';
+import { Subject }               from 'rxjs';
 import Comment                   from '@modules/server.common/entities/Comment';
 import Customer                  from '@modules/server.common/entities/Customer';
 import { environment as env }    from '@modules/client.common.angular2/environments/environment';
@@ -29,13 +29,14 @@ export class CommentListComponent implements AfterViewInit, OnDestroy
 	@Input()
 	public customerId: string;
 	
+	@Input()
+	public comments: Comment[];
+	
 	public showReply = false;
 	public togglePanel: any = {};
-	public comments: Comment[];
 	public _customer: Customer;
 	private _customers: Customer[];
 	
-	public comments$: Subscription = null;
 	private _ngDestroy$: Subject<void> = new Subject<void>();
 	
 	constructor(
@@ -57,11 +58,6 @@ export class CommentListComponent implements AfterViewInit, OnDestroy
 			this._customersService
 			    .getCustomers()
 			    .subscribe(customers => this._customers = customers);
-			
-			this.comments$ = this._commentsService
-			                     .getComments(this.storeId, this.storeProductId)
-			                     .pipe(takeUntil(this._ngDestroy$))
-			                     .subscribe(comments => this.comments = comments);
 		}
 	}
 	
@@ -110,8 +106,10 @@ export class CommentListComponent implements AfterViewInit, OnDestroy
 		return avatar;
 	}
 	
-	public async onDeleteComment(commentId: string)
+	public async onDeleteComment(comment: Comment)
 	{
+		const commentId = comment.id;
+		
 		if(this.customerId && this.comments.length > 0)
 		{
 			const comment = await this._commentsService
@@ -134,8 +132,10 @@ export class CommentListComponent implements AfterViewInit, OnDestroy
 		}
 	}
 	
-	public async onLike(commentId: string)
+	public async onLike(comment: Comment)
 	{
+		const commentId = comment.id;
+		
 		if(this.customerId && this.comments.length > 0)
 		{
 			await this._commentsService
@@ -148,8 +148,10 @@ export class CommentListComponent implements AfterViewInit, OnDestroy
 		}
 	}
 	
-	public async onDisLike(commentId: string)
+	public async onDisLike(comment: Comment)
 	{
+		const commentId = comment.id;
+		
 		if(this.customerId && this.comments.length > 0)
 		{
 			await this._commentsService
