@@ -4,20 +4,20 @@ import { Mixpanel }                           from '@ionic-native/mixpanel/ngx';
 import { BarcodeScanner }                     from '@ionic-native/barcode-scanner/ngx';
 import { Subscription }                       from 'rxjs';
 import { ILocaleMember }                      from '@modules/server.common/interfaces/ILocale';
+import OrderCarrierStatus                     from '@modules/server.common/enums/OrderCarrierStatus';
+import OrderWarehouseStatus                   from '@modules/server.common/enums/OrderWarehouseStatus';
 import Order                                  from '@modules/server.common/entities/Order';
 import Product                                from '@modules/server.common/entities/Product';
 import Warehouse                              from '@modules/server.common/entities/Warehouse';
 import WarehouseProduct                       from '@modules/server.common/entities/WarehouseProduct';
-import OrderCarrierStatus                     from '@modules/server.common/enums/OrderCarrierStatus';
-import OrderWarehouseStatus                   from '@modules/server.common/enums/OrderWarehouseStatus';
 import { OrderRouter }                        from '@modules/client.common.angular2/routers/order-router.service';
 import { WarehouseProductsRouter }            from '@modules/client.common.angular2/routers/warehouse-products-router.service';
 import { ProductLocalesService }              from '@modules/client.common.angular2/locale/product-locales.service';
 import { WarehousesService }                  from 'services/warehouses.service';
+import { StorageService }                     from 'services/storage.service';
 import { CreateProductTypePopupPage }         from './create-product-type-popup/create-product-type-popup';
 import { EditProductTypePopupPage }           from './edit-product-type-popup/edit-product-type-popup';
 import { OrdersFilterModes }                  from '../../filters/orders-filters';
-import { Storage }                            from 'services/storage.service';
 
 export enum OrderState
 {
@@ -54,12 +54,13 @@ export class WarehousePage implements OnInit
 	public productsLoading: boolean = true;
 	public ordersCount: number;
 	public showRelevant: boolean = true;
-	public showAllProducts: boolean = false;
+	public showAllProducts: boolean = true;
+	public hideTopProducts: boolean = false;
 	public focusedOrder: Order;
 	public focusedOrder$: any;
 	public orderStatus: any;
 	
-	public filter: any; //todo
+	public filter: any;
 	public keys = Object.keys;
 	public statuses = OrderStatus;
 	
@@ -72,11 +73,14 @@ export class WarehousePage implements OnInit
 			private warehouseProductsRouter: WarehouseProductsRouter,
 			private mixpanel: Mixpanel,
 			private translateProductLocales: ProductLocalesService,
-			private storage: Storage,
+			private storageService: StorageService,
 			private barcodeScanner: BarcodeScanner,
 			private warehouseService: WarehousesService
 	)
-	{}
+	{
+		this.showAllProducts = this.storageService.warehouseView === "products";
+		this.hideTopProducts = !this.storageService.topShown;
+	}
 	
 	public ngOnInit(): void
 	{
@@ -87,17 +91,22 @@ export class WarehousePage implements OnInit
 	
 	public get isLogged(): string
 	{
-		return this.storage.warehouseId;
+		return this.storageService.warehouseId;
 	}
 	
 	public get warehouseId(): string
 	{
-		return this.storage.warehouseId;
+		return this.storageService.warehouseId;
 	}
 	
 	public get language(): string
 	{
-		return this.storage.language;
+		return this.storageService.locale;
+	}
+	
+	public get isBrowser(): boolean
+	{
+		return this.storageService.platform === "browser"
 	}
 	
 	public switchOrders(showRelevant, event?): void
@@ -127,6 +136,22 @@ export class WarehousePage implements OnInit
 	public toggleOrderContainer(): void
 	{
 		this.isOrderContainerLive = !this.isOrderContainerLive;
+		this.showAllProducts = !this.isOrderContainerLive;
+	}
+	
+	public toggleAllProducts()
+	{
+		if(!this.isOrderContainerLive)
+		{
+			this.showAllProducts = !this.showAllProducts;
+			this.storageService.warehouseView = this.showAllProducts ? 'products' : 'orders';
+		}
+	}
+	
+	public toggleTopProducts()
+	{
+		this.hideTopProducts = !this.hideTopProducts;
+		this.storageService.topShown = !this.hideTopProducts;
 	}
 	
 	public getWarehouseProductImageUrl(p: Product): string
@@ -269,17 +294,17 @@ export class WarehousePage implements OnInit
 		}
 	}
 	
-	public async presentCreateProductPopover(): Promise<void>
+	public presentCreateProductPopover(): void
 	{
+		const modalOptions = {
+			component:       CreateProductTypePopupPage,
+			backdropDismiss: true,
+			cssClass:        'mutation-product-modal',
+		};
+		
 		try
 		{
-			const modal = await this.modalCtrl.create({
-				                                          component:       CreateProductTypePopupPage,
-				                                          backdropDismiss: true,
-				                                          cssClass:        'mutation-product-modal',
-			                                          });
-			
-			await modal.present();
+			this.modalCtrl.create(modalOptions).then(modal => modal.present())
 		} catch(e)
 		{
 			console.error(e)
@@ -302,7 +327,7 @@ export class WarehousePage implements OnInit
 	public async getOrderShortProcess(): Promise<boolean>
 	{
 		this.orderStatus = await this.warehouseService
-		                             .getWarehouseOrderProcess(this.storage.warehouseId)
+		                             .getWarehouseOrderProcess(this.storageService.warehouseId)
 		                             .toPromise();
 		
 		this.orderStatus = this.orderStatus['ordersShortProcess'];
