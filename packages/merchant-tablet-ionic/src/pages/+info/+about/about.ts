@@ -2,7 +2,6 @@ import { Component, OnDestroy } from '@angular/core';
 import { Subscription }         from 'rxjs';
 import { CustomerRouter }       from '@modules/client.common.angular2/routers/customer-router.service';
 import { environment }          from 'environment';
-import { AppSettingsService }   from 'services/app-settings.service';
 import { StorageService }       from 'services/storage.service';
 
 @Component({
@@ -20,7 +19,6 @@ export class AboutPage implements OnDestroy
 	
 	constructor(
 			private userRouter: CustomerRouter,
-			private appSettingsService: AppSettingsService,
 			private storageService: StorageService
 	)
 	{
