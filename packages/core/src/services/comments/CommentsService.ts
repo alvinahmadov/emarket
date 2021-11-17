@@ -1,27 +1,31 @@
-import { injectable }                                           from 'inversify';
-import Logger                                                   from 'bunyan';
-import mongoose                                                 from 'mongoose';
-import { Observable }                                           from 'rxjs';
-import { first, map }                                           from 'rxjs/operators';
-import { _throw }                                               from 'rxjs/observable/throw';
-import _                                                        from 'lodash';
+import { injectable }                from 'inversify';
+import Logger                        from 'bunyan';
+import mongoose                      from 'mongoose';
+import { Observable }                from 'rxjs';
+import { first, map, share }         from 'rxjs/operators';
+import { _throw }                    from 'rxjs/observable/throw';
+import _                             from 'lodash';
 import {
 	asyncListener,
 	observableListener,
 	routerName, serialization
-}                                                               from '@pyro/io';
-import { UpdateObject }                                         from '@pyro/db/db-update-object';
-import IComment, { ICommentCreateObject, ICommentUpdateObject } from '@modules/server.common/interfaces/IComment';
-import IPagingOptions                                           from '@modules/server.common/interfaces/IPagingOptions';
-import ICommentsRouter                                          from '@modules/server.common/routers/ICommentRouter';
-import Comment                                                  from '@modules/server.common/entities/Comment';
-import WarehouseProduct                                         from '@modules/server.common/entities/WarehouseProduct';
-import IService                                                 from '../../services/IService';
-import { createLogger }                                         from '../../helpers/Log';
-import { WarehousesProductsService }                            from '../../services/warehouses';
+}                                    from '@pyro/io';
+import { UpdateObject }              from '@pyro/db/db-update-object';
+import IComment,
+{
+	ICommentCreateObject,
+	ICommentUpdateObject
+}                                    from '@modules/server.common/interfaces/IComment';
+import IPagingOptions                from '@modules/server.common/interfaces/IPagingOptions';
+import ICommentsRouter               from '@modules/server.common/routers/ICommentRouter';
+import Comment                       from '@modules/server.common/entities/Comment';
+import WarehouseProduct              from '@modules/server.common/entities/WarehouseProduct';
+import IService                      from '../../services/IService';
+import { createLogger }              from '../../helpers/Log';
+import { WarehousesProductsService } from '../../services/warehouses';
 
 @injectable()
-@routerName('comment')
+@routerName('comments')
 export class CommentsService
 		implements ICommentsRouter, IService
 {
@@ -57,18 +61,20 @@ export class CommentsService
 						               _throw(new Error(`Comment with id ${commentId} not exists`));
 					
 					               return this._factory(comment);
-				               })
+				               }),
+				           first()
 		           );
 	}
 	
 	@observableListener()
-	public async getComments(
+	public getComments(
 			storeId: string,
 			storeProductId: string,
 			pagingOptions: IPagingOptions = {}
-	): Promise<Comment[]>
+	): Observable<Comment[]>
 	{
 		this.logger.info('.getComments(storeId, storeProductId, pagingOptions) called');
+		
 		const sortObj = {};
 		
 		if(pagingOptions.sort)
@@ -76,15 +82,15 @@ export class CommentsService
 			sortObj[pagingOptions.sort.field] = pagingOptions.sort.sortBy;
 		}
 		
-		return await this._getWarehouseProduct(storeId, storeProductId)
-		                 .pipe(
-				                 map(warehouseProduct =>
-						                     _.map(
-								                     warehouseProduct.comments,
-								                     comment => this._factory(comment))
-				                 ),
-		                 )
-		                 .toPromise();
+		return this._getWarehouseProduct(storeId, storeProductId)
+		           .pipe(
+				           map(warehouseProduct =>
+						               _.map(
+								               warehouseProduct.comments,
+								               comment => this._factory(comment))
+				           ),
+				           share()
+		           );
 	}
 	
 	@asyncListener()
@@ -218,14 +224,14 @@ export class CommentsService
 	
 	@asyncListener()
 	public async delete(
-			warehouseId: string,
+			storeId: string,
 			productId: string,
 			commentIds: string[]
-	): Promise<Comment[]>
+	): Promise<boolean>
 	{
 		this.logger.info('Deleting comments ' + commentIds);
 		
-		const warehouseProduct = await this._getWarehouseProduct(warehouseId, productId)
+		const warehouseProduct = await this._getWarehouseProduct(storeId, productId)
 		                                   .toPromise();
 		const updated = warehouseProduct.comments.filter(
 				(c) =>
@@ -243,11 +249,11 @@ export class CommentsService
 		);
 		warehouseProduct.comments = this._commentsFactory(updated);
 		await this._warehousesProductsService.update(
-				warehouseId,
+				storeId,
 				warehouseProduct
 		);
 		
-		return this._commentsFactory(warehouseProduct.comments);
+		return warehouseProduct.comments.findIndex(c => commentIds.includes(c.id)) == -1;
 	}
 	
 	protected _getWarehouseProduct(
