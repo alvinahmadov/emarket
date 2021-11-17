@@ -1,0 +1,51 @@
+:host
+{
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+}
+
+.scrollable-area
+{
+	width: 100%;
+	height: 550px;
+	background: #fff;
+	border: none;
+	overflow: auto;
+}
+
+section {
+	display: table;
+	width: 100%;
+	padding-bottom: 20px;
+}
+
+.comment-container
+{
+	.comment-label {
+		display: table-cell;
+		font-size: 14px;
+		margin-left: 8px;
+		min-width: 120px;
+	}
+	
+	.comment-button-row {
+		display: table-cell;
+		width: 490px;
+		text-align: right;
+		right: 0;
+		margin: 10px;
+	}
+	
+	.comment-flex-container {
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
+	}
+	
+	.comment-button-container {
+		display: flex;
+		justify-content: center;
+		width: 120px;
+	}
+}

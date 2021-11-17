@@ -1,0 +1,66 @@
+<mat-card style="height: 100%">
+	<mat-card-title class="d-inline-flex">
+		<button
+				[routerLink]="['/products/details', warehouseId, productId]"
+				class="back-button mr-3"
+				mat-icon-button
+		>
+			<svg viewBox="0 0 24 24">
+				<path
+						d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"
+						fill="#000000"
+						fill-opacity="0.54"
+				/>
+			</svg>
+		</button>
+		<h5>
+			{{ 'PRODUCTS_VIEW.PRODUCT_DETAILS_VIEW.COMMENTS' | translate }} {{title}}
+		
+		</h5>
+	</mat-card-title>
+	<mat-card-content class="container-fluid">
+		<section>
+			<div class="row">
+				<es-comment-list [storeId]="warehouseId"
+				                 [storeProductId]="warehouseProductId"
+				                 [customerId]="customerId"
+				                 [comments]="comments"
+				>
+				</es-comment-list>
+			</div>
+		</section>
+		<section class="message-container">
+			<form (ngSubmit)="onSubmit()"
+			      [formGroup]="commentForm"
+			      class="row">
+				<div class="form-group col-md-12">
+					<div class="row">
+						<div class="input-group">
+						<textarea class="form-control"
+						          formControlName="message"
+						          placeholder="Message"
+						          [rows]="5"
+						>
+						</textarea>
+						</div>
+					</div>
+					<div class="comment-button-row float-right">
+						<button type="submit"
+						        color="accent"
+						        style="margin: 0 9px;"
+						        mat-flat-button>
+							Comment
+						</button>
+						<button type="button"
+						        color="warn"
+						        [disabled]="!message.length"
+						        (click)="onCommentCancel()"
+						        mat-flat-button>
+							Cancel
+						</button>
+					</div>
+				</div>
+			</form>
+		</section>
+	</mat-card-content>
+</mat-card>
