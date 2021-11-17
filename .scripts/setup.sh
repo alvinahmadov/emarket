@@ -1,5 +1,5 @@
 #!/bin/bash
-source "$(pwd)/scripts/constants"
+source "$(pwd)/.scripts/constants"
 
 check_install() {
 	packages=("$@")
