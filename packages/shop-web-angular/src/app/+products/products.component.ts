@@ -1,69 +1,92 @@
-import { Component, OnDestroy, OnInit, ViewChild, }   from '@angular/core';
-import ProductInfo                                    from '@modules/server.common/entities/ProductInfo';
-import { Store }                                      from 'app/services/store';
-import { WarehouseOrdersRouter }                      from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
-import { IOrderCreateInput }                          from '@modules/server.common/routers/IWarehouseOrdersRouter';
-import { Router }                                     from '@angular/router';
-import GeoLocation                                    from '@modules/server.common/entities/GeoLocation';
-import { debounceTime, distinctUntilChanged, first, } from 'rxjs/operators';
-import { UserRouter }                                 from '@modules/client.common.angular2/routers/user-router.service';
-import { GeoLocationService }                         from 'app/services/geo-location';
-import RegistrationSystem                             from '@modules/server.common/enums/RegistrationSystem';
-import { GeoLocationProductsService }                 from 'app/services/geo-location-products';
-import { ILocation }                                  from '@modules/server.common/interfaces/IGeoLocation';
-import { WarehouseProductsService }                   from 'app/services/warehouse-products';
-import WarehouseProduct                               from '@modules/server.common/entities/WarehouseProduct';
-import DeliveryType                                   from '@modules/server.common/enums/DeliveryType';
-import { Subject }                                    from 'rxjs';
+import {
+	Component, ViewChild,
+	OnDestroy, OnInit
+}                                     from '@angular/core';
+import { Router }                     from '@angular/router';
+import { Subject }                    from 'rxjs';
+import {
+	debounceTime,
+	distinctUntilChanged,
+	first
+}                                     from 'rxjs/operators';
+import { ILocation }                  from '@modules/server.common/interfaces/IGeoLocation';
+import RegistrationSystem             from '@modules/server.common/enums/RegistrationSystem';
+import DeliveryType                   from '@modules/server.common/enums/DeliveryType';
+import { IOrderCreateInput }          from '@modules/server.common/routers/IWarehouseOrdersRouter';
+import GeoLocation                    from '@modules/server.common/entities/GeoLocation';
+import ProductInfo                    from '@modules/server.common/entities/ProductInfo';
+import WarehouseProduct               from '@modules/server.common/entities/WarehouseProduct';
+import { WarehouseOrdersRouter }      from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
+import { CustomerRouter }             from '@modules/client.common.angular2/routers/customer-router.service';
+import { GeoLocationService }         from 'app/services/geo-location';
+import { GeoLocationProductsService } from 'app/services/geo-location-products';
+import { ProductsService }            from 'app/services/products.service';
+import { WarehouseProductsService }   from 'app/services/warehouse-products.service';
+import { StorageService }             from 'app/services/storage';
+import { environment }                from 'environments/environment';
+import { CarouselViewComponent }      from './views/carousel/carousel-view.component';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
-import { CarouselViewComponent }                      from './views/carousel/carousel-view.component';
-import { environment }                                from 'environments/environment';
 
 const initializeProductsNumber: number = 10;
 
 @Component({
-	           selector: 'products',
-	           styleUrls: ['./products.component.scss'],
+	           selector:    'products',
+	           styleUrls:   ['./products.component.scss'],
 	           templateUrl: './products.component.html',
            })
 export class ProductsComponent implements OnInit, OnDestroy
 {
 	@ViewChild('carouselView')
-	carouselView: CarouselViewComponent;
+	public carouselView: CarouselViewComponent;
 	
-	products: ProductInfo[] = [];
-	productsLoading: boolean = true;
-	searchModel: string;
-	searchText: string;
-	modelChanged: Subject<string> = new Subject<string>();
-	isWideView: boolean;
+	public products: ProductInfo[] = [];
+	public productsLoading: boolean = true;
+	public searchModel: string;
+	public searchText: string;
+	public modelChanged: Subject<string> = new Subject<string>();
+	public isWideView: boolean;
 	
 	private getOrdersGeoObj: { loc: ILocation };
 	private productsCount: number;
 	private _ngDestroy$ = new Subject<void>();
 	
 	constructor(
-			private readonly store: Store,
-			private readonly warehouseOrdersRouter: WarehouseOrdersRouter,
 			private readonly router: Router,
-			private readonly userRouter: UserRouter,
+			private readonly customerRouter: CustomerRouter,
+			private readonly storageService: StorageService,
 			private readonly geoLocationService: GeoLocationService,
 			private readonly geoLocationProductsService: GeoLocationProductsService,
-			private readonly warehouseProductsService: WarehouseProductsService
+			private readonly productsService: ProductsService,
+			private readonly warehouseProductsService: WarehouseProductsService,
+			private readonly warehouseOrdersRouter: WarehouseOrdersRouter
 	)
 	{
-		this.isWideView = this.store.productListViewSpace === 'wide';
-		this.loadGeoLocationProducts().catch(console.error);
+		this.isWideView = this.storageService.productListViewSpace === 'wide';
+		this.loadGeoLocationProducts();
 		this.productsFilter();
 	}
 	
-	get isListView()
+	public ngOnInit()
 	{
-		return this.store.productViewType !== 'carousel';
+		if(this.products)
+		{
+			this.continueOrder();
+		}
 	}
 	
-	productsFilter()
+	public ngOnDestroy()
+	{
+		this._ngDestroy$.next();
+		this._ngDestroy$.complete();
+	}
+	
+	public get isListView()
+	{
+		return this.storageService.productViewType !== 'carousel';
+	}
+	
+	public productsFilter()
 	{
 		this.modelChanged
 		    .pipe(
@@ -85,67 +108,52 @@ export class ProductsComponent implements OnInit, OnDestroy
 		               });
 	}
 	
-	changedProducts(text: string)
+	public changedProducts(text: string)
 	{
 		this.modelChanged.next(text);
 	}
 	
-	ngOnInit()
-	{
-		if(this.products)
-		{
-			this.continueOrder();
-		}
-	}
-	
-	ngOnDestroy()
-	{
-		this._ngDestroy$.next();
-		this._ngDestroy$.complete();
-	}
-	
-	private async buyItem(currentProduct: WarehouseProduct, warehouseId)
+	private async buyItem(currentProduct: WarehouseProduct, warehouseId: string)
 	{
 		const orderCreateInput: IOrderCreateInput = {
 			warehouseId,
-			orderType: this.store.deliveryType,
-			products: [{ count: 1, productId: currentProduct.product['id'] }],
-			userId: this.store.userId,
-			options: { autoConfirm: true },
+			orderType:  this.storageService.deliveryType,
+			products:   [{ count: 1, productId: currentProduct.product['id'] }],
+			customerId: this.storageService.customerId,
+			options:    { autoConfirm: false },
 		};
 		
 		await this.warehouseOrdersRouter.create(orderCreateInput);
 		
-		this.router.navigate(['/orders']).catch(console.error);
+		await this.router.navigate(['/orders']);
 	}
 	
 	private async continueOrder()
 	{
-		const buyProduct = this.store.buyProduct;
+		const buyProductId = this.storageService.buyProductId;
 		
-		if(buyProduct)
+		if(buyProductId)
 		{
-			const userId = this.store.userId;
-			const mechantId = this.store.merchantId;
+			const customerId = this.storageService.customerId;
+			const merchantId = this.storageService.merchantId;
 			
-			if(userId && mechantId)
+			if(customerId && merchantId)
 			{
-				const productForBuy = await this.warehouseProductsService.getWarehouseProduct(
-						mechantId,
-						buyProduct
-				);
+				const productForBuy =
+						      await this.warehouseProductsService
+						                .getWarehouseProduct(merchantId, buyProductId);
 				
 				if(productForBuy)
 				{
-					await this.buyItem(productForBuy, mechantId);
-					this.store.buyProduct = '';
-					this.store.merchantId = '';
+					await this.buyItem(productForBuy, merchantId);
+					this.storageService.buyProductId = null;
+					this.storageService.merchantId = null;
 				}
 			}
 			else
 			{
-				this.store.buyProduct = '';
-				this.store.merchantId = '';
+				this.storageService.buyProductId = null;
+				this.storageService.merchantId = null;
 			}
 		}
 	}
@@ -156,14 +164,14 @@ export class ProductsComponent implements OnInit, OnDestroy
 		
 		const isProductionEnv = environment.production;
 		
-		if(this.store.userId && isProductionEnv)
+		if(this.storageService.customerId && isProductionEnv)
 		{
-			const user = await this.userRouter
-			                       .get(this.store.userId)
-			                       .pipe(first())
-			                       .toPromise();
+			const customer = await this.customerRouter
+			                           .get(this.storageService.customerId)
+			                           .pipe(first())
+			                           .toPromise();
 			
-			geoLocationForProducts = user.geoLocation;
+			geoLocationForProducts = customer.geoLocation;
 		}
 		else
 		{
@@ -178,7 +186,7 @@ export class ProductsComponent implements OnInit, OnDestroy
 		
 		this.getOrdersGeoObj = {
 			loc: {
-				type: 'Point',
+				type:        'Point',
 				coordinates: geoLocationForProducts.loc.coordinates,
 			},
 		};
@@ -196,29 +204,35 @@ export class ProductsComponent implements OnInit, OnDestroy
 			if(this.getOrdersGeoObj)
 			{
 				const isDeliveryRequired =
-						this.store.deliveryType === DeliveryType.Delivery;
+						      this.storageService.deliveryType === DeliveryType.Delivery;
 				const isTakeaway =
-						this.store.deliveryType === DeliveryType.Takeaway;
+						      this.storageService.deliveryType === DeliveryType.Takeaway;
 				
-				const products = await this.geoLocationProductsService
-				                           .geoLocationProductsByPaging(
-						                           this.getOrdersGeoObj,
-						                           {
-							                           skip: this.products.length,
-							                           limit: count ? count : initializeProductsNumber,
-						                           },
-						                           { isDeliveryRequired, isTakeaway },
-						                           this.searchText
-				                           )
-				                           .pipe(first())
-				                           .toPromise();
+				const products: ProductInfo[] = await this.geoLocationProductsService
+				                                          .geoLocationProductsByPaging(
+						                                          this.getOrdersGeoObj,
+						                                          {
+							                                          skip:  this.products.length,
+							                                          limit: count
+							                                                 ? count
+							                                                 : initializeProductsNumber,
+						                                          },
+						                                          {
+							                                          isDeliveryRequired,
+							                                          isTakeaway
+						                                          },
+						                                          this.searchText
+				                                          )
+				                                          .pipe(first())
+				                                          .toPromise();
 				
 				this.products.push(...products);
 			}
 			else
 			{
-				this.store.registrationSystem = RegistrationSystem.Once;
-				this.router.navigate(['/login']).catch(console.error);
+				this.storageService.registrationSystem = RegistrationSystem.Once;
+				this.router.navigate(['/auth'])
+				    .catch(err => console.error(err));
 			}
 		}
 		this.productsLoading = false;
@@ -226,18 +240,41 @@ export class ProductsComponent implements OnInit, OnDestroy
 	
 	private async loadProductsCount()
 	{
+		const isDeliveryRequired =
+				      this.storageService.deliveryType === DeliveryType.Delivery;
+		const isTakeaway =
+				      this.storageService.deliveryType === DeliveryType.Takeaway;
+		
 		if(this.getOrdersGeoObj)
 		{
-			const isDeliveryRequired =
-					this.store.deliveryType === DeliveryType.Delivery;
-			const isTakeaway =
-					this.store.deliveryType === DeliveryType.Takeaway;
-			
 			this.productsCount = await this.geoLocationProductsService.getCountOfGeoLocationProducts(
 					this.getOrdersGeoObj,
 					{ isDeliveryRequired, isTakeaway },
 					this.searchText
 			);
+		}
+		else
+		{
+			const locale = this.storageService.languageCode.split('-')[0];
+			this.productsCount = await this.productsService
+			                               .getCountOfProducts(
+					                               {
+						                               'title.value':       {
+							                               $text: {
+								                               $search:        this.searchText,
+								                               $caseSensitive: false,
+								                               $language:      locale
+							                               }
+						                               },
+						                               'description.value': {
+							                               $text: {
+								                               $search:        this.searchText,
+								                               $caseSensitive: false,
+								                               $language:      locale
+							                               }
+						                               },
+					                               }
+			                               );
 		}
 	}
 }
