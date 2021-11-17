@@ -92,7 +92,7 @@ export class StorageService
 	constructor(private readonly customerRouter: CustomerRouter)
 	{
 		const isBrowser = !browser().mobile;
-		localStorage.setItem(storageKeys.isBrowser.name, isBrowser.toString());
+		sessionStorage.setItem(storageKeys.isBrowser.name, isBrowser.toString());
 	}
 	
 	public get customerId(): string | null
@@ -112,12 +112,12 @@ export class StorageService
 		}
 	}
 	
-	public get languageCode(): string
+	public get locale(): string
 	{
 		return localStorage.getItem(storageKeys.locale.name) || null;
 	}
 	
-	public set languageCode(code: string)
+	public set locale(code: string)
 	{
 		if(code == null)
 		{
@@ -281,24 +281,24 @@ export class StorageService
 	
 	public get isBrowser(): boolean
 	{
-		return Boolean(localStorage.getItem(storageKeys.isBrowser.name));
+		return sessionStorage.getItem(storageKeys.isBrowser.name) === "true";
 	}
 	
 	public set isLocationSearchBarVisible(value: boolean | null)
 	{
 		if(value === null || value == false)
 		{
-			localStorage.setItem(storageKeys.locbar.name, '0');
+			sessionStorage.setItem(storageKeys.locbar.name, '0');
 		}
 		else
 		{
-			localStorage.setItem(storageKeys.locbar.name, '1');
+			sessionStorage.setItem(storageKeys.locbar.name, '1');
 		}
 	}
 	
 	public get isLocationSearchBarVisible(): boolean
 	{
-		return localStorage.getItem(storageKeys.locbar.name) === '1';
+		return sessionStorage.getItem(storageKeys.locbar.name) === '1';
 	}
 	
 	public isLogged()
