@@ -1,16 +1,12 @@
-import { Injectable }                                                                       from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, CanLoad, Route, Router, RouterStateSnapshot } from '@angular/router';
-import { StorageService }                                                                   from 'services/storage.service';
+import { Injectable } from '@angular/core';
+import {
+	ActivatedRouteSnapshot, RouterStateSnapshot,
+	CanActivate, CanLoad, Route
+}                     from '@angular/router';
 
 @Injectable()
 export class AuthModuleGuard implements CanLoad, CanActivate
 {
-	constructor(
-			private readonly storage: StorageService,
-			private readonly router: Router
-	)
-	{}
-	
 	async canLoad(route: Route)
 	{
 		return true;
@@ -21,6 +17,6 @@ export class AuthModuleGuard implements CanLoad, CanActivate
 			state: RouterStateSnapshot
 	): Promise<boolean>
 	{
-		return await this.storage.isLogged();
+		return true;
 	}
 }
