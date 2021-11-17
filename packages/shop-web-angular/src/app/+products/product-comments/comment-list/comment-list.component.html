@@ -1,0 +1,75 @@
+<div class="scrollable">
+	<mat-card *ngFor="let comment of comments; let i = index" class="comment">
+		<mat-card-content style="margin-bottom: 0!important;">
+			<div class="row">
+				<div class="col">
+					<div class="row">
+						<div class="comment-avatar">
+							<img src="{{getAvatar(comment)}}"
+							     width="40"
+							     height="40"
+							     alt="{{getCustomer(comment).role}}">
+						</div>
+						<div class="col">
+							<div class="row">
+								<span class="comment-title">
+								{{getCustomer(comment).fullName}}
+							</span>
+							</div>
+							<div class="row">
+								<span class="comment-subtitle">
+									{{comment._createdAt | date:datetimeFormat:timezone}}
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col col-md-10">
+					<div class="comment-message d-flex">
+						<div [ngClass]="{'me': isByMe(comment), 'participant': !isByMe(comment)}">
+							<p>
+								{{comment.message}}
+							</p>
+							<div class="row text-right">
+								<div>
+									<button mat-flat-button
+									        disableRipple
+									        class="primary"
+									        (click)="onLike(comment.id)">
+										<mat-icon class="bg-transparent">thumb_up</mat-icon>
+									</button>
+									<span *ngIf="comment.likes > 0"
+									      style="color: rgba(14,114,255,0.56)">
+										+{{comment.likes}}
+									</span>
+								</div>
+								<div>
+									<button mat-flat-button
+									        disableRipple
+									        class="warn"
+									        style="background-color: transparent"
+									        (click)="onDisLike(comment.id)">
+										<mat-icon class="bg-transparent">thumb_down</mat-icon>
+									</button>
+									<span *ngIf="comment.dislikes > 0"
+									      style="color: rgba(255,0,0,0.46)">
+										-{{comment.dislikes}}
+									</span>
+								</div>
+								<div>
+									<button mat-flat-button
+									        disableRipple
+									        class="danger"
+									        *ngIf="isByMe(comment)"
+									        (click)="onDeleteComment(comment.id)">
+										<mat-icon class="bg-transparent">delete</mat-icon>
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</mat-card-content>
+	</mat-card>
+</div>
