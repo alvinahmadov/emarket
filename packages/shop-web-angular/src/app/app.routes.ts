@@ -58,10 +58,10 @@ export const ROUTES: Routes = [
 				canActivate:  [WarehousesModuleGuard, AuthGuard],
 			},
 			{
-				path:         'settings',
+				path:         'profile',
 				loadChildren: () =>
-						              import('./+settings')
-								              .then((m) => m.SettingsModule)
+						              import('./+profile')
+								              .then((m) => m.ProfileModule)
 								              .catch(err => catchError(err)),
 				canActivate:  [AuthGuard],
 			},
