@@ -2,10 +2,10 @@ import { Component, Input }      from '@angular/core';
 import { WarehouseOrdersRouter } from '@modules/client.common.angular2/routers/warehouse-orders-router.service';
 import IWarehouse                from '@modules/server.common/interfaces/IWarehouse';
 import IWarehouseProduct         from '@modules/server.common/interfaces/IWarehouseProduct';
-import IUser                     from '@modules/server.common/interfaces/IUser';
+import ICustomer                 from '@modules/server.common/interfaces/ICustomer';
 import { ProductLocalesService } from '@modules/client.common.angular2/locale/product-locales.service';
 import { ILocaleMember }         from '@modules/server.common/interfaces/ILocale';
-import { Store }                 from 'app/services/store';
+import { StorageService }        from 'app/services/storage';
 
 @Component({
 	           selector: 'taggroup-remove-modal',
@@ -18,27 +18,27 @@ export class BuyProductComponent
 	@Input()
 	public warehouseProduct: IWarehouseProduct;
 	@Input()
-	public user: IUser;
+	public user: ICustomer;
 	
 	constructor(
 			// private readonly activeModal: NgbActiveModal,
 			private readonly warehouseOrdersRouter: WarehouseOrdersRouter,
 			private readonly _productLocalesService: ProductLocalesService,
-			private readonly store: Store
+			private readonly storage: StorageService
 	)
 	{}
 	
 	async createOrder()
 	{
-		this.warehouseOrdersRouter.createByProductType(
+		await this.warehouseOrdersRouter.createByProductType(
 				this.user._id.toString(),
 				this.warehouse._id.toString(),
 				this.warehouseProduct._id.toString(),
-				this.store.deliveryType
+				this.storage.deliveryType
 		);
 	}
 	
-	protected localeTranslate(member: ILocaleMember[])
+	public localeTranslate(member: ILocaleMember[])
 	{
 		return this._productLocalesService.getTranslate(member);
 	}
