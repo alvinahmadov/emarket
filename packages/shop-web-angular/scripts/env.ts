@@ -113,7 +113,7 @@ export const env: Env = cleanEnv(
 			WEB_MEMORY:      num({ default: 4096 }),
 			
 			HOST: str({ default: 'localhost' }),
-			PORT: num({ default: 3000 })
+			PORT: num({ default: 8080 })
 		},
 		{ strict: true, dotEnvPath: __dirname + '/../.env' }
 );
