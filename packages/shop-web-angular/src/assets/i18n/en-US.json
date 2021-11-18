@@ -8,6 +8,7 @@
 	"Products": "Products",
 	"Orders": "Orders",
 	"Warehouses": "Warehouses",
+	"Account": "Account",
 	"Buy for": "Buy for",
 	"DELIVERY": "Delivery",
 	"SELECT_YOUR_LOCATION": "Select your location",
@@ -89,12 +90,18 @@
 				"USERNAME": "Username",
 				"EMAIL": "Mail address",
 				"PASSWORD": "Password",
+				"NEWPASSWORD": "New password",
+				"OLDPASSWORD": "Old password",
 				"SELECTED_CITY": "Selected City",
 				"SELECTED_STREET": "Selected Street",
 				"HOUSE": "house",
 				"APARTMENT_OPTIONAL": "Apartment (optional)",
 				"COUNTRY_NOT_FOUND": "Not found"
 			}
+		},
+		"ERRORS": {
+			"EMAIL_OR_USERNAME_IS_INVALID": "Username and/or password is invalid!",
+			"DATA_IS_INVALID": "Username and/or password is invalid!"
 		}
 	},
 	"ORDER_VIEW": {

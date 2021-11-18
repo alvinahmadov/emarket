@@ -7,6 +7,7 @@
 	"Products": "Продукты",
 	"Orders": "Заказы",
 	"Warehouses": "Магазины",
+	"Account": "Учетная запись",
 	"Buy for": "В корзину",
 	"DELIVERY": "Доставка",
 	"SELECT_YOUR_LOCATION": "Выберите ваше местоположение",
@@ -43,12 +44,13 @@
 		"LOADING_MORE_DATA": "Загрузка дополнительных данных ...",
 		"PRODUCT_DETAILS_VIEW": {
 			"BUY_FOR": "Заказать",
-			"DESCRIPTION": "Коротко о товаре",
-			"DETAILS": "Детальное описание",
+			"DESCRIPTION": "Описание",
+			"DETAILS": "Детали",
 			"TOTAL_RATING": "Обшая оценка",
 			"TOTAL_VIEWS": "Обшие просмотры",
 			"RATE": "Оценить",
 			"CATEGORIES": "Категории",
+			"COMMENTS": "Комментарии",
 			"DELIVERY_FROM": "Доставка из",
 			"TAKEOUT_FROM": "Вынос из",
 			"PRICE": "Цена",
@@ -112,6 +114,8 @@
 				"USERNAME": "Имя пользователя",
 				"EMAIL": "Почтовый адрес",
 				"PASSWORD": "Пароль",
+				"NEWPASSWORD": "Новый пароль",
+				"OLDPASSWORD": "Старый пароль",
 				"SELECTED_CITY": "Выбранный город",
 				"SELECTED_STREET": "Выбранная улица",
 				"HOUSE": "Жилой дом",
@@ -121,7 +125,7 @@
 		},
 		"ERRORS": {
 			"EMAIL_OR_USERNAME_IS_INVALID": "Имя потльзователя/почта неверная!",
-			"DATA_IS_INVALID": "Имя потльзователя/почта или пароль неверные!"
+			"DATA_IS_INVALID": "Имя пользователя/почта или пароль неверные!"
 		}
 	},
 	"ORDER_VIEW": {
