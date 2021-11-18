@@ -13,7 +13,7 @@ export class ViewTypeComponent
 	public listViewType: string;
 	public viewType: string;
 	public showTuneButton: boolean = true;
-	public showTuning: boolean = false;
+	public showTuning: boolean = true;
 	
 	constructor(private storage: StorageService, private router: Router)
 	{
