@@ -286,7 +286,6 @@ export class ServicesApp
 		const adminCollectionCount = await this._adminsService.count({
 			                                                             email: adminEmail
 		                                                             });
-		adminName.slice(0, 2);
 		if(adminCollectionCount === 0)
 		{
 			await this._adminsService
