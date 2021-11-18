@@ -20,9 +20,11 @@ export interface IAdminEmailInput
 	email: string;
 }
 
-export interface IAdminLoginInput extends IAdminEmailInput
+export interface IAdminLoginInput
 {
+	authInfo: string;
 	password: string;
+	expiresIn?: string | number;
 }
 
 export interface IAdminRegistrationInput
@@ -53,7 +55,7 @@ interface IAdminRouter
 	
 	register(input: IAdminRegistrationInput): Promise<Admin>;
 	
-	login(email: string, password: string): Promise<IAdminLoginResponse | null>;
+	login(authInfo: string, password: string, expiresIn?: string | number): Promise<IAdminLoginResponse | null>;
 	
 	updateById(id: Admin['id'], updateObject: Partial<IAdmin>): Promise<Admin>;
 }
