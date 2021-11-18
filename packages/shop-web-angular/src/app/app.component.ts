@@ -1,26 +1,23 @@
 import {
 	Component,
+	ElementRef,
 	ViewChild,
 	ViewEncapsulation,
-	ElementRef,
-	OnInit
-}                           from '@angular/core';
-import { RouterOutlet }     from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import { v4 as uuid }       from 'uuid'
-import IUser                from '@modules/server.common/interfaces/IUser';
-import Admin                from '@modules/server.common/entities/Admin';
-import {
-	ChatPopup,
-	ChatService,
-	ChatSession
-}                           from '@modules/client.common.angular2/services/chat.service';
-import { AppState }         from './app.service';
-import { AdminsService }    from './services/admins.service';
-import { environment }      from 'environments/environment'
-import { CustomersService } from 'app/services/customer.service';
-import { StorageService }   from 'app/services/storage';
-import { MatSidenav }       from "@angular/material/sidenav";
+	OnInit, Inject
+}                                              from '@angular/core';
+import { DOCUMENT }                            from '@angular/common';
+import { RouterOutlet }                        from '@angular/router';
+import { MatSidenav }                          from '@angular/material/sidenav';
+import { TranslateService }                    from '@ngx-translate/core';
+import { v4 as uuid }                          from 'uuid'
+import IUser                                   from '@modules/server.common/interfaces/IUser';
+import Admin                                   from '@modules/server.common/entities/Admin';
+import { ChatPopup, ChatService, ChatSession } from '@modules/client.common.angular2/services/chat.service';
+import { environment }                         from 'environments/environment'
+import { CustomersService }                    from 'app/services/customer.service';
+import { StorageService }                      from 'app/services/storage';
+import { AppState }                            from 'app/app.service';
+import { AdminsService }                       from 'app/services/admins.service';
 
 export interface ToolbarController
 {
@@ -53,14 +50,19 @@ export class AppComponent implements OnInit
 	private session: ChatSession;
 	
 	private chatPopup: ChatPopup;
+	public selectedLang: string;
+	public defaultLanguage = '';
+	public dir: 'ltr' | 'rtl';
 	
 	constructor(
 			public appState: AppState,
-			private translateService: TranslateService,
+			public readonly translateService: TranslateService,
 			private storageService: StorageService,
 			private customersService: CustomersService,
 			private adminsService: AdminsService,
-			private chatService: ChatService
+			private chatService: ChatService,
+			@Inject(DOCUMENT)
+			public document: Document
 	)
 	{
 		// Here we initialize translates for the all app, when loads for the first time. Do not remove it
@@ -85,11 +87,29 @@ export class AppComponent implements OnInit
 			);
 		}
 		
+		this.selectedLang = translateService.currentLang;
 	}
 	
 	public ngOnInit()
 	{
 		this.initializeChat()
+	}
+	
+	public get isBrowser(): boolean
+	{
+		return this.storageService.isBrowser;
+	}
+	
+	public get isToolbarDisabled()
+	{
+		const serverConnection = Number(this.storageService.serverConnection);
+		return (
+				this.routerOutlet == null ||
+				serverConnection === 0 ||
+				!this.routerOutlet.isActivated ||
+				(this.routerOutlet.component as ToolbarController)
+						.toolbarDisabled === true
+		);
 	}
 	
 	private async initializeChat()
@@ -136,27 +156,5 @@ export class AppComponent implements OnInit
 				);
 			}
 		}
-	}
-	
-	public get isToolbarDisabled()
-	{
-		const serverConnection = Number(this.storageService.serverConnection);
-		return (
-				this.routerOutlet == null ||
-				serverConnection === 0 ||
-				!this.routerOutlet.isActivated ||
-				(this.routerOutlet.component as ToolbarController)
-						.toolbarDisabled === true
-		);
-	}
-	
-	public get isChatDisabled()
-	{
-		const serverConnection = Number(this.storageService.serverConnection);
-		return (
-				this.routerOutlet == null ||
-				serverConnection === 0 ||
-				!this.routerOutlet.isActivated
-		);
 	}
 }
