@@ -195,6 +195,13 @@ export namespace GQLQuery
 			}
 		`;
 		
+		export const isAuthenticated = gql`
+			query IsCustomerAuthenticated($token: String!)
+			{
+				isCustomerAuthenticated(token: $token)
+			}
+		`;
+		
 		export const Metrics = gql`
 			query GetCustomerMetrics($id: String!)
 			{
