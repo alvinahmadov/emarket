@@ -1,18 +1,12 @@
-import { Injectable } from '@angular/core';
-import { Apollo }     from 'apollo-angular';
-import { Observable } from 'rxjs';
-import { map, share } from 'rxjs/operators';
-import IPagingOptions from '@modules/server.common/interfaces/IPagingOptions';
-import ProductInfo    from '@modules/server.common/entities/ProductInfo';
-import ApolloService  from '@modules/client.common.angular2/services/apollo.service';
-import { GQLQuery }   from 'graphql/definitions';
-
-export interface IGeoLocationProductsOptions
-{
-	isDeliveryRequired?: boolean;
-	isTakeaway?: boolean,
-	trackingDistance?: number
-}
+import { Injectable }                  from '@angular/core';
+import { Apollo }                      from 'apollo-angular';
+import { Observable }                  from 'rxjs';
+import { map, share }                  from 'rxjs/operators';
+import IPagingOptions                  from '@modules/server.common/interfaces/IPagingOptions';
+import { IGeoLocationProductsOptions } from '@modules/server.common/routers/IGeoLocationProductsRouter';
+import ProductInfo                     from '@modules/server.common/entities/ProductInfo';
+import ApolloService                   from '@modules/client.common.angular2/services/apollo.service';
+import { GQLQuery }                    from 'graphql/definitions';
 
 @Injectable()
 export class GeoLocationProductsService extends ApolloService
@@ -51,7 +45,7 @@ export class GeoLocationProductsService extends ApolloService
 	
 	public async getCountOfGeoLocationProducts(
 			geoLocation,
-			options?: { isDeliveryRequired?: boolean; isTakeaway?: boolean },
+			options?: IGeoLocationProductsOptions,
 			searchText?: string
 	)
 	{
