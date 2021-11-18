@@ -25,18 +25,23 @@ export class PasswordValidator
 		};
 	}
 	
-	public static passwordMatchValidator(control: AbstractControl)
+	public static passwordMatchValidator(
+			control: AbstractControl,
+			passwordKey: string,
+			confirmPasswordKey: string
+	)
 	{
 		// get password from our password form control
-		const password: string = control.get('password').value;
+		const password: string = control.get(passwordKey).value;
 		// get password from our confirmPassword form control
-		const confirmPassword: string = control.get('confirmPassword').value;
+		const confirmPassword: string = control.get(confirmPasswordKey).value;
 		// compare is the password math
 		if(password !== confirmPassword)
 		{
 			// if they don't match, set an error in our confirmPassword form control
-			control.get('confirmPassword').setErrors({ NoPassswordMatch: true });
+			control.get(confirmPasswordKey).setErrors({ NoPassswordMatch: true });
 		}
+		
 	}
 }
 
