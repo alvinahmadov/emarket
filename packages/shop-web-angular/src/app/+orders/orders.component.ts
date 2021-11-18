@@ -4,7 +4,11 @@ import Order                        from '@modules/server.common/entities/Order'
 @Component({
 	           selector:    'orders',
 	           styleUrls:   ['./orders.component.scss'],
-	           templateUrl: './orders.component.html',
+	           template: `
+		                     <div *ngFor="let order of orders" class="orders">
+			                     <order [order]="order"></order>
+		                     </div>
+	                     `,
            })
 export class OrdersComponent implements OnInit
 {
