@@ -22,25 +22,24 @@ export interface ICurrencyFindObject
 @Injectable()
 export class CurrenciesService extends ApolloService
 {
-	private readonly currencies$: Observable<Currency[]>;
+	private readonly currencies$: Observable<Currency[]>
+			                 = this.apollo
+			                       .query<{
+				                       currencies: Currency[]
+			                       }>({
+				                          query: GQLQuery.Currency.GetAll,
+			                          })
+			                       .pipe(
+					                       map((result) => this.get(result)),
+					                       share()
+			                       );
 	
 	constructor(apollo: Apollo)
 	{
 		super(apollo,
 		      {
-			      serviceName:  "Shop::CurrenciesService",
+			      serviceName: "Shop::CurrenciesService",
 		      });
-		
-		this.currencies$ = this.apollo
-		                       .query<{
-			                       currencies: Currency[]
-		                       }>({
-			                          query: GQLQuery.Currency.GetAll,
-		                          })
-		                       .pipe(
-				                       map((result) => this.get(result)),
-				                       share()
-		                       );
 	}
 	
 	public getCurrencies(): Observable<Currency[]>
