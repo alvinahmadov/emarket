@@ -5,8 +5,8 @@ import { MatButtonModule }        from '@angular/material/button';
 import { MatCardModule }          from '@angular/material/card';
 import { MatDialogModule }        from '@angular/material/dialog';
 import { LocationPopupComponent } from './location-popup.component';
-import { LocationFormModule }     from 'app/+login/byLocation/location/location.module';
-import { GoogleMapModule }        from 'app/+login/byLocation/google-map/google-map.module';
+import { LocationFormModule }     from 'app/+auth/by-location/location/location.module';
+import { GoogleMapModule }        from 'app/+auth/by-location/google-map/google-map.module';
 
 const COMPONENTS = [LocationPopupComponent];
 
