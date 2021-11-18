@@ -10,7 +10,7 @@ import { MatDialogRef, MAT_DIALOG_DATA }       from '@angular/material/dialog';
 import { Router }                              from '@angular/router';
 import { IGeoLocationCreateObject, ILocation } from '@modules/server.common/interfaces/IGeoLocation';
 import { CustomerRouter }                      from '@modules/client.common.angular2/routers/customer-router.service';
-import { LocationFormComponent }               from 'app/+login/byLocation/location/location.component';
+import { LocationFormComponent }               from 'app/+auth/by-location/location/location.component';
 import { StorageService }                      from 'app/services/storage';
 import { environment }                         from 'environments/environment';
 
