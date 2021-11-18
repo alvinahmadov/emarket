@@ -6,7 +6,7 @@ import { environment }               from 'environments/environment';
 import { StorageService }            from 'app/services/storage';
 
 @Component({
-	           selector:    'settings',
+	           selector:    'es-settings',
 	           styleUrls:   ['./settings.component.scss'],
 	           templateUrl: './settings.component.html',
            })
@@ -23,7 +23,7 @@ export class SettingsComponent implements OnInit
 			private storage: StorageService
 	)
 	{
-		this.defaultLanguage = environment.DEFAULT_LANGUAGE;
+		this.defaultLanguage = this.storage.locale ?? environment.DEFAULT_LANGUAGE;
 		const languages = environment.AVAILABLE_LOCALES;
 		
 		if(translateService.currentLang)
@@ -35,8 +35,6 @@ export class SettingsComponent implements OnInit
 		else
 		{
 			translateService.addLangs(languages.split('|'));
-			translateService.setDefaultLang('ru-RU');
-			
 			const browserLang = translateService.getBrowserLang();
 			
 			if(this.defaultLanguage)

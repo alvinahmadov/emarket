@@ -1,0 +1,20 @@
+@import '../../../styles/variables';
+@import '~@angular/material/theming';
+
+:host {
+  background-color: $brand-darken;
+  height: 100%;
+}
+
+.settings-containerx {
+  width: 51vw;
+  margin: auto;
+}
+
+masonry {
+  margin: auto;
+}
+
+.rtl {
+  text-align: right;
+}

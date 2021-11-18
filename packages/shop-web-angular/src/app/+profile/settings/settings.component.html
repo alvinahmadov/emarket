@@ -1,14 +1,10 @@
-<mat-card [ngClass]="document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'"
-          class="container">
+<mat-card [ngClass]="document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'">
 	<mat-card-header>
-		<mat-card-title>
-			<h3 class="text-center">{{ 'SETTINGS_VIEW.SETTINGS' | translate }}</h3>
-		</mat-card-title>
-	</mat-card-header>
-	<mat-card-content>
 		<mat-card-subtitle>
 			<h6>{{ 'SETTINGS_VIEW.LANGUAGE' | translate }}</h6>
 		</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-content>
 		<mat-form-field>
 			<mat-select [(value)]="selectedLang">
 				<mat-option (click)="switchLanguage(selectedLang)"

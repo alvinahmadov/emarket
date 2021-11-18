@@ -1,0 +1,32 @@
+<mat-card>
+	<mat-card-header>
+		<mat-card-subtitle>
+			<h6>{{ 'SETTINGS_VIEW.LANGUAGE' | translate }}</h6>
+		</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-content>
+		<div class="content auth container">
+			<div class="formContent">
+				<div class="row">
+					<div class="col offset-1 col-5 mr-2">
+						<es-location-form
+								#locationForm
+								(continue)="updateCustomer()"
+								(mapCoordinatesEmitter)="onCoordinatesChanges($event)"
+								(mapGeometryEmitter)="onGeometrySend($event)"
+								(oldPasswordEmitter)="onOldPasswordChanged($event)"
+								[coordinates]="coordinates"
+						></es-location-form>
+					</div>
+					
+					<div class="col col-5 ml-2">
+						<ngx-google-map [mapCoordEvent]="mapCoordEmitter"
+						                [mapGeometryEvent]="mapGeometryEmitter"
+						></ngx-google-map>
+					</div>
+				</div>
+			</div>
+		</div>
+	</mat-card-content>
+</mat-card>
+
