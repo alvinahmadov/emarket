@@ -39,7 +39,7 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 		{
 			return {
 				token: res.token,
-				user:  this._userFactory(res.user),
+				user:  this._customerFactory(res.user),
 			};
 		}
 	}
@@ -55,7 +55,7 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 	public async register(input: ICustomerRegistrationInput): Promise<Customer>
 	{
 		const u = await this.router.run<ICustomer>('register', input);
-		return this._userFactory(u);
+		return this._customerFactory(u);
 	}
 	
 	public async addRegistrationInfo(
@@ -74,9 +74,9 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 		await this.router.run('updatePassword', id, password);
 	}
 	
-	protected _userFactory(user: ICustomer)
+	async isAuthenticated(token: string): Promise<boolean>
 	{
-		return user == null ? null : new Customer(user);
+		return this.router.run<boolean>('isAuthenticated', token);
 	}
 	
 	public getRegistrationsSettings(): Promise<{
@@ -86,5 +86,10 @@ export class CustomerAuthRouter implements ICustomerAuthRouter
 		return this.router.run<{ registrationRequiredOnStart: boolean }>(
 				'getRegistrationsSettings'
 		);
+	}
+	
+	protected _customerFactory(user: ICustomer)
+	{
+		return user == null ? null : new Customer(user);
 	}
 }
