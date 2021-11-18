@@ -551,6 +551,7 @@ type Query {
 	invitesRequests(findInput: InvitesRequestsFindInput, invited: Boolean, pagingOptions: PagingOptionsInput): [InviteRequest!]
 	isCustomerEmailExists(email: String!): Boolean!
 	isCustomerExists(conditions: CustomerMemberInput!): Boolean!
+	isCustomerAuthenticated(token: String!): Boolean!
 	nearbyStores(geoLocation: GeoLocationFindInput!): [Warehouse!]!
 	notifyAboutLaunch(devicesIds: [String!]!, invite: InviteInput): Void
 	order(id: String!): Order
