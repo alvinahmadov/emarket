@@ -3,6 +3,8 @@
 **/*.d.ts
 **/*.d.ts.map
 *~
+!extra-webpack.config.js
+!typings.d.ts
 *.sw[mnpcod]
 *.log
 *.tmp
