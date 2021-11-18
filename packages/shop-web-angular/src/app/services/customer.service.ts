@@ -9,6 +9,7 @@ import Customer                  from '@modules/server.common/entities/Customer'
 import {
 	ICustomerLoginResponse,
 	ICustomerRegistrationInput,
+	IPasswordUpdateInput,
 }                                from '@modules/server.common/routers/ICustomerAuthRouter';
 import ApolloService             from '@modules/client.common.angular2/services/apollo.service';
 import { GQLQuery, GQLMutation } from 'graphql/definitions';
@@ -116,6 +117,22 @@ export class CustomersService extends ApolloService
 			                   variables: {
 				                   id,
 				                   updateObject
+			                   }
+		                   })
+		           .pipe(map((result) => this.get(result)));
+	}
+	
+	public updatePassword(
+			id: string,
+			passwordInput: IPasswordUpdateInput
+	): Observable<Customer>
+	{
+		return this.apollo
+		           .mutate({
+			                   mutation:  GQLMutation.Customer.UpdatePassword,
+			                   variables: {
+				                   id,
+				                   password: passwordInput
 			                   }
 		                   })
 		           .pipe(map((result) => this.get(result)));
