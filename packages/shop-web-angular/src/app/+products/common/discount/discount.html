@@ -1,11 +1,21 @@
-<div *ngIf="getDiscount() != 0" class="discount-circle brand-light">
-    <div class="price-initial">
-        {{ currentProduct ? '$' + currentProduct.initialPrice : '' }}
-    </div>
-    <span>
+<div *ngIf="getDiscount() != 0"
+     class="discount-circle">
+	<div class="row">
+		<div class="col-sm-6">
+			<div class="price">
+				{{ currentProduct ? '$' + currentProduct.price: '' }}
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<div class="price-initial">
+				{{ currentProduct ? '$' + currentProduct.initialPrice : '' }}
+			</div>
+		</div>
+	</div>
+	<div class="row">
 		<i aria-hidden="true" class="material-icons">
 			trending_down
 		</i>
-        {{ getDiscount() }}%</span
-    >
+        ({{ getDiscount() }}%)
+    </div>
 </div>
