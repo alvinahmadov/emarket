@@ -6,6 +6,9 @@
 dist
 build
 www
+!config/**/*
+!src/replaced-module-package.js
+!src/custom-typings.d.ts
 
 # Logs
 logs
