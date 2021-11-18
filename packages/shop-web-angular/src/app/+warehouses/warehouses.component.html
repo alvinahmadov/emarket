@@ -1,0 +1,31 @@
+<mat-card *ngIf="warehouses" class="warehouses-view">
+    <mat-card-title class="text-center">
+        <mat-form-field class="mt-2 search-products" dividerColor="primary">
+            <input
+                    (ngModelChange)="changedWarehouses($event)"
+                    [ngModel]="searchModel"
+                    matInput
+                    placeholder="{{ 'WAREHOUSES_VIEW.SEARCH_WAREHOUSES' | translate }}"
+                    type="text"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+    </mat-card-title>
+    <list-view
+            (loadWarehouses)="loadWarehouses()"
+            [isWideView]="isWideView"
+            [warehousesLoading]="warehousesLoading"
+            [warehouses]="warehouses"
+    >
+    </list-view>
+    <mat-card-content *ngIf="!warehouses.length && !warehousesLoading" class="p-3">
+        <h4 *ngIf="searchText" class="text-center">
+            {{ 'WAREHOUSES_VIEW.NO_WAREHOUSES_FOUND' | translate }} "{{
+            searchText
+            }}"!
+        </h4>
+        <h4 *ngIf="!searchText" class="text-center">
+            {{ 'WAREHOUSES_VIEW.NO_WAREHOUSES' | translate }}
+        </h4>
+    </mat-card-content>
+</mat-card>
