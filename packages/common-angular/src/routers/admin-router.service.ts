@@ -24,9 +24,9 @@ export class AdminRouter implements IAdminRouter
 		           .pipe(map((admin) => this._adminFactory(admin)));
 	}
 	
-	public login(email: string, password: string): Promise<IAdminLoginResponse | null>
+	public login(authInfo: string, password: string, expiresIn?: string | number): Promise<IAdminLoginResponse | null>
 	{
-		return this.router.run<IAdminLoginResponse>('register', email, password);
+		return this.router.run<IAdminLoginResponse>('register', authInfo, password, expiresIn);
 	}
 	
 	public register(input: IAdminRegistrationInput): Promise<Admin>
