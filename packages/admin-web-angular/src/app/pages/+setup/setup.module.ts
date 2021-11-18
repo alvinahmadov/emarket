@@ -18,13 +18,13 @@ const routes: Routes = [
 						              (m) => m.SetupMerchantsModule
 				              ),
 	},
-	{
-		path:         'market',
-		loadChildren: () =>
-				              import('./+market/market.module').then(
-						              (m) => m.MarketModule
-				              ).catch(err => console.error(err)),
-	},
+	// {
+	// 	path:         'market',
+	// 	loadChildren: () =>
+	// 			              import('./+market/market.module').then(
+	// 					              (m) => m.MarketModule
+	// 			              ).catch(err => console.error(err)),
+	// },
 ];
 
 @NgModule({
