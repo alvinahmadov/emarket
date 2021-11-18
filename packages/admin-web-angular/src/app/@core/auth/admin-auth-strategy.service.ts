@@ -30,7 +30,7 @@ interface IAdminRegisterDto
 
 interface IAuthOptions
 {
-	authInfo: string;
+	email: string;
 	password: string;
 	rememberMe?: boolean | null;
 }
@@ -116,7 +116,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 	
 	public authenticate(args: IAuthOptions): Observable<NbAuthResult>
 	{
-		const { authInfo, password } = args;
+		const { email, password } = args;
 		const rememberMe = !!args.rememberMe;
 		const expiresIn = rememberMe ? environment.JWT_EXPIRES_MAX : environment.JWT_EXPIRES_MIN;
 		
@@ -125,7 +125,7 @@ export class AdminAuthStrategy extends NbAuthStrategy
 			           adminLogin: IAdminLoginInfo
 		           }>({
 			              mutation:    GQLMutation.Admin.Login,
-			              variables:   { authInfo, password, expiresIn },
+			              variables:   { authInfo: email, password, expiresIn },
 			              errorPolicy: 'all',
 		              })
 		           .pipe(
