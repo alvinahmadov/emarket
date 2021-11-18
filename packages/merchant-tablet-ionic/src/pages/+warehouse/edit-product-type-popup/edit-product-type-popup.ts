@@ -1,10 +1,10 @@
 import {
-	AfterViewInit,
 	Component,
-	ElementRef,
 	Input,
+	ElementRef,
+	ViewChild,
 	OnInit,
-	ViewChild
+	AfterViewInit
 }                                                      from '@angular/core';
 import { ActionSheetController, ModalController }      from '@ionic/angular';
 import { Camera, CameraOptions }                       from '@ionic-native/camera/ngx';
@@ -13,7 +13,6 @@ import { FileItem, FileUploader, FileUploaderOptions } from 'ng2-file-upload';
 import { first }                                       from 'rxjs/operators';
 import {
 	IProductDescription,
-	IProductImage,
 	IProductTitle
 }                                                      from '@modules/server.common/interfaces/IProduct';
 import { ILocaleMember }                               from '@modules/server.common/interfaces/ILocale';
@@ -21,16 +20,16 @@ import DeliveryType                                    from '@modules/server.com
 import Currency                                        from '@modules/server.common/entities/Currency';
 import WarehouseProduct                                from '@modules/server.common/entities/WarehouseProduct';
 import Product                                         from '@modules/server.common/entities/Product';
-import ProductsCategory                                from '@modules/server.common/entities/ProductsCategory';
 import { ProductLocalesService }                       from '@modules/client.common.angular2/locale/product-locales.service';
 import { ProductRouter }                               from '@modules/client.common.angular2/routers/product-router.service';
 import { WarehouseProductsRouter }                     from '@modules/client.common.angular2/routers/warehouse-products-router.service';
 import { WarehouseRouter }                             from '@modules/client.common.angular2/routers/warehouse-router.service';
+import { environment }                                 from 'environments/environment';
 import { ProductsCategoryService }                     from 'services/products-category.service';
 import { StorageService }                              from 'services/storage.service';
-import { environment }                                 from 'environments/environment';
 import { ProductImagesPopup }                          from '../product-pictures-popup/product-images-popup.component';
 import ProductTypePopup                                from '../../../@shared/common/product-type-popup';
+import ProductsCategory                                from "@modules/server.common/entities/ProductsCategory";
 
 @Component({
 	           selector:    'page-edit-product-type-popup',
@@ -40,38 +39,26 @@ import ProductTypePopup                                from '../../../@shared/co
 export class EditProductTypePopupPage extends ProductTypePopup
 		implements OnInit, AfterViewInit
 {
-	public OK: string = 'OK';
-	public CANCEL: string = 'CANCEL';
-	public SELECT_CATEGORIES: string = 'SELECT_CATEGORIES';
-	public PREFIX: string = 'WAREHOUSE_VIEW.SELECT_POP_UP.';
 	public selectOptionsObj: object;
-	public takaProductDelivery: boolean = true;
-	public takaProductTakeaway: boolean;
-	public isAvailable: boolean = false;
-	
-	@ViewChild('imageHolder', { static: true })
-	private _imageHolder: ElementRef;
 	
 	@Input()
 	public warehouseProduct: WarehouseProduct;
+	
 	public product: Product;
 	public currency: Currency;
 	public readyToUpdate: boolean = false;
-	public uploader: FileUploader;
-	public translLang: string;
-	public productsCategories: ProductsCategory[];
-	public selectedProductCategories: string[] = [];
 	public hasImage: boolean = true;
-	
-	private static cssClass = "mutation-product-images-modal";
 	
 	private lastProductTitle: IProductTitle[];
 	private lastProductDescription: IProductDescription[];
 	private lastProductPrice: number;
 	private lastProductCount: number;
-	public readonly locales: string[] = environment.AVAILABLE_LOCALES.split('|');
-	public readonly descrMaxLength = 255;
-	private imagesData: IProductImage[];
+	
+	public productsCategories: ProductsCategory[];
+	public uploader: FileUploader;
+	
+	@ViewChild('imageHolder', { static: true })
+	private _imageHolder: ElementRef;
 	
 	@ViewChild('fileInput', { static: true })
 	private fileInput: ElementRef;
@@ -93,7 +80,7 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		this._setupFileUploader();
 	}
 	
-	async ngOnInit()
+	public ngOnInit()
 	{
 		this.isAvailable = this.warehouseProduct.isProductAvailable;
 		this.product = this.warehouseProduct.product as Product;
@@ -101,19 +88,16 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		this.lastProductPrice = this.warehouseProduct.price;
 		this.lastProductDescription = this.product.description;
 		this.lastProductTitle = this.product.title;
-		this.translLang = this.translate.currentLang;
-		this.takaProductDelivery = this.warehouseProduct.isDeliveryRequired;
-		this.takaProductTakeaway = this.warehouseProduct.isTakeaway;
-		
-		
+		this.locale = this.translate.currentLang;
+		this.productDelivery = this.warehouseProduct.isDeliveryRequired;
+		this.productTakeaway = this.warehouseProduct.isTakeaway;
 		this.currentLocale =
-				this.localeTranslateService.takeSelectedLang(this.translLang) ||
+				this.localeTranslateService.takeSelectedLang(this.locale) ||
 				environment.DEFAULT_LANGUAGE;
-		this.storageService.deviceId
 		this._setupLocaleServiceValidationState();
 		
 		this._selectExistingProductCategories();
-		await this._loadProductsCategories();
+		this._loadProductsCategories();
 	}
 	
 	public ngAfterViewInit(): void
@@ -169,65 +153,74 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		);
 	}
 	
-	get currentLocale()
+	public get currentLocale()
 	{
 		return this.localeTranslateService.currentLocale;
 	}
 	
-	set currentLocale(locale: string)
+	public set currentLocale(locale: string)
 	{
 		this.localeTranslateService.currentLocale = locale;
 	}
 	
-	get productTitle()
+	public get productTitle()
 	{
 		return this.localeTranslateService.getMemberValue(this.product.title);
 	}
 	
-	set productTitle(memberValue: string)
+	public set productTitle(memberValue: string)
 	{
 		this.localeTranslateService.setMemberValue('title', memberValue);
 	}
 	
-	get productDescription()
+	public get productDescription()
 	{
 		return this.localeTranslateService.getMemberValue(
 				this.product.description
 		);
 	}
 	
-	set productDescription(memberValue: string)
+	public set productDescription(memberValue: string)
 	{
-		if(memberValue.length <= this.descrMaxLength)
-			this.localeTranslateService.setMemberValue('description', memberValue);
+		if(memberValue.length >= this.descriptionMaxLength)
+			memberValue = memberValue.slice(0, this.descriptionMaxLength);
+		this.localeTranslateService.setMemberValue('description', memberValue);
 	}
 	
-	get productDetails()
+	public get productDetails()
 	{
 		return this.localeTranslateService.getMemberValue(
 				this.product.details
 		);
 	}
 	
-	set productDetails(memberValue: string)
+	public set productDetails(memberValue: string)
 	{
-		this.localeTranslateService.setMemberValue('details', memberValue);
+		if(memberValue)
+		{
+			if(memberValue.length > 0)
+			{
+				this.localeTranslateService.setMemberValue('details', memberValue);
+				return;
+			}
+		}
+		this.localeTranslateService.setMemberValue('details', "");
 	}
 	
 	public getProductTypeChange(type: string)
 	{
 		if(DeliveryType[type] === DeliveryType.Delivery)
 		{
-			if(!this.takaProductDelivery && !this.takaProductTakeaway)
+			if(!this.productDelivery && !this.productTakeaway)
 			{
-				this.takaProductTakeaway = true;
+				this.productTakeaway = true;
 			}
 		}
 		else
 		{
-			if(!this.takaProductDelivery && !this.takaProductTakeaway)
+			if(!this.productDelivery && !this.productTakeaway)
 			{
-				this.takaProductDelivery = true;
+				this.productDelivery = true;
 			}
 		}
 	}
@@ -446,14 +439,23 @@ export class EditProductTypePopupPage extends ProductTypePopup
 		          {
 			          this.product = product;
 			          this.warehouseProduct.product = product.id;
-			          this.warehouseProduct.isDeliveryRequired = this.takaProductDelivery;
-			          this.warehouseProduct.isTakeaway = this.takaProductTakeaway;
+			          this.warehouseProduct.isDeliveryRequired = this.productDelivery;
+			          this.warehouseProduct.isTakeaway = this.productTakeaway;
 			          this.warehouseProduct.isProductAvailable = this.isAvailable;
 			
 			          this.warehouseProductsRouter
 			              .update(this.warehouseId, this.warehouseProduct)
 			              .then(() => this.modalController.dismiss());
 		          });
+	}
+	
+	public availabilityHandler()
+	{
+		this.warehouseProductsRouter.changeProductAvailability(
+				this.warehouseId,
+				this.warehouseProduct.productId,
+				this.isAvailable
+		).catch(console.debug);
 	}
 	
 	private _setImageHolderBackground(imageUrl: string)
@@ -537,27 +539,22 @@ export class EditProductTypePopupPage extends ProductTypePopup
 				'description',
 				this.productDescription
 		);
+		this.localeTranslateService.setMemberValue(
+				'details',
+				this.productDetails
+		);
 	}
 	
-	private async _loadProductsCategories()
+	private _loadProductsCategories()
 	{
-		this.productsCategories = await this._productsCategorySrvice
-		                                    .getCategories()
-		                                    .pipe(first())
-		                                    .toPromise();
+		this._productsCategorySrvice
+		    .getCategories()
+		    .pipe(first())
+		    .subscribe(categories => this.productsCategories = categories);
 	}
 	
 	private static createFileName()
 	{
 		return new Date().getTime() + '.jpg';
-	}
-	
-	clickHandler()
-	{
-		this.warehouseProductsRouter.changeProductAvailability(
-				this.warehouseId,
-				this.warehouseProduct.productId,
-				this.isAvailable
-		).then(res => console.debug(res.isProductAvailable));
 	}
 }
