@@ -13,8 +13,10 @@ export class DiscountComponent
 	
 	constructor() {}
 	
-	// Return % of discount, e.g. 25 (so we display it as 25% in UI)
-	// Returns 0 if no discount
+	/**
+	 * @returns % of discount, e.g. 25 (so we display it as 25% in UI)
+	 * Returns 0 if no discount
+	 * */
 	public getDiscount()
 	{
 		if(
