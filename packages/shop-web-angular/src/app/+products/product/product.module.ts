@@ -8,9 +8,10 @@ import { RouterModule }         from '@angular/router';
 import { WarehouseLogoModule }  from 'app/warehouse-logo';
 import { ProductComponent }     from './product.component';
 import { ProductsCommonModule } from '../common/common.module';
+import { PipesModule }          from "pipes/pipes.module";
 
 @NgModule({
-	          imports:      [
+	          imports: [
 		          CommonModule,
 		          TranslateModule.forChild(),
 		          FormsModule,
@@ -19,6 +20,7 @@ import { ProductsCommonModule } from '../common/common.module';
 		          RouterModule,
 		          ProductsCommonModule,
 		          WarehouseLogoModule,
+		          PipesModule,
 	          ],
 	          exports:      [ProductComponent],
 	          declarations: [ProductComponent],
