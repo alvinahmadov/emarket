@@ -17,10 +17,6 @@ import { DiscountComponent }                from './discount/discount';
 import { DeliveryInfoComponent }            from './delivery-info/delivery-info';
 import { TopProductsComponent }             from './top-products/top-products.component';
 import { RatingComponent }                  from './rating/rating.component';
-import { ProductCommentComponent }          from './product-comment/product-comment.component';
-import { CommentListComponent }             from './product-comment/comment-list/comment-list.component';
-
-// import { ReplyComponent }          from './product-comment/reply/reply.component';
 
 @NgModule({
 	          imports:      [
@@ -43,17 +39,12 @@ import { CommentListComponent }             from './product-comment/comment-list
 		          DiscountComponent,
 		          DeliveryInfoComponent,
 		          RatingComponent,
-		          ProductCommentComponent,
-		          // ReplyComponent
 	          ],
 	          declarations: [
 		          DiscountComponent,
 		          DeliveryInfoComponent,
 		          TopProductsComponent,
-		          RatingComponent,
-		          ProductCommentComponent,
-		          // ReplyComponent,
-		          CommentListComponent
+		          RatingComponent
 	          ],
 	          providers:    [ProductCommentService]
           })
