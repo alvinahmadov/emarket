@@ -73,6 +73,8 @@ type Query {
 
 	isCustomerEmailExists(email: String!): Boolean!
 
+	isAuthenticated(token: String!): Boolean!
+
 	generateCustomers(
 		defaultLng: Float!
 		defaultLat: Float!

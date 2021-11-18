@@ -63,6 +63,12 @@ export class CustomerResolver
 	}
 	
 	@Query()
+	public async isAuthenticated(_, { token }: { token: string }): Promise<boolean>
+	{
+		return this._customersAuthService.isAuthenticated(token);
+	}
+	
+	@Query()
 	public async getSocial(_, { socialId }: { socialId: string }): Promise<Customer>
 	{
 		return this._customersService.getSocial(socialId);
