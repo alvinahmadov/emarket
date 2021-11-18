@@ -42,13 +42,13 @@
                 <div class="product-info">
                     <h1 class="product-name">
                         {{ localeTranslate(product.product.title) }}
-                        <span class="product-price">${{ product.price }}</span>
+                        <span class="product-price">{{ product.price | customCurrency }}</span>
                     </h1>
                     <h2 class="product-description">
-                        {{ localeTranslate(product.product.description) }}
+                        {{ localeTranslate(product.product.details) }}
                     </h2>
                     <h2 class="customer-notes">
-                        Notes:
+                        {{ 'ORDER_VIEW.NOTES' | translate }}:
                         {{ order.customer.geoLocation.notes }}
                     </h2>
                 </div>
@@ -56,6 +56,7 @@
             <div class="order-images">
                 <img
                         [src]="localeTranslate(product.product.images)"
+                        alt=""
                         class="order-picture"
                 />
                 <span
@@ -70,7 +71,7 @@
             class="order-options"
     >
         <button
-                (click)="openDialog()"
+                (click)="openCancelDialog()"
                 [disabled]="_isButtonDisabled"
                 class="cancel-button"
                 color="accent"
@@ -83,13 +84,26 @@
             </svg>
             {{ 'ORDER_VIEW.CANCEL' | translate }}
         </button>
-        <button class="pay-button" color="accent" mat-raised-button>
+        <button (click)="openPaymentDialog()"
+		        class="pay-button"
+		        color="primary"
+		        mat-raised-button>
             <svg class="payment-button-icon" viewBox="0 0 24 24">
                 <path
                         d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"
                 />
             </svg>
             {{ 'ORDER_VIEW.PAY' | translate }}
+        </button>
+        <button class="pay-button"
+		        color="primary"
+		        mat-raised-button>
+	        <svg class="payment-button-icon" viewBox="0 0 24 24">
+		        <path
+				        d="M20,8H4V6H20M20,18H4V12H20M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z"
+		        />
+	        </svg>
+            {{ 'ORDER_VIEW.PAY_CASH' | translate }}
         </button>
         <button
                 (click)="openMap()"
@@ -107,7 +121,7 @@
                 <path
                         d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
                 />
-                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M0 0h24v24H0z" fill="#FFFFFF"/>
             </svg>
             {{ 'ORDER_VIEW.SHOW_CARRIER_ON_MAP' | translate }}
         </button>
