@@ -1,0 +1,39 @@
+core     | --------------------------------------------------------
+core     | docker-compose-wait - starting with configuration:
+core     |  - Hosts to be waiting for: [mongo:27017]
+core     |  - Timeout before failure: 30 seconds
+core     |  - Sleeping time before checking for hosts availability: 0 seconds
+core     |  - Sleeping time once all hosts are available: 0 seconds
+core     | --------------------------------------------------------
+core     | Checking availability of mongo:27017
+core     | Host mongo:27017 not yet available...
+core     | Host mongo:27017 not yet available...
+core     | Host mongo:27017 is now available!
+core     | --------------------------------------------------------
+core     | docker-compose-wait - Everything's fine, the application can now start!
+core     | --------------------------------------------------------
+core     | yarn run v1.22.5
+core     | $ rimraf build && tsc -p ./tsconfig.build.json
+core     | Done in 12.95s.
+core     | yarn run v1.22.5
+core     | $ yarn --cwd ./packages/core start:prod
+core     | $ yarn run build:prod && yarn run prod
+core     | $ cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 rimraf build dist && tsc -p tsconfig.build.json && yarn webpack:prod
+core     | src/graphql/geo-locations/merchants/geo-location-merchants.resolver.ts(5,47): error TS2307: Cannot find module '@modules/server.common/utilities/geolocation'.
+core     | src/graphql/users/user.resolver.ts(12,2): error TS2614: Module '"../../../node_modules/@ever-platform/common/src/interfaces/IUser"' has no exported member
+'IResponseGenerateCustomers'. Did you mean to use 'import IResponseGenerateCustomers from "../../../node_modules/@ever-platform/common/src/interfaces/IUser"' instead?
+core     | src/graphql/warehouses/warehouse.resolver.ts(10,60): error TS2307: Cannot find module '@modules/server.common/routers/IWarehouseAuthRouter'.
+core     | src/graphql/warehouses/warehouse.resolver.ts(11,60): error TS2307: Cannot find module '@modules/server.common/utilities'.
+core     | src/services/auth/AuthenticationService.ts(6,58): error TS2307: Cannot find module '@modules/server.common/enums/JwtAppType'.
+core     | src/services/carriers/CarriersOrdersService.ts(20,63): error TS2307: Cannot find module '@modules/server.common/utilities/geolocation'.
+core     | src/services/fake-data/FakeUsersService.ts(12,40): error TS2307: Cannot find module '@modules/server.common/utilities/common'.
+core     | src/services/geo-locations/GeoLocationsProductsService.ts(8,47): error TS2307: Cannot find module '@modules/server.common/utilities/geolocation'.
+core     | src/services/geo-locations/GeoLocationsWarehousesService.ts(4,78): error TS2307: Cannot find module '@modules/server.common/utilities'.
+core     | src/services/invites/InvitesService.ts(24,63): error TS2307: Cannot find module '@modules/server.common/utilities/fake-data'.
+core     | src/services/invites/InvitesService.ts(25,63): error TS2307: Cannot find module '@modules/server.common/utilities/geolocation'.
+core     | src/services/services.app.ts(34,49): error TS2307: Cannot find module '@modules/server.common/utilities/common'.
+core     | src/services/users/SocialStrategiesService.ts(3,39): error TS2307: Cannot find module 'passport-yandex-token'.
+core     | src/services/warehouses/WarehousesAuthService.ts(14,49): error TS2307: Cannot find module '@modules/server.common/routers/IWarehouseAuthRouter'.
+core     | src/services/warehouses/WarehousesService.ts(45,14): error TS2420: Class 'WarehousesService' incorrectly implements interface 'IWarehouseRouter'.
+core     |   Type 'WarehousesService' is missing the following properties from type 'IWarehouseRouter': login, register, updatePassword
+core     | error Command failed with exit code 2.
