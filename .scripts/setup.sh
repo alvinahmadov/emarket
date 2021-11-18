@@ -84,11 +84,11 @@ install_symlinks() {
 }
 
 _install_module() {
-	local MODULE_NAME=$1
-	local    SRC=$2
-	local    DEST=$3
-	local    MODULE_DIR=$4
-	local    COMMAND=$5
+	local	MODULE_NAME=$1
+	local   MODULE_DIR=$2
+	local   COMMAND=$3
+	local	SRC="$MODULE_DIR/www"
+	local   DEST="$NGINX_SERVE_DIR/$MODULE_NAME"
 
 	# shellcheck disable=SC2059
 	printf    "\n\n${BRIGHT}${POWDER_BLUE}Building %s package...${NORMAL}\n" "$MODULE_NAME"
@@ -99,21 +99,21 @@ _install_module() {
 		printf       "\n${BRIGHT}${MAGENTA}Destination exists. Removing directory %s${NORMAL}\n" "$DEST"
 		rm    -rfd "$DEST"
 	else
-		printf    "\n${BRIGHT}${LIME_YELLOW}Moving built %s package to %s...${NORMAL}\n" "$MODULE_NAME" "$DEST"
-		cp       -r "$SRC" "$DEST"
+		printf    "\n${BRIGHT}${LIME_YELLOW}Copying built %s package to %s...${NORMAL}\n" "$MODULE_NAME" "$DEST"
+		ln        -s "$SRC" "$DEST"
 	fi
 }
 
 _install_admin() {
-	_install_module "admin" "$ADMIN_PACKAGE_DIR/www" "$NGINX_SERVE_DIR/admin-web-angular" "$ADMIN_PACKAGE_DIR" "yarn run build"
+	_install_module "admin" "$ADMIN_PACKAGE_DIR" "yarn run build"
 }
 
 _install_merchant() {
-	_install_module "merchant" "$MERCHANT_PACKAGE_DIR/www" "$NGINX_SERVE_DIR/merchant-tablet-ionic" "$MERCHANT_PACKAGE_DIR" "yarn run build:dev"
+	_install_module "merchant" "$MERCHANT_PACKAGE_DIR" "yarn run build:dev"
 }
 
 _install_shop() {
-	_install_module "shop" "$SHOP_PACKAGE_DIR/www" "$NGINX_SERVE_DIR/shop-web-angular" "$SHOP_PACKAGE_DIR" "yarn run build:dev"
+	_install_module "shop" "$SHOP_PACKAGE_DIR" "yarn run build:webpack:dev"
 }
 
 _install_core() {
