@@ -24,6 +24,7 @@ import { RegisterByLocationModule }             from './by-location';
 import { ByCodeModuleGuard }                    from './by-code.module.guard';
 import { SocieModuleGuard }                     from './socie.module.guard';
 import { CodeConfirmationModule }               from './code-confirmation/code-confirmation.module';
+import { MatCheckboxModule }                    from "@angular/material/checkbox";
 
 library.add(far);
 library.add(faFacebook);
@@ -38,7 +39,7 @@ export function HttpLoaderFactory(http: HttpClient)
 
 @NgModule({
 	          declarations: [AuthComponent],
-	          imports:      [
+	          imports: [
 		          CommonModule,
 		          FontAwesomeModule,
 		          FormsModule,
@@ -65,6 +66,7 @@ export function HttpLoaderFactory(http: HttpClient)
 		          RegisterByLocationModule,
 		          CodeConfirmationModule,
 		          MatTabsModule,
+		          MatCheckboxModule,
 	          ],
 	          providers:    [ByCodeModuleGuard, SocieModuleGuard],
 	          exports:      [
