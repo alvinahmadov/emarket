@@ -214,6 +214,16 @@ export class CustomersAuthService extends EntityService<Customer>
 		);
 	}
 	
+	/**
+	 * Check if user is authenticated
+	 * @param {string} token Authorization JWT token
+	 * */
+	@asyncListener()
+	public async isAuthenticated(token: string): Promise<boolean>
+	{
+		return this.authService.isAuthenticated(token);
+	}
+	
 	private async _isInvited(
 			userCreateObject: ICustomerCreateObject
 	): Promise<boolean>
