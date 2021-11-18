@@ -12,6 +12,7 @@ import {
 import { TranslateService }                         from '@ngx-translate/core';
 import { first }                                    from 'rxjs/operators';
 import { ILocaleMember }                            from '@modules/server.common/interfaces/ILocale';
+import Carrier                                      from '@modules/server.common/entities/Carrier';
 import Order                                        from '@modules/server.common/entities/Order';
 import OrderProduct                                 from '@modules/server.common/entities/OrderProduct';
 import Warehouse                                    from '@modules/server.common/entities/Warehouse';
@@ -20,7 +21,15 @@ import { WarehouseOrdersRouter }                    from '@modules/client.common
 import { WarehouseRouter }                          from '@modules/client.common.angular2/routers/warehouse-router.service';
 import { CarrierRouter }                            from '@modules/client.common.angular2/routers/carrier-router.service';
 import { MessagePopUpComponent }                    from 'app/shared/message-pop-up/message-pop-up.component';
+import { PaymentDialogComponent }                   from 'app/shared/payment-dialog/payment-dialog.component';
 import { CarrierLocationComponent }                 from '../location/carrier-location.component';
+import { CurrenciesService }                        from 'app/services/currencies.service';
+import Currency                                     from '@modules/server.common/entities/Currency';
+
+type TOrderCancellation = {
+	enabled: boolean;
+	onState: number
+}
 
 @Component({
 	           selector:    'order',
@@ -47,13 +56,14 @@ export class OrderComponent implements OnInit
 	public orderStatusText: string;
 	public orderNumber: number;
 	public orderCurrency: string;
+	public currency: Currency;
 	public orderNotes: string;
 	public orderType: number;
 	public createdAt: Date;
 	public createdAtConverted: string;
 	public warehouse: Warehouse;
 	public totalPrice: number;
-	public carrier;
+	public carrier: Carrier;
 	public _isButtonDisabled: boolean = true;
 	
 	public PREFIX_ORDER_STATUS: string = 'ORDER_CARRIER_STATUS.';
@@ -71,6 +81,7 @@ export class OrderComponent implements OnInit
 			private warehouseOrdersRouter: WarehouseOrdersRouter,
 			private readonly warehouseRouter: WarehouseRouter,
 			private readonly carrierRouter: CarrierRouter,
+			private readonly currenciesService: CurrenciesService,
 			private readonly _productLocalesService: ProductLocalesService,
 			private translateService: TranslateService,
 			private dialog: MatDialog,
@@ -106,7 +117,32 @@ export class OrderComponent implements OnInit
 		this.loadData();
 	}
 	
-	public openDialog(): void
+	public openPaymentDialog(): void
+	{
+		const dialogRef = this.dialog.open(PaymentDialogComponent, {
+			width:  '100%',
+			height: '80%',
+			data:   {
+				order:       this.order,
+				title:       this.title,
+				currency:    this.currency,
+				description: this.description
+			},
+		});
+		
+		dialogRef.afterClosed().subscribe(
+				(result) =>
+				{
+					if(result)
+					{
+						return this.warehouseOrdersRouter
+						           .userComplete(this.order._id.toString())
+					}
+				}
+		);
+	}
+	
+	public openCancelDialog(): void
 	{
 		//duble ckeck orderCancelation
 		if(this._isButtonDisabled)
@@ -115,8 +151,9 @@ export class OrderComponent implements OnInit
 		}
 		//---
 		const dialogRef = this.dialog.open(MessagePopUpComponent, {
-			width: '560px',
-			data:  {
+			width:  '560px',
+			height: '400px',
+			data:   {
 				modalTitle:    this.modalTitleText,
 				cancelButton:  this.cancelPopUpButton,
 				confirmButton: this.confirmPopUpButton,
@@ -130,7 +167,6 @@ export class OrderComponent implements OnInit
 			                                  {
 				                                  return this.warehouseOrdersRouter
 				                                             .cancel(this.order._id.toString())
-				                                             .then();
 			                                  }
 		                                  });
 	}
@@ -139,11 +175,12 @@ export class OrderComponent implements OnInit
 	{
 		this.dialog.open(CarrierLocationComponent, {
 			width:      '560px',
+			height:     '400px',
 			panelClass: 'app-dialog-container',
 			data:       {
-				carrier:   this.carrier,
-				merchant:  this.warehouse,
-				userOrder: this.order.customer,
+				carrier:       this.carrier,
+				store:         this.warehouse,
+				customerOrder: this.order.customer,
 			},
 		});
 	}
@@ -160,7 +197,7 @@ export class OrderComponent implements OnInit
 		return this._productLocalesService.getTranslate(member);
 	}
 	
-	protected orderCancelationCheck(storeCancelation, order)
+	protected orderCancelationCheck(storeCancelation: TOrderCancellation, order: Order)
 	{
 		if(!storeCancelation || !storeCancelation.enabled)
 		{
@@ -195,6 +232,14 @@ export class OrderComponent implements OnInit
 					this.order.products[0].product.images
 			);
 			this.products = this.order.products;
+			
+			this.currenciesService
+			    .getCurrency({ code: this.orderCurrency })
+			    .subscribe(c => {
+				    console.debug({currency: c})
+				    this.currency = c;
+			    });
+			
 		}
 		this.orderStatusText = this.order.warehouseStatusText;
 		this.orderStatusTextTranslates =
