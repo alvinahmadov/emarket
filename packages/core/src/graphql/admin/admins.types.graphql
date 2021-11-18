@@ -57,7 +57,7 @@ type Query {
 
 type Mutation {
     registerAdmin(registerInput: AdminRegisterInput!): Admin!
-    adminLogin(email: String!, password: String!): AdminLoginInfo
+    adminLogin(authInfo: String!, password: String!, expiresIn: Any): AdminLoginInfo
     updateAdmin(id: String!, updateInput: AdminUpdateInput!): Admin!
     updateAdminPassword(id: String!, password: AdminPasswordUpdateInput!): Void
 }
