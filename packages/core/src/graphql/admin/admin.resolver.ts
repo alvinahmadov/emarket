@@ -57,10 +57,10 @@ export class AdminResolver
 	@Mutation()
 	public async adminLogin(
 			_,
-			{ email, password }: IAdminLoginInput
+			{ authInfo, password, expiresIn }: IAdminLoginInput
 	): Promise<IAdminLoginResponse>
 	{
-		return this._adminsService.login(email, password);
+		return this._adminsService.login(authInfo, password, expiresIn);
 	}
 	
 	@Query()
