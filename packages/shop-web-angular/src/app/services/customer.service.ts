@@ -154,6 +154,16 @@ export class CustomersService extends ApolloService
 		           .pipe(map((res) => this.get(res)));
 	}
 	
+	public isAuthenticated(token: string): Promise<boolean>
+	{
+		return this.apollo
+		           .query<{
+			           isAuthenticated: boolean
+		           }>({ query: GQLQuery.Customer.isAuthenticated, variables: { token } })
+		           .pipe(map(result => this.get(result)))
+		           .toPromise();
+	}
+	
 	public async getCustomerMetrics(
 			id: string
 	): Promise<ICustomerMetrics>
