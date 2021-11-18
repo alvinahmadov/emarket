@@ -23,7 +23,7 @@ export COMMON_ANG_PACKAGE_DIR="$PROJECT_DIR/packages/common-angular"
 export ADMIN_PACKAGE_DIR="$PROJECT_DIR/packages/admin-web-angular"
 export MERCHANT_PACKAGE_DIR="$PROJECT_DIR/packages/merchant-tablet-ionic"
 export SHOP_PACKAGE_DIR="$PROJECT_ROOT_DIR/$PROJECT_NAME/packages/shop-web-angular"
-export NGINX_SERVE_DIR="/usr/share/nginx/html"
+export NGINX_SERVE_DIR="/usr/share/nginx/html/emarket"
 export NVM_ROOT_DIR="$HOME/.nvm"
 export NVM_INSTALL_SCRIPT="https://raw.githubusercontent.com/creationix/nvm/master/install.sh"
 
