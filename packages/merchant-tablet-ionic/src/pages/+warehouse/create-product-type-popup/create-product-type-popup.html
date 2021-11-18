@@ -1,4 +1,4 @@
-<div class="app-view popup-view create-product-type-popup">
+<div class="app-view popup-view create-product-type-popup bg-white">
 	<h4 class="custom-title-popup">
 		{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.NEW_PRODUCT_TYPE' | translate }}
 	</h4>
@@ -12,10 +12,8 @@
 					<span class="popup-input-description">
 						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.TITLE' | translate }}
 					</span>
-					<input
-							class="popup-input"
-							[(ngModel)]="productTitle"
-					/>
+					<input [(ngModel)]="productTitle"
+					       class="popup-input"/>
 				</label>
 			</div>
 			
@@ -24,10 +22,30 @@
 					<span class="popup-input-description">
 						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.DESCRIPTION' | translate }}
 					</span>
+					<textarea [(ngModel)]="productDescription"
+					          class="popup-input"
+					          rows="4"
+					          #productDesc="ngModel"
+					></textarea>
+					<div *ngIf="productDesc.control.value?.length > descriptionMaxLength"
+					     style="width: 100%; border: 1px solid red;">
+					<span style="color: red; font-size: 8px">
+						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.ERRORS.MAX_CHAR' | translate }}
+						({{productDesc.control.value?.length}}/{{descriptionMaxLength}})
+					</span>
+					</div>
+				</label>
+			</div>
+			
+			<div class="popup-input-container">
+				<label>
+					<span class="popup-input-description">
+						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.DETAILS' | translate }}
+					</span>
 					<textarea
 							class="popup-input"
-							rows="4"
-							[(ngModel)]="productDescription"
+							rows="6"
+							[(ngModel)]="productDetails"
 					></textarea>
 				</label>
 			</div>
@@ -38,13 +56,11 @@
 						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.CATEGORIES' | translate }}
 					</span>
 					<ion-item id="multiple-select">
-						<ion-select
-								[(ngModel)]="selectedProductCategories"
-								multiple="true"
-								[interfaceOptions]="selectOptionTitle"
-								[okText]="buttonOK"
-								[cancelText]="buttonCancel"
-						>
+						<ion-select [(ngModel)]="selectedProductCategories"
+						            [interfaceOptions]="selectOptionTitle"
+						            [okText]="buttonOK"
+						            [cancelText]="buttonCancel"
+						            multiple="true">
 							<ion-select-option
 									[value]="category.id"
 									*ngFor="let category of productsCategories"
@@ -61,16 +77,13 @@
 				<div class="col no-padding-left pl-0 pr-0">
 					<div class="popup-input-container">
 						<label>
-							<span class="popup-input-description"
-							>{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.PRICE'
-									| translate }}</span
-							>
-							<input
-									class="popup-input"
-									type="number"
-									placeholder="$"
-									[(ngModel)]="warehouseProductCreateObject.price"
-							/>
+							<span class="popup-input-description">
+								{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.PRICE' | translate }}
+							</span>
+							<input [(ngModel)]="warehouseProductCreateObject.price"
+							       class="popup-input"
+							       type="number"
+							       placeholder="$"/>
 						</label>
 					</div>
 				</div>
@@ -84,16 +97,12 @@
 								'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.OPTIONAL'
 										| translate }})</span
 							>
-							<input
-									class="popup-input"
-									type="number"
-									oninput="validity.valid||(value='');"
-									min="0"
-									placeholder="{{
-									'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.COUNT_PLACEHOLDER'
-										| translate
-								}}"
-									[(ngModel)]="warehouseProductCreateObject.count"
+							<input [(ngModel)]="warehouseProductCreateObject.count"
+							       class="popup-input"
+							       type="number"
+							       oninput="validity.valid||(value='');"
+							       min="0"
+							       placeholder="{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.COUNT_PLACEHOLDER' | translate }}"
 							/>
 						</label>
 					</div>
@@ -102,39 +111,34 @@
 				<div class="col no-padding-right pr-0">
 					<div class="popup-input-container">
 						<label>
-							<span class="popup-input-description"
-							>{{
-								'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.LANGUAGE'
-										| translate }}</span
-							>
-							<select
-									class="popup-input select"
-									[(ngModel)]="currentLocale"
-							>
-								<option value="en-US"
-								>{{
-									'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.ENGLISH'
-											| translate }}</option
-								>
-								<option value="he-IL"
-								>{{
-									'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.HEBREW'
-											| translate }}</option
-								>
-								<option value="ru-RU"
-								>{{
-									'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.RUSSIAN'
-											| translate }}</option
-								>
-								<option value="bg-BG"
-								>{{
-									'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.BULGARIAN'
-											| translate }}</option
-								>
+							<span class="popup-input-description">
+								{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.LANGUAGE' | translate }}
+							</span>
+							<select [(ngModel)]="currentLocale"
+							        class="popup-input select">
+								<option value="en-US">
+									{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.ENGLISH' | translate }}
+								</option>
+								<option value="ru-RU">
+									{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.RUSSIAN' | translate }}
+								</option>
 							</select>
 						</label>
 					</div>
 				</div>
+			</ion-row>
+			
+			<ion-row class="row">
+				<ion-col class="col">
+					<ion-checkbox
+							class="mr-3"
+							[(ngModel)]="isAvailable"
+					>
+					</ion-checkbox>
+					<ion-label style="font-size: 12px">
+						{{ 'WAREHOUSE_VIEW.CREATE_PRODUCTS_POPUP.PRODUCT_AVAILABILITY' | translate }}
+					</ion-label>
+				</ion-col>
 			</ion-row>
 			
 			<ion-row class="row getProductType">
@@ -142,7 +146,7 @@
 					<ion-item class="coord-box">
 						<ion-checkbox
 								class="mr-3"
-								[(ngModel)]="takaProductDelivery"
+								[(ngModel)]="productDelivery"
 								(ionChange)="getProductTypeChange('Delivery')"
 						></ion-checkbox>
 						<ion-label
@@ -155,7 +159,7 @@
 					<ion-item class="coord-box">
 						<ion-checkbox
 								class="mr-3"
-								[(ngModel)]="takaProductTakeaway"
+								[(ngModel)]="productTakeaway"
 								(ionChange)="getProductTypeChange('Takeaway')"
 						></ion-checkbox>
 						<ion-label
