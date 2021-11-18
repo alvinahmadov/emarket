@@ -30,7 +30,7 @@ export interface ICustomerLoginInput
 	expiresIn?: string | number;
 }
 
-interface IPasswordUpdateInput
+export interface IPasswordUpdateInput
 {
 	current: string;
 	new: string
