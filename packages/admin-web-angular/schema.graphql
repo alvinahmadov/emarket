@@ -263,7 +263,7 @@ type Mutation {
 	addComment(comment: CommentCreateInput!, storeId: String!, storeProductId: String!): [Comment]
 	addCustomerRegistrationInfo(id: String!, registrationInfo: AdditionalCustomerRegistrationInfo!): Void
 	addWarehouseProducts(storeId: String!, storeProducts: [WarehouseProductInput!]!, triggerChange: Boolean): [WarehouseProduct!]
-	adminLogin(email: String!, password: String!): AdminLoginInfo
+	adminLogin(authInfo: String!, password: String!, expiresIn: Any): AdminLoginInfo
 	banCustomer(id: String!): Customer
 	carrierLogin(password: String!, username: String!): CarrierLoginInfo
 	changeWarehouseProductAvailability(isAvailable: Boolean!, storeId: String!, storeProductId: String!): WarehouseProduct!
