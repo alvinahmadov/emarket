@@ -1,73 +1,85 @@
-<mat-card [ngClass]="{ 'grid-view': isGridView }" class="product-card pt-0">
-    <div
-            [ngClass]="{ 'full-height': productImage?.orientation === 1 }"
-            class="image-container"
-    >
-        <product-discount #discount [currentProduct]="info.warehouseProduct">
-        </product-discount>
-
-        <product-delivery-info
-                [currentProduct]="info.warehouseProduct"
-                [hasDiscount]="discount?.getDiscount()"
-                [overImage]="true"
-        ></product-delivery-info>
-
-        <img
-                (load)="onImageLoad()"
-                [ngClass]="{
-				'border-bottom-radius': productImage?.orientation === 1
-			}"
-                [src]="productImage?.url"
-                class="image"
-                mat-card-image
-        />
-    </div>
-
-    <div
-            [ngClass]="productImage?.orientation === 1 ? 'bottom' : 'below'"
-            class="w-100"
-    >
-        <warehouse-logo
-                [light]="true"
-                [logo]="info.warehouseLogo"
-                [ngClass]="document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'"
-        ></warehouse-logo>
-
-        <div
-                [ngClass]="document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'"
-                class="hbrw"
-        >
-            <h1 class="title">
-                {{ localeTranslate(info.warehouseProduct.product.title) }}
-            </h1>
-
-            <h2 class="description">
-                {{ localeTranslate(info.warehouseProduct.product.description) }}
-            </h2>
-
-            <button
-                    (click)="createOrder()"
-                    class="purchase-button mr-2 d-inline mb-2"
-                    color="accent"
-                    mat-raised-button
-            >
-                {{ 'PRODUCTS_VIEW.BUY_FOR' | translate }} ${{
-                info.warehouseProduct.price
-                }}
-            </button>
-
-            <button
-                    [routerLink]="
-					'details/' +
-					info.warehouseId +
-					'/' +
-					info?.warehouseProduct?.product?.id
-				"
-                    class="details-button d-inline mb-2"
-                    mat-button
-            >
-                {{ 'PRODUCTS_VIEW.DETAILS' | translate }}
-            </button>
-        </div>
-    </div>
+<mat-card [ngClass]="{ 'grid-view': isGridView }"
+          class="product-card pt-0">
+	<div
+			[ngClass]="{ 'full-height': productImage?.orientation === 1 }"
+			class="image-container"
+	>
+		<product-discount #discount [currentProduct]="info.warehouseProduct">
+		</product-discount>
+		
+		<product-delivery-info
+				[currentProduct]="info.warehouseProduct"
+				[hasDiscount]="discount?.getDiscount() > 0"
+				[overImage]="true"
+		></product-delivery-info>
+		
+		<img
+				(load)="onImageLoad()"
+				[ngClass]="{ 'border-bottom-radius': productImage?.orientation === 1 }"
+				[src]="productImage?.url"
+				alt=""
+				class="image"
+				mat-card-image
+		/>
+	</div>
+	
+	<mat-card-header>
+		<div mat-card-avatar
+		     class="example-header-image">
+			<warehouse-logo
+					[light]="true"
+					[border]="false"
+					[logo]="info.warehouseLogo"
+					[ngClass]="document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'"
+			></warehouse-logo>
+		</div>
+		<mat-card-title>
+			<a [routerLink]="getDetailUrl(info)">
+				<h1 class="title">
+					{{ localeTranslate(info.warehouseProduct.product.title) }}
+				</h1>
+			</a>
+		</mat-card-title>
+		<mat-card-subtitle>
+			<h2 class="price">
+				<span [ngClass]="{ 'has-discount' : hasDiscount }">
+					{{ info.warehouseProduct.price | customCurrency:currency }}
+				</span>
+				<span *ngIf="hasDiscount"
+				      class="price-initial mt-lg-2">
+					{{ info.warehouseProduct?.initialPrice | customCurrency:currency }}
+				</span>
+			</h2>
+		</mat-card-subtitle>
+	</mat-card-header>
+	<mat-card-content>
+		<div [ngClass]="productImage?.orientation === 1 ? 'bottom' : 'below'"
+		     class="w-100"
+		>
+			<div [ngClass]="document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr'"
+			     class="hbrw">
+				<div class="row">
+					<div class="col-sm-6">
+						<button
+								(click)="createOrder()"
+								class="purchase-button mr-2 d-inline mb-2"
+								color="primary"
+								mat-raised-button
+						>
+							{{ 'PRODUCTS_VIEW.BUY_FOR' | translate }}
+						</button>
+					</div>
+					<div class="col-sm-6">
+						<es-rating fillStar
+						           ratingType="total"
+						           [customerId]="customerId"
+						           [warehouseId]="info.warehouseId"
+						           [warehouseProduct]="info.warehouseProduct"
+						>
+						</es-rating>
+					</div>
+				</div>
+			</div>
+		</div>
+	</mat-card-content>
 </mat-card>
