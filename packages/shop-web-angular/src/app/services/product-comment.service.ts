@@ -37,7 +37,7 @@ export class ProductCommentService extends ApolloService
 			              query:     GQLQuery.Store.Product.Comment.GetById,
 			              variables: { storeId, storeProductId, commentId }
 		              })
-		           .pipe(map((result) => <Comment> this.get(result)));
+		           .pipe(map((result) => <Comment>this.get(result)));
 		
 	}
 	
@@ -159,11 +159,11 @@ export class ProductCommentService extends ApolloService
 			storeId: string,
 			storeProductId: string,
 			commentIds: string[]
-	): Promise<Comment[]>
+	): Promise<boolean>
 	{
 		return this.apollo
 		           .mutate<{
-			           comments: Comment[]
+			           res: boolean
 		           }>({
 			              mutation:  GQLMutation.Store.Product.Comment.Delete,
 			              variables: { storeId, storeProductId, commentIds }
