@@ -22,6 +22,7 @@ import { GeoLocationService }                            from 'app/services/geo-
 import { GeoLocationProductsService }                    from 'app/services/geo-location-products';
 import { ProductsService }                               from 'app/services/products.service';
 import { WarehouseProductsService }                      from 'app/services/warehouse-products.service';
+import { WarehousesService }                             from 'app/services/warehouses';
 import { ProductCategoryService }                        from 'app/services/product-category.service';
 import { PipesModule }                                   from 'pipes/pipes.module';
 import { ProductsCommonModule }                          from './common/common.module';
@@ -86,7 +87,8 @@ export function HttpLoaderFactory(http: HttpClient)
 		          GeoLocationProductsService,
 		          ProductsService,
 		          ProductCategoryService,
-		          WarehouseProductsService
+		          WarehouseProductsService,
+		          WarehousesService,
 	          ],
           })
 export class ProductsModule
