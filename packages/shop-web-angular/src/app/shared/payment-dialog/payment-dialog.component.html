@@ -1,0 +1,23 @@
+<div waPayment
+     [paymentTotal]="totalsOrdersSum"
+     [paymentId]="order.customer.stripeCustomerId">
+	<div waPaymentItem
+	     class="payments-item-box"
+	     *ngFor="let orderProduct of order.products"
+	     [paymentLabel]="getPaymentTitle(orderProduct)"
+	     [paymentAmount]="getOrderCurrencyAmount(orderProduct)"
+	>
+		{{ title }}
+		{{ order.orderNotes }} ({{ orderProduct.price | customCurrency:currency:2 }})
+	</div>
+	
+	<b>{{'ORDER_VIEW.TOTAL' | translate}}:</b>  {{ totalPrice | customCurrency:currency:2 }}
+	
+	<button
+			[disabled]="order.products.length === 0"
+			(waPaymentSubmit)="onPayment($event)"
+			(waPaymentError)="onPaymentError($event)"
+	>
+		{{ 'ORDER_VIEW.PAY_NOW' | translate }}
+	</button>
+</div>
