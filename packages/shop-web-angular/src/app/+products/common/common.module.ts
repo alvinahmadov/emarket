@@ -15,7 +15,7 @@ import { NgbModule }                        from '@ng-bootstrap/ng-bootstrap';
 import { ProductCommentService }            from 'app/services/product-comment.service';
 import { DiscountComponent }                from './discount/discount';
 import { DeliveryInfoComponent }            from './delivery-info/delivery-info';
-import { TopProductsComponent }             from './top-products/top-products.component';
+// import { TopProductsComponent }             from './top-products/top-products.component';
 import { RatingComponent }                  from './rating/rating.component';
 
 @NgModule({
@@ -43,7 +43,7 @@ import { RatingComponent }                  from './rating/rating.component';
 	          declarations: [
 		          DiscountComponent,
 		          DeliveryInfoComponent,
-		          TopProductsComponent,
+		          // TopProductsComponent,
 		          RatingComponent
 	          ],
 	          providers:    [ProductCommentService]
