@@ -13,12 +13,12 @@
     >
         <section class="content" ngx-hm-carousel-container>
             <article
-                    *ngFor="let p of products; let i = index"
+                    *ngFor="let productInfo of products; let i = index"
                     [ngClass]="{ visible: currentIndex === i }"
                     class="item cursor-pointer"
                     ngx-hm-carousel-item
             >
-                <product [info]="p" class="product"></product>
+                <product [info]="productInfo" class="product"></product>
             </article>
         </section>
 
