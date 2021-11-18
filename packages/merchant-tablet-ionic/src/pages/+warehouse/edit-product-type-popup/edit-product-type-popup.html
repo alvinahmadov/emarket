@@ -1,4 +1,4 @@
-<div class="app-view popup-view edit-product-type-popup">
+<div class="app-view popup-view edit-product-type-popup bg-white">
 	<h4 class="custom-title-popup">
 		{{ 'EDIT_PRODUCT_POP_UP.EDIT_PRODUCT_TYPE' | translate }}
 	</h4>
@@ -9,7 +9,7 @@
 		<i class="fa fa-close"></i>
 	</button>
 	
-	<ion-row class="bg-white">
+	<ion-row>
 		<div class="col popup-half">
 			<div class="popup-input-container">
 				<label>
@@ -32,10 +32,11 @@
 							#productDesc="ngModel"
 					></textarea>
 				</label>
-				<div *ngIf="productDesc.control.value?.length > descrMaxLength"
+				<div *ngIf="productDesc.control.value?.length > descriptionMaxLength"
 				     style="width: 100%; border: 1px solid red;">
 					<span style="color: red; font-size: 8px">
-						{{ 'EDIT_PRODUCT_POP_UP.ERRORS.MAX_CHAR' | translate }} (255)
+						{{ 'EDIT_PRODUCT_POP_UP.ERRORS.MAX_CHAR' | translate }}
+						({{productDesc.control.value?.length}}/{{descriptionMaxLength}})
 					</span>
 				</div>
 			</div>
@@ -135,7 +136,7 @@
 					<ion-checkbox
 							class="mr-3"
 							[(ngModel)]="isAvailable"
-							(ionChange)="clickHandler()"
+							(ionChange)="availabilityHandler()"
 					>
 					</ion-checkbox>
 					<ion-label style="font-size: 12px">
@@ -149,7 +150,7 @@
 					<ion-item class="coord-box">
 						<ion-checkbox
 								class="mr-3"
-								[(ngModel)]="takaProductDelivery"
+								[(ngModel)]="productDelivery"
 								(ionChange)="getProductTypeChange('Delivery')"
 						></ion-checkbox>
 						<ion-label
@@ -161,7 +162,7 @@
 					<ion-item class="coord-box">
 						<ion-checkbox
 								class="mr-3"
-								[(ngModel)]="takaProductTakeaway"
+								[(ngModel)]="productTakeaway"
 								(ionChange)="getProductTypeChange('Takeaway')"
 						></ion-checkbox>
 						<ion-label
@@ -194,6 +195,7 @@
 				<input
 						*ngIf="!hasImage"
 						ng2FileSelect
+						multiple
 						type="file"
 						id="fileInput"
 						[uploader]="uploader"
