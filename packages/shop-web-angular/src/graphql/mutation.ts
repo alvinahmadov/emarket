@@ -168,6 +168,10 @@ export namespace GQLMutation
 						storeId: $storeId
 						storeProductIds: $storeProductIds
 					)
+					{
+						id
+						_id
+					}
 				}
 			`;
 			
@@ -669,20 +673,6 @@ export namespace GQLMutation
 							storeProductId: $storeProductId,
 							commentIds: $commentIds
 						)
-						{
-							id
-							_id
-							userId
-							productId
-							message
-							likes
-							dislikes
-							likesBy
-							dislikesBy
-							replyTo
-							_createdAt
-							_updatedAt
-						}
 					}
 				`;
 			}
