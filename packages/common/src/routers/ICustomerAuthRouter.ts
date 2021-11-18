@@ -78,6 +78,8 @@ interface ICustomerAuthRouter
 	getRegistrationsSettings(): Promise<{
 		registrationRequiredOnStart: boolean;
 	}>;
+	
+	isAuthenticated(token: string): Promise<boolean>;
 }
 
 export default ICustomerAuthRouter;
