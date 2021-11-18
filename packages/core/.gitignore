@@ -11,6 +11,10 @@ dist
 build
 cache/currency/*.json
 
+!typings.d.ts
+!config/**/*
+!certificates**/*
+
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 
