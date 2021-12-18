@@ -1,10 +1,10 @@
+// noinspection JSUnusedGlobalSymbols
+
 import { Injectable }             from '@angular/core';
 import { Apollo }                 from 'apollo-angular';
 import { Observable }             from 'rxjs';
 import { map }                    from 'rxjs/operators';
 import IPagingOptions             from '@modules/server.common/interfaces/IPagingOptions';
-import IWarehouseProduct,
-{ IWarehouseProductCreateObject } from '@modules/server.common/interfaces/IWarehouseProduct';
 import WarehouseProduct           from '@modules/server.common/entities/WarehouseProduct';
 import ApolloService              from '@modules/client.common.angular2/services/apollo.service';
 import { GQLMutation, GQLQuery }  from 'graphql/definitions';
@@ -88,57 +88,6 @@ export class WarehouseProductsService extends ApolloService
 			              variables: { storeId, quantity }
 		              })
 		           .pipe(map((result) => this.get(result)))
-	}
-	
-	public async add(
-			storeId: string,
-			products: IWarehouseProductCreateObject[],
-			triggerChange: boolean = true
-	): Promise<WarehouseProduct[]>
-	{
-		return this.apollo
-		           .mutate<{
-			           products: IWarehouseProduct[]
-		           }>({
-			              mutation:  GQLMutation.Store.Product.Add,
-			              variables: { storeId, products, triggerChange }
-		              })
-		           .pipe(
-				           map((result) => <WarehouseProduct[]>this.factory(result, WarehouseProduct))
-		           ).toPromise();
-	}
-	
-	public async remove(
-			storeId: string,
-			productsIds: string[]
-	): Promise<boolean>
-	{
-		return this.apollo
-		           .mutate<{
-			           res: boolean
-		           }>({
-			              mutation:  GQLMutation.Store.Product.Add,
-			              variables: { storeId, productsIds }
-		              })
-		           .pipe(map((result) => this.get(result)))
-		           .toPromise();
-	}
-	
-	public async update(
-			storeId: string,
-			productId: string,
-			updatedWarehouseProduct: WarehouseProduct
-	): Promise<WarehouseProduct>
-	{
-		return this.apollo
-		           .mutate<{
-			           res: WarehouseProduct
-		           }>({
-			              mutation:  GQLMutation.Store.Product.Update,
-			              variables: { storeId, productId, updatedWarehouseProduct }
-		              })
-		           .pipe(map((result) => this.get(result)))
-		           .toPromise();
 	}
 	
 	public async updateRating(
