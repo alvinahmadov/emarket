@@ -1,60 +1,56 @@
-# Цифровой рынок с множественными магазинами
+# Digital Market with Multiple Stores
 
 ![overview](./images/overview_small.png)
 
-- [Admin Website](http://localhost:4200), используйте электронную почту администратора: `admin@emarket.com`, пароль: `admin`
+- [Admin Website](http://localhost:4200), use admin email: `admin@emarket.com`, password: `admin`
 - [Shopping Mobile App](http://localhost:4201)
-- [Merchant Ionic Tablet App](http://localhost:4202), используйте электронную почту владельца магазина: `merchant@emarket.com`, пароль: `123456`
+- [Merchant Ionic Tablet App](http://localhost:4202), use merchant email: `merchant@emarket.com`, password: `123456`
 - [Carrier Mobile App](http://localhost:4203)
-- [Shopping Website](http://localhost:3000), используйте электронную почту клиента, сгенерированного случайно (можно узнать через админ панель): `xxx@xxx.com`, пароль: `123456`
+- [Shopping Website](http://localhost:3000), use client email, generated randomly (can be found in admin panel): `xxx@xxx.com`, password: `123456`
 
-## Особенности
+## Features
 
-- Поддерживает маркет с одним и несколькими магазинами / несколькими поставщиками;
-- Все реактивно, в режиме реального времени и очень быстро;
-- Платформа беззаголовочной торговли, которая позволяет реализовывать различные магазины, пользовательские интерфейсы администратора и клиентские приложения. Предоставляет богатые
-  API для GraphQL, REST и WS;
-- Мобильное приложение для заказов для клиентов, чтобы делать заказы по требованию (гибридный / PWA, iOS и Android с использованием Ionic / Ionic Native);
-- Мобильное приложение перевозчика (водителя) для доставки перевозчиками, водителями или поставщиками услуг (iOS и Android с использованием Ionic / Ionic Native);
-- Настройка веб-сайта электронной коммерции для покупок, чтобы клиенты могли совершать покупки товаров или услуг в браузере;
-- Торговое планшетное приложение для магазинов/продавцов/складов для управления и отслеживания заказов, организации поставок и т.д.;
-- Веб-сайт администратора, используемый для управления всеми функциями и настройками платформы в едином веб-интерфейсе;
-- Многоязычные и культурные настройки всюду в платформе (i18N);
-- Каталоги товаров (глобальные и для каждого продавца) с несколькими изображениями товаров;
-- Управление складами и управление/обработка заказов в режиме реального времени на платформе;
-- Управление поставками/доставкой и обработка на платформе (доставка с отслеживанием местоположения заказов в режиме реального времени);
-- Скидки, акции и обновления доступности товаров/услуг в режиме реального времени;
-- Регистрация клиентов, гостевой заказ, приглашения (по желанию);
-- Шлюз и обработка платежей (не завершена);
-- Плагины/Расширения/Пользовательские поля (WIP).
+- Supports single and multiple stores / multi-vendor market;
+- Everything is reactive, real-time, and very fast;
+- A headless commerce platform that allows implementing various stores, admin UIs, and client applications. Provides rich specific APIs for GraphQL, REST, and WS;
+- Mobile shopping app for customers to place on-demand orders (Hybrid / PWA, iOS and Android using Ionic / Ionic Native);
+- Carrier (driver) mobile app for delivery by carriers, drivers, or service providers (iOS and Android using Ionic / Ionic Native);
+- Customizable e-commerce website for shopping, allowing customers to purchase goods or services in the browser;
+- Merchant tablet app for stores/sellers/warehouses to manage and track orders, organize supplies, etc.;
+- Admin website used to manage all platform functions and settings in a single web interface;
+- Multilingual and cultural settings throughout the platform (i18N);
+- Product catalogs (global and per-merchant) with multiple product images;
+- Warehouse management and real-time order processing/handling on the platform;
+- Supply/delivery management and processing on the platform (delivery with real-time order location tracking);
+- Real-time discounts, promotions, and product/service availability updates;
+- Customer registration, guest checkout, invitations (optional);
+- Payment gateway and processing (not completed);
+- Plugins/Extensions/Custom fields (WIP).
 
-## Технологический стек и требования
+## Tech Stack and Requirements
 
 - [TypeScript](https://www.typescriptlang.org);
 - [NodeJs](https://nodejs.org) / [NestJs](https://github.com/nestjs/nest);
-- [Ionic](https://ionicframework.com) (v5) для мобильного приложения для покупок, доставщика и приложения для планшета продавца;
-- Торговый сайт разработан с помощью [Angular](https://angular.io) (v9.1) с использованием [Angular Starter](https://github.com/gdi2290/angular-starter);
-- Сайт администратора разработан с помощью [Angular](https://angular.io) (v9.1) с использованием [ngx-admin](https://github.com/akveo/ngx-admin);
-- Бэкенд/Сервер разработан с помощью [Nest](https://github.com/nestjs/nest) с использованием модуля Pyro. Поддерживает API реального времени GraphQL, REST и WS (WebSocket с
-  использованием библиотеки [Socket.io](https://socket.io));
-- [RxJS](http://reactivex.io/rxjs) библиотека, используемая в большой степени во всех частях платформы;
-- [InversifyJS](http://inversify.io) используется для управления инверсией / внедрения зависимостей в большинстве частей платформы. В бэкэнде/API также используется DI,
-  предоставляемые [Nest](https://github.com/nestjs/nest);
-- [MongoDB](https://www.mongodb.com) База данных, используется с [Mongoose](https://mongoosejs.com) ORM (поддерживаемая версия MongoDB >= 3.2; рекомендуется версия >=4). Можно управлять данными через [MongoDB Compass](https://www.mongodb.com/try/download/compass);
-- Для продакшена, интегрирован и рекомендуется использовать [PM2](https://github.com/Unitech/pm2)
+- [Ionic](https://ionicframework.com) (v5) for the shopping mobile app, carrier app, and merchant tablet app;
+- Shopping website developed with [Angular](https://angular.io) (v9.1) using [Angular Starter](https://github.com/gdi2290/angular-starter);
+- Admin website developed with [Angular](https://angular.io) (v9.1) using [ngx-admin](https://github.com/akveo/ngx-admin);
+- Backend/Server developed with [Nest](https://github.com/nestjs/nest) using the Pyro module. Supports real-time GraphQL, REST, and WS APIs (WebSocket using the [Socket.io](https://socket.io) library);
+- [RxJS](http://reactivex.io/rxjs) library, heavily used in all parts of the platform;
+- [InversifyJS](http://inversify.io) used for inversion of control / dependency injection in most parts of the platform. The backend/API also uses DI provided by [Nest](https://github.com/nestjs/nest);
+- [MongoDB](https://www.mongodb.com) Database, used with [Mongoose](https://mongoosejs.com) ORM (supported MongoDB version >= 3.2; recommended version >= 4). Data can be managed via [MongoDB Compass](https://www.mongodb.com/try/download/compass);
+- For production, it is integrated and recommended to use [PM2](https://github.com/Unitech/pm2).
 
-#### См. также README.md и CREDITS.md файлы в соответствующих папках со списками библиотек и программного обеспечения, включенных в Платформу, информацией о лицензиях и другими подробностями.
+#### See also README.md and CREDITS.md files in the respective folders with lists of libraries and software included in the Platform, license information, and other details.
 
-## Документация
+## Documentation
 
-Для быстрого обзора каждого проекта на Платформе (Сервер, Администратор, Магазины и т.д.) Вы можете выполнить поиск README.md файл в корневой папке проектов. Например,
-см. [./core/README.md](packages/core/README.md) обзор, связанный с сервером (бэкендом).
+For a quick overview of each project on the Platform (Server, Admin, Stores, etc.), you can search for the README.md file in the project's root folder. For example, see [./core/README.md](packages/core/README.md) for an overview related to the server (backend).
 
-## Приступая к работе
+## Getting Started
 
-### Клонируйте репозиторий
+### Clone the Repository
 
-Клонируйте Git репозиторий:
+Clone the Git repository:
 
 ```
 git clone https://github.com/alvinahmadov/emarket.git
@@ -62,94 +58,90 @@ git clone https://github.com/alvinahmadov/emarket.git
 
 ### Yarn
 
-В настоящее время используется "Yarn" (вместо "npm"), поэтому перед запуском платформы убедитесь, что у вас установлена последняя версия Yarn:
+Currently, "Yarn" is used (instead of "npm"), so before running the platform, make sure you have the latest version of Yarn installed:
 
 ```
 npm install -g yarn@latest
 ```
 
-### Быстрая установка
+### Quick Install
 
-После клонирования репозитория git просто выполните следующую команду для установки/начальной загрузки всех зависимостей:
+After cloning the git repository, simply run the following command to install/bootstrap all dependencies:
 
 ```
 yarn bootstrap
 ```
 
-Приведенная выше команда устанавливает необходимые пакеты во всех проектах платформы, использующих Lerna.
+The above command installs the necessary packages in all platform projects using Lerna.
 
-**Примечание**: если по какой-либо причине вышеприведенная команда завершится неудачно, вы можете попытаться установить необходимые пакеты вручную, запустив "yarn" в каждой
-подпапке папки "пакеты" с файлом "package.json".
+**Note**: If for any reason the above command fails, you can try to install the necessary packages manually by running "yarn" in each subdirectory of the "packages" folder with a "package.json" file.
 
-### Сборка
+### Build
 
-Вы можете создать все проекты, используя одну команду ниже:
+You can build all projects using the single command below:
 
 ```
 yarn build:all
 ```
 
-**Примечание**: параллельная сборка доступна с помощью команды `yarn build`
+**Note**: Parallel build is available using the `yarn build` command.
 
-### Lerna (ручная установка)
+### Lerna (Manual Installation)
 
-Используется Lerna для управления монорепозиториями.
+Lerna is used to manage monorepositories.
 
-Вам нужно выполнить следующую команду из рабочей папки, в которой вы клонировали репозиторий git, который устанавливает Lerna вместе с другими пакетами:
+You need to execute the following command from the working folder where you cloned the git repository, which installs Lerna along with other packages:
 
 ```
 yarn
 ```
 
-Вместо этого вы можете установить Lerna по глобально:
+Alternatively, you can install Lerna globally:
 
 ```
 npm install lerna@latest -g
 ```
 
-Теперь, после установки Lerna (локально или глобально), вам необходимо загрузить все зависимости вручную:
+Now, after installing Lerna (locally or globally), you need to load all dependencies manually:
 
 ```
 yarn lerna bootstrap
 ```
 
-Приведенная выше команда устанавливает все необходимые пакеты для каждого подпроекта Платформы.
+The above command installs all necessary packages for each subproject of the Platform.
 
-**Примечание**: если по какой-либо причине вышеприведенная команда завершится неудачно, вы можете попытаться установить необходимые пакеты вручную, запустив "yarn" в каждой
-подпапке с файлом "package.json".
+**Note**: If for any reason the above command fails, you can try to install the necessary packages manually by running "yarn" in each subdirectory with a "package.json" file.
 
-После загрузки Lerna все, что вам нужно, чтобы запустить сборку для всех проектов, как описано выше в разделе '[Сборка](#Сборка)'.
+After loading Lerna, everything you need to start the build for all projects is described above in the '[Build](#Build)' section.
 
 ### MongoDB
 
-Платформа настроена на использование MongoDB по умолчанию и предполагает, что служба MongoDB запущена и принимает подключения на локальном хосте по умолчанию:27017. Пожалуйста,
-смотрите [документацию](https://docs.mongodb.com/) для MongoDB.
+The platform is configured to use MongoDB by default and assumes that the MongoDB service is running and accepting connections on localhost default:27017. Please see the [documentation](https://docs.mongodb.com/) for MongoDB.
 
-### Запуск подпроектов платформы
+### Running Platform Subprojects
 
-После того, как вы все построите, каждый проект может быть запущен одной командой из этого списка:
+Once you have built everything, each project can be started with a single command from this list:
 
-- Запустите сервер `yarn run:server`
-- Запустите сайт администратора `yarn run:admin` и откройте http://localhost:4200
-- Запустите мобильное приложение для покупок `yarn run:shopmobile` и откройте http://localhost:4201
-- Запустите приложение для торговца `yarn run:merchant` и откройте http://localhost:4202
-- Запустите мобильное приложение для доставщика app `yarn run:carrier` и откройте http://localhost:4203
-- Запустите сайт `yarn run:shopweb` и откройте http://localhost:3000
+- Run server `yarn run:server`
+- Run admin site `yarn run:admin` and open http://localhost:4200
+- Run shopping mobile app `yarn run:shopmobile` and open http://localhost:4201
+- Run merchant app `yarn run:merchant` and open http://localhost:4202
+- Run carrier mobile app `yarn run:carrier` and open http://localhost:4203
+- Run website `yarn run:shopweb` and open http://localhost:3000
 
-**Примечание 1**: важна предсборка общих модулей платформы (`yarn build:common` or `yarn build:all`) перед запуском платформы (API) или приложений.
+**Note 1**: It is important to pre-build shared platform modules (`yarn build:common` or `yarn build:all`) before running the platform (API) or apps.
 
-**Примечание 2**: во время разработки вы можете запустить сервер с помощью "yarn run:server:dev", чтобы включить наблюдение за изменениями файлов TS
+**Note 2**: During development, you can start the server using "yarn run:server:dev" to enable watching for TS file changes.
 
-**Примечание 3**: при первом запуске сервер API (серверная часть) создает локальную базу данных MongoDB "ever_development" со следующим (по умолчанию) администратором
+**Note 3**: On the first run, the API server (backend) creates a local MongoDB database "ever_development" with the following (default) admin credentials:
 
-- почта: `admin@emarket.com`
-- пароль: `admin`
+- email: `admin@emarket.com`
+- password: `admin`
 
-Вы можете использовать указанные выше учетные данные для входа в приложение администратора платформы.
+You can use the above credentials to log in to the platform admin application.
 
-**Примечание 4**: чтобы иметь возможность запускать каждый проект, вам нужно убедиться, что все построено, см. раздел '[Сборка](#Сборка)' выше.
+**Note 4**: To be able to run each project, you need to make sure everything is built, see the '[Build](#Build)' section above.
 
-## Безопасность
+## Security
 
-В производственной настройке все связи между клиентом и сервером (серверная часть, API) должны быть зашифрованы с использованием HTTPS/WSS/SSL (API REST, конечная точка GraphQL,
-Сокет.веб-сайты ввода-вывода и т.д.).
+In a production setup, all communication between client and server (backend, API) must be encrypted using HTTPS/WSS/SSL (REST API, GraphQL endpoint, Socket I/O websites, etc.).
